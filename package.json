@@ -1,0 +1,51 @@
+{
+  "name": "caleydo_web",
+  "version": "0.0.1",
+  "caleydo": {
+    "plugins": {
+      "web": [
+        {
+          "type": "datatype",
+          "id": "matrix",
+          "file": "matrix_impl"
+        },
+        {
+          "type": "datatype",
+          "id": "table",
+          "file": "table_impl"
+        },
+        {
+          "type": "datatype",
+          "id": "vector",
+          "file": "vector_impl"
+        },
+        {
+          "type": "datatype",
+          "id": "stratification",
+          "file": "stratification_impl"
+        }
+      ]
+    },
+    "dependencies": {
+      "web": {
+        "d3": "~3.5.5",
+        "jquery": "~1.10.2",
+        "requirejs": "~2.1.17",
+        "require-css": "~0.1.8"
+      }
+    },
+    "requirejs-config": {
+      "map": {
+        "*": {
+          "css": "${baseUrl}/require-css/css.js"
+        }
+      }
+    },
+    "requirejs-bower": {
+      "ignore": [
+        "requirejs",
+        "require-css"
+      ]
+    }
+  }
+}

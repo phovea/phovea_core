@@ -56,7 +56,7 @@ function selectVis(initial: any, visses: vis.IVisPluginDesc[]) {
  * a simple multi form class using a select to switch
  */
 export class MultiForm extends vis.AVisInstance implements vis.IVisInstance, IMultiForm {
-  parent:D3.Selection;
+  parent:d3.Selection<any>;
   node: Element;
   /**
    * list of all possibles vis techniques
@@ -67,7 +67,7 @@ export class MultiForm extends vis.AVisInstance implements vis.IVisInstance, IMu
   private actVisPromise : C.IPromise<any>;
 
   private actDesc:vis.IVisPluginDesc;
-  private $content:D3.Selection;
+  private $content:d3.Selection<any>;
 
   private metaData_ : vis.IVisMetaData = new ProxyMetaData(() => this.actDesc);
 
@@ -80,7 +80,7 @@ export class MultiForm extends vis.AVisInstance implements vis.IVisInstance, IMu
       }
     }, options);
     this.parent = d3.select(parent).append('div').attr('class', 'multiform');
-    this.node = this.parent.node();
+    this.node = <Element>this.parent.node();
     this.parent.datum(data);
     vis.assignVis(this.node, this);
     //find all suitable plugins
@@ -189,14 +189,14 @@ export class MultiForm extends vis.AVisInstance implements vis.IVisInstance, IMu
     return this.actVisPromise;
   }
 
-  get size() {
+  get size() : [number, number] {
     if (this.actVis) {
       return this.actVis.size;
     }
     return [100, 100];
   }
 
-  get rawSize() {
+  get rawSize(): [number, number] {
     if (this.actVis) {
       return this.actVis.rawSize;
     }
@@ -252,12 +252,12 @@ export class MultiForm extends vis.AVisInstance implements vis.IVisInstance, IMu
 
 class GridElem implements C.IPersistable {
   private actVis : vis.IVisInstance;
-  $content : D3.Selection;
+  $content : d3.Selection<any>;
 
   constructor(public range: ranges.Range, public pos : number[], public data: datatypes.IDataType) {
   }
 
-  setContent($c : D3.Selection) {
+  setContent($c : d3.Selection<any>) {
     this.$content = $c;
     this.$content.datum(this.data);
   }
@@ -318,7 +318,7 @@ class GridElem implements C.IPersistable {
 
   build(plugin: any) {
     this.actVis = plugin.factory(this.data, this.$content.node());
-    vis.assignVis(this.$content.node(), this.actVis);
+    vis.assignVis(<Element>this.$content.node(), this.actVis);
     return this.actVis;
   }
 
@@ -349,7 +349,7 @@ class GridElem implements C.IPersistable {
  * a simple multi form class using a select to switch
  */
 export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance, IMultiForm {
-  parent:D3.Selection;
+  parent:d3.Selection<any>;
   node: Element;
   /**
    * list of all possibles vis techniques
@@ -360,7 +360,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
 
   private actVisPromise : C.IPromise<any>;
 
-  private $content:D3.Selection;
+  private $content:d3.Selection<any>;
 
   private dims : ranges.Range1DGroup[][];
   private grid : GridElem[];
@@ -373,7 +373,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
       initialVis : 0
     }, options);
     this.parent = d3.select(parent).append('div').attr('class', 'multiformgrid');
-    this.node = this.parent.node();
+    this.node = <Element>this.parent.node();
     this.parent.datum(data);
     vis.assignVis(this.node, this);
     //find all suitable plugins
@@ -652,12 +652,12 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
     }
   }
 
-  get size() {
+  get size() : [number, number] {
     var gridSize = this.gridSize();
     return [ d3.sum(gridSize.cols), d3.sum(gridSize.rows)];
   }
 
-  get rawSize() {
+  get rawSize() : [number, number] {
     var gridSize = this.gridSize(true);
     return [ d3.sum(gridSize.cols), d3.sum(gridSize.rows)];
   }
@@ -717,7 +717,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
  * adds everything to have an icon for the set of vis plugin descriptions
  * @param s
  */
-function createIconFromDesc(s : D3.Selection) {
+function createIconFromDesc(s : d3.Selection<any>) {
   s.each(function(d) {
     d.iconify(this);
   });

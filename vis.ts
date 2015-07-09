@@ -111,12 +111,12 @@ export interface IVisInstance extends C.IPersistable, events.IEventHandler, ILoc
    * current size of this vis
    * @returns [width, height]
    */
-  size: number[];
+  size: [number, number];
 
   /**
    * the size without transformation applied
    */
-  rawSize: number[];
+  rawSize: [number, number];
 
   /**
    * returns the current transformation
@@ -223,7 +223,7 @@ export class AVisInstance extends events.EventHandler {
     return [100, 100];
   }
 
-  get size() {
+  get size(): [number, number] {
     var t = this.transform();
     var r = this.rawSize;
     //TODO rotation

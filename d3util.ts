@@ -23,7 +23,7 @@ export function transform(x = 0, y = 0, rotate = 0, scaleX = 1, scaleY = 1) {
  * @param selector what type of object are the data bound ot
  * @returns {function(any, any): undefined} the click handler
  */
-export function selectionUtil(data: datatype.IDataType, $data : D3.Selection, selector : string) {
+export function selectionUtil(data: datatype.IDataType, $data : d3.Selection<any>, selector : string) {
   var l = function (event, type, selected) {
     var all = $data.selectAll(selector);
     all.classed('select-' + type, false);
@@ -33,7 +33,7 @@ export function selectionUtil(data: datatype.IDataType, $data : D3.Selection, se
     }
   };
   data.on('select', l);
-  C.onDOMNodeRemoved($data.node(), function () {
+  C.onDOMNodeRemoved(<Element>$data.node(), function () {
     data.off('select', l);
   });
   data.selections().then(function (selected) {
@@ -54,11 +54,11 @@ export function selectionUtil(data: datatype.IDataType, $data : D3.Selection, se
  * @param functions an object of additional functions to the vis
  * @returns a function class for this vis
  */
-export function defineVis(name: string, defaultOptions : any, initialSize : number[], build : ($parent: D3.Selection, data: datatype.IDataType, size: number[]) => D3.Selection, functions?: any): any;
-export function defineVis(name: string, defaultOptions : (data: datatype.IDataType, options: any) => any, initialSize : number[], build : ($parent: D3.Selection, data: datatype.IDataType, size: number[]) => D3.Selection, functions?: any) : any;
-export function defineVis(name: string, defaultOptions : any, initialSize : (data: datatype.IDataType)=>number[], build : ($parent: D3.Selection, data: datatype.IDataType) => D3.Selection, functions?: any) : any;
-export function defineVis(name: string, defaultOptions : (data: datatype.IDataType, options: any) => any, initialSize : (data: datatype.IDataType)=>number[], build : ($parent: D3.Selection, data: datatype.IDataType, size: number[]) => D3.Selection, functions?: any) : any;
-export function defineVis(name: string, defaultOptions : any, initialSize : any,  build : ($parent: D3.Selection, data?: datatype.IDataType) => D3.Selection, functions?: any) : any {
+export function defineVis(name: string, defaultOptions : any, initialSize : number[], build : ($parent: d3.Selection<any>, data: datatype.IDataType, size: number[]) => d3.Selection<any>, functions?: any): any;
+export function defineVis(name: string, defaultOptions : (data: datatype.IDataType, options: any) => any, initialSize : number[], build : ($parent: d3.Selection<any>, data: datatype.IDataType, size: number[]) => d3.Selection<any>, functions?: any) : any;
+export function defineVis(name: string, defaultOptions : any, initialSize : (data: datatype.IDataType)=>number[], build : ($parent: d3.Selection<any>, data: datatype.IDataType) => d3.Selection<any>, functions?: any) : any;
+export function defineVis(name: string, defaultOptions : (data: datatype.IDataType, options: any) => any, initialSize : (data: datatype.IDataType)=>number[], build : ($parent: d3.Selection<any>, data: datatype.IDataType, size: number[]) => d3.Selection<any>, functions?: any) : any;
+export function defineVis(name: string, defaultOptions : any, initialSize : any,  build : ($parent: d3.Selection<any>, data?: datatype.IDataType) => d3.Selection<any>, functions?: any) : any {
   C.extendClass(VisTechnique, vis.AVisInstance);
   function VisTechnique(data: datatype.IDataType, parent: Element, options: any) {
     vis.AVisInstance.call(this, data, parent, options);
