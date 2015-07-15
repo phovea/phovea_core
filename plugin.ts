@@ -94,13 +94,14 @@ function parsePlugins(descs : any[]) {
     //provide some default values
     desc = C.mixin({
       name : desc.id,
-      folder: desc.id,
+      folder: desc.folder,
+      file: 'main',
       factory: 'create',
       description: '',
       version: '1.0'
     },desc);
     desc = C.mixin({
-      'module' : desc.folder+'/main',
+      'module' : desc.folder+'/'+desc.file,
       baseUrl: config.baseUrl + '/' + desc.folder
     }, desc);
     desc.module = '../'+desc.module;

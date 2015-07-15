@@ -42,7 +42,7 @@ function transformEntry(desc) {
   }
 
   //find matching type
-  var plugin = available.filter((p) => p.name === desc.type);
+  var plugin = available.filter((p) => p.id === desc.type);
   //no type there create a dummy one
   if (plugin.length === 0) {
     return new datatypes.DataTypeBase(desc);
