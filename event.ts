@@ -58,8 +58,8 @@ export class EventHandler implements IEventHandler {
   propagate(progatee: IEventHandler, ...events: string[]) {
     var that = this;
     events.forEach((event) => {
-      progatee.on(event, () => {
-        var a = Array.prototype.slice.call(arguments);
+      progatee.on(event, (...args: any[]) => {
+        var a = Array.prototype.slice.call(args);
         a[0] = event; //replace the event object with the type
         that.fire.apply(that, a);
       });

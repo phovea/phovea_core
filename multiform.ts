@@ -135,24 +135,26 @@ export class MultiForm extends vis.AVisInstance implements vis.IVisInstance, IMu
     return null;
   }
 
-  locate() {
-    var p = this.actVisPromise || C.resolved(null), args = C.argList(arguments);
-    return p.then((vis) => {
+  locate(...args) {
+    var p = this.actVisPromise || C.resolved(null);
+    return p.then((...aa) => {
+      var vis = aa.length > 0 ? aa[0] : undefined;
       if (vis && C.isFunction(vis.locate)) {
         return vis.locate.apply(vis, args);
       } else {
-        return C.resolved((arguments.length === 1 ? undefined : new Array(args.length)));
+        return C.resolved((aa.length === 1 ? undefined : new Array(args.length)));
       }
     });
   }
 
-  locateById() {
-    var p = this.actVisPromise || C.resolved(null), args = C.argList(arguments);
-    return p.then((vis) => {
+  locateById(...args) {
+    var p = this.actVisPromise || C.resolved(null);
+    return p.then((...aa) => {
+      var vis = aa.length > 0 ? aa[0] : undefined;
       if (vis && C.isFunction(vis.locateById)) {
         return vis.locateById.apply(vis, args);
       } else {
-        return C.resolved((arguments.length === 1 ? undefined : new Array(args.length)));
+        return C.resolved((aa.length === 1 ? undefined : new Array(args.length)));
       }
     });
   }
@@ -581,7 +583,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
 
   locate() {
     var p = this.actVisPromise || C.resolved(null), args = C.argList(arguments);
-    return p.then((visses) => {
+    return p.then(function (visses) {
       if (!visses) {
         return C.resolved((arguments.length === 1 ? undefined : new Array(args.length)));
       }
@@ -600,7 +602,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
 
   locateById(...range:ranges.Range[]) {
     var p = this.actVisPromise || C.resolved(null), args = C.argList(arguments);
-    return p.then((visses) => {
+    return p.then(function (visses) {
       if (!visses) {
         return C.resolved((arguments.length === 1 ? undefined : new Array(args.length)));
       }

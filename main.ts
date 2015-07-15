@@ -61,7 +61,7 @@ export function asPromise<T>(f: any): IPromise<T> {
  * @type {IPromise<Array<any>>}
  */
 export function all(promises:any[]):IPromise<Array<any>> {
-  return $.when.apply($, promises).then(() => argList(arguments));
+  return $.when.apply($, promises).then((...args:any[]) => args);
 }
 
 /**
@@ -123,8 +123,8 @@ export function isUndefined(obj:any) {
  * @returns {function(): any}
  */
 export function bind(f : () => any, thisArg : any, ...args: any[]) {
-  return () => {
-    return f.apply(thisArg ? thisArg : this, args.concat(argList(arguments)));
+  return (...largs) => {
+    return f.apply(thisArg ? thisArg : this, args.concat(largs));
   };
 }
 
