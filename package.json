@@ -32,6 +32,10 @@
         "jquery": "~1.10.2",
         "requirejs": "~2.1.17",
         "require-css": "~0.1.8"
+      },
+      "tsd": {
+        "jquery": "dca2d4",
+        "d3": "1e6796"
       }
     },
     "requirejs-config": {
