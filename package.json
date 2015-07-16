@@ -47,5 +47,8 @@
         "require-css"
       ]
     }
+  },
+  "publishConfig": {
+    "registry": "http://dev.caleydo.org/nexus/content/repositories/caleydo-web/"
   }
 }
