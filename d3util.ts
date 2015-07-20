@@ -1,6 +1,7 @@
 /**
  * Created by Samuel Gratzl on 08.10.2014.
  */
+/// <reference path="../../tsd.d.ts" />
 import C = require('./main');
 import idtypes = require('./idtype');
 import datatype = require('./datatype');
