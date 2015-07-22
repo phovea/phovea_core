@@ -1,0 +1,8 @@
+{
+  "mainFile": "./main",
+  "apiPrefix": "/api",
+  "apiSuffix": "",
+  "baseUrl": "",
+  "configPrefix": "../",
+  "bower_components_url": "/bower_components"
+}
