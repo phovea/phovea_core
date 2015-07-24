@@ -30,7 +30,7 @@
       "web": {
         "d3": "~3.5.5",
         "jquery": "~1.10.2",
-        "requirejs": "~2.1.17",
+        "requirejs": "https://github.com/sgratzl/requirejs-bower.git#master",
         "require-css": "~0.1.8"
       },
       "tsd": {
