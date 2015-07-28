@@ -136,7 +136,7 @@ export class Table extends TableBase implements def.ITable {
     super(null);
     this._root = this;
     var d = <any>desc;
-    this.rowtype = idtypes.resolve(d.rowtype);
+    this.rowtype = idtypes.resolve(d.idtype || d.rowtype);
     this.vectors = d.columns.map((cdesc, i) => new TableVector(this, i, cdesc));
   }
 
