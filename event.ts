@@ -19,6 +19,7 @@ export interface IDataBinding {
  */
 export class EventHandler implements IEventHandler {
   private $obj = $({});
+  private eventList = {};
 
   /**
    * register a global event handler
@@ -27,6 +28,8 @@ export class EventHandler implements IEventHandler {
    */
   on(events, handler) {
     this.$obj.on(events, handler);
+    if (!this.eventList[events]) this.eventList[events]=0;
+    this.eventList[events]+=1;
     return this;
   }
 
@@ -37,8 +40,23 @@ export class EventHandler implements IEventHandler {
    */
   off(events, handler) {
     this.$obj.off(events, handler);
+
+    if (this.eventList[events]){
+      if (this.eventList[events]>1) this.eventList[events]-=1;
+      else delete this.eventList[events]
+    }
+
     return this;
   }
+
+
+  /**
+   * list all registered Events
+   */
+  list(){
+    return this.eventList;
+  }
+
 
   /**
    * fires an event
@@ -86,3 +104,8 @@ export var off = global.off.bind(global);
  * @param extraArguments
  */
 export var fire = global.fire.bind(global);
+/**
+ * list all events
+ */
+export var list = global.list.bind(global);
+
