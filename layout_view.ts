@@ -3,11 +3,11 @@
  */
 
 import layouts = require('./layout');
-import plugins = require('../caleydo_web/plugin');
-import datatypes = require('../caleydo_web/datatype');
-import idtypes = require('../caleydo_web/idtype');
-import events = require('../caleydo_web/event');
-import geom = require('../caleydo_web/geom');
+import plugins = require('./plugin');
+import datatypes = require('./datatype');
+import idtypes = require('./idtype');
+import events = require('./event');
+import geom = require('./geom');
 
 
 export interface IViewDesc extends plugins.IPluginDesc {

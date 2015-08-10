@@ -1,8 +1,8 @@
 /**
  * Created by Samuel Gratzl on 15.12.2014.
  */
-import geom = require('../caleydo_web/geom');
-import C = require('../caleydo_web/main');
+import geom = require('./geom');
+import C = require('./main');
 
 export interface ILayoutElem {
   setBounds(x:number, y:number, w:number, h:number) : C.IPromise<void>;

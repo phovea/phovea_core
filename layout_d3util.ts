@@ -5,8 +5,8 @@
 
 import d3 = require('d3');
 import layout = require('./layout');
-import C = require('../caleydo_web/main');
-import geom = require('../caleydo_web/geom');
+import C = require('./main');
+import geom = require('./geom');
 'use strict';
 
 class SVGTransformLayoutElem extends layout.ALayoutElem implements layout.ILayoutElem {

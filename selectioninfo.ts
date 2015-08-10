@@ -2,10 +2,10 @@
  * Created by Samuel Gratzl on 15.12.2014.
  */
 import d3 = require('d3');
-import events = require('../caleydo_web/event');
-import idtypes = require('../caleydo_web/idtype');
-import ranges = require('../caleydo_web/range');
-import C = require('../caleydo_web/main');
+import events = require('./event');
+import idtypes = require('./idtype');
+import ranges = require('./range');
+import C = require('./main');
 
 export class SelectionIDType {
   private l = (event, type: string, selection: ranges.Range) => {
