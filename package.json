@@ -1,6 +1,8 @@
 {
   "name": "caleydo_core",
   "version": "0.0.1",
+  "license" : "SEE LICENSE IN LICENSE",
+  "repository": "Caleydo/caleydo_core",
   "caleydo": {
     "plugins": {
       "web": [
