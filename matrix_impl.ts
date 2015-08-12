@@ -432,6 +432,7 @@ class ProjectedVector extends vector_impl.VectorBase implements vector.IVector {
     super(null);
     this.desc = {
       name : m.desc.name+'-p',
+      fqname : m.desc.fqname+'-p',
       type : 'vector',
       id : m.desc.id+'-p'
     };

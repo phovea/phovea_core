@@ -120,6 +120,7 @@ export function convertToTable(list : datatypes.IDataType[]) {
   return tables_impl.wrapObjects({
     id : '_data',
     name: 'data',
+    fqname: 'custom/data',
     type: 'table',
     rowtype: '_data',
     size: [list.length, 4],

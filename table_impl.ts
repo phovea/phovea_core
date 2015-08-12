@@ -421,6 +421,7 @@ class MultITableVector extends vector_impl.VectorBase implements vector.IVector 
     super(null);
     this.desc = {
       name : table.desc.name+'-p',
+      fqname: table.desc.fqname+'-p',
       type : 'vector',
       id : table.desc.id+'-p'
     };

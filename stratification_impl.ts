@@ -163,6 +163,7 @@ export class StratificationVector extends vector_impl.VectorBase implements vect
     };
     this.desc = {
       name: desc.name,
+      fqname: desc.fqname,
       id: desc.id,
       type: 'vector',
       value: this.valuetype
