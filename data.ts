@@ -60,6 +60,34 @@ function transformEntry(desc) {
 export function list() {
   return loader;
 }
+
+export interface INode {
+  name: string;
+  children: INode[];
+  data: any;
+}
+
+export function tree(): C.IPromise<INode> {
+  return list().then((list) => {
+    //create a tree out of the list by the fqname
+    var root = { children: [], name: '/', data: null};
+    list.forEach((entry) => {
+      var path = entry.desc.fqname.split('/');
+      var act = root;
+      path.forEach((node) => {
+        var next = act.children.filter((d) => d.name === node)[0];
+        if (!next) {
+          next = { children: [], name: node, data: null};
+          act.children.push(next);
+        }
+        act = next;
+      });
+      act.data = entry;
+    });
+
+    return root;
+  });
+}
 /**
  * returns a promise for getting a specific dataset
  * @param name

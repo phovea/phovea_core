@@ -14,6 +14,7 @@ import d3 = require('d3');
  */
 export interface IDataDescription {
   name: string;
+  fqname: string;
   id: string;
   type: string;
 }

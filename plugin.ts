@@ -24,6 +24,7 @@ export interface IPluginDesc {
    * human readable name of this plugin
    */
   name: string;
+
   /**
    * name of the require.js module to load
    * @default ./<name>/index
