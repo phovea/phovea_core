@@ -170,14 +170,14 @@ export function create(desc: any) : C.IPromise<datatypes.IDataType> {
 
 export function upload(desc: any, file?) : C.IPromise<datatypes.IDataType> {
   var data = new FormData();
-  data.append('_desc', JSON.stringify(desc));
+  data.append('desc', JSON.stringify(desc));
   if (file) {
     data.append('file',file);
   }
   return C.ajaxAPI({
-    url: '/dataset',
+    url: '/dataset/',
     method: 'post',
-    datatype: 'json',
+    dataType: 'json',
     data: data,
     cache: false,
     contentType: false,

@@ -80,7 +80,7 @@ export function getAPIJSON(url, ...args:any[]):IPromise<any> {
 export function ajaxAPI(args: any):IPromise<any> {
   //convert to full url
   args.url = server_url + args.url + server_json_suffix;
-  return ajax.apply($, args);
+  return ajax.call($, args);
 }
 /**
  * integrate b into a and override all duplicates
