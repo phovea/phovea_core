@@ -11,24 +11,23 @@ import tables_impl = require('./table_impl');
 
 //find all datatype plugins
 var available = plugins.list('datatype');
-/**
- * load all descriptions and store them in a promise
- * @type {C.IPromise<datatypes.IDataType[]>}
- */
-var loader : C.IPromise<datatypes.IDataType[]> = C.getAPIJSON('/dataset', {
-  ws : C.hash.getProp('ws', '')
-}).then(function (descs) {
-  //load descriptions and create data out of them
-  return <any> C.all(descs.map((desc) => transformEntry(desc))).then((datas) => {
-    var r = {};
-    datas.forEach((data) => {
-      r[data.desc.id] = data;
-      r[data.desc.name] = data;
-    });
-    (<any>datas).byId = r;
-    return C.resolved(datas);
-  });
-});
+
+var cacheById = {};
+var cacheByName = {};
+var cacheByFQName = {};
+
+export function clearCache() {
+  cacheById = {};
+  cacheByName = {};
+  cacheByFQName = {};
+}
+
+function cached(desc, result) {
+  cacheById[desc.id] = result;
+  cacheByFQName[desc.fqname] = result;
+  cacheByName[desc.name] = result;
+  return result;
+}
 
 
 /**
@@ -41,24 +40,33 @@ function transformEntry(desc) {
     return desc;
   }
 
+  if (desc.id in cacheById) {
+    return cacheById[desc.id];
+  }
+
+  desc.fqname = desc.fqname || desc.name;
+
   //find matching type
   var plugin = available.filter((p) => p.id === desc.type);
   //no type there create a dummy one
   if (plugin.length === 0) {
-    return new datatypes.DataTypeBase(desc);
+    return cached(desc, C.resolved(new datatypes.DataTypeBase(desc)));
   }
   //take the first matching one
-  return plugin[0].load().then((p) => {
+  return cached(desc, plugin[0].load().then((p) => {
     return p.factory(desc);
-  });
+  }));
 }
 
 /**
  * returns a promise for getting a map of all available data
  * @returns {JQueryPromise<any>}
  */
-export function list() {
-  return loader;
+export function list(query = {}) {
+  return C.getAPIJSON('/dataset/', query).then(function (descs) {
+    //load descriptions and create data out of them
+    return <any> C.all(descs.map((desc) => transformEntry(desc)))
+  });
 }
 
 export interface INode {
@@ -67,39 +75,83 @@ export interface INode {
   data: any;
 }
 
-export function tree(): C.IPromise<INode> {
-  return list().then((list) => {
-    //create a tree out of the list by the fqname
-    var root = { children: [], name: '/', data: null};
-    list.forEach((entry) => {
-      var path = entry.desc.fqname.split('/');
-      var act = root;
-      path.forEach((node) => {
-        var next = act.children.filter((d) => d.name === node)[0];
-        if (!next) {
-          next = { children: [], name: node, data: null};
-          act.children.push(next);
-        }
-        act = next;
-      });
-      act.data = entry;
+export function convertToTree(list: datatypes.IDataType[]) {
+  //create a tree out of the list by the fqname
+  var root = { children: [], name: '/', data: null};
+  list.forEach((entry) => {
+    var path = entry.desc.fqname.split('/');
+    var act = root;
+    path.forEach((node) => {
+      var next = act.children.filter((d) => d.name === node)[0];
+      if (!next) {
+        next = { children: [], name: node, data: null};
+        act.children.push(next);
+      }
+      act = next;
     });
+    act.data = entry;
+  });
 
-    return root;
+  return root;
+}
+
+export function tree(query = {}): C.IPromise<INode> {
+  return list(query).then(convertToTree);
+}
+
+export function getFirst(query: any | string | RegExp) {
+  if (typeof query === 'string' || Object.prototype.toString.call(query) == '[object RegExp]') {
+    return getFirstByName(<string>query);
+  }
+  query['limit'] = 1;
+  return list(query).then((result) => {
+    if (result.length === 0) {
+      return C.reject({error : 'nothing found, matching', args: query})
+    }
+    return result[0];
   });
 }
+
+function escapeRegExp(string){
+  return string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
+}
+
+export function getFirstByName(name: string | RegExp) {
+  return getFirstWithCache(name, cacheByName, 'name');
+}
+
+function getFirstWithCache(name: string | RegExp, cache: any, attr = 'name') {
+  var r = null,
+    inCache = Object.keys(cache).some((n) => {
+    if (n.match(<any>name) != null) {
+      r = n;
+      return true;
+    }
+    return false;
+  });
+  if (inCache) {
+    return r;
+  }
+  var query = {};
+  query[attr] = typeof name === 'string' ? name : name.source;
+  return getFirst(query);
+}
+
+function getById(id: string) {
+  if (id in cacheById) {
+    return cacheById[id];
+  }
+  return C.getAPIJSON('/dataset/'+id+'/desc').then(transformEntry);
+}
+
 /**
  * returns a promise for getting a specific dataset
  * @param name
- * @returns {JQueryGenericPromise<datatypes.IDatatType>}
+ * @returns {JQueryGenericPromise<datatypes.IDataType>}
  */
-export function get(name : string) : C.IPromise<datatypes.IDataType>;
-export function get(persisted: any) : C.IPromise<datatypes.IDataType>;
-export function get(persisted: any) : C.IPromise<datatypes.IDataType> {
-  if (typeof persisted === 'string' || typeof persisted === 'number') {
-    return list().then(function (data) {
-      return (<any>data).byId[persisted];
-    });
+export function get(persisted: any | string) : C.IPromise<datatypes.IDataType> {
+  if (typeof persisted === 'string') {
+    return getById(<string>persisted);
   }
   //resolve parent and then resolve it using restore item
   if (persisted.root) {
@@ -114,6 +166,23 @@ export function get(persisted: any) : C.IPromise<datatypes.IDataType> {
 
 export function create(desc: any) : C.IPromise<datatypes.IDataType> {
   return transformEntry(desc);
+}
+
+export function upload(desc: any, file?) : C.IPromise<datatypes.IDataType> {
+  var data = new FormData();
+  data.append('_desc', JSON.stringify(desc));
+  if (file) {
+    data.append('file',file);
+  }
+  return C.ajaxAPI({
+    url: '/dataset',
+    method: 'post',
+    datatype: 'json',
+    data: data,
+    cache: false,
+    contentType: false,
+    processData: false
+  }).then(transformEntry);
 }
 
 export function convertToTable(list : datatypes.IDataType[]) {
