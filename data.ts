@@ -16,10 +16,16 @@ var cacheById = {};
 var cacheByName = {};
 var cacheByFQName = {};
 
-export function clearCache() {
-  cacheById = {};
-  cacheByName = {};
-  cacheByFQName = {};
+export function clearCache(dataset?: datatypes.IDataType) {
+  if (dataset) {
+    delete cacheById[dataset.desc.id];
+    delete cacheByName[dataset.desc.name];
+    delete cacheByFQName[dataset.desc.fqname];
+  } else {
+    cacheById = {};
+    cacheByName = {};
+    cacheByFQName = {};
+  }
 }
 
 function cached(desc, result) {
@@ -183,6 +189,38 @@ export function upload(desc: any, file?) : C.IPromise<datatypes.IDataType> {
     contentType: false,
     processData: false
   }).then(transformEntry);
+}
+
+export function update(entry: datatypes.IDataType, desc: any, file?) : C.IPromise<datatypes.IDataType> {
+  var data = new FormData();
+  data.append('desc', JSON.stringify(desc));
+  if (file) {
+    data.append('file',file);
+  }
+  return C.ajaxAPI({
+    url: '/dataset/'+entry.desc.id,
+    method: 'put',
+    dataType: 'json',
+    data: data,
+    cache: false,
+    contentType: false,
+    processData: false
+  }).then((desc) => {
+    clearCache(entry);
+    return transformEntry(desc);
+  });
+}
+
+export function remove(entry: datatypes.IDataType): C.IPromise<Boolean> {
+  return C.ajaxAPI({
+    url: '/dataset/'+entry.desc.id,
+    method: 'delete',
+    dataType: 'json',
+    cache: false
+  }).then((result) => {
+    clearCache(entry);
+    return true;
+  });
 }
 
 export function convertToTable(list : datatypes.IDataType[]) {
