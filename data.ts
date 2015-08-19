@@ -32,8 +32,26 @@ function cached(desc, result) {
   cacheById[desc.id] = result;
   cacheByFQName[desc.fqname] = result;
   cacheByName[desc.name] = result;
+
   return result;
 }
+
+export function fixId(id) {
+  var r = id.replace(/[!#$%&'\(\)\*\+,\.\/:;<=>\?@\[\\\]\^`\{\|}~_]/g, ' ');
+  //title
+  r = r.toLowerCase();
+  r = r.split(/\s/).map((s,i) => i === 0 ? s : s[0].toUpperCase() + s.substr(1)).join('')
+  return r;
+}
+
+export function random_id(length) {
+  var id = '';
+  while (id.length < length) {
+    id += Math.random().toString(36).slice(-8)
+  }
+  return id.substr(0, length);
+}
+
 
 
 /**
@@ -41,16 +59,16 @@ function cached(desc, result) {
  * @param desc
  * @returns {*}
  */
-function transformEntry(desc) {
+function transformEntry(desc: any) {
   if (desc === undefined) {
     return desc;
   }
+  desc.id = desc.id || fixId(desc.name+random_id(5));
+  desc.fqname = desc.fqname || desc.name;
 
   if (desc.id in cacheById) {
     return cacheById[desc.id];
   }
-
-  desc.fqname = desc.fqname || desc.name;
 
   //find matching type
   var plugin = available.filter((p) => p.id === desc.type);
