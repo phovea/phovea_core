@@ -65,7 +65,7 @@ export interface ITableLoader {
     rows: string[];
     objs : any[];
     data : any[][];
-  }>
+  }>;
 }
 
 function toObjects(data: any[][], vecs) {

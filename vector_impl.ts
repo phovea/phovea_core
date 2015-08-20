@@ -125,7 +125,7 @@ export interface IVectorLoader {
     rowIds : ranges.Range;
     rows : string[];
     data : any[];
-  }>
+  }>;
 }
 
 

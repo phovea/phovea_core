@@ -28,8 +28,10 @@ export class EventHandler implements IEventHandler {
    */
   on(events, handler) {
     this.$obj.on(events, handler);
-    if (!this.eventList[events]) this.eventList[events]=0;
-    this.eventList[events]+=1;
+    if (!this.eventList[events]) {
+      this.eventList[events] = 0;
+    }
+    this.eventList[events] += 1;
     return this;
   }
 
@@ -41,9 +43,13 @@ export class EventHandler implements IEventHandler {
   off(events, handler) {
     this.$obj.off(events, handler);
 
-    if (this.eventList[events]){
-      if (this.eventList[events]>1) this.eventList[events]-=1;
-      else delete this.eventList[events]
+    if (this.eventList[events]) {
+      if (this.eventList[events] > 1) {
+        this.eventList[events] -= 1;
+      }
+      else {
+        delete this.eventList[events];
+      }
     }
 
     return this;

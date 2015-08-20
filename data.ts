@@ -40,14 +40,14 @@ export function fixId(id) {
   var r = id.replace(/[!#$%&'\(\)\*\+,\.\/:;<=>\?@\[\\\]\^`\{\|}~_]/g, ' ');
   //title
   r = r.toLowerCase();
-  r = r.split(/\s/).map((s,i) => i === 0 ? s : s[0].toUpperCase() + s.substr(1)).join('')
+  r = r.split(/\s/).map((s,i) => i === 0 ? s : s[0].toUpperCase() + s.substr(1)).join('');
   return r;
 }
 
 export function random_id(length) {
   var id = '';
   while (id.length < length) {
-    id += Math.random().toString(36).slice(-8)
+    id += Math.random().toString(36).slice(-8);
   }
   return id.substr(0, length);
 }
@@ -89,7 +89,7 @@ function transformEntry(desc: any) {
 export function list(query = {}) {
   return C.getAPIJSON('/dataset/', query).then(function (descs) {
     //load descriptions and create data out of them
-    return <any> C.all(descs.map((desc) => transformEntry(desc)))
+    return <any> C.all(descs.map((desc) => transformEntry(desc)));
   });
 }
 
@@ -124,21 +124,21 @@ export function tree(query = {}): C.IPromise<INode> {
 }
 
 export function getFirst(query: any | string | RegExp) {
-  if (typeof query === 'string' || Object.prototype.toString.call(query) == '[object RegExp]') {
+  if (typeof query === 'string' || Object.prototype.toString.call(query) === '[object RegExp]') {
     return getFirstByName(<string>query);
   }
-  query['limit'] = 1;
+  query.limit = 1;
   return list(query).then((result) => {
     if (result.length === 0) {
-      return C.reject({error : 'nothing found, matching', args: query})
+      return C.reject({error : 'nothing found, matching', args: query});
     }
     return result[0];
   });
 }
 
-function escapeRegExp(string){
-  return string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
-}
+/*function escapeRegExp(string){
+ return string.replace(/([.*+?^${}()|\[\]\/\\])/g, '\\$1');
+ }*/
 
 export function getFirstByName(name: string | RegExp) {
   return getFirstWithCache(name, cacheByName, 'name');

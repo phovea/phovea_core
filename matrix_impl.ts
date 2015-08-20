@@ -141,7 +141,7 @@ export interface IMatrixLoader {
     cols : string[];
     ids: ranges.Range;
     data : any[][];
-  }>
+  }>;
 }
 
 
@@ -222,7 +222,7 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
    * return the column ids of the matrix
    * @returns {*}
    */
-  cols(range: ranges.Range= ranges.all()) : C.IPromise<string[]>{
+  cols(range: ranges.Range= ranges.all()) : C.IPromise<string[]> {
     var that = this;
     return this.load().then(function (d : any) {
       return range.dim(1).filter(d.cols, that.ncol);

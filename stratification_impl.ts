@@ -17,7 +17,7 @@ export interface IStratificationLoader {
     rowIds : ranges.Range;
     rows: string[];
     range: ranges.CompositeRange1D;
-  }>
+  }>;
 }
 
 function createRangeFromGroups(name: string, groups: any[]) {

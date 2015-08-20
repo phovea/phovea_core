@@ -575,7 +575,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
     });
   }
 
-  private locateGroupById(range:ranges.Range) {
+  locateGroupById(range:ranges.Range) {
     return this.data.ids().then((ids) => {
       return this.locateGroup(ids.indexOf(range));
     });
