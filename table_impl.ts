@@ -192,9 +192,9 @@ export class Table extends TableBase implements def.ITable {
    * return the row ids of the matrix
    * @returns {*}
    */
-  rows(range: ranges.Range = ranges.all()) : C.IPromise<string[]>{
+  rows(range:ranges.Range = ranges.all()):C.IPromise<string[]> {
     var that = this;
-    return this.load().then(function (d : any) {
+    return this.load().then(function (d:any) {
       return range.dim(0).filter(d.rows, that.nrow);
     });
   }

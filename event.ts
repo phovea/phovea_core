@@ -46,8 +46,7 @@ export class EventHandler implements IEventHandler {
     if (this.eventList[events]) {
       if (this.eventList[events] > 1) {
         this.eventList[events] -= 1;
-      }
-      else {
+      } else {
         delete this.eventList[events];
       }
     }
@@ -59,7 +58,7 @@ export class EventHandler implements IEventHandler {
   /**
    * list all registered Events
    */
-  list(){
+  list() {
     return this.eventList;
   }
 

@@ -2,7 +2,6 @@
  * Created by Samuel Gratzl on 27.08.2014.
  */
 
-'use strict';
 import d3 = require('d3');
 import C = require('./main');
 import $ = require('jquery');
