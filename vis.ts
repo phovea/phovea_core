@@ -210,6 +210,10 @@ export class AVisInstance extends events.EventHandler {
 
   destroy() {
     // nothing to destroy
+    var n = (<any>this).node;
+    if (n) {
+      n.parentNode.removeChild(n);
+    }
   }
 
   transform() {
