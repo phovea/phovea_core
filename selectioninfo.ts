@@ -92,6 +92,6 @@ export function createFor(idtype: idtypes.IDType, parent, options) {
   return new SelectionIDType(idtype, d3.select(parent), options);
 }
 
-export function create(parent, options) {
+export function create(parent, options = {}) {
   return new SelectionInfo(parent, options);
 }

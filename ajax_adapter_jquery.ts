@@ -7,10 +7,14 @@ import $ = require('jquery');
 'use strict';
 
 function wrap(d:JQueryXHR):Promise<any> {
+  //since JQueryXHR is thenable
   var r = Promise.resolve(d);
   return r;
 }
 
+/**
+ * JQuery implementation of the ajax adapter
+ */
 class JQueryAdapter implements ajax.IAjaxAdapter {
   getJSON(url:string, data:any = {}):Promise<any> {
     return wrap($.getJSON(url, data));

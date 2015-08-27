@@ -6,6 +6,9 @@ import plugin = require('./plugin');
 import C = require('./main');
 'use strict';
 
+/**
+ * interface for the ajax adapter
+ */
 export interface IAjaxAdapter {
   getJSON(url: string, data : any): Promise<any>;
   getData(url: string, data : any, expectedDataType): Promise<any>;
@@ -27,15 +30,42 @@ function getConnector() {
   return _impl = adapter.load().then((p) => <IAjaxAdapter>p.factory());
 }
 
+/**
+ * to get some ajax json file
+ * @param url
+ * @param data
+ * @returns {any}
+ */
 export function getJSON(url: string, data : any = {}): Promise<any> {
   return getConnector().then((c) => c.getJSON(url, data));
 }
+/**
+ * get some generic data via ajax
+ * @param url
+ * @param data
+ * @param expectedDataType
+ * @returns {any}
+ */
 export function getData(url: string, data : any = {}, expectedDataType = 'json'): Promise<any> {
   return getConnector().then((c) => c.getData(url, data, expectedDataType));
 }
+/**
+ * delete request
+ * @param url
+ * @param data
+ * @param expectedDataType
+ * @returns {any}
+ */
 export function deleteData(url: string, data : any = {}, expectedDataType = 'json'): Promise<any> {
   return getConnector().then((c) => c.deleteData(url, data, expectedDataType));
 }
+/**
+ * post some form to a given url
+ * @param url
+ * @param form
+ * @param expectedDataType
+ * @returns {any}
+ */
 export function postForm(url: string, form: FormData, expectedDataType = 'json'): Promise<any> {
   return getConnector().then((c) => c.postForm(url, form, expectedDataType));
 }
