@@ -25,17 +25,18 @@ export function mixin(a: any, ...bs : any[]) {
     Object.keys(b).forEach((key) => {
       var v = b[key];
       if (Object.prototype.toString.call(v) === '[object Object]') {
-        r[key] = extend(r[key] || {}, v);
-			} else if (Array.isArray(v)) {
-				r[key] = (r[key] || []).concat(v);
+        r[key] = (r[key] != null) ? extend(r[key], v) : v;
 			} else {
 				r[key] = v;
 			}
     });
     return r;
   }
+  a = a || {};
   bs.forEach((b) => {
-    a = extend(a, b);
+    if (b) {
+      a = extend(a, b);
+    }
   });
   return a;
 }
