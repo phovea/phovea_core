@@ -455,3 +455,40 @@ class HashProperties {
 }
 
 export var hash = new HashProperties();
+
+
+
+/**
+ * create a delayed call, can be called multiple times but only the last one at most delayed by timeToDelay will be executed
+ * @param callback
+ * @param thisCallback
+ * @param timeToDelay
+ * @return {function(...[any]): undefined}
+ */
+export function delayedCall(callback:() => void, timeToDelay = 100, thisCallback = this) {
+  var tm = -1;
+  return (...args:any[]) => {
+    if (tm >= 0) {
+      clearTimeout(tm);
+      tm = -1;
+    }
+    args.unshift(thisCallback);
+    tm = setTimeout(callback.bind.apply(callback, args), timeToDelay);
+  };
+}
+
+
+/**
+ * computes the absolute offset of the given element
+ * @param element
+ * @return {{left: number, top: number, width: number, height: number}}
+ */
+export function offset(element: Element) {
+  var obj = element.getBoundingClientRect();
+  return {
+    left: obj.left + window.pageXOffset ,
+    top: obj.top + window.pageYOffset,
+    width: obj.width,
+    height: obj.height
+  };
+}

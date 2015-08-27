@@ -4,7 +4,6 @@
 
 import d3 = require('d3');
 import C = require('./main');
-import $ = require('jquery');
 import vis = require('./vis');
 import ranges = require('./range');
 import datatypes = require('./datatype');
@@ -324,7 +323,7 @@ class GridElem implements C.IPersistable {
   }
 
   get location() {
-    var offset = $(this.$content.node()).offset();
+    var offset = C.offset(<Element>this.$content.node());
     return {
       x : offset.left,
       y : offset.top
@@ -436,7 +435,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
     var elem = this.toElem(indices);
     var absloc = elem.location;
     var size = elem.size;
-    var parentLoc = $(this.$content.node()).offset();
+    var parentLoc = C.offset(<Element>(this.$content.node()));
 
     return geom.rect(absloc.x - parentLoc.left, absloc.y - parentLoc.top, size[0], size[1]);
   }
@@ -526,7 +525,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
       var s = this.size;
       return Promise.resolve(geom.rect(0,0,s[0], s[1]));
     }
-    var parentLoc = $(this.$content.node()).offset();
+    var parentLoc = C.offset(<any>(this.$content.node()));
     function relativePos(pos) {
       return {
         x : pos.x - parentLoc.left,
