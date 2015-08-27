@@ -292,7 +292,7 @@ export class Range1D {
         return RangeElem.parse(item.toString());
       } else if (typeof item === 'number') {
         return RangeElem.single(<number>item);
-      } else if (C.isArray(item)) {
+      } else if (Array.isArray(item)) {
         return new RangeElem(item[0], item[1], item[2]);
       }
       return <RangeElem>item;
@@ -935,7 +935,7 @@ export class Range {
       var next = filterDim(i + 1); //compute next transform
       var s = size ? size[i] : undefined;
       return (elem) => { //if the value is an array, filter it else return the value
-        return C.isArray(elem) ? d.filter(elem, s, next) : elem;
+        return Array.isArray(elem) ? d.filter(elem, s, next) : elem;
       };
     }
 
@@ -1066,7 +1066,7 @@ export function range() {
     return all();
   }
   var r = new Range();
-  if (C.isArray(arguments[0])) { //array mode
+  if (Array.isArray(arguments[0])) { //array mode
     C.argList(arguments).forEach((arr:number[], i) => {
       if (arr.length === 0) {
         return;
@@ -1087,7 +1087,7 @@ export function join() {
   }
   var r = new Range();
   var ranges = arguments[0];
-  if (!C.isArray(ranges)) { //array mode
+  if (!Array.isArray(ranges)) { //array mode
     ranges = C.argList(arguments);
   }
   r.dims = ranges.map((r) => r.dim(0));
@@ -1103,9 +1103,9 @@ export function list():Range {
     return all();
   }
   var r = new Range();
-  if (C.isArray(arguments[0]) && arguments[0][0] instanceof Range1D) {
+  if (Array.isArray(arguments[0]) && arguments[0][0] instanceof Range1D) {
     r.dims = arguments[0];
-  } else if (C.isArray(arguments[0])) { //array mode
+  } else if (Array.isArray(arguments[0])) { //array mode
     C.argList(arguments).forEach((arr:any, i) => {
       if (arr instanceof Range1D) {
         r.dims[i] = arr;

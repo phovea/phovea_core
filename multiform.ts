@@ -34,9 +34,9 @@ class ProxyMetaData implements vis.IVisMetaData {
 export interface IMultiForm extends vis.IVisInstance {
   act: vis.IVisPluginDesc;
   visses: vis.IVisPluginDesc[];
-  switchTo(id: string)  : C.IPromise<any>;
-  switchTo(index: number)  : C.IPromise<any>;
-  switchTo(vis:vis.IVisPluginDesc) : C.IPromise<any>;
+  switchTo(id: string)  : Promise<any>;
+  switchTo(index: number)  : Promise<any>;
+  switchTo(vis:vis.IVisPluginDesc) : Promise<any>;
 }
 
 
@@ -63,7 +63,7 @@ export class MultiForm extends vis.AVisInstance implements vis.IVisInstance, IMu
   visses:vis.IVisPluginDesc[];
 
   private actVis:vis.IVisInstance;
-  private actVisPromise : C.IPromise<any>;
+  private actVisPromise : Promise<any>;
 
   private actDesc:vis.IVisPluginDesc;
   private $content:d3.Selection<any>;
@@ -135,25 +135,25 @@ export class MultiForm extends vis.AVisInstance implements vis.IVisInstance, IMu
   }
 
   locate(...args) {
-    var p = this.actVisPromise || C.resolved(null);
+    var p = this.actVisPromise || Promise.resolve(null);
     return p.then((...aa) => {
       var vis = aa.length > 0 ? aa[0] : undefined;
       if (vis && C.isFunction(vis.locate)) {
         return vis.locate.apply(vis, args);
       } else {
-        return C.resolved((aa.length === 1 ? undefined : new Array(args.length)));
+        return Promise.resolve((aa.length === 1 ? undefined : new Array(args.length)));
       }
     });
   }
 
   locateById(...args) {
-    var p = this.actVisPromise || C.resolved(null);
+    var p = this.actVisPromise || Promise.resolve(null);
     return p.then((...aa) => {
       var vis = aa.length > 0 ? aa[0] : undefined;
       if (vis && C.isFunction(vis.locateById)) {
         return vis.locateById.apply(vis, args);
       } else {
-        return C.resolved((aa.length === 1 ? undefined : new Array(args.length)));
+        return Promise.resolve((aa.length === 1 ? undefined : new Array(args.length)));
       }
     });
   }
@@ -208,10 +208,10 @@ export class MultiForm extends vis.AVisInstance implements vis.IVisInstance, IMu
    * switch to the desired vis technique given by index
    * @param index
    */
-  switchTo(index: number)  : C.IPromise<any>;
-  switchTo(vis:vis.IVisPluginDesc) : C.IPromise<any>;
-  switchTo(id: string) : C.IPromise<any>;
-  switchTo(param : any) : C.IPromise<any> {
+  switchTo(index: number)  : Promise<any>;
+  switchTo(vis:vis.IVisPluginDesc) : Promise<any>;
+  switchTo(id: string) : Promise<any>;
+  switchTo(param : any) : Promise<any> {
     var vis: vis.IVisPluginDesc = selectVis(param, this.visses);
 
     if (vis === this.actDesc) {
@@ -246,7 +246,7 @@ export class MultiForm extends vis.AVisInstance implements vis.IVisInstance, IMu
         return this.actVis;
       });
     } else {
-      return C.resolved(null);
+      return Promise.resolve(null);
     }
   }
 }
@@ -359,7 +359,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
 
   private actDesc:vis.IVisPluginDesc;
 
-  private actVisPromise : C.IPromise<any>;
+  private actVisPromise : Promise<any>;
 
   private $content:d3.Selection<any>;
 
@@ -524,7 +524,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
   private locateGroup(range:ranges.Range) {
     if (range.isAll || range.isNone) {
       var s = this.size;
-      return C.resolved(geom.rect(0,0,s[0], s[1]));
+      return Promise.resolve(geom.rect(0,0,s[0], s[1]));
     }
     var parentLoc = $(this.$content.node()).offset();
     function relativePos(pos) {
@@ -557,7 +557,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
         return loc ? loc.shift(inElems[0].pos) : loc;
       });
     }
-    return C.all(inElems.map((elem) => elem.g.actVis.locate(elem.r))).then((locations) => {
+    return Promise.all(inElems.map((elem) => elem.g.actVis.locate(elem.r))).then((locations: geom.AShape[]) => {
       //shift the locations according to grid position
       locations = locations.map((loc, i) => loc ? loc.shift(inElems[i].pos) : loc).filter((loc) => loc != null);
       //merge into a single one
@@ -581,10 +581,10 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
   }
 
   locate() {
-    var p = this.actVisPromise || C.resolved(null), args = C.argList(arguments);
+    var p = this.actVisPromise || Promise.resolve(null), args = C.argList(arguments);
     return p.then(function (visses) {
       if (!visses) {
-        return C.resolved((arguments.length === 1 ? undefined : new Array(args.length)));
+        return Promise.resolve((arguments.length === 1 ? undefined : new Array(args.length)));
       }
       if (visses.length === 1) {
         return visses[0].locate.apply(visses[0], args);
@@ -593,17 +593,17 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
         if (arguments.length === 1) {
           return this.locateGroup(arguments[0]);
         } else {
-          return C.all(args.map((arg) => this.locateGroup(arg)));
+          return Promise.all(args.map((arg) => this.locateGroup(arg)));
         }
       }
     });
   }
 
   locateById(...range:ranges.Range[]) {
-    var p = this.actVisPromise || C.resolved(null), args = C.argList(arguments);
+    var p = this.actVisPromise || Promise.resolve(null), args = C.argList(arguments);
     return p.then(function (visses) {
       if (!visses) {
-        return C.resolved((arguments.length === 1 ? undefined : new Array(args.length)));
+        return Promise.resolve((arguments.length === 1 ? undefined : new Array(args.length)));
       }
       if (visses.length === 1) {
         return visses[0].locateById.apply(visses[0], args);
@@ -612,7 +612,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
         if (args.length === 1) {
           return this.locateGroupById(args[0]);
         } else {
-          return C.all(args.map((arg) => this.locateGroupById(arg)));
+          return Promise.all(args.map((arg) => this.locateGroupById(arg)));
         }
       }
     });
@@ -667,10 +667,10 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
    * switch to the desired vis technique given by index
    * @param index
    */
-  switchTo(index: number)  : C.IPromise<any>;
-  switchTo(vis:vis.IVisPluginDesc) : C.IPromise<any>;
-  switchTo(id: string) : C.IPromise<any>;
-  switchTo(param : any) : C.IPromise<any> {
+  switchTo(index: number)  : Promise<any>;
+  switchTo(vis:vis.IVisPluginDesc) : Promise<any>;
+  switchTo(id: string) : Promise<any>;
+  switchTo(param : any) : Promise<any> {
     var vis: vis.IVisPluginDesc = selectVis(param, this.visses);
 
     if (vis === this.actDesc) {
@@ -709,7 +709,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
         return r;
       });
     } else {
-      return C.resolved([]);
+      return Promise.resolve([]);
     }
   }
 }

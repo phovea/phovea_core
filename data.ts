@@ -2,6 +2,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 import C = require('./main');
+import ajax = require('./ajax');
 import plugins = require('./plugin');
 import datatypes = require('./datatype');
 import tables = require('./table');
@@ -74,7 +75,7 @@ function transformEntry(desc: any) {
   var plugin = available.filter((p) => p.id === desc.type);
   //no type there create a dummy one
   if (plugin.length === 0) {
-    return cached(desc, C.resolved(new datatypes.DataTypeBase(desc)));
+    return cached(desc, Promise.resolve(new datatypes.DataTypeBase(desc)));
   }
   //take the first matching one
   return cached(desc, plugin[0].load().then((p) => {
@@ -87,9 +88,9 @@ function transformEntry(desc: any) {
  * @returns {JQueryPromise<any>}
  */
 export function list(query = {}) {
-  return C.getAPIJSON('/dataset/', query).then(function (descs) {
+  return ajax.getAPIJSON('/dataset/', query).then(function (descs) {
     //load descriptions and create data out of them
-    return <any> C.all(descs.map((desc) => transformEntry(desc)));
+    return <any> Promise.all(descs.map((desc) => transformEntry(desc)));
   });
 }
 
@@ -119,7 +120,7 @@ export function convertToTree(list: datatypes.IDataType[]) {
   return root;
 }
 
-export function tree(query = {}): C.IPromise<INode> {
+export function tree(query = {}): Promise<INode> {
   return list(query).then(convertToTree);
 }
 
@@ -130,7 +131,7 @@ export function getFirst(query: any | string | RegExp) {
   query.limit = 1;
   return list(query).then((result) => {
     if (result.length === 0) {
-      return C.reject({error : 'nothing found, matching', args: query});
+      return Promise.reject({error : 'nothing found, matching', args: query});
     }
     return result[0];
   });
@@ -165,7 +166,7 @@ function getById(id: string) {
   if (id in cacheById) {
     return cacheById[id];
   }
-  return C.getAPIJSON('/dataset/'+id+'/desc').then(transformEntry);
+  return ajax.getAPIJSON('/dataset/'+id+'/desc').then(transformEntry);
 }
 
 /**
@@ -173,7 +174,7 @@ function getById(id: string) {
  * @param name
  * @returns {JQueryGenericPromise<datatypes.IDataType>}
  */
-export function get(persisted: any | string) : C.IPromise<datatypes.IDataType> {
+export function get(persisted: any | string) : Promise<datatypes.IDataType> {
   if (typeof persisted === 'string') {
     return getById(<string>persisted);
   }
@@ -184,58 +185,37 @@ export function get(persisted: any | string) : C.IPromise<datatypes.IDataType> {
     });
   } else {
     //can't restore non root and non data id
-    return C.resolved(null);
+    return Promise.resolve(null);
   }
 }
 
-export function create(desc: any) : C.IPromise<datatypes.IDataType> {
+export function create(desc: any) : Promise<datatypes.IDataType> {
   return transformEntry(desc);
 }
 
-export function upload(desc: any, file?) : C.IPromise<datatypes.IDataType> {
+export function upload(desc: any, file?) : Promise<datatypes.IDataType> {
   var data = new FormData();
   data.append('desc', JSON.stringify(desc));
   if (file) {
     data.append('file',file);
   }
-  return C.ajaxAPI({
-    url: '/dataset/',
-    method: 'post',
-    dataType: 'json',
-    data: data,
-    cache: false,
-    contentType: false,
-    processData: false
-  }).then(transformEntry);
+  return ajax.postForm('/dataset/',data).then(transformEntry);
 }
 
-export function update(entry: datatypes.IDataType, desc: any, file?) : C.IPromise<datatypes.IDataType> {
+export function update(entry: datatypes.IDataType, desc: any, file?) : Promise<datatypes.IDataType> {
   var data = new FormData();
   data.append('desc', JSON.stringify(desc));
   if (file) {
     data.append('file',file);
   }
-  return C.ajaxAPI({
-    url: '/dataset/'+entry.desc.id,
-    method: 'put',
-    dataType: 'json',
-    data: data,
-    cache: false,
-    contentType: false,
-    processData: false
-  }).then((desc) => {
+  return ajax.postForm('/dataset/'+entry.desc.id,data).then((desc) => {
     clearCache(entry);
     return transformEntry(desc);
   });
 }
 
-export function remove(entry: datatypes.IDataType): C.IPromise<Boolean> {
-  return C.ajaxAPI({
-    url: '/dataset/'+entry.desc.id,
-    method: 'delete',
-    dataType: 'json',
-    cache: false
-  }).then((result) => {
+export function remove(entry: datatypes.IDataType): Promise<Boolean> {
+  return ajax.deleteAPIData('/dataset/').then((result) => {
     clearCache(entry);
     return true;
   });

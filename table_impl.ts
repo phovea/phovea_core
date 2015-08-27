@@ -4,6 +4,7 @@
 
 'use strict';
 import C = require('./main');
+import ajax = require('./ajax');
 import ranges = require('./range');
 import idtypes = require('./idtype');
 import datatypes = require('./datatype');
@@ -38,7 +39,7 @@ export class TableBase extends idtypes.SelectAble {
     return new TableView(this._root, range);
   }
 
-  idView(idRange:ranges.Range = ranges.all()) : C.IPromise<def.ITable> {
+  idView(idRange:ranges.Range = ranges.all()) : Promise<def.ITable> {
     return this.ids().then((ids) => this.view(ids.indexOf(idRange)));
   }
 
@@ -60,7 +61,7 @@ export class TableBase extends idtypes.SelectAble {
 }
 
 export interface ITableLoader {
-  (desc: datatypes.IDataDescription) : C.IPromise<{
+  (desc: datatypes.IDataDescription) : Promise<{
     rowIds : ranges.Range;
     rows: string[];
     objs : any[];
@@ -84,7 +85,7 @@ function viaAPILoader() {
     if (_loader) { //in the cache
       return _loader;
     }
-    return _loader = C.getAPIJSON('/dataset/'+desc.id).then(function (data) {
+    return _loader = ajax.getAPIJSON('/dataset/'+desc.id).then(function (data) {
       data.rowIds = ranges.parse(data.rowIds);
       //transpose to have column order for better vector access
       data.objs = toObjects(data.data, desc.columns);
@@ -98,7 +99,7 @@ function viaDataLoader(data: any[], nameProperty: any) {
   var _data : any = undefined;
   return (desc) => {
     if (_data) { //in the cache
-      return C.resolved(_data);
+      return Promise.resolve(_data);
     }
     var name : (any) => string = C.isFunction(nameProperty)? nameProperty : C.getter(nameProperty.toString());
     function toGetter(col) {
@@ -121,7 +122,7 @@ function viaDataLoader(data: any[], nameProperty: any) {
       objs : objs,
       data : getters.map((getter) => data.map(getter))
     };
-    return C.resolved(_data);
+    return Promise.resolve(_data);
   };
 }
 
@@ -192,7 +193,7 @@ export class Table extends TableBase implements def.ITable {
    * return the row ids of the matrix
    * @returns {*}
    */
-  rows(range:ranges.Range = ranges.all()):C.IPromise<string[]> {
+  rows(range:ranges.Range = ranges.all()):Promise<string[]> {
     var that = this;
     return this.load().then(function (d:any) {
       return range.dim(0).filter(d.rows, that.nrow);
@@ -353,7 +354,7 @@ export class TableVector extends vector_impl.VectorBase implements vector.IVecto
    * TODO: load just needed data and not everything given by the requested range
    * @returns {*}
    */
-  load() : C.IPromise<any[]> {
+  load() : Promise<any[]> {
     var that = this;
     return this.table.load().then(function (data) {
       return data.data[that.index];
@@ -390,19 +391,19 @@ export class TableVector extends vector_impl.VectorBase implements vector.IVecto
     return this.table.nrow;
   }
 
-  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): C.IPromise<vector.IVector> {
+  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): Promise<vector.IVector> {
     return this.data().then((d) => {
       var indices = C.argSort(d, compareFn, thisArg);
       return this.view(ranges.list(indices));
     });
   }
 
-  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): C.IPromise<vector.IVector> {
+  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): Promise<vector.IVector> {
     //FIXME
     return null;
   }
 
-  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): C.IPromise<vector.IVector> {
+  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<vector.IVector> {
     return this.data().then((d) => {
       var indices = C.argFilter(d, callbackfn, thisArg);
       return this.view(ranges.list(indices));
@@ -459,7 +460,7 @@ class MultITableVector extends vector_impl.VectorBase implements vector.IVector 
   /**
    * return the associated ids of this vector
    */
-  names(range?:ranges.Range) : C.IPromise<string[]> {
+  names(range?:ranges.Range) : Promise<string[]> {
     return this.table.rows(range);
   }
   ids(range?:ranges.Range) {
@@ -471,7 +472,7 @@ class MultITableVector extends vector_impl.VectorBase implements vector.IVector 
    * @param i
    * @param j
    */
-  at(i:number) : C.IPromise<any> {
+  at(i:number) : Promise<any> {
     return this.table.data(ranges.list(i)).then((d)=> {
       return this.f.call(this.this_f, d[0]);
     });
@@ -480,25 +481,25 @@ class MultITableVector extends vector_impl.VectorBase implements vector.IVector 
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range?:ranges.Range) : C.IPromise<any[]> {
+  data(range?:ranges.Range) : Promise<any[]> {
     return this.table.data(range).then((d)=> {
       return d.map(this.f, this.this_f);
     });
   }
 
-  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): C.IPromise<vector.IVector> {
+  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): Promise<vector.IVector> {
     return this.data().then((d) => {
       var indices = C.argSort(d, compareFn, thisArg);
       return this.view(ranges.list(indices));
     });
   }
 
-  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): C.IPromise<vector.IVector> {
+  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): Promise<vector.IVector> {
     //FIXME
     return null;
   }
 
-  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): C.IPromise<vector.IVector> {
+  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<vector.IVector> {
     return this.data().then((d) => {
       var indices = C.argFilter(d, callbackfn, thisArg);
       return this.view(ranges.list(indices));

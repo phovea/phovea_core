@@ -42,7 +42,7 @@ export interface IMatrix extends datatypes.IDataType {
    */
   view(range?:ranges.Range) : IMatrix;
 
-  //view(filter: string): C.IPromise<IMatrix>;
+  //view(filter: string): Promise<IMatrix>;
 
   /**
    * reduces the current matrix to a vector using the given reduce function
@@ -61,28 +61,28 @@ export interface IMatrix extends datatypes.IDataType {
    * @param range
    * @returns {IPromise<string[]>}
    */
-  cols(range?:ranges.Range) : C.IPromise<string[]>;
-  colIds(range?:ranges.Range) : C.IPromise<ranges.Range>;
+  cols(range?:ranges.Range) : Promise<string[]>;
+  colIds(range?:ranges.Range) : Promise<ranges.Range>;
   /**
    * returns a promise for getting the row names of the matrix
    * @param range
    */
-  rows(range?:ranges.Range) : C.IPromise<string[]>;
-  rowIds(range?:ranges.Range) : C.IPromise<ranges.Range>;
+  rows(range?:ranges.Range) : Promise<string[]>;
+  rowIds(range?:ranges.Range) : Promise<ranges.Range>;
 
   /**
    * returns a promise for getting one cell
    * @param i
    * @param j
    */
-  at(i:number, j:number) : C.IPromise<any>;
+  at(i:number, j:number) : Promise<any>;
   /**
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range?:ranges.Range) : C.IPromise<any[][]>;
+  data(range?:ranges.Range) : Promise<any[][]>;
 
-  stats() : C.IPromise<math.IStatistics>;
+  stats() : Promise<math.IStatistics>;
 
-  hist(bins? : number, containedIds? : number) : C.IPromise<math.IHistogram>;
+  hist(bins? : number, containedIds? : number) : Promise<math.IHistogram>;
 }

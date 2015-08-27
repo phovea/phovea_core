@@ -3,6 +3,7 @@
  */
 
 import C = require('./main');
+import ajax = require('./ajax');
 import events = require('./event');
 import ranges = require('./range');
 'use strict';
@@ -121,7 +122,7 @@ export class IDType extends events.EventHandler implements C.IPersistable {
   select(type:string, range:number[], op:SelectOperation);
   select(r_or_t:any, r_or_op ?:any, op = SelectOperation.SET) {
     function asRange(v:any) {
-      if (C.isArray(v)) {
+      if (Array.isArray(v)) {
         return ranges.list(v);
       }
       return v;
@@ -242,7 +243,7 @@ export class ObjectManager<T extends IHasUniqueId> extends IDType {
 }
 
 function asRange(v:any) {
-  if (C.isArray(v)) {
+  if (Array.isArray(v)) {
     return ranges.list.apply(ranges, v);
   }
   return v;
@@ -283,7 +284,7 @@ export class SelectAble extends events.EventHandler {
   private selectionCache = [];
   private accumulateEvents = -1;
 
-  ids(range?:ranges.Range) : C.IPromise<ranges.Range> {
+  ids(range?:ranges.Range) : Promise<ranges.Range> {
     throw new Error('not implemented');
   }
 
@@ -464,7 +465,7 @@ function fillUp() {
     return;
   }
   filledUp = true;
-  C.getAPIJSON('/idtype').then(function (c) {
+  ajax.getAPIJSON('/idtype').then(function (c) {
     fillUpData(c);
     return cache;
   });

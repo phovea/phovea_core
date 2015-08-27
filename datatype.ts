@@ -31,7 +31,7 @@ export interface IDataType extends idtypes.SelectAble, C.IPersistable {
   dim: number[];
 
 
-  idView(idRange?: ranges.Range) : C.IPromise<IDataType>;
+  idView(idRange?: ranges.Range) : Promise<IDataType>;
 }
 
 
@@ -50,12 +50,12 @@ export class DataTypeBase extends idtypes.SelectAble implements IDataType {
     return [];
   }
 
-  ids(range:ranges.Range = ranges.all()) : C.IPromise<ranges.Range> {
-    return C.resolved(ranges.none());
+  ids(range:ranges.Range = ranges.all()) : Promise<ranges.Range> {
+    return Promise.resolve(ranges.none());
   }
 
-  idView(idRange?: ranges.Range) : C.IPromise<DataTypeBase> {
-    return C.resolved(this);
+  idView(idRange?: ranges.Range) : Promise<DataTypeBase> {
+    return Promise.resolve(this);
   }
 
   get idtypes() {

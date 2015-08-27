@@ -2,7 +2,6 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 /// <reference path="../../tsd.d.ts" />
-import $ = require('jquery');
 import module_ = require('module');
 var config = module_.config();
 'use strict';
@@ -15,102 +14,31 @@ export var version = '0.0.1-alpha';
 export var server_url:string = config.apiUrl;
 export var server_json_suffix:string = config.apiJSONSuffix || '';
 
-
-export interface IPromise<T> extends JQueryPromise<T> {
-
-}
-
-/**
- * wraps the given resolver function to be a promise
- * @param resolver
- * @param {function(resolve, reject)} resolver - the promise resolver
- * @returns {Promise} a promise object
- */
-export function promised<T>(f) : IPromise<T> {
-  var d = $.Deferred<T>();
-  f((r) => {
-    d.resolve(r);
-  }, (r) => {
-    d.reject(r);
-  });
-  return d.promise();
-}
-/**
- * wraps the given result as a promise
- * @param result - the result of the promise
- * @returns {Promise} a promise object
- */
-export function resolved(result) : IPromise<any> {
-  return $.Deferred().resolve(result).promise();
-}
-export function reject(error) : IPromise<any> {
-  return $.Deferred().reject(error).promise();
-}
-export function asPromise<T>(f: IPromise<T>): IPromise<T>;
-export function asPromise<T>(f: T): IPromise<T>;
-export function asPromise<T>(f: any): IPromise<T> {
-  if (f.hasOwnProperty('then') && $.isFunction(f.then)) {
-    return f;
-  }
-  return resolved(f);
-}
-
-/**
- * when all given promises are done
- * @param deferreds the promises to wait for
- * @type {IPromise<Array<any>>}
- */
-export function all(promises:any[]):IPromise<Array<any>> {
-  return $.when.apply($, promises).then((...args:any[]) => args);
-}
-
-/**
- * async JSON loading
- * @see {@link http://api.jquery.com/jQuery.getJSON/}
- */
-export var getJSON = $.getJSON;
-export var ajax = $.ajax;
-
-export function getAPIJSON(url, ...args:any[]):IPromise<any> {
-  //convert to full url
-  url = server_url + url + server_json_suffix;
-  args.unshift(url);
-  return getJSON.apply($, args);
-}
-export function ajaxAPI(args: any):IPromise<any> {
-  //convert to full url
-  args.url = server_url + args.url + server_json_suffix;
-  return ajax.call($, args);
-}
 /**
  * integrate b into a and override all duplicates
  * @param {Object} a
  * @param {Object} b
  * @returns {Object} a with extended b
  */
-export function mixin(a, ...bs : any[]) {
-  bs.unshift(a);
-  bs.unshift(a);
-  return $.extend.apply($, bs);
+export function mixin(a: any, ...bs : any[]) {
+  function extend(r, b) {
+    Object.keys(b).forEach((key) => {
+      var v = b[key];
+      if (Object.prototype.toString.call(v) === '[object Object]') {
+        r[key] = extend(r[key] || {}, v);
+			} else if (Array.isArray(v)) {
+				r[key] = (r[key] || []).concat(v);
+			} else {
+				r[key] = v;
+			}
+    });
+    return r;
+  }
+  bs.forEach((b) => {
+    a = extend(a, b);
+  });
+  return a;
 }
-
-//wrap function wrap jquery which may be overwritten replaced sometimes
-/**
- * test the given object is a function
- */
-export var isFunction = $.isFunction;
-/**
- * test if the argument t is an array
- */
-export var isArray = $.isArray;
-/**
- * test if the argument is an empty object, works just for testing objects
- */
-export var isEmptyObject = $.isEmptyObject;
-/**
- * test if the argument is a plain object, no subclassing
- */
-export var isPlainObject = $.isPlainObject;
 
 export function isUndefined(obj:any) {
   return typeof obj === 'undefined';
@@ -139,6 +67,10 @@ export function getter(...attr: any[]) {
     return (obj) => obj[attr[0]];
   }
   return (obj) => attr.map((a) => obj[a]);
+}
+
+export function isFunction(f: any) {
+  return typeof(f) === 'function';
 }
 
 /**
@@ -306,7 +238,7 @@ export function onDOMNodeRemoved(node:Element, callback:() => void, thisArg?:any
  */
 export function onDOMNodeRemoved(node:any, callback:() => void, thisArg?:any) {
   var arr:any[], body = document.getElementsByTagName('body')[0];
-  if (!isArray(node)) {
+  if (!Array.isArray(node)) {
     arr = [node];
   } else {
     arr = <any[]>node;

@@ -49,7 +49,7 @@ export interface IPluginDesc {
    * function for loading this plugin
    * @returns a promise for the loaded plugin
    */
-  load() : C.IPromise<IPlugin>;
+  load() : Promise<IPlugin>;
 }
 
 /**
@@ -63,7 +63,7 @@ export interface IPlugin {
   /**
    * link to the referenced method as described in the description
    */
-  factory(): any;
+  factory(...args:any[]): any;
 }
 
 /**
@@ -71,8 +71,8 @@ export interface IPlugin {
  * @param desc
  * @returns {function(): Promise}
  */
-function loadHelper(desc:IPluginDesc):() => C.IPromise<IPlugin> {
-  return () => C.promised<IPlugin>((resolver) => {
+function loadHelper(desc:IPluginDesc):() => Promise<IPlugin> {
+  return () => new Promise<IPlugin>((resolver) => {
     //require module
     require_([desc.module], (m) => {
       //create a plugin entry
@@ -112,20 +112,20 @@ function parsePlugins(descs : any[]) {
 }
 
 //map to descriptions
-var plugins = parsePlugins(config.plugins || []);
+var plugins : IPluginDesc[] = parsePlugins(config.plugins || []);
 
 /**
  * returns a list of matching plugin descs
  * @param filter the filter function to apply
  * @returns {IPluginDesc[]}
  */
-export function list(filter : (desc : IPluginDesc) => boolean);
+export function list(filter : (desc : IPluginDesc) => boolean): IPluginDesc[];
 /**
  * returns a list of matching plugin descs
  * @param type the desired plugin type
  * @returns {IPluginDesc[]}
  */
-export function list(type : string);
+export function list(type : string): IPluginDesc[];
 /**
  * returns a list of matching plugin descs
  * @param filter
@@ -147,11 +147,11 @@ export function list(filter : any = C.constantTrue) {
  * @param plugins
  * @returns {Promise}
  */
-export function load(plugins: IPluginDesc[]) :C.IPromise<IPlugin[]> {
+export function load(plugins: IPluginDesc[]) :Promise<IPlugin[]> {
   if (plugins.length === 0) {
-    return C.resolved([]);
+    return Promise.resolve([]);
   }
-  return C.promised((resolve) => {
+  return new Promise((resolve) => {
     require_(plugins.map((desc) => desc.module), (...impls : any[]) => {
       //loaded now convert to plugins
       resolve(impls.map((p,i) => {

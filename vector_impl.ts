@@ -4,6 +4,7 @@
 
 'use strict';
 import C = require('./main');
+import ajax = require('./ajax');
 import ranges = require('./range');
 import idtypes = require('./idtype');
 import datatypes = require('./datatype');
@@ -22,7 +23,7 @@ export class VectorBase extends idtypes.SelectAble {
     return [this.length];
   }
 
-  data() : C.IPromise<any[]> {
+  data() : Promise<any[]> {
     throw new Error('not implemented');
   }
 
@@ -38,11 +39,11 @@ export class VectorBase extends idtypes.SelectAble {
     return new VectorView(this._root, range);
   }
 
-  idView(idRange:ranges.Range = ranges.all()) : C.IPromise<def.IVector> {
+  idView(idRange:ranges.Range = ranges.all()) : Promise<def.IVector> {
     return this.ids().then((ids) => this.view(ids.indexOf(idRange)));
   }
 
-  stats() : C.IPromise<math.IStatistics> {
+  stats() : Promise<math.IStatistics> {
     return this.data().then((d) => math.computeStats(d));
   }
 
@@ -53,7 +54,7 @@ export class VectorBase extends idtypes.SelectAble {
   /**
    * return the range of this vector as a grouped range, depending on the type this might be a single group or multiple ones
    */
-  groups(): C.IPromise<ranges.CompositeRange1D> {
+  groups(): Promise<ranges.CompositeRange1D> {
     var v = this._root.valuetype;
     if (v.type === 'categorical') {
       return this.data().then((d) => {
@@ -66,11 +67,11 @@ export class VectorBase extends idtypes.SelectAble {
         return datatypes.categorical2partitioning(d, v.categories.map((d) => typeof d === 'string' ? d : d.name), options);
       });
     } else {
-      return C.resolved(ranges.composite(this._root.desc.id, [ ranges.asUngrouped(this.indices.dim(0))]));
+      return Promise.resolve(ranges.composite(this._root.desc.id, [ ranges.asUngrouped(this.indices.dim(0))]));
     }
   }
 
-  hist(bins? : number) : C.IPromise<math.IHistogram> {
+  hist(bins? : number) : Promise<math.IHistogram> {
     var v = this._root.valuetype;
     return this.data().then((d) => {
       switch(v.type) {
@@ -85,11 +86,11 @@ export class VectorBase extends idtypes.SelectAble {
     });
   }
 
-  every(callbackfn: (value: any, index: number) => boolean, thisArg?: any): C.IPromise<boolean> {
+  every(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<boolean> {
     return this.data().then((d) => d.every(callbackfn, thisArg));
   }
 
-  some(callbackfn: (value: any, index: number) => boolean, thisArg?: any): C.IPromise<boolean> {
+  some(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<boolean> {
     return this.data().then((d) => d.some(callbackfn, thisArg));
   }
 
@@ -97,14 +98,14 @@ export class VectorBase extends idtypes.SelectAble {
     this.data().then((d) => d.forEach(callbackfn, thisArg));
   }
 
-  reduce<T,U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): C.IPromise<U> {
+  reduce<T,U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U> {
     function helper() {
       return callbackfn.apply(thisArg, C.argList(arguments));
     }
     return this.data().then((d) => d.reduce(helper, initialValue));
   }
 
-  reduceRight<T,U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): C.IPromise<U> {
+  reduceRight<T,U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U> {
     function helper() {
       return callbackfn.apply(thisArg, C.argList(arguments));
     }
@@ -121,7 +122,7 @@ export class VectorBase extends idtypes.SelectAble {
 }
 
 export interface IVectorLoader {
-  (desc: datatypes.IDataDescription) : C.IPromise<{
+  (desc: datatypes.IDataDescription) : Promise<{
     rowIds : ranges.Range;
     rows : string[];
     data : any[];
@@ -135,7 +136,7 @@ function viaAPILoader() {
     if (_loader) { //in the cache
       return _loader;
     }
-    return _loader = C.getAPIJSON('/dataset/'+desc.id).then(function (data) {
+    return _loader = ajax.getAPIJSON('/dataset/'+desc.id).then(function (data) {
       data.rowIds = ranges.parse(data.rowIds);
       return data;
     });
@@ -146,14 +147,14 @@ function viaDataLoader(rows: string[], rowIds: number[], data: any[]) {
   var _data = undefined;
   return (desc) => {
     if (_data) { //in the cache
-      return C.resolved(_data);
+      return Promise.resolve(_data);
     }
     _data = {
       rowIds : ranges.parse(rowIds),
       rows: rows,
       data: data
     };
-    return C.resolved(_data);
+    return Promise.resolve(_data);
   };
 }
 
@@ -181,7 +182,7 @@ export class Vector extends VectorBase implements def.IVector {
    * TODO: load just needed data and not everything given by the requested range
    * @returns {*}
    */
-  load() : C.IPromise<any> {
+  load() : Promise<any> {
     return this.loader(this.desc);
   }
 
@@ -210,7 +211,7 @@ export class Vector extends VectorBase implements def.IVector {
       return range.filter(data.rows, that.dim);
     });
   }
-  ids(range:ranges.Range = ranges.all()): C.IPromise<ranges.Range> {
+  ids(range:ranges.Range = ranges.all()): Promise<ranges.Range> {
     var that = this;
     return this.load().then(function (data) {
       return range.preMultiply(data.rowIds, that.dim);
@@ -225,19 +226,19 @@ export class Vector extends VectorBase implements def.IVector {
     return (<any>this.desc).size;
   }
 
-  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): C.IPromise<def.IVector> {
+  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): Promise<def.IVector> {
     return this.data().then((d) => {
       var indices = C.argSort(d, compareFn, thisArg);
       return this.view(ranges.list(indices));
     });
   }
 
-  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): C.IPromise<def.IVector> {
+  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): Promise<def.IVector> {
     //FIXME
     return null;
   }
 
-  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): C.IPromise<def.IVector> {
+  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<def.IVector> {
     return this.data().then((d) => {
       var indices = C.argFilter(d, callbackfn, thisArg);
       return this.view(ranges.list(indices));
@@ -315,19 +316,19 @@ class VectorView extends VectorBase implements def.IVector {
     return this.range;
   }*/
 
-  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): C.IPromise<def.IVector> {
+  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): Promise<def.IVector> {
     return this.data().then((d) => {
       var indices = C.argSort(d, compareFn, thisArg);
       return this.view(this.range.preMultiply(ranges.list(indices)));
     });
   }
 
-  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): C.IPromise<def.IVector> {
+  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): Promise<def.IVector> {
     //FIXME
     return null;
   }
 
-  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): C.IPromise<def.IVector> {
+  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<def.IVector> {
     return this.data().then((d) => {
       var indices = C.argFilter(d, callbackfn, thisArg);
       return this.view(this.range.preMultiply(ranges.list(indices)));

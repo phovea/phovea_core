@@ -77,8 +77,8 @@ export class GraphBase extends datatypes.DataTypeBase {
 }
 
 export interface IGraph extends datatypes.IDataType {
-  nodes(): C.IPromise<GraphNode[]>;
-  edges(): C.IPromise<GraphEdge[]>;
+  nodes(): Promise<GraphNode[]>;
+  edges(): Promise<GraphEdge[]>;
 }
 
 class Graph extends GraphBase {
@@ -91,7 +91,7 @@ class Graph extends GraphBase {
   }
 
   ids(range: ranges.Range = ranges.all()) {
-    return C.resolved(ranges.range([0,this._nodes.length], [0, this._edges.length]));
+    return Promise.resolve(ranges.range([0,this._nodes.length], [0, this._edges.length]));
   }
 
   get idtypes() {

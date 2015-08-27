@@ -4,6 +4,7 @@
 
 'use strict';
 import C = require('./main');
+import ajax = require('./ajax');
 import ranges = require('./range');
 import idtypes = require('./idtype');
 import datatypes = require('./datatype');
@@ -65,13 +66,13 @@ export class MatrixBase extends idtypes.SelectAble {
     return ranges.range([0, this.nrow], [0, this.ncol]);
   }
 
-  data() : C.IPromise<any[]> {
+  data() : Promise<any[]> {
     throw new Error('not implemented');
   }
 
   view(): matrix.IMatrix;
   view(range:ranges.Range) : matrix.IMatrix;
-  //view(filter: string): C.IPromise<matrix.IMatrix>;
+  //view(filter: string): Promise<matrix.IMatrix>;
   view(): any {
     if (typeof arguments[0] === 'string') {
       return this.dynview(<string>arguments[0]);
@@ -83,15 +84,15 @@ export class MatrixBase extends idtypes.SelectAble {
     return new MatrixView(this._root, range);
   }
 
-  dynview(filter: string): C.IPromise<matrix.IMatrix> {
+  dynview(filter: string): Promise<matrix.IMatrix> {
     return null;
   }
 
-  stats() : C.IPromise<math.IStatistics> {
+  stats() : Promise<math.IStatistics> {
     return this.data().then((d) => math.computeStats.apply(math,d));
   }
 
-  hist(bins? : number, containedIds = 0) : C.IPromise<math.IHistogram> {
+  hist(bins? : number, containedIds = 0) : Promise<math.IHistogram> {
     var v = this._root.valuetype;
     return this.data().then((d) => {
       var flat = flatten(d, this.indices, containedIds);
@@ -107,9 +108,9 @@ export class MatrixBase extends idtypes.SelectAble {
     });
   }
 
-  idView(idRange:ranges.Range = ranges.all()) : C.IPromise<matrix.IMatrix> {
+  idView(idRange:ranges.Range = ranges.all()) : Promise<matrix.IMatrix> {
     if (idRange.isAll) {
-      return C.resolved(this._root);
+      return Promise.resolve(this._root);
     }
     return this.ids().then((ids) => this.view(ids.indexOf(idRange)));
   }
@@ -134,7 +135,7 @@ export class MatrixBase extends idtypes.SelectAble {
 }
 
 export interface IMatrixLoader {
-  (desc: datatypes.IDataDescription) : C.IPromise<{
+  (desc: datatypes.IDataDescription) : Promise<{
     rowIds : ranges.Range;
     rows : string[];
     colIds : ranges.Range;
@@ -151,7 +152,7 @@ function viaAPILoader() {
     if (_loader) { //in the cache
       return _loader;
     }
-    return _loader = C.getAPIJSON('/dataset/'+desc.id).then(function (data) {
+    return _loader = ajax.getAPIJSON('/dataset/'+desc.id).then(function (data) {
       data.rowIds = ranges.parse(data.rowIds);
       data.colIds = ranges.parse(data.colIds);
       data.ids = ranges.list(data.rowIds.dim(0), data.colIds.dim(0));
@@ -184,7 +185,7 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
    * TODO: load just needed data and not everything given by the requested range
    * @returns {*}
    */
-  load() : C.IPromise<any> {
+  load() : Promise<any> {
     return this.loader(this.desc);
   }
 
@@ -222,7 +223,7 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
    * return the column ids of the matrix
    * @returns {*}
    */
-  cols(range: ranges.Range= ranges.all()) : C.IPromise<string[]> {
+  cols(range: ranges.Range= ranges.all()) : Promise<string[]> {
     var that = this;
     return this.load().then(function (d : any) {
       return range.dim(1).filter(d.cols, that.ncol);
@@ -239,7 +240,7 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
    * return the row ids of the matrix
    * @returns {*}
    */
-  rows(range: ranges.Range = ranges.all()) : C.IPromise<string[]> {
+  rows(range: ranges.Range = ranges.all()) : Promise<string[]> {
     var that = this;
     return this.load().then(function (d : any) {
       return range.dim(0).filter(d.rows, that.nrow);
@@ -305,14 +306,14 @@ class TransposedMatrix extends MatrixBase  implements matrix.IMatrix {
     return this.t.ids(range ? range.swap() : undefined);
   }
 
-  cols(range:ranges.Range = ranges.all()): C.IPromise<string[]> {
+  cols(range:ranges.Range = ranges.all()): Promise<string[]> {
     return this.t.rows(range ? range.swap() : undefined);
   }
   colIds(range:ranges.Range = ranges.all()) {
     return this.t.rowIds(range ? range.swap() : undefined);
   }
 
-  rows(range:ranges.Range = ranges.all()): C.IPromise<string[]> {
+  rows(range:ranges.Range = ranges.all()): Promise<string[]> {
     return this.t.cols(range ? range.swap() : undefined);
   }
   rowIds(range:ranges.Range = ranges.all()) {
@@ -470,7 +471,7 @@ class ProjectedVector extends vector_impl.VectorBase implements vector.IVector {
   /**
    * return the associated ids of this vector
    */
-  names(range?:ranges.Range) : C.IPromise<string[]> {
+  names(range?:ranges.Range) : Promise<string[]> {
     return this.m.rows(range);
   }
   ids(range?:ranges.Range) {
@@ -482,7 +483,7 @@ class ProjectedVector extends vector_impl.VectorBase implements vector.IVector {
    * @param i
    * @param j
    */
-  at(i:number) : C.IPromise<any> {
+  at(i:number) : Promise<any> {
     return this.m.data(ranges.list(i)).then((d)=> {
       return this.f.call(this.this_f, d[0]);
     });
@@ -491,25 +492,25 @@ class ProjectedVector extends vector_impl.VectorBase implements vector.IVector {
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range?:ranges.Range) : C.IPromise<any[]> {
+  data(range?:ranges.Range) : Promise<any[]> {
     return this.m.data(range).then((d)=> {
       return d.map(this.f, this.this_f);
     });
   }
 
-  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): C.IPromise<vector.IVector> {
+  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): Promise<vector.IVector> {
     return this.data().then((d) => {
       var indices = C.argSort(d, compareFn, thisArg);
       return this.view(ranges.list(indices));
     });
   }
 
-  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): C.IPromise<vector.IVector> {
+  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): Promise<vector.IVector> {
     //FIXME
     return null;
   }
 
-  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): C.IPromise<vector.IVector> {
+  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<vector.IVector> {
     return this.data().then((d) => {
       var indices = C.argFilter(d, callbackfn, thisArg);
       return this.view(ranges.list(indices));

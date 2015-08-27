@@ -25,8 +25,8 @@ export interface ITable extends datatypes.IDataType {
    * returns a promise for getting the row names of the matrix
    * @param range
    */
-  rows(range?:ranges.Range) : C.IPromise<string[]>;
-  rowIds(range?:ranges.Range) : C.IPromise<ranges.Range>;
+  rows(range?:ranges.Range) : Promise<string[]>;
+  rowIds(range?:ranges.Range) : Promise<ranges.Range>;
 
   /**
    * creates a new view on this matrix specified by the given range
@@ -47,16 +47,16 @@ export interface ITable extends datatypes.IDataType {
    * @param i
    * @param j
    */
-  at(i:number, j:number) : C.IPromise<any>;
+  at(i:number, j:number) : Promise<any>;
   /**
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range?:ranges.Range) : C.IPromise<any[][]>;
+  data(range?:ranges.Range) : Promise<any[][]>;
 
   /**
    * returns a promise for getting the data as an array of objects
    * @param range
    */
-  objects(range?:ranges.Range) : C.IPromise<any[]>;
+  objects(range?:ranges.Range) : Promise<any[]>;
 }

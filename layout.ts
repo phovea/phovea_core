@@ -5,7 +5,7 @@ import geom = require('./geom');
 import C = require('./main');
 
 export interface ILayoutElem {
-  setBounds(x:number, y:number, w:number, h:number) : C.IPromise<void>;
+  setBounds(x:number, y:number, w:number, h:number) : Promise<void>;
 
   getBounds(): geom.Rect;
 
@@ -86,7 +86,7 @@ export var no_padding = {
 };
 
 export interface ILayout {
-  (elems:ILayoutElem[], w:number, h:number, parent:ILayoutElem) : C.IPromise<boolean>;
+  (elems:ILayoutElem[], w:number, h:number, parent:ILayoutElem) : Promise<boolean>;
 }
 
 function isDefault(v:number) {
@@ -97,14 +97,14 @@ function grab(v_def:number, v:number) {
   return isDefault(v_def) ? v : v_def;
 }
 
-function waitFor(promises : C.IPromise<any>[], redo: boolean = false) {
+function waitFor(promises : Promise<any>[], redo: boolean = false) {
   promises = promises.filter((p) => p != null);
   if (promises.length === 0) {
-    return C.resolved(redo);
+    return Promise.resolve(redo);
   } else if (promises.length === 1) {
     return promises[0].then(() => redo);
   }
-  return C.all(promises).then(() => redo);
+  return Promise.all(promises).then(() => redo);
 }
 
 export function layers(elems:ILayoutElem[], w:number, h:number, parent:ILayoutElem) {

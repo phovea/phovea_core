@@ -77,19 +77,19 @@ class HTMLLayoutElem extends layout.ALayoutElem implements layout.ILayoutElem {
     extra = this.layoutOption('onSetBounds', null);
     if (doAnimate) {
       this.targetBounds =  geom.rect(x,y,w,h);
-      var d : C.IPromise<void> = C.promised<void>((resolve) => {
+      var d : Promise<void> = new Promise<void>((resolve) => {
         t.each('end', () => {
           this.targetBounds = null;
           if (extra) {
             extra();
           }
-          resolve(true);
+          resolve(null);
         });
       });
       return d;
     } else if (extra) {
       extra();
-      return null;
+      return Promise.resolve(null);
     }
   }
 

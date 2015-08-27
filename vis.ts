@@ -36,9 +36,9 @@ export interface ILocateAble {
    * locate method, by convention, when just a single range is given, then return just a promise with this range, else an array
    * the return type should be something convertable using the geom module
    */
-  locate(...range: ranges.Range[]): C.IPromise<any>;
+  locate(...range: ranges.Range[]): Promise<any>;
 
-  locateById(... range: ranges.Range[]): C.IPromise<any>;
+  locateById(... range: ranges.Range[]): Promise<any>;
 }
 
 /**
@@ -187,7 +187,7 @@ export class AVisInstance extends events.EventHandler {
     if (range.length === 1) {
       return this.locateImpl(range[0]);
     }
-    return C.all(range.map(this.locateImpl, this));
+    return Promise.all(range.map(this.locateImpl, this));
   }
 
   locateById(...range:ranges.Range[]) {
@@ -195,13 +195,13 @@ export class AVisInstance extends events.EventHandler {
       if (range.length === 1) {
         return this.locateImpl(ids.indexOf(range[0]));
       }
-      return C.all(range.map((r) => this.locateImpl(ids.indexOf(r))));
+      return Promise.all(range.map((r) => this.locateImpl(ids.indexOf(r))));
     });
   }
 
   locateImpl(range: ranges.Range) {
     //no resolution by default
-    return C.resolved(null);
+    return Promise.resolve(null);
   }
 
   restore(persisted: any) {
@@ -241,7 +241,7 @@ function extrapolateFilter(r: any) {
     r.filter = C.constantTrue;
   } else if (typeof v === 'string') {
     r.filter = (data) => data && data.desc.type && data.desc.type.match(v);
-  } else if (C.isArray(v)) {
+  } else if (Array.isArray(v)) {
     r.filter = (data) => data && data && (data.desc.type && data.desc.type.match(v[0])) && (data.desc.value && data.desc.value.type.match(v[1]));
   }
 }

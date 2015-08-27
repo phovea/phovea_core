@@ -4,6 +4,7 @@
 
 'use strict';
 import C = require('./main');
+import ajax = require('./ajax');
 import ranges = require('./range');
 import idtypes = require('./idtype');
 import datatypes = require('./datatype');
@@ -13,7 +14,7 @@ import math = require('./math');
 import def = require('./stratification');
 
 export interface IStratificationLoader {
-  (desc: datatypes.IDataDescription) : C.IPromise<{
+  (desc: datatypes.IDataDescription) : Promise<{
     rowIds : ranges.Range;
     rows: string[];
     range: ranges.CompositeRange1D;
@@ -33,7 +34,7 @@ function viaAPILoader() {
     if (_data) { //in the cache
       return _data;
     }
-    _data = C.getAPIJSON('/dataset/'+desc.id).then(function (data) {
+    _data = ajax.getAPIJSON('/dataset/'+desc.id).then(function (data) {
       var d = {
         rowIds : ranges.parse(data.rowIds),
         rows : data.rows,
@@ -49,14 +50,14 @@ function viaDataLoader(rows: string[], rowIds: number[], range: ranges.Composite
   var _data = undefined;
   return (desc) => {
     if (_data) { //in the cache
-      return C.resolved(_data);
+      return Promise.resolve(_data);
     }
     _data = {
       rowIds : ranges.list(rowIds),
       rows: rows,
       range: range
     };
-    return C.resolved(_data);
+    return Promise.resolve(_data);
   };
 }
 
@@ -65,7 +66,7 @@ function viaDataLoader(rows: string[], rowIds: number[], range: ranges.Composite
  */
 export class Stratification extends datatypes.DataTypeBase implements def.IStratification {
   private _idtype:idtypes.IDType;
-  private _v : C.IPromise<vector.IVector>;
+  private _v : Promise<vector.IVector>;
 
   constructor(public desc:datatypes.IDataDescription, private loader : IStratificationLoader) {
     super(desc);
@@ -82,7 +83,7 @@ export class Stratification extends datatypes.DataTypeBase implements def.IStrat
    * TODO: load just needed data and not everything given by the requested range
    * @returns {*}
    */
-  load() : C.IPromise<{
+  load() : Promise<{
     rowIds : ranges.Range;
     rows: string[];
     range: ranges.CompositeRange1D;
@@ -98,13 +99,13 @@ export class Stratification extends datatypes.DataTypeBase implements def.IStrat
     return this;
   }
 
-  hist() : C.IPromise<math.IHistogram> {
+  hist() : Promise<math.IHistogram> {
     return null;
     //return this.load().then((d) => {
     //  return math.categoricalHist(d, this.indices.dim(0), d.length, v.categories.map((d) => typeof d === 'string' ? d : d.name));
     //});
   }
-  vector(): C.IPromise<vector.IVector> {
+  vector(): Promise<vector.IVector> {
     if (this._v) {
       return this._v;
     }
@@ -125,7 +126,7 @@ export class Stratification extends datatypes.DataTypeBase implements def.IStrat
     });
   }
 
-  ids(range:ranges.Range = ranges.all()): C.IPromise<ranges.Range> {
+  ids(range:ranges.Range = ranges.all()): Promise<ranges.Range> {
     var that = this;
     return this.load().then(function (data) {
       return range.preMultiply(data.rowIds, that.dim);
@@ -197,9 +198,9 @@ export class StratificationVector extends vector_impl.VectorBase implements vect
    * TODO: load just needed data and not everything given by the requested range
    * @returns {*}
    */
-  load() : C.IPromise<any[]> {
+  load() : Promise<any[]> {
 
-    return C.resolved([]); //TODO
+    return Promise.resolve([]); //TODO
   }
 
   /**
@@ -232,19 +233,19 @@ export class StratificationVector extends vector_impl.VectorBase implements vect
     return this.strat.size();
   }
 
-  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): C.IPromise<vector.IVector> {
+  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): Promise<vector.IVector> {
     return this.data().then((d) => {
       var indices = C.argSort(d, compareFn, thisArg);
       return this.view(ranges.list(indices));
     });
   }
 
-  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): C.IPromise<vector.IVector> {
+  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): Promise<vector.IVector> {
     //FIXME
     return null;
   }
 
-  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): C.IPromise<vector.IVector> {
+  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<vector.IVector> {
     return this.data().then((d) => {
       var indices = C.argFilter(d, callbackfn, thisArg);
       return this.view(ranges.list(indices));

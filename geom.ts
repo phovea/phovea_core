@@ -506,7 +506,7 @@ export function line(x1:number, y1:number, x2:number, y2:number):Line {
 export function polygon(...points:_2D.Vector2D[]):Polygon;
 export function polygon(points:_2D.Vector2D[]):Polygon;
 export function polygon():Polygon {
-  if (C.isArray(arguments[0])) {
+  if (Array.isArray(arguments[0])) {
     return new Polygon(arguments[0]);
   }
   return new Polygon(C.argList(arguments));
@@ -536,7 +536,7 @@ export function wrap(obj:any):AShape {
   if (obj.hasOwnProperty('x1') && obj.hasOwnProperty('y1') && obj.hasOwnProperty('x2') && obj.hasOwnProperty('y2')) {
     return line(obj.x1, obj.y1, obj.x2, obj.y2);
   }
-  if (C.isArray(obj) && obj.length > 0 && obj[0].hasOwnProperty('x') && obj[0].hasOwnProperty('y')) {
+  if (Array.isArray(obj) && obj.length > 0 && obj[0].hasOwnProperty('x') && obj[0].hasOwnProperty('y')) {
     return polygon(obj);
   }
   return obj; //can't derive it, yet
