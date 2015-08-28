@@ -513,6 +513,9 @@ class MultITableVector extends vector_impl.VectorBase implements vector.IVector 
  * @returns {def.ITable}
  */
 export function create(desc: datatypes.IDataDescription): def.ITable {
+  if (C.isFunction((<any>desc).loader)) {
+    return new Table(desc, (<any>desc).loader);
+  }
   return new Table(desc, viaAPILoader());
 }
 

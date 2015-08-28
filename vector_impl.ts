@@ -342,6 +342,9 @@ class VectorView extends VectorBase implements def.IVector {
  * @returns {def.IVector}
  */
 export function create(desc: datatypes.IDataDescription): def.IVector {
+  if (C.isFunction((<any>desc).loader)) {
+    return new Vector(desc, (<any>desc).loader);
+  }
   return new Vector(desc, viaAPILoader());
 }
 

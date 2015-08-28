@@ -9,10 +9,17 @@ import idtypes = require('./idtype');
 import datatypes = require('./datatype');
 import ranges = require('./range');
 
+/**
+ * a simple graph none
+ */
 export class GraphNode {
   outgoing : GraphEdge[] = [];
   incoming : GraphEdge[] = [];
 
+  /**
+   * internal id used for persisting
+   * @type {number}
+   */
   pid = -1;
 
   constructor(public type: string, public id = C.uniqueId('graph_node'))  {
@@ -50,9 +57,7 @@ export class GraphEdge {
   }
 }
 
-export function isType(type: string);
-export function isType(type: RegExp);
-export function isType(type: any) {
+export function isType(type: string|RegExp) {
   return (edge: GraphEdge) => type instanceof RegExp ? type.test(edge.type) : edge.type === type;
 }
 

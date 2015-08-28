@@ -524,5 +524,8 @@ class ProjectedVector extends vector_impl.VectorBase implements vector.IVector {
  * @returns {IMatrix}
  */
 export function create(desc: datatypes.IDataDescription): matrix.IMatrix {
+  if (C.isFunction((<any>desc).loader)) {
+    return new Matrix(desc, (<any>desc).loader);
+  }
   return new Matrix(desc, viaAPILoader());
 }
