@@ -199,7 +199,7 @@ export function upload(desc: any, file?) : Promise<datatypes.IDataType> {
   if (file) {
     data.append('file',file);
   }
-  return ajax.postForm('/dataset/',data).then(transformEntry);
+  return ajax.sendAPI('/dataset/',data, 'post').then(transformEntry);
 }
 
 export function update(entry: datatypes.IDataType, desc: any, file?) : Promise<datatypes.IDataType> {
@@ -208,14 +208,14 @@ export function update(entry: datatypes.IDataType, desc: any, file?) : Promise<d
   if (file) {
     data.append('file',file);
   }
-  return ajax.postForm('/dataset/'+entry.desc.id,data).then((desc) => {
+  return ajax.sendAPI('/dataset/'+entry.desc.id, data, 'put').then((desc) => {
     clearCache(entry);
     return transformEntry(desc);
   });
 }
 
 export function remove(entry: datatypes.IDataType): Promise<Boolean> {
-  return ajax.deleteAPIData('/dataset/').then((result) => {
+  return ajax.sendAPI('/dataset/', {}, 'delete').then((result) => {
     clearCache(entry);
     return true;
   });

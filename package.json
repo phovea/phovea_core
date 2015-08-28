@@ -30,6 +30,11 @@
           "type": "ajax-adapter",
           "id": "caleydo_adapter_jquery",
           "file": "ajax_adapter_jquery"
+        },
+        {
+          "type": "ajax-adapter",
+          "id": "caleydo_adapter_d3",
+          "file": "ajax_adapter_d3"
         }
       ]
     },

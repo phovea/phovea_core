@@ -16,38 +16,19 @@ function wrap(d:JQueryXHR):Promise<any> {
  * JQuery implementation of the ajax adapter
  */
 class JQueryAdapter implements ajax.IAjaxAdapter {
-  getJSON(url:string, data:any = {}):Promise<any> {
-    return wrap($.getJSON(url, data));
-  }
-
-  getData(url:string, data:any = {}, expectedDataType = 'json'):Promise<any> {
-    return wrap($.ajax({
-      url: url,
-      dataType: expectedDataType,
-      data: data
-    }));
-  }
-
-  deleteData(url:string, data:any = {}, expectedDataType = 'json'):Promise<any> {
-    return wrap($.ajax({
+  send(url: string, data: any = {}, method = 'get', expectedDataType = 'json'): Promise<any> {
+    var o : JQueryAjaxSettings = {
       url: url,
       data: data,
-      method: 'delete',
+      method: method,
       dataType: expectedDataType,
-      cache: false
-    }));
-  }
-
-  postForm(url:string, form:FormData, expectedDataType = 'json'):Promise<any> {
-    return wrap($.ajax({
-      url: url,
-      method: 'post',
-      dataType: expectedDataType,
-      data: form,
-      cache: false,
-      contentType: false,
-      processData: false
-    }));
+      cache: method === 'get'
+    };
+    if (data instanceof FormData) {
+      o.contentType = false;
+      o.processData = false;
+    }
+    return wrap($.ajax(o));
   }
 }
 
