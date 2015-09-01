@@ -222,22 +222,10 @@ export function argFilter<T>(arr:T[], callbackfn:(value:T, index:number) => bool
 
 /**
  * utility function to get notified, when the given dom element is removed from its parent
- * @param s
- * @param callback
- */
-export function onDOMNodeRemoved(s:Element[], callback:() => void, thisArg?:any);
-/**
- * utility function to get notified, when the given dom element is removed from its parent
  * @param node
  * @param callback
  */
-export function onDOMNodeRemoved(node:Element, callback:() => void, thisArg?:any);
-/**
- * utility function to get notified, when the given dom element is removed from its parent
- * @param node
- * @param callback
- */
-export function onDOMNodeRemoved(node:any, callback:() => void, thisArg?:any) {
+export function onDOMNodeRemoved(node:Element|Element[], callback:() => void, thisArg?:any) {
   var arr:any[], body = document.getElementsByTagName('body')[0];
   if (!Array.isArray(node)) {
     arr = [node];
@@ -448,7 +436,7 @@ class HashProperties {
   toString() {
     var r = [];
     Object.keys(this.map).forEach((key) => {
-      r.push(key, '=', this.escape(this.map[key]));
+      r.push(key+'='+this.escape(this.map[key]));
     });
     return r.join('&');
   }
