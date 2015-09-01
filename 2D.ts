@@ -75,8 +75,8 @@ export class Intersection {
   }
 
   static intersectShapes(shape1: IShape, shape2: IShape) {
-    var ip1 = shape1.asIntersectionParams();
-    var ip2 = shape2.asIntersectionParams();
+    const ip1 = shape1.asIntersectionParams();
+    const ip2 = shape2.asIntersectionParams();
     var result;
     if (ip1 != null && ip2 != null) {
       if (shape1 instanceof Path) {

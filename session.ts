@@ -2,7 +2,7 @@
  * Created by sam on 10.02.2015.
  */
 
-var context : any = {};
+const context : any = {};
 
 export function store(key: string, value: any) {
   var bak = context[key];

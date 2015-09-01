@@ -135,7 +135,7 @@ export class EventHandler implements IEventHandler {
   off(events: string, handler) {
     events.split(',').forEach((event) => {
       if (this.handlers.hasOwnProperty(event)) {
-        var h : SingleEventHandler = this.handlers[event];
+        let h : SingleEventHandler = this.handlers[event];
         h.remove(handler);
         if (h.length === 0) {
           delete this.handlers[event];
@@ -150,7 +150,7 @@ export class EventHandler implements IEventHandler {
    * list all registered Events
    */
   list() {
-    var r = {};
+    const r = {};
     Object.keys(this.handlers).forEach((type) => {
       r[type] = this.handlers[type].length;
     });
@@ -172,7 +172,7 @@ export class EventHandler implements IEventHandler {
 
   private fireEvent(event: Event) {
     if (this.handlers.hasOwnProperty(event.type)) {
-      var h : SingleEventHandler = this.handlers[event.type];
+      let h : SingleEventHandler = this.handlers[event.type];
       return h.fire(event);
     }
     return false;
@@ -192,27 +192,27 @@ export class EventHandler implements IEventHandler {
   }
 }
 
-var global = new EventHandler();
+const global = new EventHandler();
 /**
  * register a global event handler
  * @param events
  * @param handler
  */
-export var on = global.on.bind(global);
+export const on = global.on.bind(global);
 /**
  * unregister a global event handler
  * @param events
  * @param handler
  */
-export var off = global.off.bind(global);
+export const off = global.off.bind(global);
 /**
  * fires an event
  * @param event
  * @param extraArguments
  */
-export var fire = global.fire.bind(global);
+export const fire = global.fire.bind(global);
 /**
  * list all events
  */
-export var list = global.list.bind(global);
+export const list = global.list.bind(global);
 

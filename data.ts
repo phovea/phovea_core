@@ -11,7 +11,7 @@ import tables_impl = require('./table_impl');
 'use strict';
 
 //find all datatype plugins
-var available = plugins.list('datatype');
+const available = plugins.list('datatype');
 
 var cacheById = {};
 var cacheByName = {};
@@ -72,7 +72,7 @@ function transformEntry(desc: any) {
   }
 
   //find matching type
-  var plugin = available.filter((p) => p.id === desc.type);
+  const plugin = available.filter((p) => p.id === desc.type);
   //no type there create a dummy one
   if (plugin.length === 0) {
     return cached(desc, Promise.resolve(new datatypes.DataTypeBase(desc)));
@@ -102,7 +102,7 @@ export interface INode {
 
 export function convertToTree(list: datatypes.IDataType[]) {
   //create a tree out of the list by the fqname
-  var root = { children: [], name: '/', data: null};
+  const root = { children: [], name: '/', data: null};
   list.forEach((entry) => {
     var path = entry.desc.fqname.split('/');
     var act = root;
@@ -194,7 +194,7 @@ export function create(desc: any) : Promise<datatypes.IDataType> {
 }
 
 export function upload(desc: any, file?) : Promise<datatypes.IDataType> {
-  var data = new FormData();
+  const data = new FormData();
   data.append('desc', JSON.stringify(desc));
   if (file) {
     data.append('file',file);
@@ -203,7 +203,7 @@ export function upload(desc: any, file?) : Promise<datatypes.IDataType> {
 }
 
 export function update(entry: datatypes.IDataType, desc: any, file?) : Promise<datatypes.IDataType> {
-  var data = new FormData();
+  const data = new FormData();
   data.append('desc', JSON.stringify(desc));
   if (file) {
     data.append('file',file);
@@ -263,7 +263,7 @@ export function convertToTable(list : datatypes.IDataType[]) {
 }
 
 export function convertTableToVectors(list: datatypes.IDataType[]) {
-  var r = new Array<datatypes.IDataType>();
+  const r = new Array<datatypes.IDataType>();
   list.forEach((d) => {
     if (d.desc.type === 'table') {
       r.push.apply(r, (<tables.ITable>d).cols());

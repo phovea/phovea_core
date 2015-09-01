@@ -3,16 +3,16 @@
  */
 /// <reference path="../../tsd.d.ts" />
 import module_ = require('module');
-var config = module_.config();
+const config = module_.config();
 'use strict';
 
 /**
  * version of the core
  */
-export var version = '0.0.1-alpha';
+export const version = '0.0.1-alpha';
 
-export var server_url:string = config.apiUrl;
-export var server_json_suffix:string = config.apiJSONSuffix || '';
+export const server_url:string = config.apiUrl;
+export const server_json_suffix:string = config.apiJSONSuffix || '';
 
 /**
  * integrate b into a and override all duplicates
@@ -226,7 +226,8 @@ export function argFilter<T>(arr:T[], callbackfn:(value:T, index:number) => bool
  * @param callback
  */
 export function onDOMNodeRemoved(node:Element|Element[], callback:() => void, thisArg?:any) {
-  var arr:any[], body = document.getElementsByTagName('body')[0];
+  var arr:any[];
+  const body = document.getElementsByTagName('body')[0];
   if (!Array.isArray(node)) {
     arr = [node];
   } else {
@@ -257,7 +258,7 @@ export function onDOMNodeRemoved(node:Element|Element[], callback:() => void, th
  * unique id container
  * @type {{}}
  */
-var idCounter = {};
+const idCounter = {};
 /**
  * returns a unique id for the given domain
  * @param domain
@@ -442,7 +443,7 @@ class HashProperties {
   }
 }
 
-export var hash = new HashProperties();
+export const hash = new HashProperties();
 
 
 
@@ -472,7 +473,7 @@ export function delayedCall(callback:() => void, timeToDelay = 100, thisCallback
  * @return {{left: number, top: number, width: number, height: number}}
  */
 export function offset(element: Element) {
-  var obj = element.getBoundingClientRect();
+  const obj = element.getBoundingClientRect();
   return {
     left: obj.left + window.pageXOffset ,
     top: obj.top + window.pageYOffset,
