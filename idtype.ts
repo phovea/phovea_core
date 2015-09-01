@@ -85,7 +85,7 @@ export class IDType extends events.EventHandler implements C.IPersistable {
     this.name = persisted.name;
     this.names = persisted.names;
     Object.keys(persisted.sel).forEach((type) => this.sel[type] = ranges.parse(persisted.sel[type]));
-    return null;
+    return this;
   }
 
   toString() {

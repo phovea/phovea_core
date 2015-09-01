@@ -185,7 +185,7 @@ export function get(persisted: any | string) : Promise<datatypes.IDataType> {
     });
   } else {
     //can't restore non root and non data id
-    return Promise.resolve(null);
+    return Promise.reject('cant restore non root and non data id');
   }
 }
 

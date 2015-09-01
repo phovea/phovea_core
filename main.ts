@@ -271,6 +271,18 @@ export function uniqueId(domain : string = '_default') {
   return idCounter[domain]++;
 }
 
+export function flagId(domain: string, id: number) {
+  if (isNaN(id) || id < 0) {
+    return id;
+  }
+  if (!idCounter.hasOwnProperty(domain)) {
+    idCounter[domain] = id+1;
+  } else {
+    idCounter[domain] = Math.max(idCounter[domain], id+1); //use the next one afterwars
+  }
+  return id;
+}
+
 /**
  * returns a string, which is a unique id for the given domain
  * @param domain
@@ -362,7 +374,7 @@ export interface IPersistable {
    * @param persisted a result of a previous persist call
    * @return the restored view or null if it could be in place restored
    */
-  restore(persisted:any) : IPersistable;
+  restore(persisted:any) : IPersistable|Promise<IPersistable>;
 }
 
 /**

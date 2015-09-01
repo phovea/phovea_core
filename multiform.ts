@@ -119,18 +119,20 @@ export class MultiForm extends vis.AVisInstance implements vis.IVisInstance, IMu
     };
   }
 
-  restore(persisted: any) {
+  restore(persisted: any): Promise<MultiForm> {
+    var that = this;
     if (persisted.id) {
       var selected = C.search(this.visses, (e) => e.id === persisted.id);
       if (selected) {
-        this.switchTo(selected).then((vis) => {
+        return this.switchTo(selected).then((vis) => {
           if (vis && persisted.content && C.isFunction(vis.restore)) {
-            vis.restore(persisted.content);
+            return Promise.resolve(vis.restore(persisted.content)).then(() => that);
           }
+          return that;
         });
       }
     }
-    return null;
+    return Promise.resolve(that);
   }
 
   locate(...args) {
@@ -504,19 +506,21 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
     };
   }
 
-  restore(persisted: any) {
+  restore(persisted: any): Promise<MultiFormGrid> {
+    var that = this;
     if (persisted.id) {
       var selected = C.search(this.visses, (e) => e.id === persisted.id);
       if (selected) {
-        this.switchTo(selected).then((vis) => {
+        return this.switchTo(selected).then((vis) => {
           //FIXME
           if (vis && persisted.content && C.isFunction(vis.restore)) {
-            vis.restore(persisted.content);
+            return Promise.resolve(vis.restore(persisted.content)).then(() => that);
           }
+          return Promise.resolve(that);
         });
       }
     }
-    return null;
+    return Promise.resolve(that);
   }
 
 

@@ -205,13 +205,13 @@ export class AVisInstance extends events.EventHandler {
   }
 
   restore(persisted: any) {
-    return null;
+    return Promise.resolve(this);
   }
 
   destroy() {
     // nothing to destroy
     var n = (<any>this).node;
-    if (n) {
+    if (n && n.parentNode) {
       n.parentNode.removeChild(n);
     }
   }
