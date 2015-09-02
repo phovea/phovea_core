@@ -22,7 +22,7 @@ function getConnector() {
   var adapters = plugin.list('ajax-adapter'),
     adapter = adapters[0];
   if (adapters.length > 1) { //if more than one adapter is there then use not the standard one
-    adapter = adapters.filter((d) => d.id !== 'caleydo_adapter_jquery')[0]
+    adapter = adapters.filter((d) => d.id !== 'caleydo_adapter_jquery')[0];
   }
   return _impl = adapter.load().then((p) => <IAjaxAdapter>p.factory());
 }

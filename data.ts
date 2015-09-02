@@ -1,7 +1,6 @@
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
-import C = require('./main');
 import ajax = require('./ajax');
 import plugins = require('./plugin');
 import datatypes = require('./datatype');

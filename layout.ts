@@ -2,7 +2,6 @@
  * Created by Samuel Gratzl on 15.12.2014.
  */
 import geom = require('./geom');
-import C = require('./main');
 
 export interface ILayoutElem {
   setBounds(x:number, y:number, w:number, h:number) : Promise<void>;

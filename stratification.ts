@@ -3,7 +3,6 @@
  */
 
 'use strict';
-import C = require('./main');
 import ranges = require('./range');
 import datatypes = require('./datatype');
 import vector = require('./vector');

@@ -64,8 +64,8 @@ class Event implements IEvent {
 
 class SingleEventHandler {
   private listeners : IEventListener[] = [];
-  constructor(type: string) {
-
+  constructor(public type: string) {
+    //nothing else to do
   }
 
   push(listener: IEventListener) {
@@ -89,7 +89,7 @@ class SingleEventHandler {
     } else {
       //work on a copy in case the number changes
       var l = this.listeners.slice(), ll = l.length;
-      for (var i = 0; i < l.length && !event.isImmediatePropagationStopped(); ++i) {
+      for (var i = 0; i < ll && !event.isImmediatePropagationStopped(); ++i) {
         l[i].apply(event, largs);
       }
     }

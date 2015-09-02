@@ -5,7 +5,6 @@
 
 import d3 = require('d3');
 import layout = require('./layout');
-import C = require('./main');
 import geom = require('./geom');
 'use strict';
 
