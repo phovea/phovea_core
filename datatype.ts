@@ -34,6 +34,16 @@ export interface IDataType extends idtypes.SelectAble, C.IPersistable {
   idView(idRange?: ranges.Range) : Promise<IDataType>;
 }
 
+export function isDataType(v: any) {
+  if (v instanceof DataTypeBase) {
+    return true;
+  }
+  //sounds good
+  if (v instanceof idtypes.SelectAble && C.isFunction(v.idView) && C.isFunction(v.persist) && C.isFunction(v.restore) && ('desc' in v) && ('dim' in v)) {
+    return true;
+  }
+  return false;
+}
 
 export function assignData(node: Element, data: IDataType) {
   (<any>node).__data__ = data;

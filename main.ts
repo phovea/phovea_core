@@ -405,6 +405,26 @@ class HashProperties {
     return default_;
   }
 
+  getInt(name: string, default_ : number) {
+    let l: string = this.getProp(name, null);
+    if (l === null) {
+      return default_;
+    }
+    if (l.match(/[0-9-.]/) != null) {
+      return parseInt(l, 10);
+    }
+    return parseInt(l, 36);
+  }
+
+  setInt(name:string, value: number, update= true) {
+    var v = String(value);
+    if (value > 100) {
+      //idea encode the the using a different radix
+      v = value.toString(36);
+    }
+    this.setProp(name, String(value), update);
+  }
+
   setProp(name: string, value: string, update = true) {
     this.map[name] = value;
     if (update) {
