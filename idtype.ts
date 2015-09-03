@@ -336,8 +336,8 @@ export class SelectAble extends events.EventHandler {
     });
   }
 
-  on(events, handler) {
-    if (events === 'select' || events.slice(0, 'select-'.length) === 'select-') {
+  on(events, handler?) {
+    if (typeof events === 'string' && events === 'select' || events.slice(0, 'select-'.length) === 'select-') {
       this.numSelectListeners ++;
       if (this.numSelectListeners === 1) {
         var idt = this.idtypes;
@@ -356,8 +356,8 @@ export class SelectAble extends events.EventHandler {
     return super.on(events, handler);
   }
 
-  off(events, handler) {
-    if (events === 'select' || events.match('^select-') === 'select-') {
+  off(events, handler?) {
+    if (typeof events === 'string' && events === 'select' || events.match('^select-') === 'select-') {
       this.numSelectListeners --;
       if (this.numSelectListeners === 0) {
         this.idtypes.forEach((idtype, i) => idtype.off('select', this.selectionListeners[i]));

@@ -106,6 +106,10 @@ function createEvent(event: string, args: any[], target: IEventHandler) {
 function propagateEvent(event: IEvent, target: IEventHandler) {
   return new Event(event.type, event.args, target, event.target);
 }
+
+export interface IEventListener {
+  (event: IEvent, ...args: any[]) : any;
+}
 /**
  * EventHandler base class, in the backend JQuery is used
  */
@@ -117,13 +121,22 @@ export class EventHandler implements IEventHandler {
    * @param events
    * @param handler
    */
-  on(events: string, handler) {
-    events.split(',').forEach((event) => {
-      if (!this.handlers.hasOwnProperty(event)) {
-        this.handlers[event] = new SingleEventHandler(event);
-      }
-      this.handlers[event].push(handler);
-    });
+  on(events: string, handler: IEventListener): IEventHandler;
+  on(events: { [key: string] : IEventListener }): IEventHandler;
+  on(events: string|{ [key: string] : IEventListener }, handler? : IEventListener) {
+    if (typeof events === 'string') {
+      events.split(',').forEach((event) => {
+        if (!this.handlers.hasOwnProperty(event)) {
+          this.handlers[event] = new SingleEventHandler(event);
+        }
+        this.handlers[event].push(handler);
+      });
+    } else {
+      Object.keys(events).forEach((event) => {
+        let h = events[event];
+        this.on(event, h);
+      });
+    }
     return this;
   }
 
@@ -132,16 +145,25 @@ export class EventHandler implements IEventHandler {
    * @param events
    * @param handler
    */
-  off(events: string, handler) {
-    events.split(',').forEach((event) => {
-      if (this.handlers.hasOwnProperty(event)) {
-        let h : SingleEventHandler = this.handlers[event];
-        h.remove(handler);
-        if (h.length === 0) {
-          delete this.handlers[event];
+  off(events: string, handler: IEventListener): IEventHandler;
+  off(events: { [key: string] : IEventListener }): IEventHandler;
+  off(events: string|{ [key: string] : IEventListener }, handler? : IEventListener) {
+    if (typeof events === 'string') {
+      events.split(',').forEach((event) => {
+        if (this.handlers.hasOwnProperty(event)) {
+          let h:SingleEventHandler = this.handlers[event];
+          h.remove(handler);
+          if (h.length === 0) {
+            delete this.handlers[event];
+          }
         }
-      }
-    });
+      });
+    } else {
+      Object.keys(events).forEach((event) => {
+        let h = events[event];
+        this.off(event, h);
+      });
+    }
     return this;
   }
 
