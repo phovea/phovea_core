@@ -10,6 +10,10 @@ export function store(key: string, value: any) {
   return bak;
 }
 
+export function remove(key: string) {
+  delete context[key];
+}
+
 export function has(key: string) {
   return key in context;
 }
