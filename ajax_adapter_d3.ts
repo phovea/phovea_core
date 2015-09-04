@@ -67,10 +67,10 @@ function getParams(data = null) {
     if (Array.isArray(value)) {
       value.forEach((v, i) => {
         if (typeof v === 'object') {
-          add(prefix,'['+i+']', v);
+          add(prefix,key+'['+i+']', v);
         } else {
           //primitive values uses the same key
-          add(prefix,'[]', v);
+          add(prefix,key+'[]', v);
         }
       });
     } else if (typeof value === 'object' ) {
