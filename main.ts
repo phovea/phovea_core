@@ -513,3 +513,13 @@ export function offset(element: Element) {
     height: obj.height
   };
 }
+
+export function bounds(element: Element) {
+  const obj = element.getBoundingClientRect();
+  return {
+    x: obj.left,
+    y : obj.top,
+    w: obj.width,
+    h: obj.height
+  };
+}
