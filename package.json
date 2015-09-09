@@ -28,11 +28,6 @@
         },
         {
           "type": "ajax-adapter",
-          "id": "caleydo_adapter_jquery",
-          "file": "ajax_adapter_jquery"
-        },
-        {
-          "type": "ajax-adapter",
           "id": "caleydo_adapter_d3",
           "file": "ajax_adapter_d3"
         }
@@ -41,12 +36,10 @@
     "dependencies": {
       "web": {
         "d3": "~3.5.5",
-        "jquery": "~1.10.2",
         "requirejs": "https://github.com/sgratzl/requirejs-bower.git#master",
         "require-css": "~0.1.8"
       },
       "tsd": {
-        "jquery": "dca2d4",
         "d3": "1e6796",
         "es6-promise": "35119c"
       }
