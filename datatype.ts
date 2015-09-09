@@ -39,10 +39,7 @@ export function isDataType(v: any) {
     return true;
   }
   //sounds good
-  if (v instanceof idtypes.SelectAble && C.isFunction(v.idView) && C.isFunction(v.persist) && C.isFunction(v.restore) && ('desc' in v) && ('dim' in v)) {
-    return true;
-  }
-  return false;
+  return (v instanceof idtypes.SelectAble && C.isFunction(v.idView) && C.isFunction(v.persist) && C.isFunction(v.restore) && ('desc' in v) && ('dim' in v));
 }
 
 export function assignData(node: Element, data: IDataType) {

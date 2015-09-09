@@ -124,7 +124,7 @@ export function tree(query = {}): Promise<INode> {
 }
 
 export function getFirst(query: any | string | RegExp) {
-  if (typeof query === 'string' || Object.prototype.toString.call(query) === '[object RegExp]') {
+  if (typeof query === 'string' || query instanceof RegExp) {
     return getFirstByName(<string>query);
   }
   query.limit = 1;
@@ -156,9 +156,9 @@ function getFirstWithCache(name: string | RegExp, cache: any, attr = 'name') {
   if (inCache) {
     return r;
   }
-  var query = {};
-  query[attr] = typeof name === 'string' ? name : name.source;
-  return getFirst(query);
+  return getFirst({
+    [attr] : typeof name === 'string' ? name : name.source
+  });
 }
 
 function getById(id: string) {

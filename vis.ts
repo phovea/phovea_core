@@ -228,8 +228,8 @@ export class AVisInstance extends events.EventHandler {
   }
 
   get size(): [number, number] {
-    var t = this.transform();
-    var r = this.rawSize;
+    const t = this.transform();
+    const r = this.rawSize;
     //TODO rotation
     return [r[0] * t.scale[0], r[1] * t.scale[1]];
   }
