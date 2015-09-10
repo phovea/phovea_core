@@ -1209,6 +1209,7 @@ function parseRange1D(code:string, act:number) {
     case '(':
       next = code.indexOf(')', act);
       r.push.apply(r, code.slice(act + 1, next).split(',').map(RangeElem.parse));
+      next += 1; //skip )
       break;
     default:
       next = code.indexOf(',', act);
