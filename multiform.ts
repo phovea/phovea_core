@@ -2,11 +2,11 @@
  * Created by Samuel Gratzl on 27.08.2014.
  */
 
-import C = require('../caleydo_core/main');
-import vis = require('../caleydo_core/vis');
-import ranges = require('../caleydo_core/range');
-import datatypes = require('../caleydo_core/datatype');
-import geom = require('../caleydo_core/geom');
+import C = require('./main');
+import vis = require('./vis');
+import ranges = require('./range');
+import datatypes = require('./datatype');
+import geom = require('./geom');
 
 class ProxyMetaData implements vis.IVisMetaData {
   constructor(private proxy : () => vis.IVisMetaData) {
@@ -726,16 +726,6 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
       return Promise.resolve([]);
     }
   }
-}
-
-/**
- * adds everything to have an icon for the set of vis plugin descriptions
- * @param s
- */
-function createIconFromDesc(s : d3.Selection<any>) {
-  s.each(function(d) {
-    d.iconify(this);
-  });
 }
 
 /**
