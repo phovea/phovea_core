@@ -143,6 +143,8 @@ export interface IVisInstance extends C.IPersistable, events.IEventHandler, ILoc
    */
   option(name: string, value: any) : any;
 
+  update();
+
   /**
    * destroy this vis and deregister handlers,...
    */
@@ -206,6 +208,10 @@ export class AVisInstance extends events.EventHandler {
 
   restore(persisted: any) {
     return Promise.resolve(this);
+  }
+
+  update() {
+    //do nothing
   }
 
   destroy() {
