@@ -1161,6 +1161,9 @@ function parseRange(code:string) {
         break;
     }
   }
+  if (code.charAt(code.length-1) === ',') { //last is an empty one
+    dims.push(Range1D.all());
+  }
   var r = new Range(dims);
   return r;
 }

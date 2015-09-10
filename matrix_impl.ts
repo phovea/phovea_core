@@ -352,6 +352,9 @@ class MatrixView extends MatrixBase implements matrix.IMatrix {
   constructor(root:matrix.IMatrix, private range:ranges.Range, public t? : matrix.IMatrix) {
     super(root);
     this.range = range;
+    //ensure that there are two dimensions
+    range.dim(0);
+    range.dim(1);
     if (!t) {
       this.t = new MatrixView(root.t, range.swap(), this);
     }
