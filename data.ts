@@ -103,7 +103,7 @@ export function convertToTree(list: datatypes.IDataType[]) {
   //create a tree out of the list by the fqname
   const root = { children: [], name: '/', data: null};
   list.forEach((entry) => {
-    var path = entry.desc.fqname.split('/');
+    const path = entry.desc.fqname.split('/');
     var act = root;
     path.forEach((node) => {
       var next = act.children.filter((d) => d.name === node)[0];

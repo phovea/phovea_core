@@ -19,11 +19,8 @@ function getConnector() {
   if (_impl != null) {
     return _impl;
   }
-  var adapters = plugin.list('ajax-adapter'),
-    adapter = adapters[0];
-  if (adapters.length > 1) { //if more than one adapter is there then use not the standard one
-    adapter = adapters[0];
-  }
+  const adapters = plugin.list('ajax-adapter');
+  var adapter = adapters[0];
   return _impl = adapter.load().then((p) => <IAjaxAdapter>p.factory());
 }
 
@@ -50,16 +47,17 @@ export function getData(url: string, data : any = {}, expectedDataType = 'json')
   return send(url, data, 'get', expectedDataType);
 }
 
+function expand(url: string) {
+  return `${C.server_url}${url}${C.server_json_suffix}`;
+}
+
 export function sendAPI(url: string, data : any = {}, method = 'get', expectedDataType = 'json'): Promise<any> {
-  url = C.server_url + url + C.server_json_suffix;
-  return send(url, data, method, expectedDataType);
+  return send(expand(url), data, method, expectedDataType);
 }
 
 export function getAPIJSON(url: string, data : any = {}): Promise<any> {
-  url = C.server_url + url + C.server_json_suffix;
-  return getJSON(url, data);
+  return getJSON(expand(url), data);
 }
 export function getAPIData(url: string, data : any = {}, expectedDataType = 'json'): Promise<any> {
-  url = C.server_url + url + C.server_json_suffix;
-  return getData(url, data, expectedDataType);
+  return getData(expand(url), data, expectedDataType);
 }

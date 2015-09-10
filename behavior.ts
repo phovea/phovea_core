@@ -24,9 +24,9 @@ export class ZoomLogic extends events.EventHandler {
     function toDelta(x) {
       return x > 0 ? 0.2 : (x < 0 ? -0.2 : 0);
     }
-    var old = this.v.transform();
-    var deltaX = toDelta(zoomX);
-    var deltaY = toDelta(zoomY);
+    const old = this.v.transform();
+    const deltaX = toDelta(zoomX);
+    const deltaY = toDelta(zoomY);
     return this.zoomSet(old.scale[0] + deltaX, old.scale[1] + deltaY);
   }
 
@@ -46,7 +46,7 @@ export class ZoomLogic extends events.EventHandler {
     if (!this.v) {
       return null;
     }
-    var old = this.v.transform();
+    const old = this.v.transform();
     var s = [zoomX, zoomY];
     switch((this.meta ? this.meta.scaling : 'free')) {
       case 'width-only':
@@ -76,7 +76,7 @@ export class ZoomLogic extends events.EventHandler {
     if (!this.v) {
       return null;
     }
-    var ori = this.v.rawSize;
+    const ori = this.v.rawSize;
     return this.zoomSet(w / ori[0], h/ori[1]);
   }
 }
@@ -88,10 +88,10 @@ export class ZoomBehavior extends ZoomLogic {
       if (!this.v) {
         return;
       }
-      var ctrlKey = event.ctrlKey;
-      var shiftKey = event.shiftKey;
-      var altKey = event.altKey;
-      var m = event.wheelDelta;
+      const ctrlKey = event.ctrlKey;
+      const shiftKey = event.shiftKey;
+      const altKey = event.altKey;
+      const m = event.wheelDelta;
       this.zoom(m * (ctrlKey || altKey ? 1: 0), m * (ctrlKey || shiftKey ? 1 : 0));
       if (ctrlKey || shiftKey || altKey) {
         event.preventDefault();

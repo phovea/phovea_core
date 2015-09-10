@@ -178,7 +178,7 @@ export class AVisInstance extends events.EventHandler {
     return this._built;
   }
 
-  markReady(built: boolean = true) {
+  protected markReady(built: boolean = true) {
     this._built = built;
     if (built) {
       this.fire('ready');
