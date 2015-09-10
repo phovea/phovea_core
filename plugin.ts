@@ -3,9 +3,13 @@
  */
 import C = require('./main');
 import require_ = require('require');
+
 import module_ = require('module');
 
-var config = module_.config();
+const config = (module_ != null && typeof module_.config === 'function' ? module_.config() : null) || {
+  baseUrl: '',
+  plugins: []
+};
 
 /**
  * basic interface of a plugin

@@ -3,7 +3,7 @@
  */
 /// <reference path="../../tsd.d.ts" />
 import module_ = require('module');
-const config = module_.config();
+const config = module_ != null && typeof module_.config === 'function' ? module_.config() : {};
 'use strict';
 
 /**
@@ -11,7 +11,7 @@ const config = module_.config();
  */
 export const version = '0.0.1-alpha';
 
-export const server_url:string = config.apiUrl;
+export const server_url:string = config.apiUrl || '/api';
 export const server_json_suffix:string = config.apiJSONSuffix || '';
 
 /**
