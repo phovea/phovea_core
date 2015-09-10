@@ -20,7 +20,7 @@ export const server_json_suffix:string = config.apiJSONSuffix || '';
  * @param {Object} b
  * @returns {Object} a with extended b
  */
-export function mixin(a: any, ...bs : any[]) {
+export function mixin<T>(a: T, ...bs : any[]): T {
   function extend(r, b) {
     Object.keys(b).forEach((key) => {
       var v = b[key];
@@ -32,7 +32,6 @@ export function mixin(a: any, ...bs : any[]) {
     });
     return r;
   }
-  a = a || {};
   bs.forEach((b) => {
     if (b) {
       a = extend(a, b);

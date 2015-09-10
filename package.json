@@ -25,22 +25,15 @@
           "type": "datatype",
           "id": "stratification",
           "file": "stratification_impl"
-        },
-        {
-          "type": "ajax-adapter",
-          "id": "caleydo_adapter_d3",
-          "file": "ajax_adapter_d3"
         }
       ]
     },
     "dependencies": {
       "web": {
-        "d3": "~3.5.5",
         "requirejs": "https://github.com/sgratzl/requirejs-bower.git#master",
         "require-css": "~0.1.8"
       },
       "tsd": {
-        "d3": "1e6796",
         "es6-promise": "35119c"
       }
     },

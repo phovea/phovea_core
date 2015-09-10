@@ -6,7 +6,6 @@ import C = require('./main');
 import ajax = require('./ajax');
 import idtypes = require('./idtype');
 import ranges = require('./range');
-import d3 = require('d3');
 'use strict';
 
 export interface IIDMapper {
@@ -47,12 +46,12 @@ export function map(source:idtypes.IDType, target:idtypes.IDType) : any {
   return mapImpl(source, target, range);
 }
 
-var cache = d3.map<Promise<ranges.Range>>();
+var cache : {[key:string] : Promise<ranges.Range> } = {};
 
 function mapImpl(source:idtypes.IDType, target:idtypes.IDType, range:ranges.Range) {
   var key = source.toString()+'->'+target.toString()+':'+range.toString();
-  if (cache.has(key)) {
-    return cache.get(key);
+  if (cache.hasOwnProperty(key)) {
+    return cache[key];
   }
 
   //TODO clear old cache entries
@@ -64,6 +63,6 @@ function mapImpl(source:idtypes.IDType, target:idtypes.IDType, range:ranges.Rang
   }).then((data) => {
     return ranges.parse(data.range);
   });
-  cache.set(key, r);
+  cache[key] = r;
   return r;
 }

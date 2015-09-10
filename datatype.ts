@@ -7,7 +7,6 @@
 import C = require('./main');
 import idtypes = require('./idtype');
 import ranges = require('./range');
-import d3 = require('d3');
 
 /**
  * basic description elements
@@ -98,6 +97,7 @@ export function transpose(m: any[][]) {
   return r;
 }
 
+
 /**
  * converts the given categorical data to a grouped range
  * @param data
@@ -106,15 +106,15 @@ export function transpose(m: any[][]) {
  * @return {any}
  */
 export function categorical2partitioning(data: string[], categories: string[], options = {}) {
-  var m = C.mixin({
+  const m = C.mixin({
     skipEmptyCategories : true,
-    colors: (categories.length < 10 ? d3.scale.category10() : d3.scale.category20()).range().slice(0, categories.length),
+    colors: ['gray'],
     name: 'Partitioning'
   }, options);
   var groups = categories.map((d, i) => {
     return {
       name: d,
-      color: m.colors[i],
+      color: m.colors[Math.min(i,m.colors.length-1)],
       indices: []
     };
   });
