@@ -20,7 +20,7 @@ export interface IStratification extends datatypes.IDataType {
 
   hist(): Promise<math.IHistogram>;
 
-  size();
+  length: number;
 
   origin(): Promise<datatypes.IDataType>;
 }

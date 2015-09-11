@@ -149,6 +149,14 @@ export class Stratification extends datatypes.DataTypeBase implements def.IStrat
     return (<any>this.desc).size;
   }
 
+  get length() {
+    return this.size()[0];
+  }
+
+  get dim() {
+    return this.size();
+  }
+
   persist() {
     return this.desc.id;
   }
