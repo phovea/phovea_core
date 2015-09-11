@@ -8,6 +8,7 @@ import ajax = require('./ajax');
 import ranges = require('./range');
 import idtypes = require('./idtype');
 import datatypes = require('./datatype');
+import datas = require('./data');
 import vector = require('./vector');
 import vector_impl = require('./vector_impl');
 import math = require('./math');
@@ -111,6 +112,13 @@ export class Stratification extends datatypes.DataTypeBase implements def.IStrat
     }
     this._v = this.load().then((data) => new StratificationVector(this, data.range, this.desc));
     return this._v;
+  }
+
+  origin(): Promise<datatypes.IDataType> {
+    if ('origin' in this.desc) {
+      return datas.getFirstByFQName((<any>this.desc).origin)
+    }
+    return Promise.reject('no origin specified');
   }
 
   range() {
