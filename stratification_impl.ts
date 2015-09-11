@@ -116,7 +116,7 @@ export class Stratification extends datatypes.DataTypeBase implements def.IStrat
 
   origin(): Promise<datatypes.IDataType> {
     if ('origin' in this.desc) {
-      return datas.getFirstByFQName((<any>this.desc).origin)
+      return datas.getFirstByFQName((<any>this.desc).origin);
     }
     return Promise.reject('no origin specified');
   }

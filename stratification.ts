@@ -22,5 +22,5 @@ export interface IStratification extends datatypes.IDataType {
 
   size();
 
-  origin(): Promise<datatypes.IDataType>
+  origin(): Promise<datatypes.IDataType>;
 }
