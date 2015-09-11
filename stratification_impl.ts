@@ -100,8 +100,10 @@ export class Stratification extends datatypes.DataTypeBase implements def.IStrat
     return this;
   }
 
-  hist() : Promise<math.IHistogram> {
-    return null;
+  hist(bins? : number) : Promise<math.IHistogram> {
+    return this.vector().then((v) => v.hist(bins));
+    //TODO native bins
+    //return null;
     //return this.load().then((d) => {
     //  return math.categoricalHist(d, this.indices.dim(0), d.length, v.categories.map((d) => typeof d === 'string' ? d : d.name));
     //});

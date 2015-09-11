@@ -151,7 +151,7 @@ function getFirstWithCache(name: string | RegExp, cache: any, attr = 'name') {
   var r = null,
     inCache = Object.keys(cache).some((n) => {
     if (n.match(<any>name) != null) {
-      r = n;
+      r = cache[n];
       return true;
     }
     return false;

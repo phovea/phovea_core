@@ -18,7 +18,7 @@ export interface IStratification extends datatypes.IDataType {
   ids(): Promise<ranges.Range>;
   ids(range:ranges.Range): Promise<ranges.Range>;
 
-  hist(): Promise<math.IHistogram>;
+  hist(bins? : number): Promise<math.IHistogram>;
 
   length: number;
 
