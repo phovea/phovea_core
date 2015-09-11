@@ -216,7 +216,7 @@ export class AVisInstance extends events.EventHandler {
 
   destroy() {
     // nothing to destroy
-    var n = (<any>this).node;
+    const n = (<any>this).node;
     if (n && n.parentNode) {
       n.parentNode.removeChild(n);
     }
@@ -242,7 +242,7 @@ export class AVisInstance extends events.EventHandler {
 }
 
 function extrapolateFilter(r: any) {
-  var v = r.filter;
+  const v = r.filter;
   if (typeof v === 'undefined') {
     r.filter = C.constantTrue;
   } else if (typeof v === 'string') {
@@ -285,7 +285,7 @@ function extrapolateSize(r : any) {
 }
 
 function extrapolateRotation(r : any) {
-  var m = { //string to text mappings
+  const m = { //string to text mappings
     free : NaN,
     no : 0,
     transpose: 90,
@@ -303,7 +303,7 @@ function extrapolateRotation(r : any) {
 }
 
 function toVisPlugin(plugin : plugins.IPluginDesc) : IVisPluginDesc {
-  var r : any = plugin;
+  const r : any = plugin;
   extrapolateFilter(r);
   extrapolateIconify(r);
   extrapolateSize(r);

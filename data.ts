@@ -143,6 +143,9 @@ export function getFirst(query: any | string | RegExp) {
 export function getFirstByName(name: string | RegExp) {
   return getFirstWithCache(name, cacheByName, 'name');
 }
+export function getFirstByFQName(name: string | RegExp) {
+  return getFirstWithCache(name, cacheByFQName, 'fqname');
+}
 
 function getFirstWithCache(name: string | RegExp, cache: any, attr = 'name') {
   var r = null,

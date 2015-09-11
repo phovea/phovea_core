@@ -102,14 +102,14 @@ class Statistics implements IStatistics {
       this._var = 0;
       this.moment2 = this.moment3 = this.moment4 = 0;
     } else {
-      var mean_m1 = this.mean;
+      const mean_m1 = this.mean;
       this.mean = mean_m1 + (x - mean_m1) / this.n;
       this._var = this._var + (x - mean_m1) * (x - this.mean);
 
-      var delta = x - mean_m1;
-      var delta_n = delta / this.n;
-      var delta_n2 = delta_n * delta_n;
-      var term1 = delta * delta_n * (this.n - 1);
+      const delta = x - mean_m1;
+      const delta_n = delta / this.n;
+      const delta_n2 = delta_n * delta_n;
+      const term1 = delta * delta_n * (this.n - 1);
       this.moment4 += term1 * delta_n2 * (this.n * this.n - 3 * this.n + 3) + 6 * delta_n2 * this.moment2 - 4 * delta_n * this.moment3;
       this.moment3 += term1 * delta_n * (this.n - 2) - 3 * delta_n * this.moment2;
       this.moment2 += term1;
@@ -124,13 +124,13 @@ export function computeStats(...arr: IIterable<number>[]) : IStatistics {
 }
 
 export function hist(arr: IIterable<number>, indices: ranges.Range1D, size: number, bins: number, range: number[]) : IHistogram {
-  var r = new Histogram(bins, range);
+  const r = new Histogram(bins, range);
   r.pushAll(arr, indices, size);
   return r;
 }
 
 export function categoricalHist(arr: IIterable<string>, indices: ranges.Range1D, size: number, categories: string[]) : IHistogram {
-  var r = new CatHistogram(categories);
+  const r = new CatHistogram(categories);
   r.pushAll(arr, indices, size);
   return r;
 }
@@ -186,10 +186,10 @@ class AHistogram implements IHistogram {
       binindex.push([]);
     }
     if (indices) {
-      var it = indices.iter(size);
+      const it = indices.iter(size);
       arr.forEach((x) => {
-        var index = it.next();
-        var bin = this.binOf(x);
+        const index = it.next();
+        const bin = this.binOf(x);
         if (bin < 0) {
           this.missing_++;
           missingindex.push(index);
@@ -203,7 +203,7 @@ class AHistogram implements IHistogram {
       this.missingRange_ = ranges.list(missingindex.sort().filter((di, i, a) => di !== a[i-1]));
     } else {
       arr.forEach((x) => {
-        var bin = this.binOf(x);
+        const bin = this.binOf(x);
         if (bin < 0) {
           this.missing_++;
         } else {
@@ -236,7 +236,7 @@ class Histogram extends AHistogram {
     if (isNaN(value)) {
       return -1;
     }
-    var n = (value - this.r[0]) / (this.r[1] - this.r[0]);
+    const n = (value - this.r[0]) / (this.r[1] - this.r[0]);
     var bin = Math.round(n * (this.bins - 1));
     if (bin < 0) {
       bin = 0;

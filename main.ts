@@ -200,7 +200,7 @@ function indexRange(n:number) {
  * @param thisArg
  */
 export function argSort<T>(arr:T[], compareFn?:(a:T, b:T) => number, thisArg?:any):number[] {
-  var indices = indexRange(arr.length);
+  const indices = indexRange(arr.length);
   return indices.sort((a, b) => {
     return compareFn.call(thisArg, arr[a], arr[b]);
   });
@@ -213,7 +213,7 @@ export function argSort<T>(arr:T[], compareFn?:(a:T, b:T) => number, thisArg?:an
  * @param thisArg
  */
 export function argFilter<T>(arr:T[], callbackfn:(value:T, index:number) => boolean, thisArg?:any):number[] {
-  var indices = indexRange(arr.length);
+  const indices = indexRange(arr.length);
   return indices.filter((value, index) => {
     return callbackfn.call(thisArg, arr[value], index);
   });

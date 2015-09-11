@@ -68,14 +68,14 @@ export class RangeElem implements IRangeElem {
   }
 
   size(size?:number):number {
-    var t = fix(this.to, size), f = fix(this.from, size);
+    const t = fix(this.to, size), f = fix(this.from, size);
     if (this.step === 1) {
       return Math.max(t - f, 0);
     } else if (this.step === -1) {
       return Math.max(f - t, 0);
     }
-    var d = this.step > 0 ? (t - f + 1) : (f - t + 1);
-    var s = Math.abs(this.step);
+    const d = this.step > 0 ? (t - f + 1) : (f - t + 1);
+    const s = Math.abs(this.step);
     if (d <= 0) { //no range
       return 0;
     }
@@ -87,8 +87,8 @@ export class RangeElem implements IRangeElem {
   }
 
   reverse() {
-    var t = this.from < 0 ? this.from : this.from + 1;
-    var f = this.to < 0 ? this.to : this.to - 1;
+    const t = this.from < 0 ? this.from : this.from + 1;
+    const f = this.to < 0 ? this.to : this.to - 1;
     return new RangeElem(f, t, -this.step);
   }
 
@@ -112,8 +112,8 @@ export class RangeElem implements IRangeElem {
   }
 
   contains(value:number, size?:number) {
-    var f = fix(this.from, size);
-    var t = fix(this.to, size);
+    const f = fix(this.from, size);
+    const t = fix(this.to, size);
     if (this.step === -1) {
       return (value <= f) && (value > t);
     } else { //+1
@@ -139,7 +139,7 @@ export class RangeElem implements IRangeElem {
     if (code.length === 0) {
       return RangeElem.all();
     }
-    var parts = code.split(':');
+    const parts = code.split(':');
     if (parts.length === 1) {
       return RangeElem.single(parseFloat(parts[0]));
     } else if (parts.length === 2) {
@@ -330,7 +330,7 @@ export class Range1D {
   }
 
   size(size?:number) {
-    var t = this.arr.map((d) => d.size(size));
+    const t = this.arr.map((d) => d.size(size));
     return t.reduce((a, b) => a + b, 0);
   }
 
@@ -346,9 +346,9 @@ export class Range1D {
     if (ntimes === 1) {
       return this;
     }
-    var r = this.arr.slice();
+    const r = this.arr.slice();
     //push n times
-    for(var i = 1; i < ntimes; ++i) {
+    for(let i = 1; i < ntimes; ++i) {
       r.push.apply(r, this.arr);
     }
     return new Range1D(r);
@@ -372,9 +372,9 @@ export class Range1D {
       return sub.clone();
     }
     //TODO optimize
-    var l = this.iter(size).asList();
-    var s = sub.iter(l.length);
-    var r = new Array<number>(),
+    const l = this.iter(size).asList();
+    const s = sub.iter(l.length);
+    var r = [],
       i : number;
     while (s.hasNext()) {
       i = s.next();
@@ -397,8 +397,8 @@ export class Range1D {
     if (other.isAll || this.isNone) {
       return other.clone();
     }
-    var r = this.iter(size).asList();
-    var it2 = other.iter(size);
+    const r = this.iter(size).asList();
+    const it2 = other.iter(size);
     it2.forEach((i) => {
       if (r.indexOf(i) < 0) {
         r.push(i);
@@ -422,9 +422,9 @@ export class Range1D {
     if (other.isAll) {
       return this.clone();
     }
-    var it1 = this.iter(size).asList();
-    var it2 = other.iter(size);
-    var r = new Array<number>();
+    const it1 = this.iter(size).asList();
+    const it2 = other.iter(size);
+    var r = [];
     it2.forEach((i) => {
       if (it1.indexOf(i) >= 0) {
         r.push(i);
@@ -439,7 +439,7 @@ export class Range1D {
 
   /**
    * logical difference between two ranges
-   * @param other
+   * @param without
    * @returns {RangeDim}
    */
   without(without:Range1D, size?:number) {
@@ -449,9 +449,9 @@ export class Range1D {
     if (without.isAll) {
       return Range1D.none();
     }
-    var it1 = this.iter(size);
-    var it2 = without.iter(size).asList();
-    var r = new Array<number>();
+    const it1 = this.iter(size);
+    const it2 = without.iter(size).asList();
+    var r = [];
     it1.forEach((i) => {
       if (it2.indexOf(i) < 0) {
         r.push(i);

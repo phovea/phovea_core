@@ -11,8 +11,8 @@ import ranges = require('./range');
 
 var cache = {}, filledUp = false;
 
- export var defaultSelectionType = 'selected';
-export var hoverSelectionType = 'hovered';
+export const defaultSelectionType = 'selected';
+export const hoverSelectionType = 'hovered';
 
 export enum SelectOperation {
   SET, ADD, REMOVE
@@ -63,9 +63,10 @@ export class IDType extends events.EventHandler implements C.IPersistable {
   private sel = {};
 
   /**
-   *
+   * @param id the id of this idtype
    * @param name the name of this idtype
    * @param names the plural name
+   * @param internal whether this is an internal type or not
    */
   constructor(public id: string, public name:string, public names:string, public internal = false) {
     super();
@@ -135,7 +136,7 @@ export class IDType extends events.EventHandler implements C.IPersistable {
   }
 
   private selectImpl(range:ranges.Range, op = SelectOperation.SET, type:string = defaultSelectionType) {
-    var b = this.selections(type);
+    const b = this.selections(type);
     var new_:ranges.Range = ranges.none();
     switch (op) {
       case SelectOperation.SET:
@@ -188,7 +189,7 @@ export class ObjectManager<T extends IHasUniqueId> extends IDType {
   }
 
   nextId(item?: T) {
-    var n = this.pool.checkOut();
+    const n = this.pool.checkOut();
     if (item) {
       item.id = n;
       this.instances[n] = item;
@@ -237,7 +238,7 @@ export class ObjectManager<T extends IHasUniqueId> extends IDType {
   }
 
   selectedObjects(type = defaultSelectionType) {
-    var s = this.selections(type);
+    const s = this.selections(type);
     return s.filter(this.instances);
   }
 }
@@ -293,7 +294,7 @@ export class SelectAble extends events.EventHandler {
   }
 
   private selectionListener(idtype: IDType, index: number, total : number) {
-    var selectionListener = (event: any, type: string, act: ranges.Range, added: ranges.Range, removed: ranges.Range) => {
+    const selectionListener = (event: any, type: string, act: ranges.Range, added: ranges.Range, removed: ranges.Range) => {
       this.selectionCache[index] = {
         act: act, added: added, removed: removed
       };
@@ -340,13 +341,13 @@ export class SelectAble extends events.EventHandler {
     if (typeof events === 'string' && events === 'select' || events.slice(0, 'select-'.length) === 'select-') {
       this.numSelectListeners ++;
       if (this.numSelectListeners === 1) {
-        var idt = this.idtypes;
+        const idt = this.idtypes;
         if (idt.length === 1) {
           this.selectionListeners.push(this.singleSelectionListener);
           idt[0].on('select', this.singleSelectionListener);
         } else {
           idt.forEach((idtype, i) => {
-            var s = this.selectionListener(idtype, i, idt.length);
+            const s = this.selectionListener(idtype, i, idt.length);
             this.selectionListeners.push(s);
             idtype.on('select',s);
           });
@@ -369,7 +370,7 @@ export class SelectAble extends events.EventHandler {
 
   selections(type = defaultSelectionType) {
     return this.ids().then((ids: ranges.Range) => {
-      var r = ranges.join(this.idtypes.map((idtype) => idtype.selections(type)));
+      const r = ranges.join(this.idtypes.map((idtype) => idtype.selections(type)));
       return ids.indexRangeOf(r);
     });
   }
@@ -395,8 +396,8 @@ export class SelectAble extends events.EventHandler {
   select(dim: number, type: string, range: ranges.Range, op: SelectOperation);
   select(dim: number, type: string, range: number[], op: SelectOperation);
   select() {
-    var a = C.argList(arguments);
-    var dim = (typeof a[0] === 'number') ? +a.shift() : -1,
+    const a = C.argList(arguments);
+    const dim = (typeof a[0] === 'number') ? +a.shift() : -1,
       type = (typeof a[0] === 'string') ? a.shift() : defaultSelectionType,
       range = asRange(a[0]),
       op = asSelectOperation(a[1]);
@@ -405,7 +406,7 @@ export class SelectAble extends events.EventHandler {
 
   private selectImpl(range: ranges.Range, op = SelectOperation.SET, type : string = defaultSelectionType, dim = -1) {
     return this.ids().then((ids: ranges.Range) => {
-      var types = this.idtypes;
+      const types = this.idtypes;
       if (dim === -1) {
         range = ids.preMultiply(range);
         this.accumulateEvents = 0;
@@ -435,9 +436,9 @@ export class SelectAble extends events.EventHandler {
   clear(dim : number);
   clear(dim: number, type : string);
   clear() {
-    var a = C.argList(arguments);
-    var dim = (typeof a[0] === 'number') ? +a.shift : -1;
-    var type = (typeof a[0] === 'string') ? a[0] : defaultSelectionType;
+    const a = C.argList(arguments);
+    const dim = (typeof a[0] === 'number') ? +a.shift : -1;
+    const type = (typeof a[0] === 'string') ? a[0] : defaultSelectionType;
     return this.selectImpl(ranges.none(), SelectOperation.SET, type, dim);
   }
 }

@@ -9,9 +9,9 @@ import idtypes_ = require('./idtype');
 import events_ = require('./event');
 import geom_ = require('./geom');
 
-export var C = C_;
-export var data = data_;
-export var ranges = ranges_;
-export var idtypes = idtypes_;
-export var geom = geom_;
-export var events = events_;
+export const C = C_;
+export const data = data_;
+export const ranges = ranges_;
+export const idtypes = idtypes_;
+export const geom = geom_;
+export const events = events_;

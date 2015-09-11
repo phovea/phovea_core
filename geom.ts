@@ -7,7 +7,7 @@ import C = require('./main');
 import _2D = require('./2D');
 
 
-export var CORNER:any = <any>[];
+export const CORNER:any = <any>[];
 CORNER.N = CORNER[0] = 'n';
 CORNER.NE = CORNER[1] = 'ne';
 CORNER.E = CORNER[2] = 'e';
@@ -34,7 +34,7 @@ export class AShape implements _2D.IShape {
    */
   shift(x:number, y:number):AShape;
   shift(xy:_2D.Vector2D):AShape;
-  shift(xy:number[]):AShape;
+  shift(xy:[number, number]):AShape;
   shift() {
     if (typeof arguments[0] === 'number') {
       this.shiftImpl(arguments[0], arguments[1]);
@@ -67,7 +67,7 @@ export class AShape implements _2D.IShape {
    * @returns {_2D.Vector2D}
    */
   corner(corner:string):_2D.Vector2D {
-    var r = this.aabb();
+    const r = this.aabb();
     switch (corner) {
       case CORNER.N:
         return vec2(r.cx, r.y);
@@ -303,8 +303,8 @@ export class Line extends AShape {
   }
 
   bs():Circle {
-    var x = 0.5 * (this.x1 + this.x2);
-    var y = 0.5 * (this.y1 + this.y2);
+    const x = 0.5 * (this.x1 + this.x2);
+    const y = 0.5 * (this.y1 + this.y2);
     return circle(x, y, Math.max(Math.abs(this.x1 - this.x2), Math.abs(this.y1 - this.y2)) / 2);
   }
 
@@ -398,7 +398,7 @@ export class Polygon extends AShape {
   }
 
   pointInPolygon(point:_2D.Vector2D) {
-    var length = this.points.length;
+    const length = this.points.length;
     var counter = 0;
     var x_inter;
     var p1 = this.points[0];
@@ -423,7 +423,7 @@ export class Polygon extends AShape {
 
   get area() {
     var area = 0;
-    var length = this.points.length;
+    const length = this.points.length;
     for (var i = 0; i < length; i++) {
       var h1 = this.points[i];
       var h2 = this.points[(i + 1) % length];
@@ -433,8 +433,8 @@ export class Polygon extends AShape {
   }
 
   get centroid() {
-    var length = this.points.length;
-    var area6x = 6 * this.area;
+    const length = this.points.length;
+    const area6x = 6 * this.area;
     var x_sum = 0;
     var y_sum = 0;
     for (var i = 0; i < length; i++) {
@@ -458,7 +458,7 @@ export class Polygon extends AShape {
   get isConcave() {
     var positive = 0;
     var negative = 0;
-    var length = this.points.length;
+    const length = this.points.length;
     for (var i = 0; i < length; i++) {
       var p0 = this.points[i];
       var p1 = this.points[(i + 1) % length];
