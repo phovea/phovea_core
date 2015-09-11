@@ -101,13 +101,11 @@ export class Stratification extends datatypes.DataTypeBase implements def.IStrat
   }
 
   hist(bins? : number) : Promise<math.IHistogram> {
-    return this.vector().then((v) => v.hist(bins));
-    //TODO native bins
-    //return null;
-    //return this.load().then((d) => {
-    //  return math.categoricalHist(d, this.indices.dim(0), d.length, v.categories.map((d) => typeof d === 'string' ? d : d.name));
-    //});
+    return this.range().then((r) => {
+      return math.rangeHist(r);
+    });
   }
+
   vector(): Promise<vector.IVector> {
     if (this._v) {
       return this._v;
@@ -171,6 +169,8 @@ export class StratificationVector extends vector_impl.VectorBase implements vect
   valuetype:any;
   desc: datatypes.IDataDescription;
 
+  private _cache : Promise<string[]> = null;
+
   constructor(private strat : Stratification, private range: ranges.CompositeRange1D, desc:datatypes.IDataDescription) {
     super(null);
     this._root = this;
@@ -211,14 +211,15 @@ export class StratificationVector extends vector_impl.VectorBase implements vect
     return r;
   }
 
-  /**
-   * loads all the underlying data in json format
-   * TODO: load just needed data and not everything given by the requested range
-   * @returns {*}
-   */
   load() : Promise<any[]> {
-
-    return Promise.resolve([]); //TODO
+    if (this._cache !== null) {
+      return this._cache;
+    }
+    const r : string[] = [];
+    this.range.groups.forEach((g) => {
+      g.forEach(() => r.push(g.name));
+    });
+    return this._cache = Promise.resolve(r);
   }
 
   /**

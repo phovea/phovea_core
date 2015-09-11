@@ -3,6 +3,7 @@
  */
 
 import ranges = require('./range');
+import C = require('./main');
 /**
  * simple number statistics similar to DoubleStatistics in Caleydo
  * TODO use a standard library for that
@@ -40,6 +41,11 @@ export interface IHistogram extends IIterable<number> {
 
   missing: number;
   missingRange: ranges.Range;
+}
+
+export interface ICatHistogram extends IHistogram {
+  categories: string[];
+  colors: string[];
 }
 
 
@@ -133,6 +139,10 @@ export function categoricalHist(arr: IIterable<string>, indices: ranges.Range1D,
   const r = new CatHistogram(categories);
   r.pushAll(arr, indices, size);
   return r;
+}
+
+export function rangeHist(range: ranges.CompositeRange1D) {
+  return new RangeHistogram(range);
 }
 
 class AHistogram implements IHistogram {
@@ -249,11 +259,61 @@ class Histogram extends AHistogram {
 }
 
 class CatHistogram extends AHistogram {
-  constructor(private categories: string[]) {
+  constructor(public categories: string[]) {
     super(categories.length);
   }
 
   binOf(value: any) {
     return this.categories.indexOf(value);
+  }
+}
+
+
+class RangeHistogram implements IHistogram {
+  constructor(private range_: ranges.CompositeRange1D) {
+  }
+
+  get categories() {
+    return this.range_.groups.map((g) => g.name);
+  }
+
+  get colors() {
+    return this.range_.groups.map((g) => g.color);
+  }
+
+  get largestFrequency() {
+    return Math.max.apply(Math, this.range_.groups.map((g) => g.length));
+  }
+
+  get count() {
+    return this.range_.length;
+  }
+
+  get bins() {
+    return this.range_.groups.length;
+  }
+
+  binOf(value: any) {
+    return C.indexOf(this.range_.groups, (g) => g.name === value);
+  }
+
+  frequency(bin: number) {
+    return this.range_.groups[bin].length;
+  }
+
+  range(bin:number) {
+    return ranges.list(this.range_.groups[bin]);
+  }
+
+  get missing() {
+    return 0;
+  }
+
+  get missingRange() {
+    return ranges.none();
+  }
+
+  forEach(callbackfn: (value: number, index: number) => void, thisArg?: any) {
+    return this.range_.groups.forEach((g,i) => callbackfn.call(thisArg, g.length, i));
   }
 }
