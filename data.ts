@@ -1,6 +1,7 @@
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
+import C = require('./main');
 import ajax = require('./ajax');
 import plugins = require('./plugin');
 import datatypes = require('./datatype');
@@ -86,11 +87,21 @@ function transformEntry(desc: any) {
  * returns a promise for getting a map of all available data
  * @returns {JQueryPromise<any>}
  */
-export function list(query = {}) {
-  return ajax.getAPIJSON('/dataset/', query).then(function (descs) {
+export function list(): Promise<datatypes.IDataType[]>;
+export function list(query : { [key: string] : string }): Promise<datatypes.IDataType[]>;
+export function list(filter : (d: datatypes.IDataType) => boolean): Promise<datatypes.IDataType[]>;
+export function list(query?: any) {
+  const f = (typeof query === 'function') ? <(d: datatypes.IDataType) => boolean>query : C.constantTrue;
+  const q = (typeof query !== 'undefined' && typeof query !== 'function') ? <any>query : {};
+
+  var r = ajax.getAPIJSON('/dataset/', q).then(function (descs) {
     //load descriptions and create data out of them
     return <any> Promise.all(descs.map((desc) => transformEntry(desc)));
   });
+  if (f !== C.constantTrue) {
+    r = r.then((arr) => arr.filter(f));
+  }
+  return r;
 }
 
 export interface INode {
@@ -119,7 +130,10 @@ export function convertToTree(list: datatypes.IDataType[]) {
   return root;
 }
 
-export function tree(query = {}): Promise<INode> {
+export function tree(): Promise<INode>;
+export function tree(query : { [key: string] : string }): Promise<INode>;
+export function tree(filter : (d: datatypes.IDataType) => boolean): Promise<INode>;
+export function tree(query ?: any): Promise<INode> {
   return list(query).then(convertToTree);
 }
 
