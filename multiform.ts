@@ -359,6 +359,18 @@ class GridElem implements C.IPersistable {
     };
   }
 }
+
+function sum(arr: number[]) {
+  return arr.reduce((v,x) => v+x, 0);
+}
+
+function max(arr: any[], acc: (row: any) => number) {
+  if (arr.length === 0) {
+    return NaN;
+  }
+  return arr.reduce((p,act) => Math.max(p,acc(act)), -Infinity);
+}
+
 /**
  * a simple multi form class using a select to switch
  */
@@ -652,7 +664,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
     if (this.dims.length === 1) {
       //vertically groups only
       return {
-        cols: [ <number>d3.max(sizes, (s) => s[0]) ],
+        cols: [ <number>max(sizes, (s) => s[0]) ],
         rows: sizes.map((s) => s[1]),
         grid: sizes.map((s) => [s])
       };
@@ -660,8 +672,8 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
       const cols = this.dims[1].length;
       const grid = this.dims[0].map((row, i) => sizes.slice(i * cols, (i + 1) * cols));
       return {
-        cols: this.dims[1].map((d, i) => <number>d3.max(grid, (row) => row[i][0])),
-        rows: grid.map((row) => <number>d3.max(row, (s) => s[1])),
+        cols: this.dims[1].map((d, i) => <number>max(grid, (row) => row[i][0])),
+        rows: grid.map((row) => <number>max(row, (s) => s[1])),
         grid: grid
       };
     }
@@ -669,12 +681,12 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
 
   get size() : [number, number] {
     const gridSize = this.gridSize();
-    return [ d3.sum(gridSize.cols), d3.sum(gridSize.rows)];
+    return [ sum(gridSize.cols), sum(gridSize.rows)];
   }
 
   get rawSize() : [number, number] {
     const gridSize = this.gridSize(true);
-    return [ d3.sum(gridSize.cols), d3.sum(gridSize.rows)];
+    return [ sum(gridSize.cols), sum(gridSize.rows)];
   }
 
   /**

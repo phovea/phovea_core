@@ -195,22 +195,31 @@ export function create(desc: any) : Promise<datatypes.IDataType> {
   return transformEntry(desc);
 }
 
-export function upload(desc: any, file?) : Promise<datatypes.IDataType> {
+function prepareData(desc: any, file?) {
   const data = new FormData();
   data.append('desc', JSON.stringify(desc));
   if (file) {
     data.append('file',file);
   }
+  return data;
+}
+
+export function upload(desc: any, file?) : Promise<datatypes.IDataType> {
+  const data = prepareData(desc, file);
   return ajax.sendAPI('/dataset/',data, 'post').then(transformEntry);
 }
 
 export function update(entry: datatypes.IDataType, desc: any, file?) : Promise<datatypes.IDataType> {
-  const data = new FormData();
-  data.append('desc', JSON.stringify(desc));
-  if (file) {
-    data.append('file',file);
-  }
+  const data = prepareData(desc, file);
   return ajax.sendAPI('/dataset/'+entry.desc.id, data, 'put').then((desc) => {
+    clearCache(entry);
+    return transformEntry(desc);
+  });
+}
+
+export function modify(entry: datatypes.IDataType, desc: any, file?) : Promise<datatypes.IDataType> {
+  const data = prepareData(desc, file);
+  return ajax.sendAPI('/dataset/'+entry.desc.id, data, 'post').then((desc) => {
     clearCache(entry);
     return transformEntry(desc);
   });
