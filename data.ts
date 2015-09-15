@@ -240,7 +240,7 @@ export function modify(entry: datatypes.IDataType, desc: any, file?) : Promise<d
 }
 
 export function remove(entry: datatypes.IDataType): Promise<Boolean> {
-  return ajax.sendAPI('/dataset/', {}, 'delete').then((result) => {
+  return ajax.sendAPI('/dataset/'+entry.desc.id, {}, 'delete').then((result) => {
     clearCache(entry);
     return true;
   });
