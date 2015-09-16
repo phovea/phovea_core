@@ -435,7 +435,7 @@ class PropertyHandler {
       } else {
         this.map[k] = v;
       }
-    })
+    });
   }
 }
 
