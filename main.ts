@@ -417,7 +417,7 @@ class PropertyHandler {
 
   protected parse(code: string = '') {
     this.map = {};
-    if (code.length < 1) { //just the starting character ? or #
+    if (code.length <= 1) { //just the starting character ? or #
       return;
     }
     //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript/21152762#21152762
