@@ -376,21 +376,13 @@ export interface IPersistable {
   restore(persisted:any) : IPersistable|Promise<IPersistable>;
 }
 
-/**
- * manages the hash location property helper
- */
-class HashProperties {
-  private map: any = {};
-  private updated = () => {
-    this.parse(location.hash);
-  };
+class PropertyHandler {
+  protected map: any = {};
 
-  constructor() {
-    this.map = history.state;
-    if (!this.map) {
-      this.parse(location.hash);
+  constructor(code?:string) {
+    if (code) {
+      this.parse(code);
     }
-    window.addEventListener('hashchange', this.updated, false);
   }
 
   is(name:string) {
@@ -415,6 +407,56 @@ class HashProperties {
     return parseInt(l, 36);
   }
 
+  toString() {
+    var r = [];
+    Object.keys(this.map).forEach((key) => {
+      r.push(encodeURIComponent(key)+'='+encodeURIComponent(this.map[key]));
+    });
+    return r.join('&');
+  }
+
+  protected parse(code: string = '') {
+    this.map = {};
+    if (code.length < 1) { //just the starting character ? or #
+      return;
+    }
+    //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript/21152762#21152762
+    location.search.substr(1).split('&').forEach((item) => {
+      const s = item.split('='),
+        k = decodeURIComponent(s[0]),
+        v = s[1] && decodeURIComponent(s[1]);
+      if (k in this.map) {
+        let old = this.map[k];
+        if (!Array.isArray(old)) {
+          this.map[k] = [old, v];
+        } else {
+          this.map[k].push(v);
+        }
+      } else {
+        this.map[k] = v;
+      }
+    })
+  }
+}
+
+
+/**
+ * manages the hash location property helper
+ */
+class HashProperties extends PropertyHandler {
+  private updated = () => {
+    this.parse(location.hash);
+  };
+
+  constructor() {
+    super();
+    this.map = history.state;
+    if (!this.map) {
+      this.parse(location.hash);
+    }
+    window.addEventListener('hashchange', this.updated, false);
+  }
+
   setInt(name:string, value: number, update= true) {
     var v = String(value);
     if (value > 100) {
@@ -436,46 +478,18 @@ class HashProperties {
     history.pushState(this.map, 'State '+Date.now(), '#'+this.toString());
     window.addEventListener('hashchange', this.updated, false);
   }
-
-  private parse(v : string) {
-    this.map = {}; //reset
-    if (v[0] === '#') {
-      v = v.slice(1);
-    }
-    var parts = v.split(/[&=]/),
-      i = 0, p = null,
-      key = null;
-    while (i < parts.length) {
-      p = parts[i];
-      while (p[p.length-1] === '%' || p[p.length-1] === '$') {
-        i++;
-        p += (p[p.length -1] === '%' ? '=' : '&' ) + parts[i];
-      }
-      if (key) {
-        this.map[key] = p;
-        key = null;
-      } else {
-        key = p; //next round
-      }
-      i++;
-    }
-  }
-
-  private escape(v: string) {
-    return v.replace(/&/g,'$&').replace(/=/g,'%=');
-  }
-
-  toString() {
-    var r = [];
-    Object.keys(this.map).forEach((key) => {
-      r.push(key+'='+this.escape(this.map[key]));
-    });
-    return r.join('&');
-  }
 }
 
+/**
+ * access to hash parameters and set them, too
+ * @type {HashProperties}
+ */
 export const hash = new HashProperties();
-
+/**
+ * access to get parameters
+ * @type {PropertyHandler}
+ */
+export const param = new PropertyHandler(location.search);
 
 
 /**
