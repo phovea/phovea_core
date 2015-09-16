@@ -421,7 +421,7 @@ class PropertyHandler {
       return;
     }
     //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript/21152762#21152762
-    location.search.substr(1).split('&').forEach((item) => {
+    code.substr(1).split('&').forEach((item) => {
       const s = item.split('='),
         k = decodeURIComponent(s[0]),
         v = s[1] && decodeURIComponent(s[1]);
