@@ -85,7 +85,7 @@ function transformEntry(desc: any) {
 
 /**
  * returns a promise for getting a map of all available data
- * @returns {JQueryPromise<any>}
+ * @returns {Promise<datatypes.IDataType[]>}
  */
 export function list(): Promise<datatypes.IDataType[]>;
 export function list(query : { [key: string] : string }): Promise<datatypes.IDataType[]>;
@@ -187,8 +187,8 @@ function getById(id: string) {
 
 /**
  * returns a promise for getting a specific dataset
- * @param name
- * @returns {JQueryGenericPromise<datatypes.IDataType>}
+ * @param persisted an id or peristed object containing the id
+ * @returns {Promise<datatypes.IDataType>}
  */
 export function get(persisted: any | string) : Promise<datatypes.IDataType> {
   if (typeof persisted === 'string') {
@@ -205,6 +205,11 @@ export function get(persisted: any | string) : Promise<datatypes.IDataType> {
   }
 }
 
+/**
+ * creates a new dataset for the given description
+ * @param desc
+ * @returns {Promise<datatypes.IDataType>}
+ */
 export function create(desc: any) : Promise<datatypes.IDataType> {
   return transformEntry(desc);
 }
@@ -288,7 +293,7 @@ export function convertToTable(list : datatypes.IDataType[]) {
 }
 
 export function convertTableToVectors(list: datatypes.IDataType[]) {
-  const r = new Array<datatypes.IDataType>();
+  const r : datatypes.IDataType[] = [];
   list.forEach((d) => {
     if (d.desc.type === 'table') {
       r.push.apply(r, (<tables.ITable>d).cols());
