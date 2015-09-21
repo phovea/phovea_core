@@ -122,6 +122,7 @@ export class MultiForm extends vis.AVisInstance implements vis.IVisInstance, IMu
     if (this.actVis && C.isFunction(this.actVis.destroy)) {
       this.actVis.destroy();
     }
+    super.destroy();
   }
 
   persist() : any {
@@ -502,6 +503,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
     this.grid.forEach((elem) => {
       elem.destroy();
     });
+    super.destroy();
   }
 
   transform(scale?: number[], rotate? : number) {
