@@ -2,8 +2,11 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 /// <reference path="../../tsd.d.ts" />
-import module_ = require('module');
-const config = module_ != null && typeof module_.config === 'function' ? module_.config() : {};
+/// <amd-dependency path="module" name="module"/>
+
+declare var module: {
+  config() : any;
+};
 'use strict';
 
 /**
@@ -11,8 +14,28 @@ const config = module_ != null && typeof module_.config === 'function' ? module_
  */
 export const version = '0.0.1-alpha';
 
-export const server_url:string = config.apiUrl || '/api';
-export const server_json_suffix:string = config.apiJSONSuffix || '';
+export var server_url:string = '/api';
+export var server_json_suffix:string = '';
+export var registry : { baseUrl: string; extensions: any[]};
+
+/**
+ * if no module config is here, we can manually initialize the core
+ * @param config
+ * @private
+ */
+export function _init(config: { apiUrl?: string; apiJSONSuffix?: string, registry?: { baseUrl: string; extensions: any[]; } }) {
+  server_url = config.apiUrl || '/api';
+  server_json_suffix = config.apiJSONSuffix || '';
+
+  registry = {
+    baseUrl: config.registry && config.registry.baseUrl || '',
+    extensions: config.registry && config.registry.extensions || []
+  };
+}
+
+if (module != null && typeof module.config === 'function') {
+  _init(module.config());
+}
 
 /**
  * integrate b into a and override all duplicates

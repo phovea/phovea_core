@@ -1,15 +1,11 @@
 /**
  * Created by Samuel Gratzl on 05.08.2014.
  */
+
 import C = require('./main');
-import require_ = require('require');
+//somehow here
+declare var require : (deps:string[], callback:(deps:any[])=>any) => any;
 
-import module_ = require('module');
-
-const config = (module_ != null && typeof module_.config === 'function' ? module_.config() : null) || {
-  baseUrl: '',
-  plugins: []
-};
 
 /**
  * basic interface of a plugin
@@ -78,7 +74,7 @@ export interface IPlugin {
 function loadHelper(desc:IPluginDesc):() => Promise<IPlugin> {
   return () => new Promise<IPlugin>((resolver) => {
     //require module
-    require_([desc.module], (m) => {
+    require([desc.module], (m) => {
       //create a plugin entry
       resolver({
         desc: desc,
@@ -94,7 +90,7 @@ function loadHelper(desc:IPluginDesc):() => Promise<IPlugin> {
  * @param descs
  * @returns {IPluginDesc[]}
  */
-function parsePlugins(descs : any[]) {
+function parsePlugins(descs : any[], baseUrl: string) {
   return descs.map((desc) => {
     //provide some default values
     desc = C.mixin({
@@ -107,7 +103,7 @@ function parsePlugins(descs : any[]) {
     },desc);
     desc = C.mixin({
       'module' : desc.folder+'/'+desc.file,
-      baseUrl: config.baseUrl + '/' + desc.folder
+      baseUrl: baseUrl + '/' + desc.folder
     }, desc);
     desc.module = '../'+desc.module;
     desc.load = loadHelper(<IPluginDesc>desc);
@@ -116,7 +112,8 @@ function parsePlugins(descs : any[]) {
 }
 
 //map to descriptions
-const plugins : IPluginDesc[] = parsePlugins(config.plugins || []);
+var _extensions : IPluginDesc[] = [];
+
 
 /**
  * returns a list of matching plugin descs
@@ -140,10 +137,13 @@ export function list(filter : any = C.constantTrue) {
     var v = filter;
      filter = (desc) => desc.type === v;
   }
-  if (filter === C.constantTrue) {
-    return plugins;
+  if (_extensions.length === 0) {
+    _extensions = parsePlugins(C.registry.extensions, C.registry.baseUrl);
   }
-  return plugins.filter(filter);
+  if (filter === C.constantTrue) {
+    return _extensions;
+  }
+  return _extensions.filter(filter);
 }
 
 /**
@@ -156,7 +156,7 @@ export function load(plugins: IPluginDesc[]) :Promise<IPlugin[]> {
     return Promise.resolve([]);
   }
   return new Promise((resolve) => {
-    require_(plugins.map((desc) => desc.module), (...impls : any[]) => {
+    require(plugins.map((desc) => desc.module), (...impls : any[]) => {
       //loaded now convert to plugins
       resolve(impls.map((p,i) => {
         return {
