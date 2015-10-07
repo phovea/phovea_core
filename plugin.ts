@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Caleydo - Visualization for Molecular Biology - http://caleydo.org
+ * Copyright (c) The Caleydo Team. All rights reserved.
+ * Licensed under the new BSD license, available at http://caleydo.org/license
+ ******************************************************************************/
 /**
  * Created by Samuel Gratzl on 05.08.2014.
  */
@@ -90,7 +95,7 @@ function loadHelper(desc:IPluginDesc):() => Promise<IPlugin> {
  * @param descs
  * @returns {IPluginDesc[]}
  */
-function parsePlugins(descs : any[], baseUrl: string) {
+function parsePlugins(descs : any[], baseUrl: string = '', relativeUrl: string = '..') {
   return descs.map((desc) => {
     //provide some default values
     desc = C.mixin({
@@ -105,7 +110,7 @@ function parsePlugins(descs : any[], baseUrl: string) {
       'module' : desc.folder+'/'+desc.file,
       baseUrl: baseUrl + '/' + desc.folder
     }, desc);
-    desc.module = '../'+desc.module;
+    desc.module = relativeUrl + '/' +desc.module;
     desc.load = loadHelper(<IPluginDesc>desc);
     return <IPluginDesc>desc;
   });
@@ -138,7 +143,7 @@ export function list(filter : any = C.constantTrue) {
      filter = (desc) => desc.type === v;
   }
   if (_extensions.length === 0) {
-    _extensions = parsePlugins(C.registry.extensions, C.registry.baseUrl);
+    _extensions = parsePlugins(C.registry.extensions, C.registry.baseUrl, C.registry.relativeUrl);
   }
   if (filter === C.constantTrue) {
     return _extensions;

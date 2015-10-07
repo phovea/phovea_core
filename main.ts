@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Caleydo - Visualization for Molecular Biology - http://caleydo.org
+ * Copyright (c) The Caleydo Team. All rights reserved.
+ * Licensed under the new BSD license, available at http://caleydo.org/license
+ ******************************************************************************/
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
@@ -16,19 +21,20 @@ export const version = '0.0.1-alpha';
 
 export var server_url:string = '/api';
 export var server_json_suffix:string = '';
-export var registry : { baseUrl: string; extensions: any[]};
+export var registry : { baseUrl: string; extensions: any[]; relativeUrl: string};
 
 /**
  * if no module config is here, we can manually initialize the core
  * @param config
  * @private
  */
-export function _init(config: { apiUrl?: string; apiJSONSuffix?: string, registry?: { baseUrl: string; extensions: any[]; } }) {
+export function _init(config: { apiUrl?: string; apiJSONSuffix?: string, registry?: { baseUrl: string; extensions: any[]; relativeUrl: string } }) {
   server_url = config.apiUrl || '/api';
   server_json_suffix = config.apiJSONSuffix || '';
 
   registry = {
     baseUrl: config.registry && config.registry.baseUrl || '',
+    relativeUrl: config.registry && config.registry.relativeUrl || '..',
     extensions: config.registry && config.registry.extensions || []
   };
 }
