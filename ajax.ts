@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Caleydo - Visualization for Molecular Biology - http://caleydo.org
+ * Copyright (c) The Caleydo Team. All rights reserved.
+ * Licensed under the new BSD license, available at http://caleydo.org/license
+ ******************************************************************************/
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
@@ -24,6 +29,15 @@ function getConnector() {
   return _impl = adapter.load().then((p) => <IAjaxAdapter>p.factory());
 }
 
+
+/**
+ * sends an XML http request to the server
+ * @param url url
+ * @param data arguments
+ * @param method the http method
+ * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
+ * @returns {Promise<any>}
+ */
 export function send(url: string, data : any = {}, method = 'get', expectedDataType = 'json'): Promise<any> {
   return getConnector().then((c) => c.send(url, data, method, expectedDataType));
 }
@@ -47,17 +61,95 @@ export function getData(url: string, data : any = {}, expectedDataType = 'json')
   return send(url, data, 'get', expectedDataType);
 }
 
-function expand(url: string) {
-  return `${C.server_url}${url}${C.server_json_suffix}`;
+/**
+ * converts the given api url to an absolute with optional get parameters
+ * @param url
+ * @param data
+ * @returns {string}
+ */
+export function api2absURL(url: string, data : any = null) {
+  url = `${C.server_url}${url}${C.server_json_suffix}`;
+  data = encodeParams(data);
+  if (data) {
+    url += (/\?/.test(url) ? '&' : '?') + data;
+  }
+  return url;
 }
 
+
+/**
+ * convert a given object to url data similar to JQuery
+ * @param url
+ * @param data
+ * @returns {any}
+ */
+export function encodeParams(data = null) {
+  if (data === null) {
+    return null;
+  }
+  if (typeof data === 'string') {
+    return encodeURIComponent(data);
+  }
+  var keys = Object.keys(data);
+  if (keys.length === 0) {
+    return null;
+  }
+  var s = [];
+  function add(prefix, key, value) {
+    if (Array.isArray(value)) {
+      value.forEach((v, i) => {
+        if (typeof v === 'object') {
+          add(prefix,key+'['+i+']', v);
+        } else {
+          //primitive values uses the same key
+          add(prefix,key+'[]', v);
+        }
+      });
+    } else if (typeof value === 'object' ) {
+      Object.keys(value).forEach((v) => {
+        add(prefix, key+'['+v+']',value[v]);
+      });
+    } else {
+      s.push(encodeURIComponent(prefix+key) + '=' + encodeURIComponent(value));
+    }
+  }
+  keys.forEach((key) => {
+    add('',key, data[key]);
+  });
+
+  // Return the resulting serialization
+  return s.join('&').replace(/%20/g, '+');
+}
+
+/**
+ * api version of send
+ * @param url api relative url
+ * @param data arguments
+ * @param method http method
+ * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
+ * @returns {Promise<any>}
+ */
 export function sendAPI(url: string, data : any = {}, method = 'get', expectedDataType = 'json'): Promise<any> {
-  return send(expand(url), data, method, expectedDataType);
+  return send(api2absURL(url), data, method, expectedDataType);
 }
 
+/**
+ * api version of getJSON
+ * @param url api relative url
+ * @param data arguments
+ * @returns {Promise<any>}
+ */
 export function getAPIJSON(url: string, data : any = {}): Promise<any> {
-  return getJSON(expand(url), data);
+  return getJSON(api2absURL(url), data);
 }
+
+/**
+ * api version of getData
+ * @param url api relative url
+ * @param data arguments
+ * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
+ * @returns {Promise<any>}
+ */
 export function getAPIData(url: string, data : any = {}, expectedDataType = 'json'): Promise<any> {
-  return getData(expand(url), data, expectedDataType);
+  return getData(api2absURL(url), data, expectedDataType);
 }
