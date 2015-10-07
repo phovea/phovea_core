@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Caleydo - Visualization for Molecular Biology - http://caleydo.org
+ * Copyright (c) The Caleydo Team. All rights reserved.
+ * Licensed under the new BSD license, available at http://caleydo.org/license
+ ******************************************************************************/
 /**
  * Created by Samuel Gratzl on 16.12.2014.
  */
@@ -5,6 +10,9 @@
 import vis = require('./vis');
 import events = require('./event');
 
+/**
+ * utility logic for zooming a vis instance
+ */
 export class ZoomLogic extends events.EventHandler {
   constructor(public v: vis.IVisInstance, public meta: vis.IVisMetaData) {
     super();
@@ -17,6 +25,12 @@ export class ZoomLogic extends events.EventHandler {
     return this.zoom(-1,-1);
   }
 
+  /**
+   * zooms in/out, -1 = zoom out, +1 zoom in, 0 no zoom operation
+   * @param zoomX
+   * @param zoomY
+   * @returns {any}
+   */
   zoom (zoomX: number, zoomY : number) {
     if (!this.v) {
       return null;
@@ -42,6 +56,12 @@ export class ZoomLogic extends events.EventHandler {
     return (this.meta && this.meta.scaling === 'aspect');
   }
 
+  /**
+   * set specific zoom factors
+   * @param zoomX
+   * @param zoomY
+   * @returns {any}
+   */
   zoomSet(zoomX : number, zoomY : number) {
     if (!this.v) {
       return null;
@@ -72,6 +92,12 @@ export class ZoomLogic extends events.EventHandler {
     return this.v.transform(s, old.rotate);
   }
 
+  /**
+   * zooms to a given with and height based on the rawSize of the visualization
+   * @param w
+   * @param h
+   * @returns {any}
+   */
   zoomTo(w : number, h : number) {
     if (!this.v) {
       return null;
@@ -81,6 +107,9 @@ export class ZoomLogic extends events.EventHandler {
   }
 }
 
+/**
+ * addition to ZoomLogic taking care of mouse wheel operations on the vis instance
+ */
 export class ZoomBehavior extends ZoomLogic {
   constructor(private node: Element, v: vis.IVisInstance, meta : vis.IVisMetaData) {
     super(v, meta);
@@ -88,9 +117,9 @@ export class ZoomBehavior extends ZoomLogic {
       if (!this.v) {
         return;
       }
-      const ctrlKey = event.ctrlKey;
-      const shiftKey = event.shiftKey;
-      const altKey = event.altKey;
+      const ctrlKey = event.ctrlKey; //both
+      const shiftKey = event.shiftKey; //y
+      const altKey = event.altKey; //x
       const m = event.wheelDelta;
       this.zoom(m * (ctrlKey || altKey ? 1: 0), m * (ctrlKey || shiftKey ? 1 : 0));
       if (ctrlKey || shiftKey || altKey) {

@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Caleydo - Visualization for Molecular Biology - http://caleydo.org
+ * Copyright (c) The Caleydo Team. All rights reserved.
+ * Licensed under the new BSD license, available at http://caleydo.org/license
+ ******************************************************************************/
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
@@ -37,6 +42,11 @@ function cached(desc, result) {
   return result;
 }
 
+/**
+ * fix an given id to be used as an HTML id
+ * @param id
+ * @returns {string|void}
+ */
 export function fixId(id) {
   var r = id.replace(/[!#$%&'\(\)\*\+,\.\/:;<=>\?@\[\\\]\^`\{\|}~_]/g, ' ');
   //title
@@ -45,7 +55,12 @@ export function fixId(id) {
   return r;
 }
 
-export function random_id(length) {
+/**
+ * generates a random id of the given length
+ * @param length length of the id
+ * @returns {string}
+ */
+export function random_id(length = 8) {
   var id = '';
   while (id.length < length) {
     id += Math.random().toString(36).slice(-8);
@@ -110,6 +125,11 @@ export interface INode {
   data: any;
 }
 
+/**
+ * converts a given list of datasets to a tree
+ * @param list
+ * @returns {{children: Array, name: string, data: null}}
+ */
 export function convertToTree(list: datatypes.IDataType[]) {
   //create a tree out of the list by the fqname
   const root = { children: [], name: '/', data: null};
@@ -130,6 +150,9 @@ export function convertToTree(list: datatypes.IDataType[]) {
   return root;
 }
 
+/**
+ * returns a tree of all available datasets
+ */
 export function tree(): Promise<INode>;
 export function tree(query : { [key: string] : string }): Promise<INode>;
 export function tree(filter : (d: datatypes.IDataType) => boolean): Promise<INode>;
@@ -137,6 +160,11 @@ export function tree(query ?: any): Promise<INode> {
   return list(query).then(convertToTree);
 }
 
+/**
+ * returns the first dataset matching the given query
+ * @param query
+ * @returns {any}
+ */
 export function getFirst(query: any | string | RegExp) {
   if (typeof query === 'string' || query instanceof RegExp) {
     return getFirstByName(<string>query);
@@ -223,11 +251,23 @@ function prepareData(desc: any, file?) {
   return data;
 }
 
+/**
+ * uploads a given dataset description with optional file attachment ot the server
+ * @param desc
+ * @param file
+ * @returns {Promise<*>}
+ */
 export function upload(desc: any, file?) : Promise<datatypes.IDataType> {
   const data = prepareData(desc, file);
   return ajax.sendAPI('/dataset/',data, 'post').then(transformEntry);
 }
 
+/**
+ * updates an existing dataset with a new description and optional file
+ * @param desc
+ * @param file
+ * @returns {Promise<*>} returns the update dataset
+ */
 export function update(entry: datatypes.IDataType, desc: any, file?) : Promise<datatypes.IDataType> {
   const data = prepareData(desc, file);
   return ajax.sendAPI('/dataset/'+entry.desc.id, data, 'put').then((desc) => {
@@ -236,6 +276,12 @@ export function update(entry: datatypes.IDataType, desc: any, file?) : Promise<d
   });
 }
 
+/**
+ * modifies an existing dataset with a new description and optional file, the difference to update is that this should be used for partial changes
+ * @param desc
+ * @param file
+ * @returns {Promise<*>} returns the update dataset
+ */
 export function modify(entry: datatypes.IDataType, desc: any, file?) : Promise<datatypes.IDataType> {
   const data = prepareData(desc, file);
   return ajax.sendAPI('/dataset/'+entry.desc.id, data, 'post').then((desc) => {
@@ -244,6 +290,11 @@ export function modify(entry: datatypes.IDataType, desc: any, file?) : Promise<d
   });
 }
 
+/**
+ * removes a given dataset
+ * @param entry
+ * @returns {Promise<boolean>}
+ */
 export function remove(entry: datatypes.IDataType): Promise<Boolean> {
   return ajax.sendAPI('/dataset/'+entry.desc.id, {}, 'delete').then((result) => {
     clearCache(entry);
@@ -251,6 +302,11 @@ export function remove(entry: datatypes.IDataType): Promise<Boolean> {
   });
 }
 
+/**
+ * utility to convert a list of datatypes to a table compatible datatype object
+ * @param list
+ * @returns {any}
+ */
 export function convertToTable(list : datatypes.IDataType[]) {
   return tables_impl.wrapObjects({
     id : '_data',
@@ -292,6 +348,11 @@ export function convertToTable(list : datatypes.IDataType[]) {
   }, list, (d : datatypes.IDataType) => d.desc.name);
 }
 
+/**
+ * utilility function converting all contained tables in their vectors of individual columns
+ * @param list
+ * @returns {datatypes.IDataType[]}
+ */
 export function convertTableToVectors(list: datatypes.IDataType[]) {
   const r : datatypes.IDataType[] = [];
   list.forEach((d) => {
@@ -304,6 +365,11 @@ export function convertTableToVectors(list: datatypes.IDataType[]) {
   return r;
 }
 
+/**
+ * lists all datasets and converts them to a table
+ * @param tablesAsVectors whether tables should be converted to individual vectors
+ * @returns {Promise<*>}
+ */
 export function listAsTable(tablesAsVectors = false) {
   var l = list();
   if (tablesAsVectors) {

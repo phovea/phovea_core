@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Caleydo - Visualization for Molecular Biology - http://caleydo.org
+ * Copyright (c) The Caleydo Team. All rights reserved.
+ * Licensed under the new BSD license, available at http://caleydo.org/license
+ ******************************************************************************/
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
@@ -287,6 +292,12 @@ export class SelectAble extends events.EventHandler {
 
   ids(range?:ranges.Range) : Promise<ranges.Range> {
     throw new Error('not implemented');
+  }
+
+  fromIdRange(idRange: ranges.Range = ranges.all()) {
+    return this.ids().then((ids) => {
+      return ids.indexOf(idRange);
+    })
   }
 
   get idtypes() : IDType[] {
