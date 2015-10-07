@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Caleydo - Visualization for Molecular Biology - http://caleydo.org
+ * Copyright (c) The Caleydo Team. All rights reserved.
+ * Licensed under the new BSD license, available at http://caleydo.org/license
+ ******************************************************************************/
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
@@ -35,9 +40,9 @@ function fix(v:number, size:number) {
 
 export class RangeElem implements IRangeElem {
   constructor(public from:number, public to = -1, public step = 1) {
-    if (step !== 1 && step !== -1) {
+    /*if (step !== 1 && step !== -1) {
       throw new Error('currently just +1 and -1 are valid steps');
-    }
+    }*/
   }
 
   get isAll() {
@@ -373,16 +378,23 @@ export class Range1D {
     }
     //TODO optimize
     const l = this.iter(size).asList();
-    const s = sub.iter(l.length);
-    var r = [],
-      i : number;
-    while (s.hasNext()) {
-      i = s.next();
-      if (i >= 0 && i < l.length) { //check for out of range
-        r.push(l[i]);
-      }
+    const mapImpl = (sub) => {
+      const s = sub.iter(l.length);
+      var r = [],
+        i : number;
+      s.forEach((i) => {
+        if (i >= 0 && i < l.length) { //check for out of range
+          r.push(l[i]);
+        }
+      });
+      return sub.fromLike(r);
+    };
+
+    if (sub instanceof CompositeRange1D) {
+      return composite(sub.name, sub.groups.map(mapImpl));
+    } else {
+      return mapImpl(sub);
     }
-    return Range1D.from(r);
   }
 
   /**
@@ -404,7 +416,7 @@ export class Range1D {
         r.push(i);
       }
     });
-    return Range1D.from(r.sort());
+    return other.fromLike(r.sort());
   }
 
   /**
@@ -430,7 +442,7 @@ export class Range1D {
         r.push(i);
       }
     });
-    return Range1D.from(r.sort());
+    return other.fromLike(r.sort());
   }
 
   toSet(size?:number) {
@@ -535,26 +547,35 @@ export class Range1D {
     if (r.isNone || this.isNone) {
       return r.fromLike([]);
     }
-    var result = [];
     //
+    var mapImpl;
     if (this.isIdentityRange) {
-      var end = this.arr[0].to;
-      r.forEach((d) => {
+      let end = this.arr[0].to;
+      mapImpl = (d, result) => {
         if (d >= 0 && d < end) {
           result.push(d);
         }
-      });
+      };
     } else {
       var arr = this.iter().asList();
-      r.forEach((d) => {
+      mapImpl = (d, result) => {
         var i = arr.indexOf(d);
         if (i >= 0) {
           result.push(i);
         }
-      });
+      };
     }
-
-    return r.fromLike(result);
+    if (r instanceof CompositeRange1D) {
+      return composite(r.name, r.groups.map((g) => {
+        var result = [];
+        g.forEach((d) => mapImpl(d, result));
+        return g.fromLike(result);
+      }));
+    } else {
+      var result = [];
+      r.forEach((d) => mapImpl(d, result));
+      return r.fromLike(result);
+    }
   }
 
   /**
@@ -621,10 +642,10 @@ export class Range1D {
    * @param cmp
    * @return {Range1D}
    */
-  sort(cmp:(a:number, b:number) => number):Range1D {
+  sort(cmp:(a:number, b:number) => number = (a,b) => a-b):Range1D {
     var arr = this.iter().asList();
     var r = arr.sort(cmp);
-    return Range1D.from(r);
+    return this.fromLike(r);
   }
 
   private removeDuplicates(size?:number): Range1D {
@@ -688,11 +709,6 @@ export class Range1DGroup extends Range1D {
 
   without(without:Range1D, size?:number):Range1DGroup {
     var r = super.without(without, size);
-    return new Range1DGroup(this.name, this.color, r);
-  }
-
-  sort(cmp:(a:number, b:number) => number):Range1D {
-    var r = super.sort(cmp);
     return new Range1DGroup(this.name, this.color, r);
   }
 
@@ -766,7 +782,7 @@ export class CompositeRange1D extends Range1D {
     return new CompositeRange1D(name, this.groups.map((g) => <Range1DGroup>g.clone()), r);
   }
 
-  sort(cmp:(a:number, b:number) => number):Range1D {
+  sort(cmp?:(a:number, b:number) => number):Range1D {
     var r = this.groups.length > 1 ? super.sort(cmp) : undefined;
     return new CompositeRange1D(this.name, this.groups.map((g) => <Range1DGroup>g.sort(cmp)), r);
   }
@@ -833,7 +849,7 @@ export class Range {
     }
     var r = new Range();
     this.dims.forEach((d, i) => {
-      r.dims[i] = d.preMultiply(other.dims[i], size ? size[i] : undefined);
+      r.dims[i] = d.preMultiply(other.dim(i), size ? size[i] : undefined);
     });
     return r;
   }
@@ -847,7 +863,7 @@ export class Range {
     }
     var r = new Range();
     this.dims.forEach((d, i) => {
-      r.dims[i] = d.union(other.dims[i], size ? size[i] : undefined);
+      r.dims[i] = d.union(other.dim(i), size ? size[i] : undefined);
     });
     return r;
   }
@@ -869,7 +885,7 @@ export class Range {
     }
     var r = new Range();
     this.dims.forEach((d, i) => {
-      r.dims[i] = d.intersect(other.dims[i], size ? size[i] : undefined);
+      r.dims[i] = d.intersect(other.dim(i), size ? size[i] : undefined);
     });
     return r;
   }
@@ -888,7 +904,7 @@ export class Range {
     }
     var r = new Range();
     this.dims.forEach((d, i) => {
-      r.dims[i] = d.without(without.dims[i], size ? size[i] : undefined);
+      r.dims[i] = d.without(without.dim(i), size ? size[i] : undefined);
     });
     return r;
   }
@@ -1211,7 +1227,9 @@ function parseRange1D(code:string, act:number) {
       break;
     case '(':
       next = code.indexOf(')', act);
-      r.push.apply(r, code.slice(act + 1, next).split(',').map(RangeElem.parse));
+      if (next > act+1) { //not ()
+        r.push.apply(r, code.slice(act + 1, next).split(',').map(RangeElem.parse));
+      }
       next += 1; //skip )
       break;
     default:
