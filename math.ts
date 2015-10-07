@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Caleydo - Visualization for Molecular Biology - http://caleydo.org
+ * Copyright (c) The Caleydo Team. All rights reserved.
+ * Licensed under the new BSD license, available at http://caleydo.org/license
+ ******************************************************************************/
 /**
  * Created by Samuel Gratzl on 29.08.2014.
  */
@@ -32,7 +37,15 @@ export interface IIterable<T> {
 export interface IHistogram extends IIterable<number> {
   bins: number;
   largestFrequency : number;
+  /**
+   * largest frequency without missing
+   */
+  largestBin: number;
   count: number;
+  /**
+   * number of valid entries;
+   */
+  validCount: number;
 
   frequency(bin: number) : number;
   range(bin: number): ranges.Range;
@@ -135,14 +148,17 @@ export function hist(arr: IIterable<number>, indices: ranges.Range1D, size: numb
   return r;
 }
 
-export function categoricalHist(arr: IIterable<string>, indices: ranges.Range1D, size: number, categories: string[]) : IHistogram {
-  const r = new CatHistogram(categories);
+export function categoricalHist<T>(arr: IIterable<T>, indices: ranges.Range1D, size: number, categories: T[], labels: string[], colors: string[]) : IHistogram {
+  const r = new CatHistogram(categories, labels, colors);
   r.pushAll(arr, indices, size);
   return r;
 }
 
 export function rangeHist(range: ranges.CompositeRange1D) {
   return new RangeHistogram(range);
+}
+export function wrapHist(hist: number[], value_range: number[]) {
+  return new Histogram(hist.length, value_range, hist);
 }
 
 class AHistogram implements IHistogram {
@@ -151,10 +167,10 @@ class AHistogram implements IHistogram {
   private ranges_ : ranges.Range[];
   private missingRange_  = ranges.none();
 
-  constructor(bins: number) {
+  constructor(bins: number, hist?: number[]) {
     this.bins_ = [];
     for(var i = 0; i < bins; ++i) {
-      this.bins_.push(0);
+      this.bins_.push(hist && hist.length > i ? hist[i] : 0);
     }
   }
 
@@ -162,8 +178,16 @@ class AHistogram implements IHistogram {
     return Math.max(Math.max.apply(Math,this.bins_), this.missing_);
   }
 
+  get largestBin() {
+    return Math.max.apply(Math,this.bins_);
+  }
+
   get count() {
-    return this.bins_.reduce((p,s) => p+s, this.missing_);
+    return this.validCount + this.missing_;
+  }
+
+  get validCount() {
+    return this.bins_.reduce((p,s) => p+s, 0);
   }
 
   get bins() {
@@ -179,7 +203,7 @@ class AHistogram implements IHistogram {
   }
 
   range(bin:number) {
-    return this.ranges_ ? this.ranges_[bin] : null;
+    return this.ranges_ ? this.ranges_[bin] : ranges.none();
   }
 
   get missing() {
@@ -231,8 +255,8 @@ class AHistogram implements IHistogram {
 }
 
 class Histogram extends AHistogram {
-  constructor(bins: number, private r: number[]) {
-    super(bins);
+  constructor(bins: number, private value_range: number[], hist?: number[]) {
+    super(bins, hist);
   }
 
   binOf(value: any) {
@@ -246,7 +270,7 @@ class Histogram extends AHistogram {
     if (isNaN(value)) {
       return -1;
     }
-    const n = (value - this.r[0]) / (this.r[1] - this.r[0]);
+    const n = (value - this.value_range[0]) / (this.value_range[1] - this.value_range[0]);
     var bin = Math.round(n * (this.bins - 1));
     if (bin < 0) {
       bin = 0;
@@ -258,18 +282,18 @@ class Histogram extends AHistogram {
   }
 }
 
-class CatHistogram extends AHistogram {
-  constructor(public categories: string[]) {
-    super(categories.length);
+class CatHistogram extends AHistogram implements ICatHistogram {
+  constructor(private values: any[], public categories: string[], public colors: string[]) {
+    super(values.length);
   }
 
   binOf(value: any) {
-    return this.categories.indexOf(value);
+    return this.values.indexOf(value);
   }
 }
 
 
-class RangeHistogram implements IHistogram {
+class RangeHistogram implements ICatHistogram {
   constructor(private range_: ranges.CompositeRange1D) {
   }
 
@@ -285,8 +309,16 @@ class RangeHistogram implements IHistogram {
     return Math.max.apply(Math, this.range_.groups.map((g) => g.length));
   }
 
+  get largestBin() {
+    return this.largestFrequency;
+  }
+
   get count() {
     return this.range_.length;
+  }
+
+  get validCount() {
+    return this.count;
   }
 
   get bins() {

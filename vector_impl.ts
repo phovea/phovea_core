@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Caleydo - Visualization for Molecular Biology - http://caleydo.org
+ * Copyright (c) The Caleydo Team. All rights reserved.
+ * Licensed under the new BSD license, available at http://caleydo.org/license
+ ******************************************************************************/
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
@@ -10,6 +15,7 @@ import idtypes = require('./idtype');
 import datatypes = require('./datatype');
 import math = require('./math');
 import def = require('./vector');
+import stratification = require('./stratification');
 
 /**
  * base class for different Vector implementations, views, transposed,...
@@ -23,7 +29,7 @@ export class VectorBase extends idtypes.SelectAble {
     return [this.length];
   }
 
-  data() : Promise<any[]> {
+  data(range?:ranges.Range) : Promise<any[]> {
     throw new Error('not implemented');
   }
 
@@ -64,6 +70,9 @@ export class VectorBase extends idtypes.SelectAble {
         if (v.categories[0].color) {
           options.colors = v.categories.map((d) => d.color);
         }
+        if (v.categories[0].label) {
+          options.labels = v.categories.map((d) => d.label);
+        }
         return datatypes.categorical2partitioning(d, v.categories.map((d) => typeof d === 'string' ? d : d.name), options);
       });
     } else {
@@ -71,12 +80,20 @@ export class VectorBase extends idtypes.SelectAble {
     }
   }
 
-  hist(bins? : number) : Promise<math.IHistogram> {
+  stratification(): Promise<stratification.IStratification> {
+    return this.groups().then((range) => {
+      return new StratificationVector(<def.IVector><any>this, range);
+    });
+  }
+
+  hist(bins? : number, range = ranges.all()) : Promise<math.IHistogram> {
     var v = this._root.valuetype;
-    return this.data().then((d) => {
+    return this.data(range).then((d) => {
       switch(v.type) {
       case 'categorical':
-          return math.categoricalHist(d, this.indices.dim(0), d.length, v.categories.map((d) => typeof d === 'string' ? d : d.name));
+          return math.categoricalHist(d, this.indices.dim(0), d.length, v.categories.map((d) => typeof d === 'string' ? d : d.name),
+          v.categories.map((d) => typeof d === 'string' ? d : d.name || d.label),
+          v.categories.map((d) => typeof d === 'string' ? 'gray' : d.color || 'gray'));
       case 'real':
       case 'int':
         return math.hist(d, this.indices.dim(0), d.length, bins ? bins : Math.round(Math.sqrt(this.length)), v.range);
@@ -201,7 +218,7 @@ export class Vector extends VectorBase implements def.IVector {
   data(range:ranges.Range = ranges.all()) {
     var that = this;
     return this.load().then(function (data) {
-      return range.filter(data.data, that.dim);
+      return datatypes.mask(range.filter(data.data, that.dim), that.valuetype);
     });
   }
 
@@ -214,7 +231,7 @@ export class Vector extends VectorBase implements def.IVector {
   ids(range:ranges.Range = ranges.all()): Promise<ranges.Range> {
     var that = this;
     return this.load().then(function (data) {
-      return range.preMultiply(data.rowIds, that.dim);
+      return data.rowIds.preMultiply(range, that.dim);
     });
   }
 
@@ -335,6 +352,91 @@ class VectorView extends VectorBase implements def.IVector {
     });
   }
 }
+
+
+/**
+ * root matrix implementation holding the data
+ */
+export class StratificationVector extends datatypes.DataTypeBase implements stratification.IStratification {
+
+  constructor(private v: def.IVector, private r: ranges.CompositeRange1D) {
+    super({
+      id: v.desc.id+'-s',
+      name: v.desc.name+'-s',
+      fqname: v.desc.fqname+'-s',
+      type: 'stratification',
+      size: v.dim,
+      ngroups: r.groups.length,
+      groups : r.groups.map((ri) => ({ name: ri.name, color: ri.color, size: ri.length }))
+    });
+  }
+
+  get idtype() {
+    return this.v.idtype;
+  }
+
+  get groups() {
+    return <stratification.IGroup[]>(<any>this.desc).groups;
+  }
+
+  group(group:number):stratification.IStratification {
+    return new stratification.StratificationGroup(this, group, this.groups[group]);
+  }
+
+  hist(bins?:number, range=ranges.all()):Promise<math.IHistogram> {
+    return this.range().then((r) => {
+      return math.rangeHist(r);
+    });
+  }
+
+  vector() {
+    return Promise.resolve(this.v);
+  }
+
+  origin():Promise<datatypes.IDataType> {
+    return this.vector();
+  }
+
+  range() {
+    return Promise.resolve(this.r);
+  }
+
+  names(range:ranges.Range = ranges.all()) {
+    return this.v.names(range);
+  }
+
+  ids(range:ranges.Range = ranges.all()):Promise<ranges.Range> {
+    return this.v.ids(range);
+  }
+
+  get idtypes() {
+    return [this.idtype];
+  }
+
+  size() {
+    return (<any>this.desc).size;
+  }
+
+  get length() {
+    return this.size()[0];
+  }
+
+  get ngroups() {
+    return (<any>this.desc).ngroups;
+  }
+
+  get dim() {
+    return this.size();
+  }
+
+  persist() {
+    return {
+      root: this.v.persist(),
+      asstrat: true
+    };
+  }
+}
+
 
 /**
  * module entry point for creating a datatype

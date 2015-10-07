@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Caleydo - Visualization for Molecular Biology - http://caleydo.org
+ * Copyright (c) The Caleydo Team. All rights reserved.
+ * Licensed under the new BSD license, available at http://caleydo.org/license
+ ******************************************************************************/
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
@@ -6,6 +11,7 @@
 import ranges = require('./range');
 import idtypes = require('./idtype');
 import datatypes = require('./datatype');
+import stratification = require('./stratification');
 import math = require('./math');
 
 export interface IVector extends datatypes.IDataType {
@@ -45,7 +51,8 @@ export interface IVector extends datatypes.IDataType {
 
   stats() : Promise<math.IStatistics>;
 
-  hist(bins? : number) : Promise<math.IHistogram>;
+  hist(bins? : number, range?:ranges.Range) : Promise<math.IHistogram>;
+
 
   /**
    * Sorts an array.
@@ -124,4 +131,6 @@ export interface IVector extends datatypes.IDataType {
    * return the range of this vector as a grouped range, depending on the type this might be a single group or multiple ones
    */
   groups(): Promise<ranges.CompositeRange1D>;
+
+  stratification(): Promise<stratification.IStratification>;
 }

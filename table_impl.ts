@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Caleydo - Visualization for Molecular Biology - http://caleydo.org
+ * Copyright (c) The Caleydo Team. All rights reserved.
+ * Licensed under the new BSD license, available at http://caleydo.org/license
+ ******************************************************************************/
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
@@ -73,7 +78,7 @@ function toObjects(data: any[][], vecs) {
   return data.map((row) => {
     var r : any = {};
     vecs.forEach((col, i) => {
-      r[col.name] =  row[i];
+      r[col.name] =  datatypes.mask(row[i], col.value);
     });
     return r;
   });
@@ -90,6 +95,12 @@ function viaAPILoader() {
       //transpose to have column order for better vector access
       data.objs = toObjects(data.data, desc.columns);
       data.data = datatypes.transpose(data.data);
+
+      //mask data
+      if (desc.columns.some((col) => col.value && 'missing' in col.value)) {
+       data.data = data.data.map((col, i) => datatypes.mask(col, desc.columns[i].value));
+      }
+      //mask the data
       return data;
     });
   };
@@ -323,6 +334,7 @@ export class TableVector extends vector_impl.VectorBase implements vector.IVecto
     super(null);
     this._root = this;
     this.valuetype = (<any>desc).value;
+    this.desc.fqname=table.desc.fqname+'/'+this.desc.name;
     this.desc.type = 'vector';
   }
 
@@ -354,7 +366,7 @@ export class TableVector extends vector_impl.VectorBase implements vector.IVecto
    * TODO: load just needed data and not everything given by the requested range
    * @returns {*}
    */
-  load() : Promise<any[]> {
+  private load() : Promise<any[]> {
     var that = this;
     return this.table.load().then(function (data) {
       return data.data[that.index];

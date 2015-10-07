@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Caleydo - Visualization for Molecular Biology - http://caleydo.org
+ * Copyright (c) The Caleydo Team. All rights reserved.
+ * Licensed under the new BSD license, available at http://caleydo.org/license
+ ******************************************************************************/
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
@@ -12,16 +17,32 @@ import ranges = require('./range');
  * basic description elements
  */
 export interface IDataDescription {
-  name: string;
-  fqname: string;
+  /**
+   * the unique id
+   */
   id: string;
+  /**
+   * the type of the datatype, e.g. matrix, vector, stratification, ...
+   */
   type: string;
+
+  /**
+   * the name of the dataset
+   */
+  name: string;
+  /**
+   * a fully qualified name, e.g. project_name/name
+   */
+  fqname: string;
 }
 
 /**
  * basic data type interface
  */
 export interface IDataType extends idtypes.SelectAble, C.IPersistable {
+  /**
+   * its description
+   */
   desc: IDataDescription;
   /**
    * dimensions of this datatype
@@ -41,9 +62,15 @@ export function isDataType(v: any) {
   return (v instanceof idtypes.SelectAble && C.isFunction(v.idView) && C.isFunction(v.persist) && C.isFunction(v.restore) && ('desc' in v) && ('dim' in v));
 }
 
+/**
+ * utility to assign a dataset to an html element, similar to d3
+ * @param node
+ * @param data
+ */
 export function assignData(node: Element, data: IDataType) {
   (<any>node).__data__ = data;
 }
+
 /**
  * dummy data type just holding the description
  */
@@ -68,7 +95,7 @@ export class DataTypeBase extends idtypes.SelectAble implements IDataType {
     return [];
   }
 
-  persist() {
+  persist() : any {
     return this.desc.id;
   }
 
@@ -97,6 +124,23 @@ export function transpose(m: any[][]) {
   return r;
 }
 
+function maskImpl(arr: number|number[], missing: number) {
+  if (Array.isArray(arr)) {
+    let vs = <number[]>arr;
+    if (vs.indexOf(missing) >= 0) {
+      return vs.map((v) => v === missing ? NaN : v);
+    }
+  }
+  return arr === missing ? NaN : arr;
+}
+
+export function mask(arr: any|any[], desc: { type: string; missing?: number}) {
+  if (desc.type === 'int' && 'missing' in desc) {
+    return maskImpl(arr, desc.missing);
+  }
+  return arr;
+}
+
 
 /**
  * converts the given categorical data to a grouped range
@@ -105,15 +149,16 @@ export function transpose(m: any[][]) {
  * @param options
  * @return {any}
  */
-export function categorical2partitioning(data: string[], categories: string[], options = {}) {
+export function categorical2partitioning<T>(data: T[], categories: T[], options = {}) {
   const m = C.mixin({
     skipEmptyCategories : true,
     colors: ['gray'],
+    labels: null,
     name: 'Partitioning'
   }, options);
   var groups = categories.map((d, i) => {
     return {
-      name: d,
+      name: m.labels ? m.labels[i] : d,
       color: m.colors[Math.min(i,m.colors.length-1)],
       indices: []
     };

@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Caleydo - Visualization for Molecular Biology - http://caleydo.org
+ * Copyright (c) The Caleydo Team. All rights reserved.
+ * Licensed under the new BSD license, available at http://caleydo.org/license
+ ******************************************************************************/
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
@@ -41,6 +46,8 @@ export interface IMatrix extends datatypes.IDataType {
    */
   view(range?:ranges.Range) : IMatrix;
 
+  slice(col: number): vector.IVector;
+
   //view(filter: string): Promise<IMatrix>;
 
   /**
@@ -83,5 +90,8 @@ export interface IMatrix extends datatypes.IDataType {
 
   stats() : Promise<math.IStatistics>;
 
-  hist(bins? : number, containedIds? : number) : Promise<math.IHistogram>;
+  hist(bins? : number, range?:ranges.Range, containedIds? : number) : Promise<math.IHistogram>;
+
+
+  heatmapUrl(range?: ranges.Range, options?: { format?: string; transpose?: boolean; range?: [number,number]}): string;
 }
