@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Caleydo - Visualization for Molecular Biology - http://caleydo.org
+ * Copyright (c) The Caleydo Team. All rights reserved.
+ * Licensed under the new BSD license, available at http://caleydo.org/license
+ ******************************************************************************/
 /**
  * Created by Samuel Gratzl on 27.08.2014.
  */
@@ -331,8 +336,8 @@ class GridElem implements C.IPersistable {
     this.actVis = null;
   }
 
-  build(plugin: any) {
-    this.actVis = plugin.factory(this.data, this.content);
+  build(plugin: any, options: any) {
+    this.actVis = plugin.factory(this.data, this.content, options);
     vis.assignVis(this.content, this.actVis);
     return this.actVis;
   }
@@ -372,6 +377,10 @@ function max(arr: any[], acc: (row: any) => number) {
   return arr.reduce((p,act) => Math.max(p,acc(act)), -Infinity);
 }
 
+export interface IViewFactory {
+  (data:datatypes.IDataType, range : ranges.Range, pos: number[]) : datatypes.IDataType;
+}
+
 /**
  * a simple multi form class using a select to switch
  */
@@ -393,7 +402,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
 
   private metaData_ : vis.IVisMetaData = new ProxyMetaData(() => this.actDesc);
 
-  constructor(public data:datatypes.IDataType, public range: ranges.Range, parent:Element, viewFactory : (data:datatypes.IDataType, range : ranges.Range) => datatypes.IDataType, private options : any = {}) {
+  constructor(public data:datatypes.IDataType, public range: ranges.Range, parent:Element, viewFactory : IViewFactory, private options : any = {}) {
     super();
     this.options = C.mixin({
       initialVis : 0
@@ -418,7 +427,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
     function product(level: number, range : ranges.Range1D[], pos : number[]) {
       if (level === dims.length) {
         var r = range.length === 0 ? ranges.all() : ranges.list(range.slice()); //work on a copy for safety reason
-        grid.push(new GridElem(r, pos.slice(), viewFactory(data, r)));
+        grid.push(new GridElem(r, pos.slice(), viewFactory(data, r, pos.slice())));
       } else {
         dims[level].forEach((group, i) => {
           range.push(group);
@@ -482,7 +491,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
     //create groups for all grid elems
     //TODO how to layout as a grid
     if (this.dims.length === 1) {
-      this.grid.forEach((elem) => elem.setContent(wrap(createNode(this.node, 'div', 'content gridrow'), elem.data, elem.range)));
+      this.grid.forEach((elem) => elem.setContent(wrap(createNode(this.node, 'div', 'content gridrow'), elem.data, elem.range, elem.pos)));
     } else {
       const ndim = this.dimSizes;
       for(let i = 0; i < ndim[0]; ++i) {
@@ -491,7 +500,7 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
           const elem = this.grid[i*ndim[1] + j];
           let nn = createNode(row, 'div', 'content');
           nn.style.display = 'inline-block';
-          elem.setContent(wrap(nn, elem.data, elem.range));
+          elem.setContent(wrap(nn, elem.data, elem.range, elem.pos));
         }
       }
     }
@@ -721,8 +730,9 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
         if (this.actDesc !== vis) { //changed in the meanwhile
           return null;
         }
+        const options = C.mixin({}, this.options.all, this.options[vis.id] || {});
         const r = this.grid.map((elem) => {
-          return elem.build(plugin);
+          return elem.build(plugin, options);
         });
         var c = r.length;
         r.forEach((ri) => {
@@ -788,6 +798,6 @@ export function create(data:datatypes.IDataType, parent:Element, options?) {
   return new MultiForm(data, parent, options);
 }
 
-export function createGrid(data:datatypes.IDataType, range: ranges.Range, parent:Element, viewFactory : (data:datatypes.IDataType, range : ranges.Range) => datatypes.IDataType, options?) {
+export function createGrid(data:datatypes.IDataType, range: ranges.Range, parent:Element, viewFactory : IViewFactory, options?) {
   return new MultiFormGrid(data, range, parent, viewFactory, options);
 }
