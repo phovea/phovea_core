@@ -201,7 +201,7 @@ function viaAPI2Loader() {
         });
       }
       return rowIds.then((d) => {
-        return range.preMultiply(d, (<any>desc).size);
+        return d.preMultiply(range, (<any>desc).size);
       });
     },
     rows: (desc:datatypes.IDataDescription, range:ranges.Range) => {
@@ -214,7 +214,7 @@ function viaAPI2Loader() {
       if (colIds == null) {
         colIds = ajax.getAPIJSON('/dataset/matrix/' + desc.id + '/colIds').then((ids) => ranges.parse(ids));
       }
-      return colIds.then((d) => range.preMultiply(d, (<any>desc).size));
+      return colIds.then((d) => d.preMultiply(range, (<any>desc).size));
     },
     cols: (desc:datatypes.IDataDescription, range:ranges.Range) => {
       if (cols == null) {
@@ -223,6 +223,9 @@ function viaAPI2Loader() {
       return cols.then((d) => range.dim(1).filter(d, (<any>desc).size[1]));
     },
     ids: (desc:datatypes.IDataDescription, range:ranges.Range) => {
+      if (range.ndim === 1) {
+        return r.rowIds(desc, range);
+      }
       range.dim(0); //ensure two dim
       range.dim(1); //ensure two dim
       var split = range.split();

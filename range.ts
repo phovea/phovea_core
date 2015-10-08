@@ -361,8 +361,7 @@ export class Range1D {
 
   /**
    * combines this range with another and returns a new one
-   * this = (1,3,4), sub = (2) -> (2)
-   * (2)(1,2,3)
+   * this = (1,3,5,7), sub = (1,2) -> (1,2)(1,3,5,7) = (3,5)
    * @param other
    * @returns {*}
    */
@@ -834,8 +833,7 @@ export class Range {
 
   /**
    * combines this range with another and returns a new one
-   * this = (1,3,4), sub = (2) -> (2)
-   * (2)(1,2,3)
+   * this = (1,3,5,7), other = (1,2) -> (1,2)(1,3,5,7) = (3,5)
    * @param other
    * @returns {*}
    */
