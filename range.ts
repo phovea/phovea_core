@@ -1,8 +1,8 @@
-/*******************************************************************************
+/* *****************************************************************************
  * Caleydo - Visualization for Molecular Biology - http://caleydo.org
  * Copyright (c) The Caleydo Team. All rights reserved.
  * Licensed under the new BSD license, available at http://caleydo.org/license
- ******************************************************************************/
+ **************************************************************************** */
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
@@ -380,8 +380,7 @@ export class Range1D {
     const l = this.iter(size).asList();
     const mapImpl = (sub) => {
       const s = sub.iter(l.length);
-      var r = [],
-        i : number;
+      var r = [];
       s.forEach((i) => {
         if (i >= 0 && i < l.length) { //check for out of range
           r.push(l[i]);

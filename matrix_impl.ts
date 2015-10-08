@@ -1,8 +1,8 @@
-/*******************************************************************************
+/* *****************************************************************************
  * Caleydo - Visualization for Molecular Biology - http://caleydo.org
  * Copyright (c) The Caleydo Team. All rights reserved.
  * Licensed under the new BSD license, available at http://caleydo.org/license
- ******************************************************************************/
+ **************************************************************************** */
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
@@ -182,21 +182,6 @@ function adapterOne2Two(loader: IMatrixLoader): IMatrixLoader2 {
   };
 }
 
-function viaAPILoader() {
-  var _loader = undefined;
-  return (desc) => {
-    if (_loader) { //in the cache
-      return _loader;
-    }
-    return _loader = ajax.getAPIJSON('/dataset/'+desc.id).then(function (data) {
-      data.rowIds = ranges.parse(data.rowIds);
-      data.colIds = ranges.parse(data.colIds);
-      data.ids = ranges.list(data.rowIds.dim(0), data.colIds.dim(0));
-      return data;
-    });
-  };
-}
-
 function maskIt(desc: datatypes.IDataDescription) {
   return (v) => datatypes.mask(v, desc);
 }
@@ -206,7 +191,6 @@ function viaAPI2Loader() {
     rows = null,
     colIds = null,
     cols = null,
-    ids = null,
     data = null,
     hist = null;
   var r = {

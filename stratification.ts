@@ -1,15 +1,15 @@
-/*******************************************************************************
+/* *****************************************************************************
  * Caleydo - Visualization for Molecular Biology - http://caleydo.org
  * Copyright (c) The Caleydo Team. All rights reserved.
  * Licensed under the new BSD license, available at http://caleydo.org/license
- ******************************************************************************/
+ **************************************************************************** */
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
 'use strict';
 import ranges = require('./range');
-import datatypes = require('./datatype')
+import datatypes = require('./datatype');
 import idtypes = require('./idtype');
 import vector = require('./vector');
 import math = require('./math');
