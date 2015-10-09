@@ -268,7 +268,8 @@ function viaAPI2Loader() {
     },
     heatmapUrl: (desc:datatypes.IDataDescription, range:ranges.Range, options: { format?: string; transpose?: boolean; range?: [number,number]; palette?: string}) => {
       var args : any = {
-        format: options.format || 'png'
+        format: options.format || 'png',
+        range: range.toString()
       };
       if (options.transpose === true) {
         args.format_transpose = true;
