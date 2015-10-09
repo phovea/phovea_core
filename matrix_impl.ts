@@ -167,7 +167,7 @@ export interface IMatrixLoader2 {
   at(desc: datatypes.IDataDescription, i, j) : Promise<any>;
   hist?(desc: datatypes.IDataDescription, range: ranges.Range, bins?: number): Promise<math.IHistogram>;
   data(desc: datatypes.IDataDescription, range: ranges.Range) : Promise<any[][]>;
-  heatmapUrl?(desc: datatypes.IDataDescription, range:ranges.Range, options: { format?: string; transpose?: boolean; range?: [number,number]}): string;
+  heatmapUrl?(desc: datatypes.IDataDescription, range:ranges.Range, options: { format?: string; transpose?: boolean; range?: [number,number]; palette?: string}): string;
 }
 
 function adapterOne2Two(loader: IMatrixLoader): IMatrixLoader2 {
@@ -266,7 +266,7 @@ function viaAPI2Loader() {
         range: range.toString()
       }).then(maskIt(desc));
     },
-    heatmapUrl: (desc:datatypes.IDataDescription, range:ranges.Range, options: { format?: string; transpose?: boolean; range?: [number,number]}) => {
+    heatmapUrl: (desc:datatypes.IDataDescription, range:ranges.Range, options: { format?: string; transpose?: boolean; range?: [number,number]; palette?: string}) => {
       var args : any = {
         format: options.format || 'png'
       };
@@ -276,6 +276,9 @@ function viaAPI2Loader() {
       if (options.range) {
         args.format_min = options.range[0];
         args.format_max = options.range[1];
+      }
+      if (options.palette) {
+        args.format_palette = options.palette;
       }
       return ajax.api2absURL(`/dataset/matrix/${desc.id}/data`, args);
     }
