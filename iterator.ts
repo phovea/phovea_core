@@ -30,25 +30,26 @@ export interface IIterator<T> {
    */
   byMinusOne : boolean;
 
-  forEach(callbackfn: (value: T) => void, thisArg?: any): void;
+  forEach(callbackfn:(value:T) => void, thisArg?:any): void;
 
   /**
    * Calls a defined callback function on each element of an array, and returns an array that contains the results.
    * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
    * @param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
    */
-  map<U>(callbackfn: (value: T) => U, thisArg?: any): IIterator<U>;
+  map<U>(callbackfn:(value:T) => U, thisArg?:any): IIterator<U>;
 }
 
 export class AIterator<T> {
-  hasNext() : boolean {
+  hasNext():boolean {
     return false;
   }
-  next() : T {
+
+  next():T {
     return null;
   }
 
-  forEach(callbackfn: (value: T) => void, thisArg?: any): void {
+  forEach(callbackfn:(value:T) => void, thisArg?:any):void {
     var i = 0;
     while (this.hasNext()) {
       callbackfn.call(thisArg, this.next(), i++);
@@ -60,7 +61,7 @@ export class AIterator<T> {
    * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
    * @param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
    */
-  map<U>(callbackfn: (value: T) => U, thisArg?: any): IIterator<U> {
+  map<U>(callbackfn:(value:T) => U, thisArg?:any):IIterator<U> {
     return new TransformIterator(this, callbackfn, thisArg);
   }
 
@@ -95,7 +96,7 @@ export class AIterator<T> {
 /**
  * iterator for a given range
  */
-export class Iterator extends AIterator<number> implements IIterator<number>{
+export class Iterator extends AIterator<number> implements IIterator<number> {
 
   private act:number;
 
@@ -146,20 +147,20 @@ export class Iterator extends AIterator<number> implements IIterator<number>{
 
   get size() {
     if (this.byOne) {
-      return Math.max(this.to - this.from,0);
+      return Math.max(this.to - this.from, 0);
     } else if (this.byMinusOne) {
-      return Math.max(this.from - this.to,0);
+      return Math.max(this.from - this.to, 0);
     }
-    var d = this.isIncreasing ? (this.to - this.from+1) : (this.from - this.to+1);
+    var d = this.isIncreasing ? (this.to - this.from + 1) : (this.from - this.to + 1);
     var s = Math.abs(this.step);
     if (d <= 0) { //no range
       return 0;
     }
-    return Math.floor(d/s);
+    return Math.floor(d / s);
   }
 }
 
-export class ListIterator<T> extends AIterator<T> implements IIterator<T>{
+export class ListIterator<T> extends AIterator<T> implements IIterator<T> {
   private it:Iterator;
 
   constructor(public arr:T[]) {
@@ -189,9 +190,10 @@ export class ListIterator<T> extends AIterator<T> implements IIterator<T>{
   }
 }
 
-export class SingleIterator<T> extends AIterator<T> implements IIterator<T>{
+export class SingleIterator<T> extends AIterator<T> implements IIterator<T> {
   private delivered = false;
-  constructor(private value: T) {
+
+  constructor(private value:T) {
     super();
   }
 
@@ -228,9 +230,9 @@ export class SingleIterator<T> extends AIterator<T> implements IIterator<T>{
   }
 }
 
-export class ConcatIterator<T> extends AIterator<T> implements IIterator<T>{
+export class ConcatIterator<T> extends AIterator<T> implements IIterator<T> {
 
-  private act : IIterator<T>;
+  private act:IIterator<T>;
 
   constructor(private its:IIterator<T>[]) {
     super();
@@ -288,7 +290,7 @@ export class ConcatIterator<T> extends AIterator<T> implements IIterator<T>{
   }
 }
 
-export class EmptyIterator<T> extends AIterator<T> implements IIterator<T>{
+export class EmptyIterator<T> extends AIterator<T> implements IIterator<T> {
   isIncreasing = false;
   isDecreasing = false;
   byOne = false;
@@ -304,7 +306,7 @@ export class EmptyIterator<T> extends AIterator<T> implements IIterator<T>{
   /**
    * returns the next item
    */
-  next() : T {
+  next():T {
     throw new RangeError('end of iterator');
   }
 
@@ -317,10 +319,11 @@ export class EmptyIterator<T> extends AIterator<T> implements IIterator<T>{
   }
 }
 
-class TransformIterator<O,T> extends AIterator<T> implements IIterator<T>{
-  constructor(private it : IIterator<O>, private f : (elem: O) => T, private thisArg? : any) {
+class TransformIterator<O,T> extends AIterator<T> implements IIterator<T> {
+  constructor(private it:IIterator<O>, private f:(elem:O) => T, private thisArg?:any) {
     super();
   }
+
   /**
    * whether more items are available
    */
@@ -359,7 +362,7 @@ export function empty<T>() {
   return new EmptyIterator<T>();
 }
 
-export function concat<T>(...its : IIterator<T>[]) {
+export function concat<T>(...its:IIterator<T>[]) {
   if (its.length === 0) {
     return empty();
   } else if (its.length === 1) {
@@ -379,7 +382,7 @@ export function range(from:number, to:number, step:number) {
   return new Iterator(from, to, step);
 }
 
-export function single(value: number) {
+export function single(value:number) {
   return new SingleIterator(value);
 }
 
