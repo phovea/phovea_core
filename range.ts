@@ -582,7 +582,7 @@ export class Range1D {
    * @param size the total size for resolving negative indices
    * @returns {*}
    */
-  filter(data:any[], size:number, transform:(any) => any = C.identity) {
+  filter(data:any[], size?:number, transform:(any) => any = C.identity) {
     if (this.isAll) {
       return data.map(transform);
     }

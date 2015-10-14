@@ -269,6 +269,13 @@ function asSelectOperation(v: any) {
   return +v;
 }
 
+function fillWithNone(r : ranges.Range, ndim: number) {
+  while(r.ndim < ndim) {
+    r.dims[r.ndim] = ranges.Range1D.none();
+  }
+  return r;
+}
+
 
 export class SelectAble extends events.EventHandler {
   private numSelectListeners = 0;
@@ -283,6 +290,11 @@ export class SelectAble extends events.EventHandler {
       if (act.isNone && added.isNone && removed.isNone) {
         return;
       }
+      //ensure the right number of dimensions
+      fillWithNone(act, ids.ndim);
+      fillWithNone(added, ids.ndim);
+      fillWithNone(removed, ids.ndim);
+
       this.fire('select', type, act, added, removed);
       this.fire('select-' + type, act, added, removed);
     });
@@ -343,6 +355,11 @@ export class SelectAble extends events.EventHandler {
       if (act.isNone && added.isNone && removed.isNone) {
         return;
       }
+      //ensure the right number of dimensions
+      fillWithNone(act, ids.ndim);
+      fillWithNone(added, ids.ndim);
+      fillWithNone(removed, ids.ndim);
+
       this.fire('select', type, act, added, removed);
       this.fire('select-' + type, act, added, removed);
     });
