@@ -27,7 +27,7 @@ export enum SelectOperation {
  * converts the given mouse event to a select operation
  * @param event the mouse event to examine
  */
-export function toSelectOperation(event: any);
+export function toSelectOperation(event:any);
 /**
  * converts the given key modifiers to select operation
  * @param ctryKey
@@ -35,8 +35,8 @@ export function toSelectOperation(event: any);
  * @param shiftKey
  * @param metaKey
  */
-export function toSelectOperation(ctryKey: boolean, altKey: boolean, shiftKey: boolean, metaKey: boolean);
-export function toSelectOperation(event: any) {
+export function toSelectOperation(ctryKey:boolean, altKey:boolean, shiftKey:boolean, metaKey:boolean);
+export function toSelectOperation(event:any) {
   var ctryKeyDown, shiftDown, altDown, metaDown;
   if (typeof event === 'boolean') {
     ctryKeyDown = event;
@@ -73,7 +73,7 @@ export class IDType extends events.EventHandler implements C.IPersistable {
    * @param names the plural name
    * @param internal whether this is an internal type or not
    */
-  constructor(public id: string, public name:string, public names:string, public internal = false) {
+  constructor(public id:string, public name:string, public names:string, public internal = false) {
     super();
   }
 
@@ -87,7 +87,7 @@ export class IDType extends events.EventHandler implements C.IPersistable {
     };
   }
 
-  restore(persisted: any) {
+  restore(persisted:any) {
     this.name = persisted.name;
     this.names = persisted.names;
     Object.keys(persisted.sel).forEach((type) => this.sel[type] = ranges.parse(persisted.sel[type]));
@@ -174,26 +174,26 @@ export interface IHasUniqueId {
   id: number;
 }
 
-export function toId(elem : IHasUniqueId) {
+export function toId(elem:IHasUniqueId) {
   return elem.id;
 }
 
-export function isId(id: number) {
-  return (elem: IHasUniqueId) => elem && elem.id === id;
+export function isId(id:number) {
+  return (elem:IHasUniqueId) => elem && elem.id === id;
 }
 
 /**
  * a manager of a bunch of objects with selection support
  */
 export class ObjectManager<T extends IHasUniqueId> extends IDType {
-  private instances: T[] = [];
+  private instances:T[] = [];
   private pool = new C.IdPool();
 
-  constructor(id: string, name : string) {
+  constructor(id:string, name:string) {
     super(id, name, name + 's', true);
   }
 
-  nextId(item?: T) {
+  nextId(item?:T) {
     const n = this.pool.checkOut();
     if (item) {
       item.id = n;
@@ -203,18 +203,18 @@ export class ObjectManager<T extends IHasUniqueId> extends IDType {
     return n;
   }
 
-  push(...items : T[]) {
+  push(...items:T[]) {
     items.forEach((item) => {
       this.instances[item.id] = item;
       this.fire('add', item.id, item);
     });
   }
 
-  byId(id: number) {
+  byId(id:number) {
     return this.instances[id];
   }
 
-  forEach(callbackfn: (value: T) => void, thisArg?: any): void {
+  forEach(callbackfn:(value:T) => void, thisArg?:any):void {
     this.instances.forEach((item, i) => this.pool.isCheckedOut(i) ? callbackfn.call(thisArg, item) : null);
   }
 
@@ -222,9 +222,9 @@ export class ObjectManager<T extends IHasUniqueId> extends IDType {
     return this.instances.filter((item, i) => this.pool.isCheckedOut(i));
   }
 
-  remove(id: number);
-  remove(item: T);
-  remove(item: any): T {
+  remove(id:number);
+  remove(item:T);
+  remove(item:any):T {
     var old = null;
     if (typeof item.id === 'number') {
       item = item.id;
@@ -248,6 +248,42 @@ export class ObjectManager<T extends IHasUniqueId> extends IDType {
   }
 }
 
+export class LocalIDAssigner {
+  private pool = new C.IdPool();
+  private lookup:{  [key:string] : number } = {};
+
+  constructor() {
+
+  }
+
+  mapOne(id:string):number {
+    if (id in this.lookup) {
+      return this.lookup[id];
+    }
+    this.lookup[id] = this.pool.checkOut();
+    return this.lookup[id];
+  }
+
+  map(ids:string[]):ranges.Range {
+    return ranges.list.apply(ranges, ids.map(this.mapOne.bind(this)));
+  }
+}
+
+export function createLocalAssigner() {
+  const pool = new C.IdPool();
+  const lookup:{  [key:string] : number } = {};
+
+  function mapOne(id:string):number {
+    if (id in lookup) {
+      return lookup[id];
+    }
+    lookup[id] = pool.checkOut();
+    return lookup[id];
+  }
+
+  return (ids:string[]) => ranges.list.apply(ranges, ids.map(mapOne));
+}
+
 function asRange(v:any) {
   if (Array.isArray(v)) {
     return ranges.list.apply(ranges, v);
@@ -255,22 +291,25 @@ function asRange(v:any) {
   return v;
 }
 
-function asSelectOperation(v: any) {
+function asSelectOperation(v:any) {
   if (!v) {
     return SelectOperation.SET;
   }
-  if(typeof v === 'string') {
-    switch(v.toLowerCase()) {
-      case 'add' : return SelectOperation.ADD;
-      case 'remove' : return SelectOperation.REMOVE;
-      default : return SelectOperation.SET;
+  if (typeof v === 'string') {
+    switch (v.toLowerCase()) {
+      case 'add' :
+        return SelectOperation.ADD;
+      case 'remove' :
+        return SelectOperation.REMOVE;
+      default :
+        return SelectOperation.SET;
     }
   }
   return +v;
 }
 
-function fillWithNone(r : ranges.Range, ndim: number) {
-  while(r.ndim < ndim) {
+function fillWithNone(r:ranges.Range, ndim:number) {
+  while (r.ndim < ndim) {
     r.dims[r.ndim] = ranges.Range1D.none();
   }
   return r;
@@ -302,22 +341,22 @@ export class SelectAble extends events.EventHandler {
   private selectionCache = [];
   private accumulateEvents = -1;
 
-  ids(range?:ranges.Range) : Promise<ranges.Range> {
+  ids(range?:ranges.Range):Promise<ranges.Range> {
     throw new Error('not implemented');
   }
 
-  fromIdRange(idRange: ranges.Range = ranges.all()) {
+  fromIdRange(idRange:ranges.Range = ranges.all()) {
     return this.ids().then((ids) => {
       return ids.indexOf(idRange);
     });
   }
 
-  get idtypes() : IDType[] {
+  get idtypes():IDType[] {
     throw new Error('not implemented');
   }
 
-  private selectionListener(idtype: IDType, index: number, total : number) {
-    const selectionListener = (event: any, type: string, act: ranges.Range, added: ranges.Range, removed: ranges.Range) => {
+  private selectionListener(idtype:IDType, index:number, total:number) {
+    const selectionListener = (event:any, type:string, act:ranges.Range, added:ranges.Range, removed:ranges.Range) => {
       this.selectionCache[index] = {
         act: act, added: added, removed: removed
       };
@@ -328,11 +367,13 @@ export class SelectAble extends events.EventHandler {
     return selectionListener;
   }
 
-  private fillAndSend(type: string, trigger: number) {
+  private fillAndSend(type:string, trigger:number) {
     var ids = this.idtypes;
     var full = ids.map((id, i) => {
       var entry = this.selectionCache[i];
-      if (entry) { return entry; }
+      if (entry) {
+        return entry;
+      }
       return {
         act: id.selections(type),
         added: ranges.none(),
@@ -347,7 +388,7 @@ export class SelectAble extends events.EventHandler {
     this.selectionCache = [];
     this.accumulateEvents = -1; //reset
 
-    this.ids().then((ids: ranges.Range) => {
+    this.ids().then((ids:ranges.Range) => {
       //filter to the right ids and convert to indices format
       act = ids.indexOf(act);
       added = ids.indexOf(added);
@@ -367,7 +408,7 @@ export class SelectAble extends events.EventHandler {
 
   on(events, handler?) {
     if (typeof events === 'string' && events === 'select' || events.slice(0, 'select-'.length) === 'select-') {
-      this.numSelectListeners ++;
+      this.numSelectListeners++;
       if (this.numSelectListeners === 1) {
         const idt = this.idtypes;
         if (idt.length === 1) {
@@ -377,7 +418,7 @@ export class SelectAble extends events.EventHandler {
           idt.forEach((idtype, i) => {
             const s = this.selectionListener(idtype, i, idt.length);
             this.selectionListeners.push(s);
-            idtype.on('select',s);
+            idtype.on('select', s);
           });
         }
       }
@@ -387,7 +428,7 @@ export class SelectAble extends events.EventHandler {
 
   off(events, handler?) {
     if (typeof events === 'string' && events === 'select' || events.match('^select-') === 'select-') {
-      this.numSelectListeners --;
+      this.numSelectListeners--;
       if (this.numSelectListeners === 0) {
         this.idtypes.forEach((idtype, i) => idtype.off('select', this.selectionListeners[i]));
         this.selectionListeners = [];
@@ -397,32 +438,32 @@ export class SelectAble extends events.EventHandler {
   }
 
   selections(type = defaultSelectionType) {
-    return this.ids().then((ids: ranges.Range) => {
+    return this.ids().then((ids:ranges.Range) => {
       const r = ranges.join(this.idtypes.map((idtype) => idtype.selections(type)));
       return ids.indexRangeOf(r);
     });
   }
 
-  select(range: ranges.Range);
-  select(range: number[]);
-  select(range: number[][]);
-  select(range: ranges.Range, op : SelectOperation);
-  select(range: number[], op : SelectOperation);
-  select(range: number[][], op : SelectOperation);
-  select(type: string, range: ranges.Range);
-  select(type: string, range: number[]);
-  select(type: string, range: number[][]);
-  select(type: string, range: ranges.Range, op : SelectOperation);
-  select(type: string, range: number[], op : SelectOperation);
-  select(type: string, range: number[][], op : SelectOperation);
-  select(dim: number, range: ranges.Range);
-  select(dim: number, range: number[]);
-  select(dim: number, range: ranges.Range, op: SelectOperation);
-  select(dim: number, range: number[], op: SelectOperation);
-  select(dim: number, type: string, range: ranges.Range);
-  select(dim: number, type: string, range: number[]);
-  select(dim: number, type: string, range: ranges.Range, op: SelectOperation);
-  select(dim: number, type: string, range: number[], op: SelectOperation);
+  select(range:ranges.Range);
+  select(range:number[]);
+  select(range:number[][]);
+  select(range:ranges.Range, op:SelectOperation);
+  select(range:number[], op:SelectOperation);
+  select(range:number[][], op:SelectOperation);
+  select(type:string, range:ranges.Range);
+  select(type:string, range:number[]);
+  select(type:string, range:number[][]);
+  select(type:string, range:ranges.Range, op:SelectOperation);
+  select(type:string, range:number[], op:SelectOperation);
+  select(type:string, range:number[][], op:SelectOperation);
+  select(dim:number, range:ranges.Range);
+  select(dim:number, range:number[]);
+  select(dim:number, range:ranges.Range, op:SelectOperation);
+  select(dim:number, range:number[], op:SelectOperation);
+  select(dim:number, type:string, range:ranges.Range);
+  select(dim:number, type:string, range:number[]);
+  select(dim:number, type:string, range:ranges.Range, op:SelectOperation);
+  select(dim:number, type:string, range:number[], op:SelectOperation);
   select() {
     const a = C.argList(arguments);
     const dim = (typeof a[0] === 'number') ? +a.shift() : -1,
@@ -432,8 +473,8 @@ export class SelectAble extends events.EventHandler {
     return this.selectImpl(range, op, type, dim);
   }
 
-  private selectImpl(range: ranges.Range, op = SelectOperation.SET, type : string = defaultSelectionType, dim = -1) {
-    return this.ids().then((ids: ranges.Range) => {
+  private selectImpl(range:ranges.Range, op = SelectOperation.SET, type:string = defaultSelectionType, dim = -1) {
+    return this.ids().then((ids:ranges.Range) => {
       const types = this.idtypes;
       if (dim === -1) {
         range = ids.preMultiply(range);
@@ -460,9 +501,9 @@ export class SelectAble extends events.EventHandler {
    * clear the specific selection (type) and dimension
    */
   clear();
-  clear(type : string);
-  clear(dim : number);
-  clear(dim: number, type : string);
+  clear(type:string);
+  clear(dim:number);
+  clear(dim:number, type:string);
   clear() {
     const a = C.argList(arguments);
     const dim = (typeof a[0] === 'number') ? +a.shift : -1;
@@ -500,8 +541,12 @@ function fillUp() {
   });
 }
 
-export function resolve(id:string):IDType {
-  return register(id, new IDType(id, id, id + 's'));
+export function resolve(id:string|IDType):IDType {
+  if (id instanceof IDType) {
+    return id;
+  } else {
+    return register(<string>id, new IDType(<string>id, <string>id, id + 's'));
+  }
 }
 
 /**
@@ -531,7 +576,7 @@ export function persist() {
   return r;
 }
 
-export function restore(persisted: any) {
+export function restore(persisted:any) {
   Object.keys(persisted).forEach((id) => {
     resolve(id).restore(persisted[id]);
   });

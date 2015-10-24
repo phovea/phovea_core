@@ -933,7 +933,7 @@ export class Range {
    * @param size the underlying size for negative indices
    * @returns {*}
    */
-  filter(data:any[], size:number[]) {
+  filter(data:any[], size?:number[]) {
     if (this.isAll) {
       return data;
     }

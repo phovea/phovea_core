@@ -860,9 +860,9 @@ class ProjectedVector extends vector_impl.VectorBase implements vector.IVector {
  * @param desc
  * @returns {IMatrix}
  */
-export function create(desc: datatypes.IDataDescription): matrix.IMatrix {
+export function create(desc: datatypes.IDataDescription, loader?: IMatrixLoader2): matrix.IMatrix {
   if (C.isFunction((<any>desc).loader)) {
     return new Matrix(desc, adapterOne2Two((<any>desc).loader));
   }
-  return new Matrix(desc, viaAPI2Loader());
+  return new Matrix(desc, loader ? loader: viaAPI2Loader());
 }
