@@ -16,6 +16,8 @@ export interface IDataDescription {
   fqname: string;
   id: string;
   type: string;
+
+  [extras: string]: any;
 }
 
 /**
