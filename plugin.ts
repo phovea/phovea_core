@@ -80,15 +80,25 @@ export interface IPlugin {
  */
 function loadHelper(desc:IPluginDesc):() => Promise<IPlugin> {
   return () => new Promise<IPlugin>((resolver) => {
-    //require module
-    require([desc.module], (m) => {
-      //create a plugin entry
+    //we have the instance given
+    const instance = (<any>desc).instance;
+    if (instance) {
       resolver({
         desc: desc,
-        impl : m,
-        factory : m[desc.factory]
+        impl: instance,
+        factory: instance[desc.factory]
       });
-    });
+    } else {
+      //require module
+      require([desc.module], (m) => {
+        //create a plugin entry
+        resolver({
+          desc: desc,
+          impl: m,
+          factory: m[desc.factory]
+        });
+      });
+    }
   });
 }
 
@@ -163,15 +173,28 @@ export function load(plugins: IPluginDesc[]) :Promise<IPlugin[]> {
     return Promise.resolve([]);
   }
   return new Promise((resolve) => {
-    require(plugins.map((desc) => desc.module), (...impls : any[]) => {
+    //do we have all instances?
+    if (plugins.every(desc => !!(<any>desc).instance)) {
       //loaded now convert to plugins
-      resolve(impls.map((p,i) => {
+      resolve(plugins.map((p:any) => {
         return {
-          desc: plugins[i],
-          impl : p,
-          factory : p[plugins[i].factory]
+          desc: p,
+          impl : p.instance,
+          factory : p.instance[p.factory]
         };
       }));
-    });
+    } else {
+      //old way
+      require(plugins.map((desc) => desc.module), (...impls:any[]) => {
+        //loaded now convert to plugins
+        resolve(impls.map((p, i) => {
+          return {
+            desc: plugins[i],
+            impl: p,
+            factory: p[plugins[i].factory]
+          };
+        }));
+      });
+    }
   });
 }
