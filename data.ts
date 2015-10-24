@@ -313,7 +313,7 @@ export function convertToTable(list : datatypes.IDataType[]) {
     name: 'data',
     fqname: 'custom/data',
     type: 'table',
-    rowtype: '_data',
+    idtype: '_data',
     size: [list.length, 4],
     columns: [
       {

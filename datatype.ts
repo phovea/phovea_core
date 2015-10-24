@@ -34,6 +34,8 @@ export interface IDataDescription {
    * a fully qualified name, e.g. project_name/name
    */
   fqname: string;
+
+  [extras: string]: any;
 }
 
 /**

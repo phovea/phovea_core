@@ -69,6 +69,8 @@ export interface IPlugin {
    * link to the referenced method as described in the description
    */
   factory(...args:any[]): any;
+
+  [extras: string]: any;
 }
 
 /**
