@@ -81,7 +81,8 @@ export interface IPlugin {
 function loadHelper(desc:IPluginDesc):() => Promise<IPlugin> {
   return () => new Promise<IPlugin>((resolver) => {
     //we have the instance given
-    const instance = (<any>desc).instance;
+    const loader = (<any>desc).loader;
+    const instance = (<any>desc).instance || (loader ? loader() : null);
     if (instance) {
       resolver({
         desc: desc,
@@ -89,44 +90,47 @@ function loadHelper(desc:IPluginDesc):() => Promise<IPlugin> {
         factory: instance[desc.factory]
       });
     } else {
-      //require module
-      require([desc.module], (m) => {
-        //create a plugin entry
-        resolver({
-          desc: desc,
-          impl: m,
-          factory: m[desc.factory]
+        //require module
+        require([desc.module], (m) => {
+          //create a plugin entry
+          resolver({
+            desc: desc,
+            impl: m,
+            factory: m[desc.factory]
+          });
         });
-      });
-    }
+      }
   });
 }
 
+
+function parsePlugin(desc: any,  baseUrl: string = '', relativeUrl: string = '..') {
+  //provide some default values
+  desc = C.mixin({
+    name : desc.id,
+    folder: desc.folder,
+    file: 'main',
+    factory: 'create',
+    description: '',
+    version: '1.0'
+  },desc);
+  desc = C.mixin({
+    'module' : desc.folder+'/'+desc.file,
+    baseUrl: baseUrl + '/' + desc.folder
+  }, desc);
+  desc.module = relativeUrl + '/' +desc.module;
+  desc.load = loadHelper(<IPluginDesc>desc);
+  return <IPluginDesc>desc;
+}
 /**
  * parses the given descriptions and creates a full description out of it
  * @param descs
  * @returns {IPluginDesc[]}
  */
 function parsePlugins(descs : any[], baseUrl: string = '', relativeUrl: string = '..') {
-  return descs.map((desc) => {
-    //provide some default values
-    desc = C.mixin({
-      name : desc.id,
-      folder: desc.folder,
-      file: 'main',
-      factory: 'create',
-      description: '',
-      version: '1.0'
-    },desc);
-    desc = C.mixin({
-      'module' : desc.folder+'/'+desc.file,
-      baseUrl: baseUrl + '/' + desc.folder
-    }, desc);
-    desc.module = relativeUrl + '/' +desc.module;
-    desc.load = loadHelper(<IPluginDesc>desc);
-    return <IPluginDesc>desc;
-  });
+  return descs.map((desc) => parsePlugin(desc, baseUrl, relativeUrl));
 }
+
 
 //map to descriptions
 var _extensions : IPluginDesc[] = [];
@@ -164,6 +168,26 @@ export function list(filter : any = C.constantTrue) {
 }
 
 /**
+ * pushes a new description to the registry
+ * @param desc
+ * @param baseUrl
+ * @param relativeUrl
+ * @returns {IPluginDesc}
+ */
+export function push(desc: any, baseUrl = C.registry.baseUrl, relativeUrl = C.registry.relativeUrl) {
+  if (_extensions.length === 0) {
+    _extensions = parsePlugins(C.registry.extensions, C.registry.baseUrl, C.registry.relativeUrl);
+  }
+  const p = parsePlugin(desc, baseUrl, relativeUrl);
+  _extensions.push(p);
+  return p;
+}
+
+export function pushAll(descs: any[], baseUrl = C.registry.baseUrl, relativeUrl = C.registry.relativeUrl) {
+  return descs.map((desc) => push(desc, baseUrl, relativeUrl));
+}
+
+/**
  * loads all given plugins at once and returns a promise
  * @param plugins
  * @returns {Promise}
@@ -174,13 +198,14 @@ export function load(plugins: IPluginDesc[]) :Promise<IPlugin[]> {
   }
   return new Promise((resolve) => {
     //do we have all instances?
-    if (plugins.every(desc => !!(<any>desc).instance)) {
+    if (plugins.every(desc => !!(<any>desc).instance) || !!(<any>desc).loader) {
       //loaded now convert to plugins
       resolve(plugins.map((p:any) => {
+        const instance = p.instance || p.loader();
         return {
           desc: p,
-          impl : p.instance,
-          factory : p.instance[p.factory]
+          impl: instance,
+          factory : instance[p.factory]
         };
       }));
     } else {
