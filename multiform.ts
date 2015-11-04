@@ -36,6 +36,7 @@ class ProxyMetaData implements vis.IVisMetaData {
 
 export interface IMultiForm extends vis.IVisInstance {
   act: vis.IVisPluginDesc;
+  actLoader: Promise<vis.IVisInstance>;
   visses: vis.IVisPluginDesc[];
   switchTo(id: string)  : Promise<any>;
   switchTo(index: number)  : Promise<any>;
@@ -191,6 +192,11 @@ export class MultiForm extends vis.AVisInstance implements vis.IVisInstance, IMu
         return r;
       }
     }
+    if (this.actVisPromise && arguments.length > 0) {
+      //2nd try
+      this.actVisPromise.then((v) => this.transform(scale, rotate));
+      return;
+    }
     return {
       scale: [1,1],
       rotate: 0
@@ -205,7 +211,7 @@ export class MultiForm extends vis.AVisInstance implements vis.IVisInstance, IMu
     return this.actDesc;
   }
 
-  Loader() {
+  get actLoader() {
     return this.actVisPromise;
   }
 
