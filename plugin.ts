@@ -198,7 +198,7 @@ export function load(plugins: IPluginDesc[]) :Promise<IPlugin[]> {
   }
   return new Promise((resolve) => {
     //do we have all instances?
-    if (plugins.every(desc => !!(<any>desc).instance) || !!(<any>desc).loader) {
+    if (plugins.every(desc => (!!(<any>desc).instance) || !!(<any>desc).loader)) {
       //loaded now convert to plugins
       resolve(plugins.map((p:any) => {
         const instance = p.instance || p.loader();
