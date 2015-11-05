@@ -252,10 +252,6 @@ export class LocalIDAssigner {
   private pool = new C.IdPool();
   private lookup:{  [key:string] : number } = {};
 
-  constructor() {
-
-  }
-
   unmapOne(id: number) {
     return this.unmap([id])[0];
   }
