@@ -256,6 +256,22 @@ export class LocalIDAssigner {
 
   }
 
+  unmapOne(id: number) {
+    return this.unmap([id])[0];
+  }
+
+  unmap(ids: number[]) {
+    const keys = Object.keys(this.lookup);
+    return ids.map((id) => {
+      for(let k in keys) {
+        if (this.lookup[k] === id) {
+          return k;
+        }
+      }
+      return null;
+    });
+  }
+
   mapOne(id:string):number {
     if (id in this.lookup) {
       return this.lookup[id];

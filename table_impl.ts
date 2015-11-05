@@ -127,9 +127,10 @@ function viaDataLoader(data: any[], nameProperty: any) {
       });
       return r;
     });
+    const rows = data.map(name);
     _data = {
-      rowIds : ranges.range(0,data.length),
-      rows : data.map(name),
+      rowIds : desc.rowassigner ? desc.rowassigner.map(rows) : ranges.range(0,data.length),
+      rows : rows,
       objs : objs,
       data : getters.map((getter) => data.map(getter))
     };
