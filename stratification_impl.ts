@@ -297,7 +297,7 @@ export function wrap(desc:datatypes.IDataDescription, rows:string[], rowIds:numb
 
 
 export function wrapCategoricalVector(v: vector.IVector) {
-  var desc = {
+  var desc : datatypes.IDataDescription = {
     id: v.desc.id+'-s',
     type: 'stratification',
     name: v.desc.name+'-s',
