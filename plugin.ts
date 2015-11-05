@@ -87,19 +87,18 @@ function toInstance(instance: any, desc: IPluginDesc): IPlugin {
  * @returns {function(): Promise}
  */
 function loadHelper(desc:IPluginDesc):() => Promise<IPlugin> {
-  return () => new Promise<IPlugin>((resolve) => {
-    if ((<any>desc).instance) {
-      resolve(toInstance((<any>desc).instance, desc));
-    } else if ((<any>desc).loader) {
-      (<any>desc).loader().then((impl) => toInstance(impl, desc));
-    } else {
-      //require module
+  return () => {
+    if ((<any>desc).instance || (<any>desc).loader) {
+      return Promise.resolve((<any>desc).instance || (<any>desc).loader()).then((impl) => toInstance(impl, desc));
+    }
+    //require module
+    return new Promise<IPlugin>((resolve) => {
       require([desc.module], (m) => {
         //create a plugin entry
         resolve(toInstance(m, desc));
       });
-    }
-  });
+    });
+  };
 }
 
 
@@ -198,26 +197,14 @@ export function load(plugins: IPluginDesc[]) :Promise<IPlugin[]> {
   return new Promise((resolve) => {
     //do we have all instances?
     if (plugins.every(desc => (!!(<any>desc).instance) || !!(<any>desc).loader)) {
-      //loaded now convert to plugins
-      resolve(plugins.map((p:any) => {
-        const instance = p.instance || p.loader();
-        return {
-          desc: p,
-          impl: instance,
-          factory : instance[p.factory]
-        };
-      }));
+      Promise.all(plugins.map((p:any) => p.instance || p.loader()))
+        .then((impls) => impls.map((impl, i) => toInstance(impl, plugins[i])))
+        .then(resolve);
     } else {
       //old way
       require(plugins.map((desc) => desc.module), (...impls:any[]) => {
         //loaded now convert to plugins
-        resolve(impls.map((p, i) => {
-          return {
-            desc: plugins[i],
-            impl: p,
-            factory: p[plugins[i].factory]
-          };
-        }));
+        resolve(impls.map((p, i) => toInstance(p, plugins[i])));
       });
     }
   });
