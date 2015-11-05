@@ -73,33 +73,32 @@ export interface IPlugin {
   [extras: string]: any;
 }
 
+function toInstance(instance: any, desc: IPluginDesc): IPlugin {
+  return {
+    desc: desc,
+    impl: instance,
+    factory: instance[desc.factory]
+  };
+}
+
 /**
  * utility function to create a loading promise function which wraps require.js
  * @param desc
  * @returns {function(): Promise}
  */
 function loadHelper(desc:IPluginDesc):() => Promise<IPlugin> {
-  return () => new Promise<IPlugin>((resolver) => {
-    //we have the instance given
-    const loader = (<any>desc).loader;
-    const instance = (<any>desc).instance || (loader ? loader() : null);
-    if (instance) {
-      resolver({
-        desc: desc,
-        impl: instance,
-        factory: instance[desc.factory]
-      });
+  return () => new Promise<IPlugin>((resolve) => {
+    if ((<any>desc).instance) {
+      resolve(toInstance((<any>desc).instance, desc));
+    } else if ((<any>desc).loader) {
+      (<any>desc).loader().then((impl) => toInstance(impl, desc));
     } else {
-        //require module
-        require([desc.module], (m) => {
-          //create a plugin entry
-          resolver({
-            desc: desc,
-            impl: m,
-            factory: m[desc.factory]
-          });
-        });
-      }
+      //require module
+      require([desc.module], (m) => {
+        //create a plugin entry
+        resolve(toInstance(m, desc));
+      });
+    }
   });
 }
 
