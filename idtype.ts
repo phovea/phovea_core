@@ -185,16 +185,22 @@ export class IDType extends events.EventHandler implements C.IPersistable {
     });
   }
 
-  unmap(ids: number[]): Promise<string[]> {
-    var to_resolve = ids.filter((name) => !(name in this.id2name_cache));
+  unmap(ids_: ranges.Range | number[]): Promise<string[]> {
+    var ids = ids_ instanceof ranges.Range ? <ranges.Range>ids_ : ranges.list(<number[]>ids_);
+    var to_resolve = [];
+    ids.dim(0).forEach((name) => !(name in this.id2name_cache) ? to_resolve.push(name): null);
     if (to_resolve.length === 0) {
-      return Promise.resolve(ids.map((name) => this.id2name_cache[name]));
+      var r = [];
+      ids.dim(0).forEach((name) => r.push(this.id2name_cache[name]) );
+      return Promise.resolve(r);
     }
-    return ajax.getAPIJSON(`/idtype/${this.id}/unmap`, { ids: to_resolve }).then((ids) => {
+    return ajax.getAPIJSON(`/idtype/${this.id}/unmap`, { ids: ranges.list(to_resolve).toString() }).then((result) => {
       to_resolve.forEach((name,i) => {
-        this.id2name_cache[name] = ids[i];
+        this.id2name_cache[name] = result[i];
       });
-      return ids.map((name) => this.id2name_cache[name]);
+      var r = [];
+      ids.dim(0).forEach((name) => r.push(this.id2name_cache[name]) );
+      return r;
     });
   }
 
