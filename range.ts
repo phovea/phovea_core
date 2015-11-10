@@ -622,6 +622,13 @@ export class Range1D {
     return this.iter(size).asList();
   }
 
+  get first() {
+    if (this.isNone) {
+      return null;
+    }
+    return this.arr[0].from;
+  }
+
   /**
    * for each element
    * @param callbackfn
@@ -813,6 +820,10 @@ export class Range {
 
   get isNone() {
     return this.dims.every((dim) => dim.isNone);
+  }
+
+  get first() {
+    return this.dim(0).first;
   }
 
   /**
