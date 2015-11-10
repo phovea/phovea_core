@@ -67,6 +67,9 @@ export class IDType extends events.EventHandler implements C.IPersistable {
    */
   private sel = {};
 
+  private name2id_cache : { [k:string] : number } = {};
+  private id2name_cache : { [k:number] : string } = {};
+
   /**
    * @param id the id of this idtype
    * @param name the name of this idtype
@@ -168,6 +171,33 @@ export class IDType extends events.EventHandler implements C.IPersistable {
   clear(type = defaultSelectionType) {
     return this.selectImpl(ranges.none(), SelectOperation.SET, type);
   }
+
+  map(names: string[]) : Promise<number[]> {
+    var to_resolve = names.filter((name) => !(name in this.name2id_cache));
+    if (to_resolve.length === 0) {
+      return Promise.resolve(names.map((name) => this.name2id_cache[name]));
+    }
+    return ajax.getAPIJSON(`/idtype/${this.id}/map`, { ids: to_resolve }).then((ids) => {
+      to_resolve.forEach((name,i) => {
+        this.name2id_cache[name] = ids[i];
+      });
+      return names.map((name) => this.name2id_cache[name]);
+    });
+  }
+
+  unmap(ids: number[]): Promise<string[]> {
+    var to_resolve = ids.filter((name) => !(name in this.id2name_cache));
+    if (to_resolve.length === 0) {
+      return Promise.resolve(ids.map((name) => this.id2name_cache[name]));
+    }
+    return ajax.getAPIJSON(`/idtype/${this.id}/unmap`, { ids: to_resolve }).then((ids) => {
+      to_resolve.forEach((name,i) => {
+        this.id2name_cache[name] = ids[i];
+      });
+      return ids.map((name) => this.id2name_cache[name]);
+    });
+  }
+
 }
 
 export interface IHasUniqueId {
