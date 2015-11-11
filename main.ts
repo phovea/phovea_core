@@ -565,3 +565,42 @@ export function bounds(element: Element) {
     h: obj.height
   };
 }
+
+/**
+ * utility for drag-n-drop support
+ * @param e
+ * @param type
+ * @returns {any}
+ */
+export function hasDnDType(e, type) {
+  var types = e.dataTransfer.types;
+  if (isFunction(types.indexOf)) {
+    return types.indexOf(type) >= 0;
+  }
+  if (isFunction(types.includes)) {
+    return types.includes(type);
+  }
+  return false;
+}
+
+/**
+ * checks whether it is a copy operation
+ * @param e
+ * @returns {boolean|RegExpMatchArray}
+ */
+export function copyDnD(e) {
+  var dT = e.dataTransfer;
+  return (e.ctrlKey && dT.effectAllowed.match(/copy/gi)) || (!dT.effectAllowed.match(/move/gi));
+}
+/**
+ * updates the drop effect accoriding to the current copyDnD state
+ * @param e
+ */
+export function updateDropEffect(e) {
+  var dT = e.dataTransfer;
+  if (copyDnD(e)) {
+    dT.dropEffect = 'copy';
+  } else {
+    dT.dropEffect = 'move';
+  }
+}
