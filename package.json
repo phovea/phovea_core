@@ -31,7 +31,8 @@
     "dependencies": {
       "web": {
         "requirejs": "https://github.com/sgratzl/requirejs-bower.git#master",
-        "require-css": "~0.1.8"
+        "require-css": "~0.1.8",
+        "es6-promise": "~3.0.2"
       },
       "tsd": {
         "es6-promise": "35119c"

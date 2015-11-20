@@ -9,10 +9,19 @@
 /// <reference path="../../tsd.d.ts" />
 /// <amd-dependency path="module" name="module"/>
 
+declare var require: any;
+
 declare var module: {
   config() : any;
 };
 'use strict';
+
+
+if (!(<any>window).Promise) {
+  //inject es6-promise polyfill if needed
+  let r = require;
+  r(['es6-promise']);
+}
 
 /**
  * version of the core
