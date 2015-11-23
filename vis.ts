@@ -225,6 +225,7 @@ export class AVisInstance extends events.EventHandler {
     if (n && n.parentNode && !(window.event && window.event.type === 'DOMNodeRemoved' && window.event.target === n)) {
       n.parentNode.removeChild(n);
     }
+    this.fire('destroyed');
   }
 
   transform() {
