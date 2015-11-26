@@ -122,6 +122,10 @@ export class Rect extends AShape {
     super();
   }
 
+  eq(that: Rect) {
+    return this.x === that.x && this.y === that.y && this.w === that.w && this.h === that.h;
+  }
+
   toString() {
     return 'Rect(x=' + this.x + ',y=' + this.y + ',w=' + this.w + ',h=' + this.h + ')';
   }

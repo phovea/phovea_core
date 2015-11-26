@@ -258,6 +258,19 @@ export function argFilter<T>(arr:T[], callbackfn:(value:T, index:number) => bool
 }
 
 /**
+ * generates a random id of the given length
+ * @param length length of the id
+ * @returns {string}
+ */
+export function random_id(length = 8) {
+  var id = '';
+  while (id.length < length) {
+    id += Math.random().toString(36).slice(-8);
+  }
+  return id.substr(0, length);
+}
+
+/**
  * utility function to get notified, when the given dom element is removed from its parent
  * @param node
  * @param callback
