@@ -32,6 +32,7 @@ export function guessColor(stratification: string, group: string) {
 
 export interface IStratification extends datatypes.IDataType {
   range() : Promise<ranges.CompositeRange1D>;
+  idRange(): Promise<ranges.CompositeRange1D>;
   vector(): Promise<vector.IVector>;
 
   names();
@@ -103,6 +104,13 @@ export class StratificationGroup extends idtypes.SelectAble implements IStratifi
 
   range() {
     return this.rangeGroup().then((g) => {
+      return new ranges.CompositeRange1D(g.name, [g]);
+    });
+  }
+
+  idRange() {
+    return this.root.idRange().then((r) => {
+      const g = r.groups[this.groupIndex];
       return new ranges.CompositeRange1D(g.name, [g]);
     });
   }

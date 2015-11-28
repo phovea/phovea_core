@@ -133,6 +133,15 @@ export class Stratification extends datatypes.DataTypeBase implements def.IStrat
     });
   }
 
+  idRange() {
+    var that = this;
+    return this.load().then(function (data) {
+      const ids = data.rowIds.dim(0);
+      const range = data.range;
+      return ids.preMultiply(range, that.dim[0]);
+    });
+  }
+
   names(range:ranges.Range = ranges.all()) {
     var that = this;
     return this.load().then(function (data) {
