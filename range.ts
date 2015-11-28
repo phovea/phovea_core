@@ -545,6 +545,9 @@ export class Range1D {
     if (r.isNone || this.isNone) {
       return r.fromLike([]);
     }
+    if (r.isAll) { //index of all is still all
+      return Range1D.all();
+    }
     //
     var mapImpl;
     if (this.isIdentityRange) {
