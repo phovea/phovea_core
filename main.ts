@@ -458,6 +458,14 @@ class PropertyHandler {
     return parseInt(l, 36);
   }
 
+  removeProp(name: string) {
+    if (this.map.hasOwnProperty(name)) {
+      delete this.map[name];
+      return true;
+    }
+    return false;
+  }
+
   toString() {
     var r = [];
     Object.keys(this.map).forEach((key) => {
@@ -522,6 +530,17 @@ class HashProperties extends PropertyHandler {
     if (update) {
       this.update();
     }
+  }
+
+  removeProp(name: string, update = true) {
+    if (this.map.hasOwnProperty(name)) {
+      delete this.map[name];
+      if (update) {
+        this.update();
+      }
+      return true;
+    }
+    return false;
   }
 
   private update() {
