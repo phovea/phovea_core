@@ -401,6 +401,14 @@ export class StratificationVector extends datatypes.DataTypeBase implements stra
     return Promise.resolve(this.r);
   }
 
+  idRange() {
+    var that = this;
+    return this.ids().then((ids) => {
+      const range = this.r;
+      return ids.dim(0).preMultiply(range, that.dim[0]);
+    });
+  }
+
   names(range:ranges.Range = ranges.all()) {
     return this.v.names(range);
   }
