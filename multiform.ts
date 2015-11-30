@@ -411,7 +411,8 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
   constructor(public data:datatypes.IDataType, public range: ranges.Range, parent:Element, viewFactory : IViewFactory, private options : any = {}) {
     super();
     this.options = C.mixin({
-      initialVis : 0
+      initialVis : 0,
+      singleRowOptimization: true
     }, options);
     this.node = createNode(parent, 'div', 'multiformgrid');
     (<any>parent).__data__ = data;
@@ -497,7 +498,16 @@ export class MultiFormGrid extends vis.AVisInstance implements vis.IVisInstance,
     //create groups for all grid elems
     //TODO how to layout as a grid
     if (this.dims.length === 1) {
-      this.grid.forEach((elem) => elem.setContent(wrap(createNode(this.node, 'div', 'content gridrow'), elem.data, elem.range, elem.pos)));
+      if (this.options.singleRowOptimization) {
+        this.grid.forEach((elem) => elem.setContent(wrap(createNode(this.node, 'div', 'content gridrow'), elem.data, elem.range, elem.pos)));
+      } else {
+        this.grid.forEach((elem) => {
+          const n = createNode(this.node, 'div', 'gridrow');
+          const nn = createNode(n, 'div', 'content');
+          nn.style.display = 'inline-block';
+          elem.setContent(wrap(nn, elem.data, elem.range, elem.pos));
+        });
+      }
     } else {
       const ndim = this.dimSizes;
       for(let i = 0; i < ndim[0]; ++i) {
