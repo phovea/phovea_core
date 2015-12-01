@@ -328,7 +328,7 @@ export class Range1D {
     if (index < 0) {
       index += this.length;
     }
-    if (index < 0 || index >= this.length) {
+    if (index < 0 || index >= this.arr.length) {
       return RangeElem.none();
     }
     return this.arr[index];
