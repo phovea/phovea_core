@@ -1244,14 +1244,18 @@ function parseRange1D(code:string, act:number) {
       next += 1; //skip )
       break;
     default:
-      next = code.indexOf(',', act);
-      if (next < 0) {
-        next = code.indexOf('}', act);
+      next = code.indexOf('}', act);
+      let n2 = code.indexOf(',', act);
+      if (next >= 0 && n2 >= 0) {
+        next = Math.min(next, n2);
+      } else if (next < 0) {
+        next = n2;
       }
+
       if (next < 0) {
         next = code.length;
       }
-      r = new Range1D([RangeElem.parse(code.slice(act, next + 1))]);
+      r = new Range1D([RangeElem.parse(code.slice(act, next))]);
       break;
   }
   return {
