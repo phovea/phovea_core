@@ -261,6 +261,11 @@ function viaAPI2Loader() {
       if (data != null) { //already loading all
         return data.then((d) => range.filter(d, (<any>desc).size));
       }
+      const size = (<any>desc).size;
+      if (size[0] * size[1] < 1000 || (<any>desc).loadAtOnce ) { //small file load all
+        data = ajax.getAPIJSON('/dataset/matrix/' + desc.id + '/raw').then(maskIt(desc));
+        return data.then((d) => range.filter(d, (<any>desc).size));
+      }
       //server side slicing
       return ajax.getAPIData('/dataset/matrix/'+desc.id+'/raw', {
         range: range.toString()
