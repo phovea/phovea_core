@@ -587,21 +587,27 @@ export function delayedCall(callback:() => void, timeToDelay = 100, thisCallback
  * @param element
  * @return {{left: number, top: number, width: number, height: number}}
  */
-export function offset(element: Element) {
+export function offset(element:Element) {
+  if (!element) {
+    return {left: 0, top: 0, width: 0, height: 0};
+  }
   const obj = element.getBoundingClientRect();
   return {
-    left: obj.left + window.pageXOffset ,
+    left: obj.left + window.pageXOffset,
     top: obj.top + window.pageYOffset,
     width: obj.width,
     height: obj.height
   };
 }
 
-export function bounds(element: Element) {
+export function bounds(element:Element) {
+  if (!element) {
+    return {x: 0, y: 0, w: 0, h: 0};
+  }
   const obj = element.getBoundingClientRect();
   return {
     x: obj.left,
-    y : obj.top,
+    y: obj.top,
     w: obj.width,
     h: obj.height
   };
