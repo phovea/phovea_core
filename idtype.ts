@@ -172,6 +172,14 @@ export class IDType extends events.EventHandler implements C.IPersistable {
     return this.selectImpl(ranges.none(), SelectOperation.SET, type);
   }
 
+  fillMapCache(ids: number[], names: string[]) {
+    ids.forEach((id, i) => {
+      const name = names[i];
+      this.name2id_cache[name] = id;
+      this.id2name_cache[id] = name;
+    });
+  }
+
   map(names: string[]) : Promise<number[]> {
     var to_resolve = names.filter((name) => !(name in this.name2id_cache));
     if (to_resolve.length === 0) {
