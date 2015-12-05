@@ -651,3 +651,16 @@ export function updateDropEffect(e) {
     dT.dropEffect = 'move';
   }
 }
+
+/**
+ * returns a promise that resolves in the given number of milliseconds
+ * @param milliseconds the number of milliseconds to resolve
+ */
+export function resolveIn(milliseconds: number) : Promise<void> {
+  if (milliseconds <= 0) {
+    return Promise.resolve<void>(null);
+  }
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, milliseconds);
+  });
+}
