@@ -22,11 +22,12 @@ var cacheById = {};
 var cacheByName = {};
 var cacheByFQName = {};
 
-export function clearCache(dataset?: datatypes.IDataType) {
+export function clearCache(dataset?: datatypes.IDataType | datatypes.IDataDescription) {
   if (dataset) {
-    delete cacheById[dataset.desc.id];
-    delete cacheByName[dataset.desc.name];
-    delete cacheByFQName[dataset.desc.fqname];
+    const desc : any = (<any>dataset).desc || dataset;
+    delete cacheById[desc.id];
+    delete cacheByName[desc.name];
+    delete cacheByFQName[desc.fqname];
   } else {
     cacheById = {};
     cacheByName = {};
@@ -282,9 +283,10 @@ export function modify(entry: datatypes.IDataType, desc: any, file?) : Promise<d
  * @param entry
  * @returns {Promise<boolean>}
  */
-export function remove(entry: datatypes.IDataType): Promise<Boolean> {
-  return ajax.sendAPI('/dataset/'+entry.desc.id, {}, 'delete').then((result) => {
-    clearCache(entry);
+export function remove(entry: datatypes.IDataType | datatypes.IDataDescription): Promise<Boolean> {
+  const desc : any = (<any>entry).desc || entry;
+  return ajax.sendAPI('/dataset/'+desc.id, {}, 'delete').then((result) => {
+    clearCache(desc);
     return true;
   });
 }
