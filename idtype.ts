@@ -597,11 +597,18 @@ function fillUp() {
   });
 }
 
+function toPlural(name:string) {
+  if (name[name.length - 1] === 'y') {
+    return name.slice(0, name.length - 1) + 'ies';
+  }
+  return name + 's';
+}
+
 export function resolve(id:string|IDType):IDType {
   if (id instanceof IDType) {
     return id;
   } else {
-    return register(<string>id, new IDType(<string>id, <string>id, id + 's'));
+    return register(<string>id, new IDType(<string>id, <string>id, toPlural(<string>id)));
   }
 }
 
