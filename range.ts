@@ -372,6 +372,9 @@ export class Range1D {
     if (sub.isAll) {
       return this.clone();
     }
+    if (sub.isNone || this.isNone) {
+      return Range1D.none();
+    }
     if (this.isIdentityRange) { //identity lookup
       return sub.clone();
     }

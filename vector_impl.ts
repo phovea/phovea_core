@@ -362,8 +362,8 @@ export class StratificationVector extends datatypes.DataTypeBase implements stra
   constructor(private v: def.IVector, private r: ranges.CompositeRange1D) {
     super({
       id: v.desc.id+'-s',
-      name: v.desc.name+'-s',
-      fqname: v.desc.fqname+'-s',
+      name: v.desc.name,
+      fqname: v.desc.fqname,
       type: 'stratification',
       size: v.dim,
       ngroups: r.groups.length,
