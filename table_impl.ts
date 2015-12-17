@@ -241,6 +241,7 @@ export class Table extends TableBase implements def.ITable {
   }
 }
 
+
 /**
  * view on the vector restricted by a range
  * @param root underlying matrix
@@ -536,4 +537,88 @@ export function wrapObjects(desc: datatypes.IDataDescription, data: any[], nameP
 export function wrapObjects(desc: datatypes.IDataDescription, data: any[], nameProperty: (obj: any) => string);
 export function wrapObjects(desc: datatypes.IDataDescription, data: any[], nameProperty: any) {
   return new Table(desc, viaDataLoader(data, nameProperty));
+}
+
+export class VectorTable extends TableBase implements def.ITable {
+  rowtype:idtypes.IDType;
+
+  constructor(public desc:datatypes.IDataDescription, private vectors: vector.IVector[]) {
+    super(null);
+    this._root = this;
+    var d = <any>desc;
+    const ref = <any>(vectors[0].desc);
+    d.idtype = ref.idtype;
+    d.size = [vectors[0].length, vectors.length];
+    d.columns = vectors.map((v) => v.desc);
+    this.rowtype = vectors[0].idtype;
+  }
+
+  get idtypes() {
+    return [this.rowtype];
+  }
+
+  col(i: number) {
+    return this.vectors[i];
+  }
+
+  cols(range:ranges.Range = ranges.all()) {
+    return range.filter(this.vectors, [this.ncol]);
+  }
+
+  at(i, j) {
+    return this.col(i).at(j);
+  }
+
+  data(range:ranges.Range = ranges.all()) {
+    return Promise.all(this.vectors.map((v) => v.data(range))).then((arr: any[][]) => {
+      const r = arr[0].map((i) =>([i]));
+      arr.slice(1).forEach((ai) => ai.forEach((d,i) => r[i].push(d)));
+      return r;
+    });
+  }
+
+  objects(range:ranges.Range = ranges.all()) {
+    return Promise.all(this.vectors.map((v) => v.data(range))).then((arr: any[][]) => {
+      const names = this.vectors.map((d) => d.desc.name);
+      const r = arr[0].map((i) =>( { [ names[0]] : i }));
+      arr.slice(1).forEach((ai,j) => {
+        const name = names[j+1];
+        ai.forEach((d,i) => r[i][name] = d);
+      });
+      return r;
+    });
+  }
+
+  /**
+   * return the row ids of the matrix
+   * @returns {*}
+   */
+  rows(range:ranges.Range = ranges.all()):Promise<string[]> {
+    return this.col(0).names(range);
+  }
+  rowIds(range:ranges.Range = ranges.all()) {
+    return this.col(0).ids(range);
+  }
+  ids(range:ranges.Range = ranges.all()) {
+    return this.rowIds(range);
+  }
+
+  size() {
+    return [ this.col(0).length, this.vectors.length ];
+  }
+
+  persist() {
+    return this.desc.id;
+  }
+
+  restore(persisted: any) : C.IPersistable {
+    if (persisted && typeof persisted.col === 'number') {
+      return this.col(persisted.col);
+    }
+    return super.restore(persisted);
+  }
+}
+
+export function fromVectors(desc: datatypes.IDataDescription, vecs: vector.IVector[]) {
+  return new VectorTable(desc, vecs);
 }
