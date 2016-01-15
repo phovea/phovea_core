@@ -7,9 +7,10 @@
  * Created by Samuel Gratzl on 05.08.2014.
  */
 
+/// <amd-dependency path="require" name="requir_e"/>
+declare var requir_e : (deps:string[], callback:(deps:any[])=>any) => any;
+
 import C = require('./main');
-//somehow here
-declare var require : (deps:string[], callback:(deps:any[])=>any) => any;
 
 
 /**
@@ -93,7 +94,7 @@ function loadHelper(desc:IPluginDesc):() => Promise<IPlugin> {
     }
     //require module
     return new Promise<IPlugin>((resolve) => {
-      require([desc.module], (m) => {
+      requir_e([desc.module], (m) => {
         //create a plugin entry
         resolve(toInstance(m, desc));
       });
@@ -202,7 +203,7 @@ export function load(plugins: IPluginDesc[]) :Promise<IPlugin[]> {
         .then(resolve);
     } else {
       //old way
-      require(plugins.map((desc) => desc.module), (...impls:any[]) => {
+      requir_e(plugins.map((desc) => desc.module), (...impls:any[]) => {
         //loaded now convert to plugins
         resolve(impls.map((p, i) => toInstance(p, plugins[i])));
       });
