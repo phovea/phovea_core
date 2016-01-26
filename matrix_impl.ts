@@ -3,6 +3,7 @@
  * Copyright (c) The Caleydo Team. All rights reserved.
  * Licensed under the new BSD license, available at http://caleydo.org/license
  **************************************************************************** */
+import {StateToken} from "../caleydo_provenance/main";
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
@@ -315,6 +316,14 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
     return [this.rowtype, this.coltype];
   }
 
+  get stateTokens(): StateToken[]{
+    var token = {
+      name: "Scaling",
+      value: this.desc.name,
+      importance: 2
+    }
+    return [token];
+  }
   /**
    * access at a specific position
    * @param i
