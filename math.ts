@@ -54,6 +54,8 @@ export interface IHistogram extends IIterable<number> {
 
   missing: number;
   missingRange: ranges.Range;
+
+  forEach(callbackfn: (value: number, index: number) => void, thisArg?: any): void;
 }
 
 export interface ICatHistogram extends IHistogram {
