@@ -1045,7 +1045,7 @@ export class Range {
    * @param size the underlying size for negative indices
    * @returns {*}
    */
-  size(size:number[]):number[] {
+  size(size?:number[]):number[] {
     if (this.isAll) {
       return size;
     }

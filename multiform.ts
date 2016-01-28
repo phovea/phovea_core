@@ -814,6 +814,7 @@ export function create(data:datatypes.IDataType, parent:Element, options?) {
   return new MultiForm(data, parent, options);
 }
 
-export function createGrid(data:datatypes.IDataType, range: ranges.Range, parent:Element, viewFactory : IViewFactory, options?) {
+export function createGrid(data:datatypes.IDataType, range: ranges.Range, parent:Element,
+                           viewFactory : IViewFactory, options?) {
   return new MultiFormGrid(data, range, parent, viewFactory, options);
 }
