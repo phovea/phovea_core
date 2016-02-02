@@ -93,7 +93,7 @@ export class ZoomLogic extends events.EventHandler {
   }
 
   /**
-   * zooms to a given with and height based on the rawSize of the visualization
+   * zooms to a given width and height based on the rawSize of the visualization
    * @param w
    * @param h
    * @returns {any}

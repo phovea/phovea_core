@@ -436,18 +436,51 @@ class PropertyHandler {
     }
   }
 
+  /**
+   * returns the contained keys of this property handler
+   * @returns {string[]}
+   */
+  keys() {
+    return Object.keys(this.map);
+  }
+
+  /**
+   * iterate over each entry in the map
+   * @param f
+   */
+  forEach(f : (key: string, value: any) => void) {
+    return Object.keys(this.map).forEach((k) => f(k, this.map[k]));
+  }
+
+  /**
+   * whether the given name is defined i.e., not null
+   * @param name
+   * @returns {boolean}
+   */
   is(name:string) {
     return this.getProp(name, null) != null;
   }
 
-  getProp(name: string, default_ : string) {
+  /**
+   * returns the given value with optional default value
+   * @param name
+   * @param default_
+   * @returns {any}
+   */
+  getProp(name: string, default_ : string = null) {
     if (this.map.hasOwnProperty(name)) {
       return this.map[name];
     }
     return default_;
   }
 
-  getInt(name: string, default_ : number) {
+  /**
+   * returns the given integer value with optinal default, the value itself might be encoded to safe space
+   * @param name
+   * @param default_
+   * @returns {number}
+   */
+  getInt(name: string, default_ : number = NaN) {
     let l: string = this.getProp(name, null);
     if (l === null) {
       return default_;
@@ -458,6 +491,11 @@ class PropertyHandler {
     return parseInt(l, 36);
   }
 
+  /**
+   * removes the property from the map
+   * @param name
+   * @returns {boolean}
+   */
   removeProp(name: string) {
     if (this.map.hasOwnProperty(name)) {
       delete this.map[name];
@@ -600,6 +638,11 @@ export function offset(element:Element) {
   };
 }
 
+/**
+ * returns the bounding box of a given element similar to offset
+ * @param element
+ * @returns {{x: number, y: number, w: number, h: number}}
+ */
 export function bounds(element:Element) {
   if (!element) {
     return {x: 0, y: 0, w: 0, h: 0};

@@ -38,7 +38,8 @@ export interface ILocateAble {
   data: datatypes.IDataType;
 
   /**
-   * locate method, by convention, when just a single range is given, then return just a promise with this range, else an array
+   * locate method, by convention, when just a single range is given, then return
+   * just a promise with this range, else an array
    * the return type should be something convertable using the geom module
    */
   locate(...range: ranges.Range[]): Promise<any>;

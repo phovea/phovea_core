@@ -167,6 +167,16 @@ export function list(filter : any = C.constantTrue) {
 }
 
 /**
+ * returns an extension identified by type and id
+ * @param type
+ * @param id
+ * @returns {IPluginDesc}
+ */
+export function get(type: string, id : string) : IPluginDesc {
+  return C.search(_extensions, (d) => d.type === type && d.id === id);
+}
+
+/**
  * pushes a new description to the registry
  * @param desc
  * @param baseUrl

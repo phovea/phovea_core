@@ -368,7 +368,7 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
     if (this.loader.hist) {
       return this.loader.hist(this.desc, range, bins);
     }
-    super.hist(bins, range, containedIds);
+    return super.hist(bins, range, containedIds);
   }
 
   size() {
