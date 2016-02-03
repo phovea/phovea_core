@@ -58,7 +58,10 @@ export function toSelectOperation(event:any) {
 }
 
 /**
- * an id type is a semantic aggregation of ids, like patient, gene, ...
+ * An IDType is a semantic aggregation of an entity type, like Patient and Gene.
+ *
+ * An entity is tracked by a unique identifier (integer) within the system,
+ * which is mapped to a common, external identifier or name (string) as well.
  */
 export class IDType extends events.EventHandler implements C.IPersistable {
   /**
@@ -67,13 +70,14 @@ export class IDType extends events.EventHandler implements C.IPersistable {
    */
   private sel = {};
 
+  // TODO: is this cache ever emptied, or do we assume a reasonable upper bound on the entities in IDType?
   private name2id_cache : { [k:string] : number } = {};
   private id2name_cache : { [k:number] : string } = {};
 
   /**
-   * @param id the id of this idtype
-   * @param name the name of this idtype
-   * @param names the plural name
+   * @param id the system identifier of this IDType
+   * @param name the name of this IDType for external presentation
+   * @param names the plural form of above name
    * @param internal whether this is an internal type or not
    */
   constructor(public id:string, public name:string, public names:string, public internal = false) {
@@ -172,6 +176,11 @@ export class IDType extends events.EventHandler implements C.IPersistable {
     return this.selectImpl(ranges.none(), SelectOperation.SET, type);
   }
 
+  /**
+   * Cache identifier <-> name mapping in bulk.
+   * @param ids the entity identifiers to cache
+   * @param names the matching entity names to cache
+   */
   fillMapCache(ids: number[], names: string[]) {
     ids.forEach((id, i) => {
       const name = names[i];
@@ -180,6 +189,11 @@ export class IDType extends events.EventHandler implements C.IPersistable {
     });
   }
 
+  /**
+   * Request the system identifiers for the given entity names.
+   * @param names the entity names to resolve
+   * @returns a promise of system identifiers that match the input names
+   */
   map(names: string[]) : Promise<number[]> {
     var to_resolve = names.filter((name) => !(name in this.name2id_cache));
     if (to_resolve.length === 0) {
@@ -193,6 +207,11 @@ export class IDType extends events.EventHandler implements C.IPersistable {
     });
   }
 
+  /**
+   * Request the names for the given entity system identifiers.
+   * @param ids the entity names to resolve
+   * @returns a promise of system identifiers that match the input names
+   */
   unmap(ids_: ranges.Range | number[]): Promise<string[]> {
     var ids = ids_ instanceof ranges.Range ? <ranges.Range>ids_ : ranges.list(<number[]>ids_);
     var to_resolve = [];
@@ -227,7 +246,8 @@ export function isId(id:number) {
 }
 
 /**
- * a manager of a bunch of objects with selection support
+ * IDType with an actual collection of entities.
+ * Supports selections.
  */
 export class ObjectManager<T extends IHasUniqueId> extends IDType {
   private instances:T[] = [];
