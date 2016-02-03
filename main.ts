@@ -664,11 +664,20 @@ export function bounds(element:Element) {
  */
 export function hasDnDType(e, type) {
   var types = e.dataTransfer.types;
+
+  /*
+   * In Chrome datatransfer.types is an Array,
+   * while in Firefox it is a DOMStringList
+   * that only implements a contains-method!
+   */
   if (isFunction(types.indexOf)) {
     return types.indexOf(type) >= 0;
   }
   if (isFunction(types.includes)) {
     return types.includes(type);
+  }
+  if (isFunction(types.contains)) {
+    return types.contains(type);
   }
   return false;
 }
