@@ -485,7 +485,7 @@ export class Polygon extends AShape {
   }
 
   get isConvex() {
-    return !this.isConvex;
+    return !this.isConcave;
   }
 
   asIntersectionParams():_2D.IIntersectionParam {
