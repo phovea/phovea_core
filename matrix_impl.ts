@@ -3,7 +3,7 @@
  * Copyright (c) The Caleydo Team. All rights reserved.
  * Licensed under the new BSD license, available at http://caleydo.org/license
  **************************************************************************** */
-import {StateToken} from "../caleydo_provenance/main";
+
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
@@ -18,6 +18,7 @@ import vector = require('./vector');
 import vector_impl = require('./vector_impl');
 import math = require('./math');
 import matrix = require('./matrix');
+import {StateToken} from "../caleydo_core/statetoken";
 
 function flatten(arr : any[][], indices: ranges.Range, select: number = 0) {
   var r = [], dim = [arr.length, arr[0].length];
