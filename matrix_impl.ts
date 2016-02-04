@@ -320,7 +320,6 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
     var token = {
       name: "Scaling",
       value: this.desc.name,
-      repIDType: false,
       importance: 2
     }
     return [token];
