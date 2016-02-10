@@ -28,18 +28,34 @@ if (!(<any>window).Promise) {
  */
 export const version = '0.0.1-alpha';
 
+/**
+ * whether the standard api calls should be prevented
+ * @type {boolean}
+ */
+export var offline = false;
+/**
+ * server prefix ofr api calls
+ * @type {string}
+ */
 export var server_url:string = '/api';
+/**
+ * server suffix for api calls
+ * @type {string}
+ */
 export var server_json_suffix:string = '';
+
 export var registry : { baseUrl: string; extensions: any[]; relativeUrl: string};
+
 
 /**
  * if no module config is here, we can manually initialize the core
  * @param config
  * @private
  */
-export function _init(config: { apiUrl?: string; apiJSONSuffix?: string, registry?: { baseUrl: string; extensions: any[]; relativeUrl: string } }) {
+export function _init(config: { apiUrl?: string; apiJSONSuffix?: string, offline? : boolean, registry?: { baseUrl: string; extensions: any[]; relativeUrl: string } }) {
   server_url = config.apiUrl || '/api';
   server_json_suffix = config.apiJSONSuffix || '';
+  offline = config.offline === true;
 
   registry = {
     baseUrl: config.registry && config.registry.baseUrl || '',

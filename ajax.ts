@@ -121,6 +121,12 @@ export function encodeParams(data = null) {
   return s.join('&').replace(/%20/g, '+');
 }
 
+type OfflineGenerator = ((data: any) => Promise<any>)|Promise<any>|any;
+
+function offline(generator : OfflineGenerator, data : any = {}) {
+  return Promise.resolve(typeof generator === 'function' ? generator(data) : generator);
+}
+
 /**
  * api version of send
  * @param url api relative url
@@ -129,7 +135,10 @@ export function encodeParams(data = null) {
  * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
  * @returns {Promise<any>}
  */
-export function sendAPI(url: string, data : any = {}, method = 'get', expectedDataType = 'json'): Promise<any> {
+export function sendAPI(url: string, data : any = {}, method = 'get', expectedDataType = 'json', offlineGenerator: OfflineGenerator = Promise.reject('offline')): Promise<any> {
+  if (C.offline) {
+    return offline(offlineGenerator, data);
+  }
   return send(api2absURL(url), data, method, expectedDataType);
 }
 
@@ -139,7 +148,10 @@ export function sendAPI(url: string, data : any = {}, method = 'get', expectedDa
  * @param data arguments
  * @returns {Promise<any>}
  */
-export function getAPIJSON(url: string, data : any = {}): Promise<any> {
+export function getAPIJSON(url: string, data : any = {}, offlineGenerator: OfflineGenerator = Promise.reject('offline')): Promise<any> {
+  if (C.offline) {
+    return offline(offlineGenerator, data);
+  }
   return getJSON(api2absURL(url), data);
 }
 
@@ -150,6 +162,9 @@ export function getAPIJSON(url: string, data : any = {}): Promise<any> {
  * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
  * @returns {Promise<any>}
  */
-export function getAPIData(url: string, data : any = {}, expectedDataType = 'json'): Promise<any> {
+export function getAPIData(url: string, data : any = {}, expectedDataType = 'json', offlineGenerator: OfflineGenerator = Promise.reject('offline')): Promise<any> {
+  if (C.offline) {
+    return offline(offlineGenerator, data);
+  }
   return getData(api2absURL(url), data, expectedDataType);
 }

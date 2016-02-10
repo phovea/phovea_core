@@ -12,15 +12,16 @@ import plugins = require('./plugin');
 import datatypes = require('./datatype');
 import tables = require('./table');
 import tables_impl = require('./table_impl');
+import {IDataType} from "./datatype";
 
 'use strict';
 
 //find all datatype plugins
 const available = plugins.list('datatype');
 
-var cacheById = {};
-var cacheByName = {};
-var cacheByFQName = {};
+var cacheById:{ [key : string]: Promise<IDataType> } = {};
+var cacheByName:{ [key : string]: Promise<IDataType> } = {};
+var cacheByFQName:{ [key : string]: Promise<IDataType> } = {};
 
 export function clearCache(dataset?: datatypes.IDataType | datatypes.IDataDescription) {
   if (dataset) {
@@ -35,7 +36,11 @@ export function clearCache(dataset?: datatypes.IDataType | datatypes.IDataDescri
   }
 }
 
-function cached(desc, result) {
+function getCachedEntries() : Promise<IDataType[]> {
+  return Promise.all(Object.keys(cacheById).map((k) => cacheById[k]));
+}
+
+function cached(desc : datatypes.IDataDescription, result : Promise<IDataType>) {
   cacheById[desc.id] = result;
   cacheByFQName[desc.fqname] = result;
   cacheByName[desc.name] = result;
@@ -63,9 +68,9 @@ export const random_id = C.random_id;
  * @param desc
  * @returns {*}
  */
-function transformEntry(desc: any) {
+function transformEntry(desc: any) : Promise<IDataType> {
   if (desc === undefined) {
-    return desc;
+    return null;
   }
   desc.id = desc.id || fixId(desc.name+random_id(5));
   desc.fqname = desc.fqname || desc.name;
@@ -97,9 +102,9 @@ export function list(query?: any) {
   const f = (typeof query === 'function') ? <(d: datatypes.IDataType) => boolean>query : C.constantTrue;
   const q = (typeof query !== 'undefined' && typeof query !== 'function') ? <any>query : {};
 
-  var r = ajax.getAPIJSON('/dataset/', q).then(function (descs) {
-    //load descriptions and create data out of them
-    return <any> Promise.all(descs.map((desc) => transformEntry(desc)));
+  var r = C.offline ? getCachedEntries() : ajax.getAPIJSON('/dataset/', q).then(function (descs) {
+      //load descriptions and create data out of them
+      return <any> Promise.all(descs.map((desc) => transformEntry(desc)));
   });
   if (f !== C.constantTrue) {
     r = r.then((arr) => arr.filter(f));
@@ -198,7 +203,7 @@ function getById(id: string) {
   if (id in cacheById) {
     return cacheById[id];
   }
-  return ajax.getAPIJSON('/dataset/'+id+'/desc').then(transformEntry);
+  return ajax.getAPIJSON('/dataset/'+id+'/desc', {}).then(transformEntry);
 }
 
 /**

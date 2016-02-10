@@ -611,7 +611,7 @@ function fillUp() {
     return;
   }
   filledUp = true;
-  ajax.getAPIJSON('/idtype').then(function (c) {
+  ajax.getAPIJSON('/idtype', {}, []).then(function (c) {
     fillUpData(c);
     return cache;
   });
