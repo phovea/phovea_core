@@ -267,12 +267,15 @@ function extrapolateIconify(r: any) {
     node.title = this.name;
     if(this.iconcss) {
       node.classList.add('fa');
+      node.classList.add('vis-icon');
       node.classList.add(this.iconcss);
     } else if (this.icon) {
       node.classList.add('fa');
       node.classList.add('fa-fw');
+      node.classList.add('vis-icon');
       node.style.width = '1em';
       node.style['background-image'] = 'url(' + this.baseUrl + '/' + this.icon + ')';
+      node.style['background-size'] = '100%';
       node.innerHTML = '&nbsp';
     } else {
       node.innerText = this.name.substr(0, 1).toUpperCase();
