@@ -12,16 +12,15 @@ import plugins = require('./plugin');
 import datatypes = require('./datatype');
 import tables = require('./table');
 import tables_impl = require('./table_impl');
-import {IDataType} from "./datatype";
 
 'use strict';
 
 //find all datatype plugins
 const available = plugins.list('datatype');
 
-var cacheById:{ [key : string]: Promise<IDataType> } = {};
-var cacheByName:{ [key : string]: Promise<IDataType> } = {};
-var cacheByFQName:{ [key : string]: Promise<IDataType> } = {};
+var cacheById:{ [key : string]: Promise<datatypes.IDataType> } = {};
+var cacheByName:{ [key : string]: Promise<datatypes.IDataType> } = {};
+var cacheByFQName:{ [key : string]: Promise<datatypes.IDataType> } = {};
 
 export function clearCache(dataset?: datatypes.IDataType | datatypes.IDataDescription) {
   if (dataset) {
@@ -36,11 +35,11 @@ export function clearCache(dataset?: datatypes.IDataType | datatypes.IDataDescri
   }
 }
 
-function getCachedEntries() : Promise<IDataType[]> {
+function getCachedEntries() : Promise<datatypes.IDataType[]> {
   return Promise.all(Object.keys(cacheById).map((k) => cacheById[k]));
 }
 
-function cached(desc : datatypes.IDataDescription, result : Promise<IDataType>) {
+function cached(desc : datatypes.IDataDescription, result : Promise<datatypes.IDataType>) {
   cacheById[desc.id] = result;
   cacheByFQName[desc.fqname] = result;
   cacheByName[desc.name] = result;
@@ -68,7 +67,7 @@ export const random_id = C.random_id;
  * @param desc
  * @returns {*}
  */
-function transformEntry(desc: any) : Promise<IDataType> {
+function transformEntry(desc: any) : Promise<datatypes.IDataType> {
   if (desc === undefined) {
     return null;
   }
