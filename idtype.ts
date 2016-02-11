@@ -125,25 +125,15 @@ export class IDType extends events.EventHandler implements C.IPersistable {
    * select the given range as
    * @param range
    */
-  select(range:ranges.Range);
-  select(range:ranges.Range, op:SelectOperation);
-  select(range:number[]);
-  select(range:number[], op:SelectOperation);
-  select(type:string, range:ranges.Range);
-  select(type:string, range:ranges.Range, op:SelectOperation);
-  select(type:string, range:number[]);
-  select(type:string, range:number[], op:SelectOperation);
-  select(r_or_t:any, r_or_op ?:any, op = SelectOperation.SET) {
-    function asRange(v:any) {
-      if (Array.isArray(v)) {
-        return ranges.list(v);
-      }
-      return v;
-    }
-
-    var type = (typeof r_or_t === 'string') ? r_or_t.toString() : defaultSelectionType;
-    var range = asRange((typeof r_or_t === 'string') ? r_or_op : r_or_t);
-    op = (typeof r_or_t === 'string') ? op : (r_or_op ? r_or_op : SelectOperation.SET);
+  select(range:ranges.RangeLike);
+  select(range:ranges.RangeLike, op:SelectOperation);
+  select(type:string, range:ranges.RangeLike);
+  select(type:string, range:ranges.RangeLike, op:SelectOperation);
+  select() {
+    const a = C.argList(arguments);
+    const type = (typeof a[0] === 'string') ? a.shift() : defaultSelectionType,
+      range = ranges.parse(a[0]),
+      op = asSelectOperation(a[1]);
     return this.selectImpl(range, op, type);
   }
 
@@ -360,13 +350,6 @@ export function createLocalAssigner() {
   return (ids:string[]) => ranges.list.apply(ranges, ids.map(mapOne));
 }
 
-function asRange(v:any) {
-  if (Array.isArray(v)) {
-    return ranges.list.apply(ranges, v);
-  }
-  return v;
-}
-
 function asSelectOperation(v:any) {
   if (!v) {
     return SelectOperation.SET;
@@ -520,31 +503,19 @@ export class SelectAble extends events.EventHandler {
     });
   }
 
-  select(range:ranges.Range);
-  select(range:number[]);
-  select(range:number[][]);
-  select(range:ranges.Range, op:SelectOperation);
-  select(range:number[], op:SelectOperation);
-  select(range:number[][], op:SelectOperation);
-  select(type:string, range:ranges.Range);
-  select(type:string, range:number[]);
-  select(type:string, range:number[][]);
-  select(type:string, range:ranges.Range, op:SelectOperation);
-  select(type:string, range:number[], op:SelectOperation);
-  select(type:string, range:number[][], op:SelectOperation);
-  select(dim:number, range:ranges.Range);
-  select(dim:number, range:number[]);
-  select(dim:number, range:ranges.Range, op:SelectOperation);
-  select(dim:number, range:number[], op:SelectOperation);
-  select(dim:number, type:string, range:ranges.Range);
-  select(dim:number, type:string, range:number[]);
-  select(dim:number, type:string, range:ranges.Range, op:SelectOperation);
-  select(dim:number, type:string, range:number[], op:SelectOperation);
+  select(range:ranges.RangeLike);
+  select(range:ranges.RangeLike, op:SelectOperation);
+  select(type:string, range:ranges.RangeLike);
+  select(type:string, range:ranges.RangeLike, op:SelectOperation);
+  select(dim:number, range:ranges.RangeLike);
+  select(dim:number, range:ranges.RangeLike, op:SelectOperation);
+  select(dim:number, type:string, range:ranges.RangeLike);
+  select(dim:number, type:string, range:ranges.RangeLike, op:SelectOperation);
   select() {
     const a = C.argList(arguments);
     const dim = (typeof a[0] === 'number') ? +a.shift() : -1,
       type = (typeof a[0] === 'string') ? a.shift() : defaultSelectionType,
-      range = asRange(a[0]),
+      range = ranges.parse(a[0]),
       op = asSelectOperation(a[1]);
     return this.selectImpl(range, op, type, dim);
   }

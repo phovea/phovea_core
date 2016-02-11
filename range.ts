@@ -1266,24 +1266,30 @@ function parseRange1D(code:string, act:number) {
     dim: r
   };
 }
+
+/**
+ * something that can be parsed as a range
+ */
+export type RangeLike = Range | number[] | number[][] | string;
+
 /**
  * parses the given encoded string created by toString to a range object
- * @param encoded
+ * @param arange something like a range
  * @returns {Range}
  */
-export function parse(range:Range);
-export function parse(indices: number[]);
-export function parse(...encoded:string[]);
-export function parse(...args:any[]) {
+export function parse(arange:RangeLike = null) {
 
-  if (args.length === 0) {
+  if (arange === null) {
     return all();
   }
-  if (args.length === 1 && args[0] instanceof Range) {
-    return <Range>args[0];
+  if (arange instanceof Range) {
+    return <Range>arange;
   }
-  if (args.length === 1 && Array.isArray(args[0]) && typeof args[0][0] === 'number') {
-    return list(args[0]);
+  if (Array.isArray(arange)) {
+    if (Array.isArray(arange[0])) {
+      return list(...<number[][]>arange);
+    }
+    return list(<number[]>arange);
   }
-  return parseRange(args.map(String).join(','));
+  return parseRange(C.argList(arguments).map(String).join(','));
 }
