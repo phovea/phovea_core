@@ -360,11 +360,12 @@ export class ProductIDType extends events.EventHandler implements IIDType {
    * @param type optional the selection type
    * @returns {ranges.Range[]}
    */
-  selections(type = defaultSelectionType) {
+  selections(type = defaultSelectionType) : ranges.Range[] {
     if (this.sel.hasOwnProperty(type)) {
       return this.sel[type].slice();
     }
     this.sel[type] = [];
+    return [];
   }
 
   productSelections(type = defaultSelectionType /*, wildcardLookup: (idtype: IDType) => Promise<number> */): ranges.Range[] {
@@ -374,8 +375,10 @@ export class ProductIDType extends events.EventHandler implements IIDType {
       const s = e.selections(type);
       //remove all already used rows / columns as part of the cells
       const wildcard = s.without(usedCells[i]);
-      //create wildcard cells, e.g., the remaining ones are row/column selections
-      cells.push(ranges.list(this.elems.map((e2) => e === e2 ? wildcard.dim(0) : ranges.Range1D.all())));
+      if (!wildcard.isNone) {
+        //create wildcard cells, e.g., the remaining ones are row/column selections
+        cells.push(ranges.list(this.elems.map((e2) => e === e2 ? wildcard.dim(0) : ranges.Range1D.all())));
+      }
     });
 
     return cells;
@@ -434,7 +437,7 @@ export class ProductIDType extends events.EventHandler implements IIDType {
         new_ = rcells;
         break;
       case SelectOperation.ADD:
-        new_ = b.concat(new_);
+        new_ = b.concat(rcells);
         break;
       case SelectOperation.REMOVE:
         new_ = removeCells(b, rcells, this.elems.length);
@@ -462,8 +465,11 @@ export class ProductIDType extends events.EventHandler implements IIDType {
 
   private toPerDim(sel: ranges.Range[]) {
     return this.elems.map((elem, i) => {
+      if (sel.length === 0) {
+        return ranges.none();
+      }
       const dimselections = sel.map((r) => r.dim(i));
-      const selection = dimselections.reduce((p,a) => a ? a.union(p) : p);
+      const selection = dimselections.reduce((p,a) => p ? p.union(a) : a, null);
       return ranges.list(selection);
     });
   }

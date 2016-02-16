@@ -240,6 +240,10 @@ export class Range1D {
     return new Range1D([RangeElem.all()]);
   }
 
+  static single(item: number) {
+    return new Range1D([RangeElem.single(item)]);
+  }
+
   static none() {
     return new Range1D();
   }
@@ -1335,4 +1339,8 @@ export function parse(arange:RangeLike = null) {
     return list(<number[]>arange);
   }
   return parseRange(C.argList(arguments).map(String).join(','));
+}
+
+export function cell(...dim_indices: number[]) {
+  return new Range(dim_indices.map(Range1D.single));
 }
