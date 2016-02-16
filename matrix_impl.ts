@@ -301,7 +301,7 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
   valuetype:any;
   rowtype:idtypes.IDType;
   coltype:idtypes.IDType;
-  producttype: idtypes.ProductIDType;
+  private producttype_: idtypes.ProductIDType;
 
   constructor(public desc: datatypes.IDataDescription, private loader: IMatrixLoader2) {
     super(null);
@@ -310,8 +310,12 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
     this.valuetype = d.value;
     this.rowtype = idtypes.resolve(d.rowtype);
     this.coltype = idtypes.resolve(d.coltype);
-    this.producttype = idtypes.resolveProduct(this.rowtype, this.coltype);
+    this.producttype_ = idtypes.resolveProduct(this.rowtype, this.coltype);
     this.t = new TransposedMatrix(this);
+  }
+
+  get producttype() {
+    return this.producttype_;
   }
 
   get idtypes() {

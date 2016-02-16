@@ -123,6 +123,10 @@ export function encodeParams(data = null) {
 
 type OfflineGenerator = ((data: any) => Promise<any>)|Promise<any>|any;
 
+function defaultOfflineGenerator() {
+  return Promise.reject('offline');
+}
+
 function offline(generator : OfflineGenerator, data : any = {}) {
   return Promise.resolve(typeof generator === 'function' ? generator(data) : generator);
 }
@@ -135,7 +139,7 @@ function offline(generator : OfflineGenerator, data : any = {}) {
  * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
  * @returns {Promise<any>}
  */
-export function sendAPI(url: string, data : any = {}, method = 'get', expectedDataType = 'json', offlineGenerator: OfflineGenerator = Promise.reject('offline')): Promise<any> {
+export function sendAPI(url: string, data : any = {}, method = 'get', expectedDataType = 'json', offlineGenerator: OfflineGenerator = defaultOfflineGenerator): Promise<any> {
   if (C.offline) {
     return offline(offlineGenerator, data);
   }
@@ -148,7 +152,7 @@ export function sendAPI(url: string, data : any = {}, method = 'get', expectedDa
  * @param data arguments
  * @returns {Promise<any>}
  */
-export function getAPIJSON(url: string, data : any = {}, offlineGenerator: OfflineGenerator = Promise.reject('offline')): Promise<any> {
+export function getAPIJSON(url: string, data : any = {}, offlineGenerator: OfflineGenerator = defaultOfflineGenerator): Promise<any> {
   if (C.offline) {
     return offline(offlineGenerator, data);
   }
@@ -162,7 +166,7 @@ export function getAPIJSON(url: string, data : any = {}, offlineGenerator: Offli
  * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
  * @returns {Promise<any>}
  */
-export function getAPIData(url: string, data : any = {}, expectedDataType = 'json', offlineGenerator: OfflineGenerator = Promise.reject('offline')): Promise<any> {
+export function getAPIData(url: string, data : any = {}, expectedDataType = 'json', offlineGenerator: OfflineGenerator = () => defaultOfflineGenerator): Promise<any> {
   if (C.offline) {
     return offline(offlineGenerator, data);
   }
