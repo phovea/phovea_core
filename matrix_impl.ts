@@ -40,7 +40,7 @@ function flatten(arr : any[][], indices: ranges.Range, select: number = 0) {
 /**
  * base class for different Matrix implementations, views, transposed,...
  */
-export class MatrixBase extends idtypes.SelectAble {
+export class MatrixBase extends idtypes.ProductSelectAble {
   constructor(public _root:matrix.IMatrix) {
     super();
   }
@@ -145,6 +145,7 @@ export class MatrixBase extends idtypes.SelectAble {
       return <C.IPersistable>(<any>this);
     }
   }
+
 }
 
 export interface IMatrixLoader {
@@ -300,6 +301,7 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
   valuetype:any;
   rowtype:idtypes.IDType;
   coltype:idtypes.IDType;
+  producttype: idtypes.ProductIDType;
 
   constructor(public desc: datatypes.IDataDescription, private loader: IMatrixLoader2) {
     super(null);
@@ -308,6 +310,7 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
     this.valuetype = d.value;
     this.rowtype = idtypes.resolve(d.rowtype);
     this.coltype = idtypes.resolve(d.coltype);
+    this.producttype = idtypes.resolveProduct(this.rowtype, this.coltype);
     this.t = new TransposedMatrix(this);
   }
 
@@ -412,6 +415,10 @@ class TransposedMatrix extends MatrixBase  implements matrix.IMatrix {
 
   get coltype() {
     return this._root.rowtype;
+  }
+
+  get producttype() {
+    return this._root.producttype;
   }
 
   get idtypes() {
@@ -557,8 +564,12 @@ class MatrixView extends MatrixBase implements matrix.IMatrix {
     return this._root.coltype;
   }
 
+  get producttype() {
+    return this._root.producttype;
+  }
+
   get idtypes() {
-    return [this.rowtype, this.coltype];
+    return this._root.idtypes;
   }
 }
 

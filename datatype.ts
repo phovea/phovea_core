@@ -41,7 +41,7 @@ export interface IDataDescription {
 /**
  * basic data type interface
  */
-export interface IDataType extends idtypes.SelectAble, C.IPersistable {
+export interface IDataType extends idtypes.ISelectAble, C.IPersistable {
   /**
    * its description
    */

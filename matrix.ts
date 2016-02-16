@@ -14,7 +14,11 @@ import datatypes = require('./datatype');
 import vector = require('./vector');
 import math = require('./math');
 
-export interface IMatrix extends datatypes.IDataType {
+export const IDTYPE_ROW = 0;
+export const IDTYPE_COLUMN = 1;
+export const IDTYPE_CELL = 2;
+
+export interface IMatrix extends datatypes.IDataType, idtypes.IProductSelectAble {
   /**
    * nrow * ncol
    */
@@ -31,10 +35,12 @@ export interface IMatrix extends datatypes.IDataType {
    * type of the value - to be specified
    */
   valuetype:any;
+
   /**
    * row id type
    */
   rowtype:idtypes.IDType;
+
   /**
    * column id type
    */
@@ -46,7 +52,7 @@ export interface IMatrix extends datatypes.IDataType {
    */
   view(range?:ranges.Range) : IMatrix;
 
-  slice(col: number): vector.IVector;
+  slice(col:number): vector.IVector;
 
   //view(filter: string): Promise<IMatrix>;
 
@@ -57,7 +63,7 @@ export interface IMatrix extends datatypes.IDataType {
    * @param valuetype the new value type by default the same as matrix valuetype
    * @param idtype the new vlaue type by default the same as matrix rowtype
    */
-  reduce(f : (row : any[]) => any, this_f? : any, valuetype? : any, idtype? : idtypes.IDType) : vector.IVector;
+  reduce(f:(row:any[]) => any, this_f?:any, valuetype?:any, idtype?:idtypes.IDType) : vector.IVector;
   /**
    * transposed version of this matrix
    */
@@ -90,8 +96,8 @@ export interface IMatrix extends datatypes.IDataType {
 
   stats() : Promise<math.IStatistics>;
 
-  hist(bins? : number, range?:ranges.Range, containedIds? : number) : Promise<math.IHistogram>;
+  hist(bins?:number, range?:ranges.Range, containedIds?:number) : Promise<math.IHistogram>;
 
 
-  heatmapUrl(range?: ranges.Range, options?: { format?: string; transpose?: boolean; range?: [number,number]}): string;
+  heatmapUrl(range?:ranges.Range, options?:{ format?: string; transpose?: boolean; range?: [number,number]}): string;
 }

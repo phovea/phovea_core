@@ -13,6 +13,7 @@ import Iterator = require('./iterator');
 
 export interface IRangeElem {
   isAll : boolean;
+  isUnbound: boolean;
   isSingle : boolean;
   size(size?:number):number;
   clone() : IRangeElem;
@@ -51,6 +52,10 @@ export class RangeElem implements IRangeElem {
 
   get isSingle() {
     return (this.from + this.step) === this.to;
+  }
+
+  get isUnbound() {
+    return this.from < 0 || this.to < 0;
   }
 
   static all() {
@@ -174,6 +179,10 @@ export class SingleRangeElem implements IRangeElem {
     return true;
   }
 
+  get isUnbound() {
+    return false;
+  }
+
   size(size?:number):number {
     return 1;
   }
@@ -281,6 +290,10 @@ export class Range1D {
 
   get isNone() {
     return this.arr.length === 0;
+  }
+
+  get isUnbound() {
+    return this.arr.some((d) => d.isUnbound);
   }
 
   private get isList() {
@@ -828,6 +841,13 @@ export class Range {
     return this.dims.every((dim) => dim.isNone);
   }
 
+  /**
+   * checks whether there are any wildcards
+   */
+  get isUnbound() {
+    return this.dims.some((dim) => dim.isUnbound);
+  }
+
   get first() {
     return this.dim(0).first;
   }
@@ -1058,6 +1078,29 @@ export class Range {
     return this.dims.map((dim) => {
       return new Range([dim]);
     });
+  }
+
+  /**
+   * iterates over the product of this range, e.g. (0,1,2),(3) => (0,3),(1,3),(2,3)
+   * @param callback
+   * @param size
+   */
+  product(callback: (indices: number[]) => void, size?: number[]) {
+    const ndim = this.ndim;
+    const iter = (ids: number[]) => {
+      const act = ids.length;
+      if (act < ndim) {
+        let dim = this.dims[act];
+        dim.iter(size ? size[act] : null).forEach((id) => {
+          ids.push(id);
+          iter(ids);
+          ids.pop();
+        });
+      } else {
+        callback(ids.slice());
+      }
+    };
+    iter([]);
   }
 
   /**
