@@ -11,12 +11,10 @@ import C = require('./main');
 import ajax = require('./ajax');
 import events = require('./event');
 import ranges = require('./range');
-import {IEventHandler} from "./event";
-import {IEventListener} from "./event";
 'use strict';
 
 
-const cache : { [id: string] : IDType|ProductIDType }= {};
+const cache:{ [id: string] : IDType|ProductIDType } = {};
 var filledUp = false;
 
 export const defaultSelectionType = 'selected';
@@ -60,7 +58,7 @@ export function toSelectOperation(event:any) {
   return SelectOperation.SET;
 }
 
-export interface IIDType extends events.IEventHandler, C.IPersistable{
+export interface IIDType extends events.IEventHandler, C.IPersistable {
   id: string;
   name: string;
   names: string;
@@ -70,7 +68,7 @@ export interface IIDType extends events.IEventHandler, C.IPersistable{
   selectionTypes(): string[];
 
   clear();
-  clear(type: string);
+  clear(type:string);
 }
 
 /**
@@ -87,8 +85,8 @@ export class IDType extends events.EventHandler implements IIDType {
   private sel = {};
 
   // TODO: is this cache ever emptied, or do we assume a reasonable upper bound on the entities in IDType?
-  private name2id_cache : { [k:string] : number } = {};
-  private id2name_cache : { [k:number] : string } = {};
+  private name2id_cache:{ [k:string] : number } = {};
+  private id2name_cache:{ [k:number] : string } = {};
 
   /**
    * @param id the system identifier of this IDType
@@ -187,7 +185,7 @@ export class IDType extends events.EventHandler implements IIDType {
    * @param ids the entity identifiers to cache
    * @param names the matching entity names to cache
    */
-  fillMapCache(ids: number[], names: string[]) {
+  fillMapCache(ids:number[], names:string[]) {
     ids.forEach((id, i) => {
       const name = names[i];
       this.name2id_cache[name] = id;
@@ -200,13 +198,13 @@ export class IDType extends events.EventHandler implements IIDType {
    * @param names the entity names to resolve
    * @returns a promise of system identifiers that match the input names
    */
-  map(names: string[]) : Promise<number[]> {
+  map(names:string[]):Promise<number[]> {
     var to_resolve = names.filter((name) => !(name in this.name2id_cache));
     if (to_resolve.length === 0) {
       return Promise.resolve(names.map((name) => this.name2id_cache[name]));
     }
-    return ajax.getAPIJSON(`/idtype/${this.id}/map`, { ids: to_resolve }).then((ids) => {
-      to_resolve.forEach((name,i) => {
+    return ajax.getAPIJSON(`/idtype/${this.id}/map`, {ids: to_resolve}).then((ids) => {
+      to_resolve.forEach((name, i) => {
         this.name2id_cache[name] = ids[i];
       });
       return names.map((name) => this.name2id_cache[name]);
@@ -218,45 +216,45 @@ export class IDType extends events.EventHandler implements IIDType {
    * @param ids the entity names to resolve
    * @returns a promise of system identifiers that match the input names
    */
-  unmap(ids_: ranges.Range | number[]): Promise<string[]> {
+  unmap(ids_:ranges.Range | number[]):Promise<string[]> {
     var ids = ids_ instanceof ranges.Range ? <ranges.Range>ids_ : ranges.list(<number[]>ids_);
     var to_resolve = [];
-    ids.dim(0).forEach((name) => !(name in this.id2name_cache) ? to_resolve.push(name): null);
+    ids.dim(0).forEach((name) => !(name in this.id2name_cache) ? to_resolve.push(name) : null);
     if (to_resolve.length === 0) {
       var r = [];
-      ids.dim(0).forEach((name) => r.push(this.id2name_cache[name]) );
+      ids.dim(0).forEach((name) => r.push(this.id2name_cache[name]));
       return Promise.resolve(r);
     }
-    return ajax.getAPIJSON(`/idtype/${this.id}/unmap`, { ids: ranges.list(to_resolve).toString() }).then((result) => {
-      to_resolve.forEach((name,i) => {
+    return ajax.getAPIJSON(`/idtype/${this.id}/unmap`, {ids: ranges.list(to_resolve).toString()}).then((result) => {
+      to_resolve.forEach((name, i) => {
         this.id2name_cache[name] = result[i];
       });
       var r = [];
-      ids.dim(0).forEach((name) => r.push(this.id2name_cache[name]) );
+      ids.dim(0).forEach((name) => r.push(this.id2name_cache[name]));
       return r;
     });
   }
 }
 
-function indicesCompare(a: number[], b: number[]) {
-  //assert a.length = b.length
-  for(let i = 0; i < a.length; ++i) {
-    if (a[i] != b[i]) {
-      return a[i] - b[i];
-    }
-  }
-  return 0;
-}
+//function indicesCompare(a: number[], b: number[]) {
+//  //assert a.length = b.length
+//  for(let i = 0; i < a.length; ++i) {
+//    if (a[i] !== b[i]) {
+//      return a[i] - b[i];
+//    }
+//  }
+//  return 0;
+//}
+//
+//function compressPairs(pairs: number[][]): ranges.Range[] {
+//  return pairs.map((a) => ranges.list(...a));
+//}
 
-function compressPairs(pairs: number[][]): ranges.Range[] {
-  return pairs.map((a) => ranges.list(...a));
-}
-
-function overlaps(r: ranges.Range, with_ : ranges.Range, ndim : number) {
+function overlaps(r:ranges.Range, with_:ranges.Range, ndim:number) {
   if (with_.ndim === 0) {
     return true; //catch all
   }
-  for(let i = 0; i < Math.min(r.ndim, ndim); ++i) {
+  for (let i = 0; i < Math.min(r.ndim, ndim); ++i) {
     let ri = r.dim(i);
     var wi = with_.dim(i);
     if (wi.isAll || ri.isAll) {
@@ -271,11 +269,11 @@ function overlaps(r: ranges.Range, with_ : ranges.Range, ndim : number) {
   return false;
 }
 
-function removeCells(b: ranges.Range[], without : ranges.Range[], ndim: number) {
+function removeCells(b:ranges.Range[], without:ranges.Range[], ndim:number) {
   if (without.length === 0) {
     return b;
   }
-  var r : ranges.Range[] = [];
+  var r:ranges.Range[] = [];
   b.forEach((bi) => {
     if (without.some((w) => w.eq(bi))) {
       //skip
@@ -291,19 +289,19 @@ function removeCells(b: ranges.Range[], without : ranges.Range[], ndim: number) 
  * a product idtype is a product of multiple underlying ones, e.g. patient x gene.
  */
 export class ProductIDType extends events.EventHandler implements IIDType {
-  private sel : { [type: string] : ranges.Range[] } = {};
+  private sel:{ [type: string] : ranges.Range[] } = {};
 
   private isOn = false;
-  private selectionListener = (event: events.IEvent, type: string, act: ranges.Range, added: ranges.Range, removed: ranges.Range) => {
+  private selectionListener = (event:events.IEvent, type:string, act:ranges.Range, added:ranges.Range, removed:ranges.Range) => {
     this.fire('selectDim,selectProduct', this.elems.indexOf(<IDType>event.currentTarget), type, act, added, removed);
-    this.fire('selectDim-'+type+',selectProduct-'+type, this.elems.indexOf(<IDType>event.currentTarget), act, added, removed);
+    this.fire('selectDim-' + type + ',selectProduct-' + type, this.elems.indexOf(<IDType>event.currentTarget), act, added, removed);
   };
 
-  constructor(public elems: IDType[], public internal = false) {
+  constructor(public elems:IDType[], public internal = false) {
     super();
   }
 
-  on(events: any, listener?: IEventListener) {
+  on(events:any, listener?:IEventListener) {
     if (!this.isOn) {
       this.enable();
       this.isOn = true;
@@ -326,6 +324,7 @@ export class ProductIDType extends events.EventHandler implements IIDType {
   private enable() {
     this.elems.forEach((elem) => elem.on('select', this.selectionListener));
   }
+
   private disable() {
     this.elems.forEach((elem) => elem.off('select', this.selectionListener));
   }
@@ -360,7 +359,7 @@ export class ProductIDType extends events.EventHandler implements IIDType {
    * @param type optional the selection type
    * @returns {ranges.Range[]}
    */
-  selections(type = defaultSelectionType) : ranges.Range[] {
+  selections(type = defaultSelectionType):ranges.Range[] {
     if (this.sel.hasOwnProperty(type)) {
       return this.sel[type].slice();
     }
@@ -368,7 +367,7 @@ export class ProductIDType extends events.EventHandler implements IIDType {
     return [];
   }
 
-  productSelections(type = defaultSelectionType /*, wildcardLookup: (idtype: IDType) => Promise<number> */): ranges.Range[] {
+  productSelections(type = defaultSelectionType /*, wildcardLookup: (idtype: IDType) => Promise<number> */):ranges.Range[] {
     const cells = this.selections(type);
     const usedCells = this.toPerDim(cells);
     this.elems.forEach((e, i) => {
@@ -383,30 +382,30 @@ export class ProductIDType extends events.EventHandler implements IIDType {
 
     return cells;
     /* TODO no duplicates
-    if (cells.every((c) => !c.isUnbound)) {
-      //all cells are bound, just cells
-      return Promise.resolve(cells);
-    }
-    //we need to resolve some wildcards
-    return Promise.all(this.elems.map((elem, i) => {
-      if (cells.some((c) => c.dim(i).isUnbound)) {
-        return wildcardLookup(elem);
-      } else {
-        return Promise.resolve(0);
-      }
-    })).then((size: number[]) => {
-      const fullCells : any = {};
-      cells.forEach((cell) => {
-        cell.product((indices: number[]) => {
-          const id = indices.join('_');
-          fullCells[id] = indices;
-        });
-      }, size);
-      //fullCells contains all cells that we have to take care of
-      const pairs = Object.keys(fullCells).map((k) => fullCells[k]).sort(indicesCompare);
-      return compressPairs(pairs);
-    });
-    */
+     if (cells.every((c) => !c.isUnbound)) {
+     //all cells are bound, just cells
+     return Promise.resolve(cells);
+     }
+     //we need to resolve some wildcards
+     return Promise.all(this.elems.map((elem, i) => {
+     if (cells.some((c) => c.dim(i).isUnbound)) {
+     return wildcardLookup(elem);
+     } else {
+     return Promise.resolve(0);
+     }
+     })).then((size: number[]) => {
+     const fullCells : any = {};
+     cells.forEach((cell) => {
+     cell.product((indices: number[]) => {
+     const id = indices.join('_');
+     fullCells[id] = indices;
+     });
+     }, size);
+     //fullCells contains all cells that we have to take care of
+     const pairs = Object.keys(fullCells).map((k) => fullCells[k]).sort(indicesCompare);
+     return compressPairs(pairs);
+     });
+     */
   }
 
   /**
@@ -463,13 +462,13 @@ export class ProductIDType extends events.EventHandler implements IIDType {
     return b;
   }
 
-  private toPerDim(sel: ranges.Range[]) {
+  private toPerDim(sel:ranges.Range[]) {
     return this.elems.map((elem, i) => {
       if (sel.length === 0) {
         return ranges.none();
       }
       const dimselections = sel.map((r) => r.dim(i));
-      const selection = dimselections.reduce((p,a) => p ? p.union(a) : a, null);
+      const selection = dimselections.reduce((p, a) => p ? p.union(a) : a, null);
       return ranges.list(selection);
     });
   }
@@ -562,14 +561,14 @@ export class LocalIDAssigner {
   private pool = new C.IdPool();
   private lookup:{  [key:string] : number } = {};
 
-  unmapOne(id: number) {
+  unmapOne(id:number) {
     return this.unmap([id])[0];
   }
 
-  unmap(ids: number[]) {
+  unmap(ids:number[]) {
     const keys = Object.keys(this.lookup);
     return ids.map((id) => {
-      for(let k in keys) {
+      for (let k in keys) {
         if (this.lookup[k] === id) {
           return k;
         }
@@ -637,7 +636,7 @@ export interface ISelectAble extends events.IEventHandler {
 
   idtypes:IDType[];
 
-  selections(type?: string);
+  selections(type?:string);
 
   select(range:ranges.RangeLike);
   select(range:ranges.RangeLike, op:SelectOperation);
@@ -658,7 +657,7 @@ export interface ISelectAble extends events.IEventHandler {
 }
 
 
-export class SelectAble extends events.EventHandler implements ISelectAble{
+export class SelectAble extends events.EventHandler implements ISelectAble {
   private numSelectListeners = 0;
   private selectionListeners = [];
   private singleSelectionListener = (event:any, type:string, act:ranges.Range, added:ranges.Range, removed:ranges.Range) => {
@@ -844,7 +843,7 @@ export class SelectAble extends events.EventHandler implements ISelectAble{
 
 export interface IProductSelectAble extends ISelectAble {
   producttype: ProductIDType;
-  productSelections(type?: string): Promise<ranges.Range[]>;
+  productSelections(type?:string): Promise<ranges.Range[]>;
 
   selectProduct(range:ranges.RangeLike[], op?:SelectOperation);
   selectProduct(type:string, range:ranges.RangeLike[], op?:SelectOperation);
@@ -853,7 +852,7 @@ export interface IProductSelectAble extends ISelectAble {
 export class ProductSelectAble extends SelectAble {
   private numProductSelectListeners = 0;
 
-  private productSelectionListener = (event: events.IEvent, index: number, type: string) => {
+  private productSelectionListener = (event:events.IEvent, index:number, type:string) => {
     const cells = this.producttype.productSelections(type);
     if (cells.length === 0) {
       this.fire('selectProduct', type, []);
@@ -861,7 +860,7 @@ export class ProductSelectAble extends SelectAble {
       return;
     }
 
-    this.ids().then((ids: ranges.Range) => {
+    this.ids().then((ids:ranges.Range) => {
       var act = cells.map((c) => ids.indexOf(c)).filter((c) => !c.isNone);
       if (act.length === 0) {
         return;
@@ -874,7 +873,7 @@ export class ProductSelectAble extends SelectAble {
     });
   };
 
-  get producttype(): ProductIDType {
+  get producttype():ProductIDType {
     return null;
   }
 
@@ -898,10 +897,10 @@ export class ProductSelectAble extends SelectAble {
     return super.off(events, handler);
   }
 
-  productSelections(type = defaultSelectionType): Promise<ranges.Range[]> {
+  productSelections(type = defaultSelectionType):Promise<ranges.Range[]> {
     return this.ids().then((ids:ranges.Range) => {
       const cells = this.producttype.productSelections(type);
-       var act = cells.map((c) => ids.indexRangeOf(c)).filter((c) => !c.isNone);
+      var act = cells.map((c) => ids.indexRangeOf(c)).filter((c) => !c.isNone);
       //ensure the right number of dimensions
       act.forEach((a) => fillWithNone(a, ids.ndim));
       return act;
@@ -920,7 +919,6 @@ export class ProductSelectAble extends SelectAble {
 
   private selectProductImpl(cells:ranges.Range[], op = SelectOperation.SET, type:string = defaultSelectionType) {
     return this.ids().then((ids:ranges.Range) => {
-      const types = this.idtypes;
       cells = cells.map((c) => ids.preMultiply(c));
       this.producttype.select(type, cells, op);
     });
@@ -935,7 +933,9 @@ export class ProductSelectAble extends SelectAble {
   clear(dim:number, type:string);
   clear() {
     const a = C.argList(arguments);
-    const dim = (typeof a[0] === 'number') ? +a.shift() : -1;
+    if (typeof a[0] === 'number') {
+      a.shift();
+    }
     const type = (typeof a[0] === 'string') ? a[0] : defaultSelectionType;
     return this.selectProductImpl([], SelectOperation.SET, type || defaultSelectionType);
   }
@@ -998,7 +998,7 @@ export function list() {
   return Object.keys(cache).map((d) => cache[d]);
 }
 
-export function register(id:string, idtype:IDType|ProductIDType): IDType|ProductIDType {
+export function register(id:string, idtype:IDType|ProductIDType):IDType|ProductIDType {
   fillUp(); //trigger loading of the meta data
   if (cache.hasOwnProperty(id)) {
     return cache[id];
