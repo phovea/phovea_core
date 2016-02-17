@@ -301,7 +301,7 @@ export class ProductIDType extends events.EventHandler implements IIDType {
     super();
   }
 
-  on(events:any, listener?:IEventListener) {
+  on(events:any, listener?:events.IEventListener) {
     if (!this.isOn) {
       this.enable();
       this.isOn = true;
