@@ -25,6 +25,11 @@
           "type": "datatype",
           "id": "stratification",
           "file": "stratification_impl"
+        },
+        {
+          "type": "datatype",
+          "id": "graph",
+          "file": "graph"
         }
       ]
     },
