@@ -3,6 +3,7 @@
  * Copyright (c) The Caleydo Team. All rights reserved.
  * Licensed under the new BSD license, available at http://caleydo.org/license
  **************************************************************************** */
+
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
@@ -41,7 +42,7 @@ function flatten(arr : any[][], indices: ranges.Range, select: number = 0) {
 /**
  * base class for different Matrix implementations, views, transposed,...
  */
-export class MatrixBase extends idtypes.ProductSelectAble {
+export class MatrixBase extends idtypes.SelectAble {
   constructor(public _root:matrix.IMatrix) {
     super();
   }
@@ -146,7 +147,6 @@ export class MatrixBase extends idtypes.ProductSelectAble {
       return <C.IPersistable>(<any>this);
     }
   }
-
 }
 
 export interface IMatrixLoader {
@@ -302,7 +302,6 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
   valuetype:any;
   rowtype:idtypes.IDType;
   coltype:idtypes.IDType;
-  private producttype_: idtypes.ProductIDType;
 
   constructor(public desc: datatypes.IDataDescription, private loader: IMatrixLoader2) {
     super(null);
@@ -311,27 +310,22 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
     this.valuetype = d.value;
     this.rowtype = idtypes.resolve(d.rowtype);
     this.coltype = idtypes.resolve(d.coltype);
-    this.producttype_ = idtypes.resolveProduct(this.rowtype, this.coltype);
     this.t = new TransposedMatrix(this);
-  }
-
-  get producttype() {
-    return this.producttype_;
   }
 
   get idtypes() {
     return [this.rowtype, this.coltype];
   }
 
-  get stateTokens(): IStateToken[]{
-    var token:IStateToken = {
-      name:  "scaling",
-      type: TokenType.string,
+  get stateTokens(): StateToken[]{
+    var token = {
+      name: "Scaling",
       value: this.desc.name,
-      importance: 2}
+      repIDType: false,
+      importance: 2
+    }
     return [token];
   }
-
   /**
    * access at a specific position
    * @param i
@@ -429,10 +423,6 @@ class TransposedMatrix extends MatrixBase  implements matrix.IMatrix {
 
   get coltype() {
     return this._root.rowtype;
-  }
-
-  get producttype() {
-    return this._root.producttype;
   }
 
   get idtypes() {
@@ -578,12 +568,8 @@ class MatrixView extends MatrixBase implements matrix.IMatrix {
     return this._root.coltype;
   }
 
-  get producttype() {
-    return this._root.producttype;
-  }
-
   get idtypes() {
-    return this._root.idtypes;
+    return [this.rowtype, this.coltype];
   }
 }
 
