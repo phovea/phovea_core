@@ -13,6 +13,10 @@ import idtypes = require('./idtype');
 import datatypes = require('./datatype');
 import vector = require('./vector');
 
+export interface IVector extends vector.IVector {
+
+}
+
 export interface ITable extends datatypes.IDataType {
   ncol : number;
   nrow : number;
