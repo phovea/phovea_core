@@ -42,6 +42,8 @@ export interface ITable extends datatypes.IDataType {
    */
   view(range?:ranges.Range) : ITable;
 
+  queryView(name: string, args: any): ITable;
+
   /**
    * reduces the current matrix to a vector using the given reduce function
    * @param f the reduce function
