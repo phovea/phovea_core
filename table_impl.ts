@@ -107,7 +107,7 @@ function viaAPIViewLoader(name: string, args: any) {
     }
     return _loader = ajax.getAPIJSON('/dataset/table/'+desc.id+'/view/'+name, args).then(function (data) {
       data.rowIds = ranges.parse(data.rowIds);
-      data.data = maskObjects(data.data, desc);
+      data.objs = maskObjects(data.data, desc);
       //mask the data
       return data;
     });
