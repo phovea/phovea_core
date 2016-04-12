@@ -6,7 +6,6 @@
 /**
  * Created by michael gillhofer
  */
-/// <reference path="../../tsd.d.ts" />
 'use strict';
 
 
@@ -22,4 +21,5 @@ export interface IStateToken {
   type: TokenType;
   value;
   importance: number;
+  childs: IStateToken[]
 }

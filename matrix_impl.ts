@@ -323,14 +323,17 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
     return [this.rowtype, this.coltype];
   }
 
+  /*
    get stateTokens(): IStateToken[]{
-    var token:IStateToken = {
+   var token:IStateToken = {
       name:  "scaling",
       type: TokenType.string,
       value: this.desc.name,
       importance: 2}
     return [token];
   }
+  */
+  
   /**
    * access at a specific position
    * @param i
