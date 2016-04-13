@@ -209,25 +209,25 @@ export class IDType extends events.EventHandler implements IIDType {
   mapToFirstName(ids_:ranges.Range | number[], to_idtype: string|IDType):Promise<string[]> {
     const target = resolve(to_idtype);
     const ids = ids_ instanceof ranges.Range ? <ranges.Range>ids_ : ranges.list(<number[]>ids_);
-    return ajax.getAPIJSON(`/idtype/${this.id}/${target.id}`, { ids: ids.toString(), mode : 'first'  })
+    return ajax.getAPIJSON(`/idtype/${this.id}/${target.id}`, { ids: ids.toString(), mode : 'first'  });
   }
 
   mapToName(ids_:ranges.Range | number[], to_idtype: string|IDType):Promise<string[][]> {
     const target = resolve(to_idtype);
     const ids = ids_ instanceof ranges.Range ? <ranges.Range>ids_ : ranges.list(<number[]>ids_);
-    return ajax.getAPIJSON(`/idtype/${this.id}/${target.id}`, { ids: ids.toString() })
+    return ajax.getAPIJSON(`/idtype/${this.id}/${target.id}`, { ids: ids.toString() });
   }
 
   mapToFirstID(ids_:ranges.Range | number[], to_idtype: string|IDType):Promise<number[]> {
     const target = resolve(to_idtype);
     const ids = ids_ instanceof ranges.Range ? <ranges.Range>ids_ : ranges.list(<number[]>ids_);
-    return ajax.getAPIJSON(`/idtype/${this.id}/${target.id}/map`, { ids: ids.toString(), mode : 'first'  })
+    return ajax.getAPIJSON(`/idtype/${this.id}/${target.id}/map`, { ids: ids.toString(), mode : 'first'  });
   }
 
   mapToID(ids_:ranges.Range | number[], to_idtype: string|IDType):Promise<number[][]> {
     const target = resolve(to_idtype);
     const ids = ids_ instanceof ranges.Range ? <ranges.Range>ids_ : ranges.list(<number[]>ids_);
-    return ajax.getAPIJSON(`/idtype/${this.id}/${target.id}/map`, { ids: ids.toString() })
+    return ajax.getAPIJSON(`/idtype/${this.id}/${target.id}/map`, { ids: ids.toString() });
   }
 
   /**
