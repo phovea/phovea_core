@@ -16,10 +16,13 @@ export enum TokenType {
     idtype
   };
 
+
+
 export interface IStateToken {
   name: string;
   type: TokenType;
   value;
   importance: number;
   childs: IStateToken[]
+  category;
 }
