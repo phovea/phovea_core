@@ -14,8 +14,6 @@ declare var require: any;
 declare var module: {
   config() : any;
 };
-'use strict';
-
 
 if (!(<any>window).Promise) {
   //inject es6-promise polyfill if needed

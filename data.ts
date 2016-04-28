@@ -13,8 +13,6 @@ import datatypes = require('./datatype');
 import tables = require('./table');
 import tables_impl = require('./table_impl');
 
-'use strict';
-
 //find all datatype plugins
 const available = plugins.list('datatype');
 

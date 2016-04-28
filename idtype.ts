@@ -11,8 +11,6 @@ import C = require('./main');
 import ajax = require('./ajax');
 import events = require('./event');
 import ranges = require('./range');
-'use strict';
-
 
 const cache:{ [id: string] : IDType|ProductIDType } = {};
 var filledUp = false;

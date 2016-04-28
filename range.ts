@@ -9,7 +9,6 @@
 
 import C = require('./main');
 import Iterator = require('./iterator');
-'use strict';
 
 export interface IRangeElem {
   isAll : boolean;
