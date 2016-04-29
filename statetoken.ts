@@ -17,12 +17,35 @@ export enum TokenType {
   };
 
 
-
 export interface IStateToken {
   name: string;
-  type: TokenType;
-  value;
+  importance: number;
+}
+
+export class StateTokenNode implements IStateToken {
+  name: string;
   importance: number;
   childs: IStateToken[]
+
+  constructor(name:string, importance:number, childs:IStateToken[]) {
+    this.name = name;
+    this.importance = importance;
+    this.childs = childs
+  }
+}
+
+export class StateTokenLeaf implements IStateToken{
+  name: string;
+  importance: number;
+  type: TokenType;
+  value;
   category;
+
+  constructor(name:string,  importance: number,  type: TokenType,  value,  category) {
+    this.name = name;
+    this.importance= importance;
+    this.type = type;
+    this.value = value;
+    this.category = category
+  }
 }
