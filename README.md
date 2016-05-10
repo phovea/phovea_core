@@ -1,7 +1,7 @@
 Caleydo Web Core
 =====================
 
-Caleydo Web is a framework for developing web-based visualization applications. This is the core repository, but you will find the code distributed among [many repositories](http://localhost:4000/documentation/list_of_plugins).
+Caleydo Web is a framework for developing web-based visualization applications. This is the core repository, but you will find the code distributed among [many repositories](http://caleydo.org/documentation/list_of_plugins).
 
 If you want to learn how to use Caleydo Web, check out the [documentation](http://caleydo.org/documentation).
  
