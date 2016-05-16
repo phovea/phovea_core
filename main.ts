@@ -96,6 +96,12 @@ export function isUndefined(obj:any) {
   return typeof obj === 'undefined';
 }
 
+
+//fixes a javascript bug on unsing "%" with negative numbers
+export function mod(n,m){
+      return ((n % m) + m) % m;
+}
+
 /**
  * binds the given function to the given context / this arg
  * @param f
