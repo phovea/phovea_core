@@ -97,9 +97,9 @@ export function isUndefined(obj:any) {
 }
 
 
-//fixes a javascript bug on unsing "%" with negative numbers
-export function mod(n,m){
-      return ((n % m) + m) % m;
+//fixes a javascript bug on using "%" with negative numbers
+export function mod(n: number, m: number) {
+  return ((n % m) + m) % m;
 }
 
 /**
