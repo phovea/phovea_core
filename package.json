@@ -1,9 +1,12 @@
 {
   "name": "caleydo_core",
+  "description": "Caleydo Web Core including plugin registry, data definition (+ common types: tables, matrix, vector, stratification), ajax, selections",
   "version": "0.0.1-alpha",
   "license": "SEE LICENSE IN LICENSE",
   "repository": "Caleydo/caleydo_core",
   "caleydo": {
+    "type": "plugin", 
+    "category": "core",
     "plugins": {
       "web": [
         {
