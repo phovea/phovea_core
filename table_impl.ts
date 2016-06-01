@@ -114,6 +114,14 @@ function viaAPIViewLoader(name: string, args: any) {
   };
 }
 
+function maskCol(arr : any[], col) {
+  //mask data
+  if (col.value && 'missing' in col.value) {
+    return datatypes.mask(arr, col.value);
+  }
+  return arr;
+}
+
 function maskObjects(arr : any[], desc) {
   //mask data
   if (desc.columns.some((col) => col.value && 'missing' in col.value)) {
@@ -194,7 +202,7 @@ function viaAPI2Loader(): ITableLoader2 {
       //server side slicing
       return ajax.getAPIData('/dataset/table/'+desc.id+'/col/'+column, {
         range: range.toString()
-      }).then((data) => maskObjects(data, desc));
+      }).then((data) => maskCol(data, colDesc));
     },
     view: (desc:datatypes.IDataDescription, name: string, args: any) => viaAPIViewLoader(name, args)
   };
