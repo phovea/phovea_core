@@ -651,6 +651,13 @@ export class Range1D {
     return this.arr[0].from;
   }
 
+  get last() {
+    if (this.isNone) {
+      return null;
+    }
+    return this.arr[this.arr.length-1].from;
+  }
+
   /**
    * for each element
    * @param callbackfn
@@ -853,6 +860,10 @@ export class Range {
 
   get first() {
     return this.dim(0).first;
+  }
+
+  get last() {
+    return this.dim(0).last;
   }
 
   /**
