@@ -807,6 +807,10 @@ export function addSelectVisChooser(toolbar: Element, ...forms: IMultiForm[]) {
     child.setAttribute('value', String(i));
     child.textContent = v.name;
   });
+  // use only the current selection of the first form
+  if(forms[0]) {
+    s.selectedIndex = visses.indexOf(forms[0].act);
+  }
   s.onchange = () => forms.forEach((f) => f.switchTo(visses[s.selectedIndex]));
 }
 
