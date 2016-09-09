@@ -44,6 +44,10 @@ export class TableBase extends idtypes.SelectAble {
     return new TableView(this._root, range);
   }
 
+  queryView(name: string, args: any): def.ITable {
+    throw new Error('not implemented');
+  }
+
   idView(idRange:ranges.Range = ranges.all()) : Promise<def.ITable> {
     return this.ids().then((ids) => this.view(ids.indexOf(idRange)));
   }
@@ -70,41 +74,145 @@ export interface ITableLoader {
     rowIds : ranges.Range;
     rows: string[];
     objs : any[];
-    data : any[][];
   }>;
 }
 
-function toObjects(data: any[][], vecs) {
-  return data.map((row) => {
-    var r : any = {};
-    vecs.forEach((col, i) => {
-      r[col.name] =  datatypes.mask(row[i], col.value);
-    });
-    return r;
-  });
+
+export interface ITableLoader2 {
+  rowIds(desc: datatypes.IDataDescription, range: ranges.Range) : Promise<ranges.Range>;
+  rows(desc: datatypes.IDataDescription, range: ranges.Range) : Promise<string[]>;
+  col(desc: datatypes.IDataDescription, column: string, range: ranges.Range): Promise<any[]>;
+  objs(desc: datatypes.IDataDescription, range: ranges.Range) : Promise<any[]>;
+  data(desc: datatypes.IDataDescription, range: ranges.Range) : Promise<any[][]>;
+  view(desc: datatypes.IDataDescription, name: string, args: any) : ITableLoader;
 }
 
-function viaAPILoader() {
+function adapterOne2Two(loader: ITableLoader): ITableLoader2 {
+  return {
+    rowIds: (desc: datatypes.IDataDescription, range: ranges.Range) => loader(desc).then((d) => range.preMultiply(d.rowIds, (<any>desc).size)),
+    rows: (desc: datatypes.IDataDescription, range: ranges.Range) => loader(desc).then((d) => range.dim(0).filter(d.rows, (<any>desc).size[0])),
+    col: (desc: datatypes.IDataDescription, column: string, range: ranges.Range) => loader(desc).then((d) => range.filter(d.objs.map((d) => d[column]), (<any>desc).size)),
+    objs: (desc: datatypes.IDataDescription, range: ranges.Range) => loader(desc).then((d) => range.filter(d.objs, (<any>desc).size)),
+    data: (desc: datatypes.IDataDescription ,range: ranges.Range) => loader(desc).then((d) => range.filter(toFlat(d.objs, (<any>desc).columns), (<any>desc).size)),
+    view: (desc: datatypes.IDataDescription, name: string, args: any) => null
+  };
+}
+
+
+function viaAPIViewLoader(name: string, args: any) {
   var _loader = undefined;
   return (desc) => {
     if (_loader) { //in the cache
       return _loader;
     }
-    return _loader = ajax.getAPIJSON('/dataset/'+desc.id).then(function (data) {
+    return _loader = ajax.getAPIJSON('/dataset/table/'+desc.id+'/view/'+name, args).then(function (data) {
       data.rowIds = ranges.parse(data.rowIds);
-      //transpose to have column order for better vector access
-      data.objs = toObjects(data.data, desc.columns);
-      data.data = datatypes.transpose(data.data);
-
-      //mask data
-      if (desc.columns.some((col) => col.value && 'missing' in col.value)) {
-       data.data = data.data.map((col, i) => datatypes.mask(col, desc.columns[i].value));
-      }
+      data.objs = maskObjects(data.data, desc);
       //mask the data
       return data;
     });
   };
 }
+
+function maskCol(arr : any[], col) {
+  //mask data
+  if (col.value && 'missing' in col.value) {
+    return datatypes.mask(arr, col.value);
+  }
+  return arr;
+}
+
+function maskObjects(arr : any[], desc) {
+  //mask data
+  if (desc.columns.some((col) => col.value && 'missing' in col.value)) {
+    arr.forEach((row) => {
+      desc.columns.forEach((col) => row[col.name] = datatypes.mask(row[col.name], col.value));
+    });
+  }
+  return arr;
+}
+
+
+function viaAPI2Loader(): ITableLoader2 {
+  var rowIds = null,
+    rows = null,
+    cols : any = {},
+    objs = null,
+    data = null;
+  var r = {
+    rowIds: (desc:datatypes.IDataDescription, range:ranges.Range) => {
+      if (rowIds == null) {
+        rowIds = ajax.getAPIJSON('/dataset/table/'+desc.id+'/rowIds').then((ids) => {
+          return ranges.parse(ids);
+        });
+      }
+      return rowIds.then((d) => {
+        return d.preMultiply(range, (<any>desc).size);
+      });
+    },
+    rows: (desc:datatypes.IDataDescription, range:ranges.Range) => {
+      if (rows == null) {
+        rows = ajax.getAPIJSON('/dataset/table/' + desc.id + '/rows');
+      }
+      return rows.then((d) => range.dim(0).filter(d, (<any>desc).size[0]));
+    },
+    objs: (desc:datatypes.IDataDescription, range:ranges.Range) => {
+      if (range.isAll) {
+        if (objs == null) {
+          objs = ajax.getAPIJSON('/dataset/table/' + desc.id + '/raw').then((data) => maskObjects(data, desc));
+        }
+        return objs;
+      }
+      if (objs != null) { //already loading all
+        return objs.then((d) => range.filter(d, (<any>desc).size));
+      }
+      //server side slicing
+      return ajax.getAPIData('/dataset/table/'+desc.id+'/raw', {
+        range: range.toString()
+      }).then((data) => maskObjects(data, desc));
+    },
+    data: (desc:datatypes.IDataDescription, range:ranges.Range) => {
+      if (range.isAll) {
+        if (data == null) {
+          data = r.objs(desc, range).then((objs) => toFlat(objs, (<any>desc).columns));
+        }
+        return data;
+      }
+      if (data != null) { //already loading all
+        return data.then((d) => range.filter(d, (<any>desc).size));
+      }
+      //server side slicing
+      return r.objs(desc, range).then((objs) => toFlat(objs, (<any>desc).columns));
+    },
+    col: (desc: datatypes.IDataDescription, column: string, range: ranges.Range) => {
+      const colDesc = C.search((<any>desc).columns, (c : any) => c.name === column);
+      if (range.isAll) {
+        if (cols[column] == null) {
+          if (objs === null) {
+            cols[column] = ajax.getAPIJSON('/dataset/table/'+desc.id+'/col/'+column).then((data) => datatypes.mask(data, colDesc));
+          } else {
+            cols[column] = objs.then((objs) => objs.map((row) => row[column]));
+          }
+        }
+        return cols[column];
+      }
+      if (cols[column] != null) { //already loading all
+        return cols[column].then((d) => range.filter(d, (<any>desc).size));
+      }
+      //server side slicing
+      return ajax.getAPIData('/dataset/table/'+desc.id+'/col/'+column, {
+        range: range.toString()
+      }).then((data) => maskCol(data, colDesc));
+    },
+    view: (desc:datatypes.IDataDescription, name: string, args: any) => viaAPIViewLoader(name, args)
+  };
+  return r;
+}
+
+function toFlat(data: any[][], vecs) {
+  return data.map((row) => vecs.map((col) => row[col.name]));
+}
+
 
 function viaDataLoader(data: any[], nameProperty: any) {
   var _data : any = undefined;
@@ -145,21 +253,12 @@ export class Table extends TableBase implements def.ITable {
   rowtype:idtypes.IDType;
   private vectors : TableVector[];
 
-  constructor(public desc:datatypes.IDataDescription, private loader : ITableLoader) {
+  constructor(public desc:datatypes.IDataDescription, private loader : ITableLoader2) {
     super(null);
     this._root = this;
     var d = <any>desc;
     this.rowtype = idtypes.resolve(d.idtype || d.rowtype);
     this.vectors = d.columns.map((cdesc, i) => new TableVector(this, i, cdesc));
-  }
-
-  /**
-   * loads all the underlying data in json format
-   * TODO: load just needed data and not everything given by the requested range
-   * @returns {*}
-   */
-  load() {
-    return this.loader(this.desc);
   }
 
   get idtypes() {
@@ -181,24 +280,23 @@ export class Table extends TableBase implements def.ITable {
    * @returns {*}
    */
   at(i, j) {
-    return this.load().then(function (d) {
-      return d.data[j][i];
-    });
+    return this.colData(this.col(j).column, ranges.list(i)).then((arr) => arr[0]);
+  }
+
+  queryView(name: string, args: any) {
+    return new Table(this.desc, adapterOne2Two(this.loader.view(this.desc, name, args)));
   }
 
   data(range:ranges.Range = ranges.all()) {
-    var that = this;
-    return this.load().then(function (data) {
-      return datatypes.transpose(range.swap().filter(data.data, that.swap(that.size())));
-    });
+    return this.loader.data(this.desc, range);
+  }
+
+  colData(column: string, range:ranges.Range = ranges.all()) {
+    return this.loader.col(this.desc, column, range);
   }
 
   objects(range:ranges.Range = ranges.all()) {
-    var that = this;
-    return this.load().then(function (data) {
-      //TODO filter to specific properties by the second range
-      return range.filter(data.objs, that.size());
-    });
+    return this.loader.objs(this.desc, range);
   }
 
   /**
@@ -206,23 +304,13 @@ export class Table extends TableBase implements def.ITable {
    * @returns {*}
    */
   rows(range:ranges.Range = ranges.all()):Promise<string[]> {
-    var that = this;
-    return this.load().then(function (d:any) {
-      return range.dim(0).filter(d.rows, that.nrow);
-    });
+    return this.loader.rows(this.desc, range);
   }
   rowIds(range:ranges.Range = ranges.all()) {
-    var that = this;
-    return this.load().then(function (data) {
-      return data.rowIds.preMultiply(range, that.dim);
-    });
+    return this.loader.rowIds(this.desc, range);
   }
   ids(range:ranges.Range = ranges.all()) {
     return this.rowIds(range);
-  }
-
-  private swap(d : number[]) {
-    return d.slice(0).reverse();
   }
 
   size() {
@@ -340,6 +428,10 @@ export class TableVector extends vector_impl.VectorBase implements vector.IVecto
     this.desc.type = 'vector';
   }
 
+  get column(): string {
+    return (<any>this.desc).name;
+  }
+
   get idtype() {
     return this.table.rowtype;
   }
@@ -364,34 +456,17 @@ export class TableVector extends vector_impl.VectorBase implements vector.IVecto
   }
 
   /**
-   * loads all the underlying data in json format
-   * TODO: load just needed data and not everything given by the requested range
-   * @returns {*}
-   */
-  private load() : Promise<any[]> {
-    var that = this;
-    return this.table.load().then(function (data) {
-      return data.data[that.index];
-    });
-  }
-
-  /**
    * access at a specific position
    * @param i
    * @param j
    * @returns {*}
    */
   at(i) {
-    return this.load().then(function (d) {
-      return d[i];
-    });
+    return this.table.at(i, this.index);
   }
 
   data(range:ranges.Range = ranges.all()) {
-    var that = this;
-    return this.load().then(function (data) {
-      return range.filter(data, that.dim);
-    });
+    return this.table.colData(this.column, range);
   }
 
   names(range:ranges.Range = ranges.all()) {
@@ -528,15 +603,15 @@ class MultITableVector extends vector_impl.VectorBase implements vector.IVector 
  */
 export function create(desc: datatypes.IDataDescription): def.ITable {
   if (C.isFunction((<any>desc).loader)) {
-    return new Table(desc, (<any>desc).loader);
+    return new Table(desc, adapterOne2Two((<any>desc).loader));
   }
-  return new Table(desc, viaAPILoader());
+  return new Table(desc, viaAPI2Loader());
 }
 
 export function wrapObjects(desc: datatypes.IDataDescription, data: any[], nameProperty: string);
 export function wrapObjects(desc: datatypes.IDataDescription, data: any[], nameProperty: (obj: any) => string);
 export function wrapObjects(desc: datatypes.IDataDescription, data: any[], nameProperty: any) {
-  return new Table(desc, viaDataLoader(data, nameProperty));
+  return new Table(desc, adapterOne2Two(viaDataLoader(data, nameProperty)));
 }
 
 export class VectorTable extends TableBase implements def.ITable {

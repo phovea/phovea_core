@@ -11,8 +11,6 @@ import C = require('./main');
 import ajax = require('./ajax');
 import events = require('./event');
 import ranges = require('./range');
-'use strict';
-
 
 const cache:{ [id: string] : IDType|ProductIDType } = {};
 var filledUp = false;
@@ -87,6 +85,8 @@ export class IDType extends events.EventHandler implements IIDType {
   // TODO: is this cache ever emptied, or do we assume a reasonable upper bound on the entities in IDType?
   private name2id_cache:{ [k:string] : number } = {};
   private id2name_cache:{ [k:number] : string } = {};
+
+  private canBeMappedTo: Promise<IDType[]> = null;
 
   /**
    * @param id the system identifier of this IDType
@@ -191,6 +191,41 @@ export class IDType extends events.EventHandler implements IIDType {
       this.name2id_cache[name] = id;
       this.id2name_cache[id] = name;
     });
+  }
+
+  /**
+   * returns the list of idtypes that this type can be mapped to
+   * @returns {Promise<IDType[]>}
+   */
+  getCanBeMappedTo() {
+    if (this.canBeMappedTo === null) {
+      this.canBeMappedTo = ajax.getAPIJSON('/idtype/'+this.id+'/').then((list) => list.map(resolve));
+    }
+    return this.canBeMappedTo;
+  }
+
+  mapToFirstName(ids_:ranges.Range | number[], to_idtype: string|IDType):Promise<string[]> {
+    const target = resolve(to_idtype);
+    const ids = ids_ instanceof ranges.Range ? <ranges.Range>ids_ : ranges.list(<number[]>ids_);
+    return ajax.getAPIJSON(`/idtype/${this.id}/${target.id}`, { ids: ids.toString(), mode : 'first'  });
+  }
+
+  mapToName(ids_:ranges.Range | number[], to_idtype: string|IDType):Promise<string[][]> {
+    const target = resolve(to_idtype);
+    const ids = ids_ instanceof ranges.Range ? <ranges.Range>ids_ : ranges.list(<number[]>ids_);
+    return ajax.getAPIJSON(`/idtype/${this.id}/${target.id}`, { ids: ids.toString() });
+  }
+
+  mapToFirstID(ids_:ranges.Range | number[], to_idtype: string|IDType):Promise<number[]> {
+    const target = resolve(to_idtype);
+    const ids = ids_ instanceof ranges.Range ? <ranges.Range>ids_ : ranges.list(<number[]>ids_);
+    return ajax.getAPIJSON(`/idtype/${this.id}/${target.id}/map`, { ids: ids.toString(), mode : 'first'  });
+  }
+
+  mapToID(ids_:ranges.Range | number[], to_idtype: string|IDType):Promise<number[][]> {
+    const target = resolve(to_idtype);
+    const ids = ids_ instanceof ranges.Range ? <ranges.Range>ids_ : ranges.list(<number[]>ids_);
+    return ajax.getAPIJSON(`/idtype/${this.id}/${target.id}/map`, { ids: ids.toString() });
   }
 
   /**

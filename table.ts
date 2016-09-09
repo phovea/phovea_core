@@ -13,6 +13,10 @@ import idtypes = require('./idtype');
 import datatypes = require('./datatype');
 import vector = require('./vector');
 
+export interface IVector extends vector.IVector {
+
+}
+
 export interface ITable extends datatypes.IDataType {
   ncol : number;
   nrow : number;
@@ -37,6 +41,8 @@ export interface ITable extends datatypes.IDataType {
    * @param range
    */
   view(range?:ranges.Range) : ITable;
+
+  queryView(name: string, args: any): ITable;
 
   /**
    * reduces the current matrix to a vector using the given reduce function

@@ -280,7 +280,7 @@ class Histogram extends AHistogram {
     if (bin >= this.bins) {
       bin = this.bins - 1;
     }
-    return bin;
+    return isNaN(bin) ? -1 : bin;
   }
 }
 

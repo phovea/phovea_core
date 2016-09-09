@@ -14,8 +14,6 @@ declare var require: any;
 declare var module: {
   config() : any;
 };
-'use strict';
-
 
 if (!(<any>window).Promise) {
   //inject es6-promise polyfill if needed
@@ -96,6 +94,12 @@ export function mixin<T>(a: T, ...bs : any[]): T {
 
 export function isUndefined(obj:any) {
   return typeof obj === 'undefined';
+}
+
+
+//fixes a javascript bug on using "%" with negative numbers
+export function mod(n: number, m: number) {
+  return ((n % m) + m) % m;
 }
 
 /**

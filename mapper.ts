@@ -11,7 +11,6 @@ import C = require('./main');
 import ajax = require('./ajax');
 import idtypes = require('./idtype');
 import ranges = require('./range');
-'use strict';
 
 export interface IIDMapper {
   (...id:number[]) : Promise<ranges.Range>;

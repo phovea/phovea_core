@@ -9,7 +9,6 @@
 /// <reference path="../../tsd.d.ts" />
 import plugin = require('./plugin');
 import C = require('./main');
-'use strict';
 
 /**
  * interface for the ajax adapter
