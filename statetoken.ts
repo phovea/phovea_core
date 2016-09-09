@@ -14,7 +14,7 @@ export enum TokenType {
     ordinal,
     ordinalIDType,
     idtype
-  };
+  }
 
 
 export interface IStateToken {
@@ -25,16 +25,16 @@ export interface IStateToken {
 export class StateTokenNode implements IStateToken {
   name: string;
   importance: number;
-  childs: IStateToken[]
+  childs: IStateToken[];
 
   constructor(name:string, importance:number, childs:IStateToken[]) {
     this.name = name;
     this.importance = importance;
-    this.childs = childs
+    this.childs = childs;
   }
 }
 
-export class StateTokenLeaf implements IStateToken{
+export class StateTokenLeaf implements IStateToken {
   name: string;
   importance: number;
   type: TokenType;
@@ -43,9 +43,9 @@ export class StateTokenLeaf implements IStateToken{
 
   constructor(name:string,  importance: number,  type: TokenType,  value,  category) {
     this.name = name;
-    this.importance= importance;
+    this.importance = importance;
     this.type = type;
     this.value = value;
-    this.category = category
+    this.category = category;
   }
 }

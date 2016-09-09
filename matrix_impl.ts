@@ -17,7 +17,6 @@ import vector = require('./vector');
 import vector_impl = require('./vector_impl');
 import math = require('./math');
 import matrix = require('./matrix');
-import {IStateToken, TokenType} from "../caleydo_core/statetoken";
 
 function flatten(arr : any[][], indices: ranges.Range, select: number = 0) {
   var r = [], dim = [arr.length, arr[0].length];
@@ -333,7 +332,7 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
     return [token];
   }
   */
-  
+
   /**
    * access at a specific position
    * @param i
