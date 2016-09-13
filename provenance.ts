@@ -10,6 +10,11 @@ import ranges = require('./range');
 import datatypes = require('./datatype');
 import session = require('./session');
 
+import {SimHash, MatchedTokenTree} from '../caleydo_clue/simhash';
+import {IStateToken, StateTokenNode} from '../caleydo_clue/statetoken';
+import all = Promise.all;
+import {isUndefined} from '../caleydo_core/main';
+
 /**
  * reexport the edge type
  */
@@ -180,6 +185,22 @@ export class ObjectNode<T> extends graph.GraphNode implements IObjectRef<T> {
     super.setAttr('category', category);
     super.setAttr('hash', hash);
     super.setAttr('description', description);
+  }
+
+
+  get stateTokenPropertyExists() {
+    let value = <any>this.value;
+    if (value === null || value === '') {
+      return false;
+    }
+    return 'stateTokens' in value;
+  }
+
+  get stateTokens() {
+    if (!this.stateTokenPropertyExists) {
+      return 'undefined';
+    }
+    return (<any>this.value).stateTokens;
   }
 
   get value() {
@@ -510,7 +531,125 @@ export class StateNode extends graph.GraphNode {
     super.setAttr('description', description);
   }
 
-  get name():string {
+  //<author>: Michael Gillhofer
+  private treeMatches: MatchedTokenTree[] = [];
+  public isHoveredInLineUp: boolean = false;
+  private _lineupIndex: number = -1;
+
+  get lineUpIndex(): number {
+    return this._lineupIndex;
+  }
+
+  set lineUpIndex(value: number) {
+    this._lineupIndex = value;
+  }
+
+  get stateTokens(): IStateToken[] {
+    let allTokens: IStateToken[] = this.getAttr('stateTokens');
+    if (allTokens === null) {
+      allTokens = [];
+      for (var oN of this.consistsOf) {
+        if (oN.stateTokenPropertyExists) {
+          if (oN.category === 'data') {
+            continue;
+          }
+          allTokens = allTokens.concat(oN.stateTokens);
+        }
+      }
+      allTokens = SimHash.normalizeTokenPriority(allTokens);
+      this.setAttr('stateTokens', allTokens);
+    }
+    return allTokens;
+  }
+
+  get simHash(): string[] {
+    var simHash: string[] = this.getAttr('simHash');
+    if (simHash === null) {
+      let allTokens = this.stateTokens;
+      let hash: string[] = SimHash.hasher.calcHash(allTokens);
+      this.setAttr('simHash', hash);
+    }
+    return simHash;
+  }
+
+  /*
+   getSimilarityTo(otherState:StateNode): number{
+   return 1-this.numberOfSetBits(this.simHash ^ otherState.simHash)/32
+   }
+   */
+
+  getSimilarityTo(otherState: StateNode, exact: boolean = false): number {
+    //exact = true
+    if (exact) {
+      return this.getExactSimilarityTo(otherState);
+    }
+    let thisH: string[] = this.simHash;
+    let otherH: string[] = otherState.simHash;
+    if (thisH === null || otherH === null) {
+      return -1;
+    }
+    if (thisH[0] === 'invalid' || otherH[0] === 'invalid') {
+      return -1;
+    }
+    let weighting = SimHash.hasher.categoryWeighting;
+    let similarity: number = 0;
+    for (let j = 0; j < 5; j++) {
+      let len = Math.min(thisH[j].length, otherH[j].length);
+      let nrEqu = 0;
+      for (let i = 0; i < len; i++) {
+        if (thisH[j].charAt(i) === otherH[j].charAt(i)) {
+          nrEqu++;
+        }
+      }
+      similarity += (nrEqu / len - 0.5) * 2 * weighting[j] / 100;
+    }
+    return similarity >= 0 ? similarity : 0;
+  }
+
+  public getMatchedTreeWithOtherState(otherState: StateNode): MatchedTokenTree {
+    if (otherState === null || isUndefined(otherState)) {
+      otherState = this;
+    }
+    if (this.treeMatches[otherState.id]) {
+      return this.treeMatches[otherState.id];
+    }
+    let tree = new MatchedTokenTree(this, otherState);
+    this.treeMatches[otherState.id] = tree;
+    otherState.treeMatches[this.id] = tree;
+    return tree;
+  }
+
+  public getExactSimilarityTo(otherState: StateNode): number {
+    if (this.id === otherState.id) {
+      return 1;
+    }
+    let tree: MatchedTokenTree = this.getMatchedTreeWithOtherState(otherState);
+    //if (tree === null) return 0;
+    return tree.similarity;
+  }
+
+  getSimForLineupTo(otherState: StateNode) {
+    return this.getMatchedTreeWithOtherState(otherState).similarityForLineup
+  }
+
+  numberOfSetBits(i: number): number {
+    i = i - ((i >> 1) & 0x55555555);
+    i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
+    return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
+  }
+
+  public duplicates: StateNode[] = [];
+
+  //checkduplicate() {
+
+  //if (this.simHash == ){
+  // this.duplicates[this.duplicates.length] = state;
+  // }
+  // }
+
+  //</author>
+
+  get name(): string {
     return super.getAttr('name');
   }
 
@@ -1159,6 +1298,21 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
 
   act:StateNode = null;
   private lastAction:ActionNode = null;
+  public comparing: boolean = false;
+
+  get compareMode(): boolean {
+    return this.comparing && this.selectedStates(idtypes.hoverSelectionType).length > 0;
+  }
+
+  private _similarityMode: boolean = false;
+
+  get similarityMode(): boolean {
+    return this._similarityMode;
+  }
+
+  set similarityMode(value: boolean) {
+    this._similarityMode = value;
+  }
 
   //currently executing promise
   private currentlyRunning = false;
@@ -1203,6 +1357,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
   selectState(state:StateNode, op:idtypes.SelectOperation = idtypes.SelectOperation.SET, type = idtypes.defaultSelectionType, extras = {}) {
     this.fire('select_state,select_state_' + type, state, type, op, extras);
     this.select(ProvenanceGraphDim.State, type, state ? [this._states.indexOf(state)] : [], op);
+    this.fire('select_state,select_state_' + type, state, type, op, extras);
   }
 
   selectSlide(state:SlideNode, op:idtypes.SelectOperation = idtypes.SelectOperation.SET, type = idtypes.defaultSelectionType, extras = {}) {
@@ -1535,7 +1690,8 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
     action.updateInverse(this, <IInverseActionCreator>result.inverse);
 
     this.switchToImpl(action, next);
-
+    let hash = next.simHash;
+    this.fire('action-execution-complete', action.resultsIn);
     return {
       action: action,
       state: next,
