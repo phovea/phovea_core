@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Test</title>
+  <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.0.1.css">
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <script src="https://code.jquery.com/qunit/qunit-2.0.1.js"></script>
+  <script src="qunit_support.js"></script>
+  <script>
+    (function() {
+      var files = window.location.search.substring(1).split('&');
+      for (file of files) {
+        document.write('\x3Cscript type="text/javascript" src="'+file+'">\x3C/script>');
+      }
+    })();
+  </script>
+</body>
+</html>
