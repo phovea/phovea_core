@@ -9,8 +9,9 @@ rvm:
 install: bundle install
 
 before_script:
-- "export DISPLAY=:99.0"
-- "sh -e /etc/init.d/xvfb start"  # From https://docs.travis-ci.com/user/gui-and-headless-browsers/#Using-xvfb-to-Run-Tests-That-Require-a-GUI
+- 'export DISPLAY=:99.0'
+- 'sh -e /etc/init.d/xvfb start'  # From https://docs.travis-ci.com/user/gui-and-headless-browsers/#Using-xvfb-to-Run-Tests-That-Require-a-GUI
+- 'npm install -g typescript@1.8.0'
 
 script:
 - tsc range.ts # Fails, but does produce range.js
