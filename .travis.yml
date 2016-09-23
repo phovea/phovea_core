@@ -9,6 +9,12 @@ rvm:
 install:
 - bundle install
 - 'npm install -g typescript@1.8.0'
+- 'npm install -g typings'
+- typings install
+# TODO: Clean up
+- tsc main.ts --out main.js --target ES5 --module amd
+- tsc iterator.ts --out iterator.js --target ES5 --module amd
+- tsc range.ts --out range.js --target ES5 --module amd
 
 before_script:
 - 'export DISPLAY=:99.0'
@@ -22,4 +28,4 @@ script:
 - until ( curl -I $TEST_URL | grep '200 OK' ); do sleep 1; done
 - bundle exec ruby tests/test.rb $TEST_URL
 
-sudo: false # route your build to the container-based infrastructure for a faster build
+sudo: false # container-based infrastructure for a faster build
