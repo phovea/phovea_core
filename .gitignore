@@ -7,4 +7,5 @@
 *.map
 *.css
 *.js
+typings/
 !tests/**/*

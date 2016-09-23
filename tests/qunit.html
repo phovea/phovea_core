@@ -12,12 +12,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.2/require.min.js"></script>
   <script>
       exports = {}; // TODO: Should something else provide this?
-      require([
-              'qunit_support',
-              '../main',
-              '../range',
-              'range_test'
-      ])
+      require.config({
+        baseUrl: '../'
+      });
+      require(['main', 'iterator'], function(main, iterator){
+        require(['range'], function(range){ // TODO: range should declare its dependencies
+          require(['tests/range_test']);
+        });
+      });
   </script>
 </body>
 </html>
