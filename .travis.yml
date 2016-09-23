@@ -21,7 +21,6 @@ before_script:
 - 'sh -e /etc/init.d/xvfb start'  # From https://docs.travis-ci.com/user/gui-and-headless-browsers/#Using-xvfb-to-Run-Tests-That-Require-a-GUI
 
 script:
-- tsc range.ts # Fails, but does produce range.js
 - PORT=5000
 - bundle exec ruby -run -e httpd . -p $PORT &
 - TEST_URL=http://localhost:$PORT/tests/qunit.html
