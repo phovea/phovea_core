@@ -11,10 +11,12 @@ install:
 - 'npm install -g typescript@1.8.0'
 - 'npm install -g typings'
 - typings install
-# TODO: Clean up
-- tsc main.ts --out main.js --target ES5 --module amd
-- tsc iterator.ts --out iterator.js --target ES5 --module amd
-- tsc range.ts --out range.js --target ES5 --module amd
+# TODO: Individual files, but no names on modules?
+#- tsc main.ts --out main.js --target ES5 --module amd
+#- tsc iterator.ts --out iterator.js --target ES5 --module amd
+#- tsc range.ts --out range.js --target ES5 --module amd
+# TODO: Or, one big file, but modules are named?
+tsc main.ts iterator.ts range.ts  --out main.js --target ES5 --module amd
 
 before_script:
 - 'export DISPLAY=:99.0'

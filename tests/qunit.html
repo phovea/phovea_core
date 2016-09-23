@@ -13,7 +13,10 @@
   <script>
       exports = {}; // TODO: Should something else provide this?
       require.config({
-        baseUrl: '../'
+        baseUrl: '../',
+        bundles: {
+          'main': ['main', 'iterator', 'range']
+        }
       });
       require(['main', 'iterator'], function(main, iterator){
         require(['range'], function(range){ // TODO: range should declare its dependencies
