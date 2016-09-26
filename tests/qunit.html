@@ -11,12 +11,8 @@
   <script src="https://code.jquery.com/qunit/qunit-2.0.1.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.2/require.min.js"></script>
   <script>
-      exports = {}; // TODO: Should something else provide this?
       require.config({
         baseUrl: '../'
-//        bundles: {
-//          'main': ['main', 'iterator', 'range']
-//        }
       });
       require(['range_test'], function(range_test){
           range_test.test();
