@@ -14,8 +14,9 @@
       require.config({
         baseUrl: '../'
       });
-      require(['tests/range_test'], function(range_test){
-          range_test.test();
+      require(['tests/range_test', 'tests/matrix_test'], function(range_test, matrix_test){
+        range_test.test();
+        matrix_test.test();
       });
   </script>
 </body>

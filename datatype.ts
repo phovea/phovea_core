@@ -8,7 +8,6 @@
  */
 
 'use strict';
-/// <reference path="../../tsd.d.ts" />
 import C = require('./main');
 import idtypes = require('./idtype');
 import ranges = require('./range');
