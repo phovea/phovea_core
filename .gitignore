@@ -8,4 +8,5 @@
 *.css
 *.js
 typings/
+!*_test.js # TODO: move these to test directory
 !tests/**/*

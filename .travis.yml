@@ -11,18 +11,15 @@ install:
 - 'npm install -g typescript@1.8.0'
 - 'npm install -g typings'
 - typings install
-# TODO: Individual files, but no names on modules?
-#- tsc main.ts --out main.js --target ES5 --module amd
-#- tsc iterator.ts --out iterator.js --target ES5 --module amd
-#- tsc range.ts --out range.js --target ES5 --module amd
-# TODO: Or, one big file, but modules are named?
-tsc main.ts iterator.ts range.ts  --out main.js --target ES5 --module amd
+# TODO: Compile all the things
+- tsc main.ts iterator.ts range.ts --target ES5 --module amd
 
 before_script:
 - 'export DISPLAY=:99.0'
 - 'sh -e /etc/init.d/xvfb start'  # From https://docs.travis-ci.com/user/gui-and-headless-browsers/#Using-xvfb-to-Run-Tests-That-Require-a-GUI
 
 script:
+- set -e # Exit on any error
 - PORT=5000
 - bundle exec ruby -run -e httpd . -p $PORT &
 - TEST_URL=http://localhost:$PORT/tests/qunit.html
