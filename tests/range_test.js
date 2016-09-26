@@ -21,6 +21,7 @@ define(["require", "exports", 'range'], function (require, exports, range) {
     assert_parse('negative step < -1', '1:2:-2', '(1:2:-2)');
 
     assert_parse('comma space set', '1, (1,4)', '1,(1,4)');
+    assert_parse('comma tab set', '1,\t(1,4)', '1,(1,4)');
     assert_parse('comma space range', '(1:3), (1:3)', '(1:3),(1:3)');
 
     assert_parse('syntax error', ':::::', '(NaN:NaN:NaN)'); // TODO: BUG! (Should throw error.)
