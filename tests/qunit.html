@@ -14,9 +14,14 @@
       require.config({
         baseUrl: '../'
       });
-      require(['tests/range_test', 'tests/matrix_test'], function(range_test, matrix_test){
-        range_test.test();
-        matrix_test.test();
+      // Not proper query parsing, but good enough.
+      var tests = location.search.substring(1).split('&')
+              .filter(function(kv){return kv.match(/^test=/)})
+              .map(function(kv){return kv.replace('test=', '')});
+      require(tests, function(){
+        for (test_module of arguments) {
+          test_module.test();
+        }
       });
   </script>
 </body>
