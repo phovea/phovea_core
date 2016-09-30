@@ -298,7 +298,7 @@ export function random_id(length = 8) {
 export function fix_id(name: string) {
   var clean = name.replace(/[!#$%&'\(\)\*\+,\.\/:;<=>\?@\[\\\]\^`\{\|}~_]/,' ');
   var words = clean.split(/\s/);
-  return words.map((w, i) => (i === 0 ? w[0].toLowerCase() : w[1].toUpperCase()) + w.slice(1)).join('');
+  return words.map((w, i) => (i === 0 ? w[0].toLowerCase() : w[0].toUpperCase()) + w.slice(1)).join('');
 }
 
 /**
