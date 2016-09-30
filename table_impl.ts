@@ -225,7 +225,7 @@ function viaDataLoader(data: any[], nameProperty: any) {
       if (col.getter) {
         return col.getter;
       }
-      return (d) => d[col.name];
+      return (d) => d[col.column || col.name];
     }
     var getters = desc.columns.map(toGetter);
     var objs = data.map((row) => {
