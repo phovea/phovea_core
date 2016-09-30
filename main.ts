@@ -291,6 +291,17 @@ export function random_id(length = 8) {
 }
 
 /**
+ * fixes a given name by converting it to plain camelcase
+ * @param name
+ * @return {string}
+ */
+export function fix_id(name: string) {
+  var clean = name.replace(/[!#$%&'\(\)\*\+,\.\/:;<=>\?@\[\\\]\^`\{\|}~_]/,' ');
+  var words = clean.split(/\s/);
+  return words.map((w, i) => (i === 0 ? w[0].toLowerCase() : w[1].toUpperCase()) + w.slice(1)).join('');
+}
+
+/**
  * utility function to get notified, when the given dom element is removed from its parent
  * @param node
  * @param callback
