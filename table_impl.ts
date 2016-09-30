@@ -608,9 +608,7 @@ export function create(desc: datatypes.IDataDescription): def.ITable {
   return new Table(desc, viaAPI2Loader());
 }
 
-export function wrapObjects(desc: datatypes.IDataDescription, data: any[], nameProperty: string);
-export function wrapObjects(desc: datatypes.IDataDescription, data: any[], nameProperty: (obj: any) => string);
-export function wrapObjects(desc: datatypes.IDataDescription, data: any[], nameProperty: any) {
+export function wrapObjects(desc: datatypes.IDataDescription, data: any[], nameProperty: string|((obj: any) => string)) {
   return new Table(desc, adapterOne2Two(viaDataLoader(data, nameProperty)));
 }
 
