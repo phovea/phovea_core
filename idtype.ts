@@ -368,15 +368,11 @@ export class ProductIDType extends events.EventHandler implements IIDType {
     var s = {};
     Object.keys(this.sel).forEach((type) => s[type] = this.sel[type].map((r) => r.toString()));
     return {
-      sel: s,
-      name: this.name,
-      names: this.names
+      sel: s
     };
   }
 
   restore(persisted:any) {
-    this.name = persisted.name;
-    this.names = persisted.names;
     Object.keys(persisted.sel).forEach((type) => this.sel[type] = persisted.sel[type].map(ranges.parse));
     return this;
   }
@@ -981,8 +977,10 @@ function fillUpData(entries) {
     var entry = cache[row.id];
     var new_ = false;
     if (entry) {
-      entry.name = row.name;
-      entry.names = row.names;
+      if (entry instanceof IDType) {
+        entry.name = row.name;
+        entry.names = row.names;
+      }
     } else {
       entry = new IDType(row.id, row.name, row.names);
       new_ = true;
