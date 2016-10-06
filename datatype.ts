@@ -60,7 +60,7 @@ export function isDataType(v: any) {
     return true;
   }
   //sounds good
-  return (v instanceof idtypes.SelectAble && C.isFunction(v.idView) && C.isFunction(v.persist) && C.isFunction(v.restore) && ('desc' in v) && ('dim' in v));
+  return (C.isFunction(v.idView) && C.isFunction(v.persist) && C.isFunction(v.restore) && v instanceof idtypes.SelectAble && ('desc' in v) && ('dim' in v));
 }
 
 /**
