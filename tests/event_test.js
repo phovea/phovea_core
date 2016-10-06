@@ -4,12 +4,12 @@ define(["require", "exports", 'event'], function (require, exports, event) {
     QUnit.module('event', function() {
 
       QUnit.test('Object.keys', function(assert) {
-        assert.deepEqual(Object.keys(event), [
+        assert.deepEqual(Object.keys(event).sort(), [
           "EventHandler",
-          "on",
-          "off",
           "fire",
-          "list"
+          "list",
+          "off",
+          "on"
         ]);
       });
 

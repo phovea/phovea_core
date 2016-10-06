@@ -4,27 +4,27 @@ define(["require", "exports", 'idtype'], function (require, exports, idtype) {
     QUnit.module('idtype', function() {
 
       QUnit.test('Object.keys', function(assert) {
-        assert.deepEqual(Object.keys(idtype), [
+        assert.deepEqual(Object.keys(idtype).sort(), [
+          "IDType",
+          "LocalIDAssigner",
+          "ObjectManager",
+          "ProductIDType",
+          "ProductSelectAble",
+          "SelectAble",
+          "SelectOperation",
+          "clearSelection",
+          "createLocalAssigner",
           "defaultSelectionType",
           "hoverSelectionType",
-          "SelectOperation",
-          "toSelectOperation",
-          "IDType",
-          "ProductIDType",
-          "toId",
           "isId",
-          "ObjectManager",
-          "LocalIDAssigner",
-          "createLocalAssigner",
-          "SelectAble",
-          "ProductSelectAble",
+          "list",
+          "persist",
+          "register",
           "resolve",
           "resolveProduct",
-          "list",
-          "register",
-          "persist",
           "restore",
-          "clearSelection"
+          "toId",
+          "toSelectOperation"
         ]);
       });
 

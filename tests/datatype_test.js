@@ -4,14 +4,14 @@ define(["require", "exports", 'datatype'], function (require, exports, datatype)
     QUnit.module('datatype', function() {
 
       QUnit.test('Object.keys', function(assert) {
-        assert.deepEqual(Object.keys(datatype), [
-          "isDataType",
-          "assignData",
+        assert.deepEqual(Object.keys(datatype).sort(), [
           "DataTypeBase",
-          "transpose",
-          "mask",
+          "assignData",
           "categorical2partitioning",
-          "defineDataType"
+          "defineDataType",
+          "isDataType",
+          "mask",
+          "transpose"
         ]);
       });
 
