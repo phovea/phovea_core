@@ -12,7 +12,7 @@ install:
 - 'npm install -g typings'
 - typings install
 # TODO: Compile all the things
-- tsc main.ts iterator.ts range.ts matrix.ts matrix_impl.ts vis.ts datatype.ts provenance.ts --target ES5 --module amd
+- tsc main.ts iterator.ts range.ts matrix.ts matrix_impl.ts vis.ts datatype.ts behavior.ts geom.ts layout.ts layout_view.ts --target ES5 --module amd
 
 before_script:
 - 'export DISPLAY=:99.0'
