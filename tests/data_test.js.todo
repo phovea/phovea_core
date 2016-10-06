@@ -1,0 +1,15 @@
+define(["require", "exports", 'data'], function (require, exports, data) {
+  exports.test = function(){
+
+    QUnit.module('data', function() {
+
+      QUnit.test('Object.keys', function(assert) {
+        assert.deepEqual(Object.keys(data).sort(), [
+          // TODO: tsc fails currently
+        ]);
+      });
+
+    });
+
+  }
+});

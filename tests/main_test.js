@@ -19,6 +19,7 @@ define(["require", "exports", 'main'], function (require, exports, main) {
           "copyDnD",
           "delayedCall",
           "extendClass",
+          "fix_id",
           "flagId",
           "getter",
           "hasDnDType",

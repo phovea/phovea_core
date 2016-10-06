@@ -15,8 +15,12 @@ define(["require", "exports", 'datatype'], function (require, exports, datatype)
         ]);
       });
 
-      QUnit.test('isDataType no arg', function(assert) {
-        assert.equal(datatype.isDataType(), false);
+      QUnit.test('isDataType', function(assert) {
+        assert.throws(
+          function() {
+            datatype.isDataType();
+          }
+        );
       });
 
       QUnit.test('isDataType one arg', function(assert) {
