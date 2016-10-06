@@ -8,7 +8,7 @@ define(["require", "exports", 'vis'], function (require, exports, vis) {
           "handlers",
           "id",
           "_built"
-        ], true);
+        ]);
       });
 
       // TODO: Test methods
