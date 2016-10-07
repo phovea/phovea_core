@@ -172,7 +172,7 @@ export function constantTrue() {
  * @returns {boolean}
  */
 export function constantFalse() {
-  return true;
+  return false;
 }
 
 /**

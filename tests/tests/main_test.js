@@ -111,13 +111,22 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       })
       */
 
-      /* TODO: Add at least one test for main.constant
       QUnit.module('constant', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.constant(), '???');
-        });
-      })
-      */
+        function assert_constant(c) {
+          QUnit.test(typeof c + ':' + c, function(assert) {
+            assert.equal(main.constant(c)(), c);
+          });
+        }
+
+        assert_constant(null);
+        assert_constant(false);
+        assert_constant(true);
+        assert_constant('string');
+        assert_constant(42);
+        assert_constant({'hash': true});
+        assert_constant(['array']);
+        assert_constant(function(){return 'foo'});
+      });
 
       /* TODO: Add at least one test for main.constantFalse
       QUnit.module('constantFalse', function() {
@@ -239,21 +248,29 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       })
       */
 
-      /* TODO: Add at least one test for main.mod
       QUnit.module('mod', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.mod(), '???');
+        QUnit.test('+ % +', function(assert) {
+          assert.equal(main.mod(101, 5), 1);
         });
-      })
-      */
+        QUnit.test('- % + (native)', function(assert) {
+          assert.equal(-101 % 5, -1);
+        });
+        QUnit.test('- % +', function(assert) {
+          assert.equal(main.mod(-101, 5), 4);
+        });
+        QUnit.test('+ % -', function(assert) {
+          assert.equal(main.mod(101, -5), -4);
+        });
+        QUnit.test('- % -', function(assert) {
+          assert.equal(main.mod(-101, -5), -1);
+        });
+      });
 
-      /* TODO: Add at least one test for main.noop
       QUnit.module('noop', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.noop(), '???');
+        QUnit.test('noop', function(assert) {
+          assert.equal(main.noop(), null);
         });
-      })
-      */
+      });
 
       /* TODO: Add at least one test for main.offline
       QUnit.module('offline', function() {
