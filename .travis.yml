@@ -20,6 +20,8 @@ before_script:
 
 script:
 - set -e # Exit on any error
+# Confirm that there is one test for every tsc
+- diff <(for FILE in `ls tests/tests`; do basename $FILE; done | perl -pne 's/_test.js//;s/.todo//' | sort) <(for FILE in `ls *.ts`; do basename $FILE; done | perl -pne 's/.ts// | sort')
 - PORT=5000
 - bundle exec ruby -run -e httpd . -p $PORT &
 - QUERY=`cd tests/tests; ls *.js | perl -pne 's/.js//;s/^/test=/' | xargs | tr ' ' '&'`
