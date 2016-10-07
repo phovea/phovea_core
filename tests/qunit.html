@@ -17,7 +17,7 @@
       // Not proper query parsing, but good enough.
       var tests = location.search.substring(1).split('&')
               .filter(function(kv){return kv.match(/^test=/)})
-              .map(function(kv){return kv.replace('test=', '')});
+              .map(function(kv){return kv.replace('test=', 'tests/tests/')});
       require(tests, function(){
         for (test_module of arguments) {
           test_module.test();

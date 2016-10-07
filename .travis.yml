@@ -9,9 +9,9 @@ rvm:
 install:
 - bundle install
 - 'npm install -g typescript@1.8.0'
-- 'npm install -g typings'
+- 'npm install -g typings@1.4.0'
 - typings install
-# TODO: Compile all the things
+# TODO: Build the same way web_bundle builds?
 - tsc main.ts iterator.ts range.ts matrix.ts matrix_impl.ts vis.ts datatype.ts behavior.ts geom.ts layout.ts layout_view.ts --target ES5 --module amd
 
 before_script:
@@ -22,7 +22,7 @@ script:
 - set -e # Exit on any error
 - PORT=5000
 - bundle exec ruby -run -e httpd . -p $PORT &
-- QUERY=`ls tests/*.js | perl -pne 's/.js//;s/^/test=/' | xargs | tr ' ' '&'`
+- QUERY=`cd tests/tests; ls *.js | perl -pne 's/.js//;s/^/test=/' | xargs | tr ' ' '&'`
 - TEST_URL=http://localhost:$PORT/tests/qunit.html?$QUERY
 - until ( curl -I $TEST_URL | grep '200 OK' ); do sleep 1; done
 - bundle exec ruby tests/test.rb $TEST_URL
