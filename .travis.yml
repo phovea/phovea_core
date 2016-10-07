@@ -12,7 +12,7 @@ install:
 - 'npm install -g typings@1.4.0'
 - typings install
 # TODO: Build the same way web_bundle builds?
-- tsc main.ts iterator.ts range.ts matrix.ts matrix_impl.ts vis.ts datatype.ts behavior.ts geom.ts layout.ts layout_view.ts --target ES5 --module amd
+- ( cd tests/tests; ls *.js | perl -pne 's/_test.js/.ts/' ) | xargs tsc --target ES5 --module amd
 
 before_script:
 - 'export DISPLAY=:99.0'
