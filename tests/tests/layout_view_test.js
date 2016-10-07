@@ -10,6 +10,22 @@ define(["require", "exports", 'layout_view'], function (require, exports, layout
         ]);
       });
 
+      /* TODO: Add at least one test for layout_view.AView
+      QUnit.module('AView', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(layout_view.AView(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for layout_view.list
+      QUnit.module('list', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(layout_view.list(), '???');
+        });
+      })
+      */
+
     });
 
   }

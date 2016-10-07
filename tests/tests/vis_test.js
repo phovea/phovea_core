@@ -11,7 +11,7 @@ define(["require", "exports", 'vis'], function (require, exports, vis) {
         ]);
       });
 
-      QUnit.module('vis.AVisInstance', function () {
+      QUnit.module('AVisInstance', function () {
 
         QUnit.test('Object.keys', function (assert) {
           assert.deepEqual(Object.keys(new vis.AVisInstance()).sort(), [
@@ -24,7 +24,7 @@ define(["require", "exports", 'vis'], function (require, exports, vis) {
       });
 
 
-      QUnit.module('vis.assignVis', function () {
+      QUnit.module('assignVis', function () {
 
         QUnit.test('no arg', function (assert) {
           assert.throws( // TODO
@@ -56,7 +56,7 @@ define(["require", "exports", 'vis'], function (require, exports, vis) {
       });
 
 
-      QUnit.module('vis.list', function () {
+      QUnit.module('list', function () {
 
         QUnit.test('no arg', function (assert) {
           assert.throws( // TODO

@@ -15,63 +15,61 @@ define(["require", "exports", 'datatype'], function (require, exports, datatype)
         ]);
       });
 
-      QUnit.test('isDataType', function(assert) {
-        assert.throws(
-          function() {
-            datatype.isDataType();
-          }
-        );
-      });
+      /* TODO: Add at least one test for datatype.DataTypeBase
+      QUnit.module('DataTypeBase', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(datatype.DataTypeBase(), '???');
+        });
+      })
+      */
 
-      QUnit.test('isDataType one arg', function(assert) {
-        assert.equal(datatype.isDataType('foo'), false);
-      });
+      /* TODO: Add at least one test for datatype.assignData
+      QUnit.module('assignData', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(datatype.assignData(), '???');
+        });
+      })
+      */
 
-      // TODO: isDataType == true?
+      /* TODO: Add at least one test for datatype.categorical2partitioning
+      QUnit.module('categorical2partitioning', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(datatype.categorical2partitioning(), '???');
+        });
+      })
+      */
 
-      QUnit.test('assignData', function(assert) {
-        assert.throws( // TODO
-          function() {
-            datatype.assignData();
-          }
-        );
-      });
+      /* TODO: Add at least one test for datatype.defineDataType
+      QUnit.module('defineDataType', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(datatype.defineDataType(), '???');
+        });
+      })
+      */
 
-      QUnit.test('transpose', function(assert) {
-        assert.throws( // TODO
-          function() {
-            datatype.transpose();
-          }
-        );
-      });
+      /* TODO: Add at least one test for datatype.isDataType
+      QUnit.module('isDataType', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(datatype.isDataType(), '???');
+        });
+      })
+      */
 
-      QUnit.test('mask', function(assert) {
-        assert.throws( // TODO
-          function() {
-            datatype.mask();
-          }
-        );
-      });
+      /* TODO: Add at least one test for datatype.mask
+      QUnit.module('mask', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(datatype.mask(), '???');
+        });
+      })
+      */
 
-      QUnit.test('categorical2partitioning', function(assert) {
-        assert.throws( // TODO
-          function() {
-            datatype.categorical2partitioning();
-          }
-        );
-      });
-
-      QUnit.test('defineDataType', function(assert) {
-        assert.equal(typeof datatype.defineDataType(), 'function');
-      });
-
-      QUnit.test('defineDataType', function(assert) {
-        assert.throws( // TODO
-          function() {
-            (datatype.defineDataType())();
-          }
-        );
-      });
+      /* TODO: Add at least one test for datatype.transpose
+      QUnit.module('transpose', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(datatype.transpose(), '???');
+        });
+      })
+      */
 
     });
 

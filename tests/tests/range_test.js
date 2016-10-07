@@ -24,7 +24,119 @@ define(["require", "exports", 'range'], function (require, exports, range) {
         ]);
       });
 
-      QUnit.module('range.parse', function() {
+      /* TODO: Add at least one test for range.CompositeRange1D
+      QUnit.module('CompositeRange1D', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(range.CompositeRange1D(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for range.Range
+      QUnit.module('Range', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(range.Range(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for range.Range1D
+      QUnit.module('Range1D', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(range.Range1D(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for range.Range1DGroup
+      QUnit.module('Range1DGroup', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(range.Range1DGroup(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for range.RangeElem
+      QUnit.module('RangeElem', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(range.RangeElem(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for range.SingleRangeElem
+      QUnit.module('SingleRangeElem', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(range.SingleRangeElem(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for range.all
+      QUnit.module('all', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(range.all(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for range.asUngrouped
+      QUnit.module('asUngrouped', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(range.asUngrouped(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for range.cell
+      QUnit.module('cell', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(range.cell(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for range.composite
+      QUnit.module('composite', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(range.composite(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for range.is
+      QUnit.module('is', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(range.is(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for range.join
+      QUnit.module('join', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(range.join(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for range.list
+      QUnit.module('list', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(range.list(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for range.none
+      QUnit.module('none', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(range.none(), '???');
+        });
+      })
+      */
+
+      QUnit.module('parse', function() {
 
         function assert_parse(name, input, output) {
           QUnit.test(name, function(assert) {
@@ -51,6 +163,15 @@ define(["require", "exports", 'range'], function (require, exports, range) {
         assert_parse('syntax error', ':::::', '(NaN:NaN:NaN)'); // TODO: BUG! (Should throw error.)
 
       })
+
+      /* TODO: Add at least one test for range.range
+      QUnit.module('range', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(range.range(), '???');
+        });
+      })
+      */
+
 
     });
 

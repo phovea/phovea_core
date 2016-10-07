@@ -16,7 +16,7 @@ define(["require", "exports", 'ajax'], function (require, exports, ajax) {
         ]);
       });
 
-      /* TODO
+      /* TODO: Add at least one test for ajax.api2absURL
       QUnit.module('api2absURL', function() {
         QUnit.test('???', function(assert) {
           assert.equal(ajax.api2absURL(), '???');
@@ -24,7 +24,7 @@ define(["require", "exports", 'ajax'], function (require, exports, ajax) {
       })
       */
 
-      /* TODO
+      /* TODO: Add at least one test for ajax.encodeParams
       QUnit.module('encodeParams', function() {
         QUnit.test('???', function(assert) {
           assert.equal(ajax.encodeParams(), '???');
@@ -32,7 +32,7 @@ define(["require", "exports", 'ajax'], function (require, exports, ajax) {
       })
       */
 
-      /* TODO
+      /* TODO: Add at least one test for ajax.getAPIData
       QUnit.module('getAPIData', function() {
         QUnit.test('???', function(assert) {
           assert.equal(ajax.getAPIData(), '???');
@@ -40,7 +40,7 @@ define(["require", "exports", 'ajax'], function (require, exports, ajax) {
       })
       */
 
-      /* TODO
+      /* TODO: Add at least one test for ajax.getAPIJSON
       QUnit.module('getAPIJSON', function() {
         QUnit.test('???', function(assert) {
           assert.equal(ajax.getAPIJSON(), '???');
@@ -48,7 +48,7 @@ define(["require", "exports", 'ajax'], function (require, exports, ajax) {
       })
       */
 
-      /* TODO
+      /* TODO: Add at least one test for ajax.getData
       QUnit.module('getData', function() {
         QUnit.test('???', function(assert) {
           assert.equal(ajax.getData(), '???');
@@ -56,7 +56,7 @@ define(["require", "exports", 'ajax'], function (require, exports, ajax) {
       })
       */
 
-      /* TODO
+      /* TODO: Add at least one test for ajax.getJSON
       QUnit.module('getJSON', function() {
         QUnit.test('???', function(assert) {
           assert.equal(ajax.getJSON(), '???');
@@ -64,7 +64,7 @@ define(["require", "exports", 'ajax'], function (require, exports, ajax) {
       })
       */
 
-      /* TODO
+      /* TODO: Add at least one test for ajax.send
       QUnit.module('send', function() {
         QUnit.test('???', function(assert) {
           assert.equal(ajax.send(), '???');
@@ -72,7 +72,7 @@ define(["require", "exports", 'ajax'], function (require, exports, ajax) {
       })
       */
 
-      /* TODO
+      /* TODO: Add at least one test for ajax.sendAPI
       QUnit.module('sendAPI', function() {
         QUnit.test('???', function(assert) {
           assert.equal(ajax.sendAPI(), '???');

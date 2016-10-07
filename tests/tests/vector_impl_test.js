@@ -13,6 +13,48 @@ define(["require", "exports", 'vector_impl'], function (require, exports, vector
         ]);
       });
 
+      /* TODO: Add at least one test for vector_impl.StratificationVector
+      QUnit.module('StratificationVector', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(vector_impl.StratificationVector(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for vector_impl.Vector
+      QUnit.module('Vector', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(vector_impl.Vector(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for vector_impl.VectorBase
+      QUnit.module('VectorBase', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(vector_impl.VectorBase(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for vector_impl.create
+      QUnit.module('create', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(vector_impl.create(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for vector_impl.wrap
+      QUnit.module('wrap', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(vector_impl.wrap(), '???');
+        });
+      })
+      */
+
+
+
     });
 
   }

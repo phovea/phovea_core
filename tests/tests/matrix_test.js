@@ -11,6 +11,31 @@ define(["require", "exports", 'matrix'], function (require, exports, matrix) {
         ]);
       });
 
+      /* TODO: Add at least one test for matrix.IDTYPE_CELL
+      QUnit.module('IDTYPE_CELL', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(matrix.IDTYPE_CELL(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for matrix.IDTYPE_COLUMN
+      QUnit.module('IDTYPE_COLUMN', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(matrix.IDTYPE_COLUMN(), '???');
+        });
+      })
+      */
+
+      /* TODO: Add at least one test for matrix.IDTYPE_ROW
+      QUnit.module('IDTYPE_ROW', function() {
+        QUnit.test('???', function(assert) {
+          assert.equal(matrix.IDTYPE_ROW(), '???');
+        });
+      })
+      */
+
+
     });
 
   }
