@@ -128,21 +128,17 @@ define(["require", "exports", 'main'], function (require, exports, main) {
         assert_constant(function(){return 'foo'});
       });
 
-      /* TODO: Add at least one test for main.constantFalse
       QUnit.module('constantFalse', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.constantFalse(), '???');
+        QUnit.test('false', function(assert) {
+          assert.equal(main.constantFalse(), false);
         });
-      })
-      */
+      });
 
-      /* TODO: Add at least one test for main.constantTrue
       QUnit.module('constantTrue', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.constantTrue(), '???');
+        QUnit.test('true', function(assert) {
+          assert.equal(main.constantTrue(), true);
         });
-      })
-      */
+      });
 
       /* TODO: Add at least one test for main.copyDnD
       QUnit.module('copyDnD', function() {
@@ -352,13 +348,19 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       })
       */
 
-      /* TODO: Add at least one test for main.uniqueString
       QUnit.module('uniqueString', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.uniqueString(), '???');
+        // This depends on run order and is fragile.
+        QUnit.test('default0', function(assert) {
+          assert.equal(main.uniqueString(), "_default0");
         });
-      })
-      */
+        QUnit.test('default1', function(assert) {
+          assert.equal(main.uniqueString(), "_default1");
+        });
+        // TODO: Should this work? How do I define a domain?
+        // QUnit.test('other', function(assert) {
+        //   assert.equal(main.uniqueString(other), "other0");
+        // });
+      });
 
       /* TODO: Add at least one test for main.updateDropEffect
       QUnit.module('updateDropEffect', function() {
