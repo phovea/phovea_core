@@ -240,13 +240,17 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       })
       */
 
-      /* TODO: Add at least one test for main.identity
       QUnit.module('identity', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.identity(), '???');
-        });
-      })
-      */
+        function assert_identity(x) {
+          QUnit.test(x, function(assert) {
+            assert.deepEqual(main.identity(x), x);
+          });
+        }
+        assert_identity(false);
+        assert_identity(true);
+        assert_identity(function(x){});
+        assert_identity('string');
+      });
 
       /* TODO: Add at least one test for main.indexOf
       QUnit.module('indexOf', function() {
@@ -415,15 +419,11 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       })
       */
 
-      /* TODO: Add at least one test for main.version
-      QUnit.module('version', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.version(), '???');
+      QUnit.module('version', function() { // TODO: Does anything actually consume this?
+        QUnit.test('version', function(assert) {
+          assert.equal(main.version, '0.0.1-alpha');
         });
-      })
-      */
-
-
+      });
 
     });
 

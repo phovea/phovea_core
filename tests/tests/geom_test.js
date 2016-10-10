@@ -12,6 +12,8 @@ define(["require", "exports", 'geom'], function (require, exports, geom) {
           "Line",
           "Polygon",
           "Rect",
+            // TODO: Do we really need both the constructors and these functions?
+            // It would be different if we sometimes reused objects, instead of making new ones.
           "circle",
           "ellipse",
           "line",
@@ -39,13 +41,57 @@ define(["require", "exports", 'geom'], function (require, exports, geom) {
       })
       */
 
-      /* TODO: Add at least one test for geom.Circle
       QUnit.module('Circle', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(geom.Circle(), '???');
+        var circle = new geom.Circle(0,0,1);
+        QUnit.test('aabb', function(assert) {
+          var aabb = circle.aabb();
+          assert.equal(aabb.x, -1);
+          assert.equal(aabb.x2, 1);
+          assert.equal(aabb.y, -1);
+          assert.equal(aabb.y2, 1);
+          assert.equal(aabb.h, 2);
+          assert.equal(aabb.w, 2);
         });
-      })
-      */
+        // QUnit.test('asIntersectionParams', function(assert) {
+        //   assert.deepEqual(circle.asIntersectionParams(), '???');
+        // });
+        // QUnit.test('bs', function(assert) {
+        //   assert.deepEqual(circle.bs(), '???');
+        // });
+        // QUnit.test('center', function(assert) {
+        //   assert.deepEqual(circle.center(), '???');
+        // });
+        // QUnit.test('corner', function(assert) {
+        //   assert.deepEqual(circle.corner(), '???');
+        // });
+        // QUnit.test('intersects', function(assert) {
+        //   assert.deepEqual(circle.intersects(), '???');
+        // });
+        // QUnit.test('radius', function(assert) {
+        //   assert.deepEqual(circle.radius(), '???');
+        // });
+        // QUnit.test('shift', function(assert) {
+        //   assert.deepEqual(circle.shift(), '???');
+        // });
+        // QUnit.test('shiftImpl', function(assert) {
+        //   assert.deepEqual(circle.shiftImpl(), '???');
+        // });
+        // QUnit.test('toString', function(assert) {
+        //   assert.deepEqual(circle.toString(), '???');
+        // });
+        // QUnit.test('transform', function(assert) {
+        //   assert.deepEqual(circle.transform(), '???');
+        // });
+        // QUnit.test('x', function(assert) {
+        //   assert.deepEqual(circle.x, '???');
+        // });
+        // QUnit.test('y', function(assert) {
+        //   assert.deepEqual(circle.y, '???');
+        // });
+        // QUnit.test('xy', function(assert) {
+        //   assert.deepEqual(circle.xy, '???');
+        // });
+      });
 
       /* TODO: Add at least one test for geom.Ellipse
       QUnit.module('Ellipse', function() {
