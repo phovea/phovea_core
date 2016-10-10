@@ -42,55 +42,76 @@ define(["require", "exports", 'geom'], function (require, exports, geom) {
       */
 
       QUnit.module('Circle', function() {
-        var circle = new geom.Circle(0,0,1);
+        var circle = new geom.Circle(1,1,1);
         QUnit.test('aabb', function(assert) {
           var aabb = circle.aabb();
-          assert.equal(aabb.x, -1);
-          assert.equal(aabb.x2, 1);
-          assert.equal(aabb.y, -1);
-          assert.equal(aabb.y2, 1);
+          assert.equal(aabb.x, 0);
+          assert.equal(aabb.x2, 2);
+          assert.equal(aabb.y, 0);
+          assert.equal(aabb.y2, 2);
           assert.equal(aabb.h, 2);
           assert.equal(aabb.w, 2);
+          // TODO: more
         });
-        // QUnit.test('asIntersectionParams', function(assert) {
-        //   assert.deepEqual(circle.asIntersectionParams(), '???');
-        // });
-        // QUnit.test('bs', function(assert) {
+        QUnit.test('asIntersectionParams', function(assert) {
+          var params = circle.asIntersectionParams();
+          assert.equal(params.name, 'Circle');
+          assert.equal(params.params[0].x, 1);
+          assert.equal(params.params[0].y, 1);
+          assert.equal(params.params[1], 1); // TODO: Is this the radius?
+          // TODO: more
+        });
+        // QUnit.test('bs', function(assert) { TODO: What does this mean?
         //   assert.deepEqual(circle.bs(), '???');
         // });
-        // QUnit.test('center', function(assert) {
-        //   assert.deepEqual(circle.center(), '???');
-        // });
-        // QUnit.test('corner', function(assert) {
-        //   assert.deepEqual(circle.corner(), '???');
-        // });
-        // QUnit.test('intersects', function(assert) {
-        //   assert.deepEqual(circle.intersects(), '???');
-        // });
-        // QUnit.test('radius', function(assert) {
-        //   assert.deepEqual(circle.radius(), '???');
-        // });
+        QUnit.test('center', function(assert) {
+          assert.deepEqual(circle.center.x, 1);
+          assert.deepEqual(circle.center.y, 1);
+        });
+        QUnit.test('corner', function(assert) {
+          // TODO: Bug? A circle shouldn't have corners? How is this used?
+          assert.deepEqual(circle.corner().toString(), '1,1');
+        });
+        QUnit.test('intersects', function(assert) {
+          var same = circle.intersects(new geom.Circle(1,1,1));
+          assert.equal(same.intersects, true);
+          var outside = circle.intersects(new geom.Circle(-1,-1,1));
+          assert.equal(outside.intersects, false);
+          var touching = circle.intersects(new geom.Circle(-1,1,1));
+          assert.equal(touching.intersects, true); // TODO: Confirm?
+          var inside = circle.intersects(new geom.Circle(1,1,0.5));
+          assert.equal(inside.intersects, false); // TODO: Bug?
+          var contain = circle.intersects(new geom.Circle(1,1,2));
+          assert.equal(inside.intersects, false); // TODO: Bug?
+          // TODO: Test other methods of intersection object
+        });
+        QUnit.test('radius', function(assert) {
+          assert.deepEqual(circle.radius, 1);
+        });
         // QUnit.test('shift', function(assert) {
         //   assert.deepEqual(circle.shift(), '???');
         // });
         // QUnit.test('shiftImpl', function(assert) {
         //   assert.deepEqual(circle.shiftImpl(), '???');
         // });
-        // QUnit.test('toString', function(assert) {
-        //   assert.deepEqual(circle.toString(), '???');
-        // });
+        QUnit.test('toString', function(assert) {
+          assert.deepEqual(circle.toString(), 'Circle(x=1,y=1,radius=1)');
+        });
         // QUnit.test('transform', function(assert) {
         //   assert.deepEqual(circle.transform(), '???');
         // });
-        // QUnit.test('x', function(assert) {
-        //   assert.deepEqual(circle.x, '???');
-        // });
-        // QUnit.test('y', function(assert) {
-        //   assert.deepEqual(circle.y, '???');
-        // });
-        // QUnit.test('xy', function(assert) {
-        //   assert.deepEqual(circle.xy, '???');
-        // });
+        QUnit.test('x', function(assert) {
+          assert.deepEqual(circle.x, 1);
+        });
+        QUnit.test('y', function(assert) {
+          assert.deepEqual(circle.y, 1);
+        });
+        QUnit.test('xy', function(assert) {
+          // TODO: How is this different from .center?
+          assert.deepEqual(circle.xy.x, 1);
+          assert.deepEqual(circle.xy.y, 1);
+          // TODO: more
+        });
       });
 
       /* TODO: Add at least one test for geom.Ellipse
