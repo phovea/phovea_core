@@ -73,16 +73,26 @@ define(["require", "exports", 'geom'], function (require, exports, geom) {
           assert.deepEqual(circle.corner().toString(), '1,1');
         });
         QUnit.test('intersects', function(assert) {
-          var same = circle.intersects(new geom.Circle(1,1,1));
-          assert.equal(same.intersects, true);
-          var outside = circle.intersects(new geom.Circle(-1,-1,1));
-          assert.equal(outside.intersects, false);
-          var touching = circle.intersects(new geom.Circle(-1,1,1));
-          assert.equal(touching.intersects, true); // TODO: Confirm?
-          var inside = circle.intersects(new geom.Circle(1,1,0.5));
-          assert.equal(inside.intersects, false); // TODO: Bug?
-          var contain = circle.intersects(new geom.Circle(1,1,2));
-          assert.equal(inside.intersects, false); // TODO: Bug?
+          function assert_intersect(x,y,r,reverse) {
+            if (typeof reverse == 'undefined') {
+              reverse = true;
+            }
+            var other = new geom.Circle(x, y, r);
+            var intersection = circle.intersects(other);
+            if (!reverse) {
+              assert.ok(!intersection.intersects);
+            } else {
+              assert.ok(intersection.intersects);
+            }
+          }
+          assert_intersect(1,1,1); // same
+          assert_intersect(-1,-1,1, false); // outside
+          assert_intersect(-1,1,1); // touch
+          assert_intersect(0,0,1); // overlap
+          // TODO: Bug? Maybe intersection means the line of the circle edge,
+          // rather than the interior of the disk?
+          assert_intersect(1,1,0.5, false); // smaller
+          assert_intersect(1,1,2, false); // larger
           // TODO: Test other methods of intersection object
         });
         QUnit.test('radius', function(assert) {
