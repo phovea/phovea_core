@@ -6,7 +6,7 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       QUnit.test('Object.keys', function(assert) {
         assert.deepEqual(Object.keys(main).sort(), [
           "IdPool",
-          "_init",
+          "_init", // TODO: private?
           "argFilter",
           "argList",
           "argSort",
@@ -19,7 +19,7 @@ define(["require", "exports", 'main'], function (require, exports, main) {
           "copyDnD",
           "delayedCall",
           "extendClass",
-          "fix_id",
+          "fix_id", // TODO: camel case?
           "flagId",
           "getter",
           "hasDnDType",
@@ -35,11 +35,11 @@ define(["require", "exports", 'main'], function (require, exports, main) {
           "offset",
           "onDOMNodeRemoved",
           "param",
-          "random_id",
+          "random_id", // TODO: camel case?
           "resolveIn",
           "search",
-          "server_json_suffix",
-          "server_url",
+          "server_json_suffix", // TODO: camel case?
+          "server_url", // TODO: camel case?
           "uniqueId",
           "uniqueString",
           "updateDropEffect",
@@ -47,13 +47,11 @@ define(["require", "exports", 'main'], function (require, exports, main) {
         ]);
       });
 
-      /* TODO: Add at least one test for main.IdPool
-      QUnit.module('IdPool', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.IdPool(), '???');
+      QUnit.module('IdPool', function() { // TODO: Should this be public?
+        QUnit.test('Object.keys', function(assert) {
+          assert.deepEqual(Object.keys(new main.IdPool()), ['counter', 'free']);
         });
-      })
-      */
+      });
 
       /* TODO: Add at least one test for main._init
       QUnit.module('_init', function() {
@@ -63,15 +61,22 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       })
       */
 
-      /* TODO: Add at least one test for main.argFilter
+      // TODO: Explain why these arg* methods are useful?
+
       QUnit.module('argFilter', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.argFilter(), '???');
+        QUnit.test('evens', function(assert) {
+          assert.deepEqual(
+              main.argFilter(
+                  [1,3,5, 2,4,6, 7,9,11],
+                  function(x) {return x % 2 == 0;}
+              ),
+              [3,4,5]
+          );
         });
-      })
-      */
+      });
 
       /* TODO: Add at least one test for main.argList
+         TODO: What implements IArguments? What is this used for?
       QUnit.module('argList', function() {
         QUnit.test('???', function(assert) {
           assert.equal(main.argList(), '???');
@@ -79,13 +84,25 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       })
       */
 
-      /* TODO: Add at least one test for main.argSort
       QUnit.module('argSort', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.argSort(), '???');
+        QUnit.test('by length', function(assert) {
+          assert.deepEqual(main.argSort(
+              ['lizard', 'marsupial', 'cat', 'dolphin'],
+              function(a,b) {
+                var a_b = a.length;
+                var b_b = b.length;
+                if (a_b < b_b) {
+                  return -1;
+                }
+                if (a_b > b_b) {
+                  return 1;
+                }
+                return 0;
+              }
+          ),
+          [2,0,3,1]);
         });
-      })
-      */
+      });
 
       /* TODO: Add at least one test for main.bind
       QUnit.module('bind', function() {
@@ -95,13 +112,32 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       })
       */
 
-      /* TODO: Add at least one test for main.bounds
       QUnit.module('bounds', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.bounds(), '???');
+        /* TODO: This seems odd. For instance, there is already
+           an x and y provided by the DOM, but we give a different
+           meaning to these.  */
+        QUnit.test('body', function(assert) {
+          var bounds = main.bounds(document.getElementsByTagName('body')[0]);
+          assert.ok(bounds.x > 0);
+          assert.ok(bounds.y > 0);
+          assert.ok(bounds.w > 0);
+          assert.ok(bounds.h > 0);
         });
-      })
-      */
+        QUnit.test('false', function(assert) {
+          var bounds = main.bounds(false);
+          assert.ok(bounds.x == 0);
+          assert.ok(bounds.y == 0);
+          assert.ok(bounds.w == 0);
+          assert.ok(bounds.h == 0);
+        });
+        QUnit.test('not DOM', function(assert) {
+          var bounds = main.bounds(false);
+          assert.ok(bounds.x == 0);
+          assert.ok(bounds.y == 0);
+          assert.ok(bounds.w == 0);
+          assert.ok(bounds.h == 0);
+        });
+      });
 
       /* TODO: Add at least one test for main.callable
       QUnit.module('callable', function() {
