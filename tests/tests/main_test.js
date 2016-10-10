@@ -316,13 +316,20 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       })
       */
 
-      /* TODO: Add at least one test for main.search
       QUnit.module('search', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.search(), '???');
+        QUnit.test('no match', function(assert) {
+          assert.equal(main.search(
+              [1,2,3],
+              function(x) {return x > 10}),
+            undefined);
         });
-      })
-      */
+        QUnit.test('multi match', function(assert) {
+          assert.equal(main.search(
+              [10,20,30],
+              function(x) {return x > 10}),
+            20);
+        });
+      });
 
       /* TODO: Add at least one test for main.server_json_suffix
       QUnit.module('server_json_suffix', function() {
@@ -340,21 +347,23 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       })
       */
 
-      /* TODO: Add at least one test for main.uniqueId
       QUnit.module('uniqueId', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.uniqueId(), '???');
+        // This depends on run order and is fragile.
+        QUnit.test('first', function(assert) {
+          assert.equal(main.uniqueId(), '0');
         });
-      })
-      */
+        QUnit.test('second', function(assert) {
+          assert.equal(main.uniqueId(), '1');
+        });
+      });
 
       QUnit.module('uniqueString', function() {
         // This depends on run order and is fragile.
-        QUnit.test('default0', function(assert) {
-          assert.equal(main.uniqueString(), "_default0");
+        QUnit.test('first', function(assert) {
+          assert.equal(main.uniqueString(), "_default2");
         });
-        QUnit.test('default1', function(assert) {
-          assert.equal(main.uniqueString(), "_default1");
+        QUnit.test('second', function(assert) {
+          assert.equal(main.uniqueString(), "_default3");
         });
         // TODO: Should this work? How do I define a domain?
         // QUnit.test('other', function(assert) {
