@@ -11,30 +11,25 @@ define(["require", "exports", 'matrix'], function (require, exports, matrix) {
         ]);
       });
 
-      /* TODO: Add at least one test for matrix.IDTYPE_CELL
+      // TODO: Not sure that these are actually a good thing.
+
       QUnit.module('IDTYPE_CELL', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(matrix.IDTYPE_CELL(), '???');
+        QUnit.test('value', function(assert) {
+          assert.equal(matrix.IDTYPE_CELL, 2);
         });
-      })
-      */
+      });
 
-      /* TODO: Add at least one test for matrix.IDTYPE_COLUMN
       QUnit.module('IDTYPE_COLUMN', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(matrix.IDTYPE_COLUMN(), '???');
+        QUnit.test('value', function(assert) {
+          assert.equal(matrix.IDTYPE_COLUMN, 1);
         });
-      })
-      */
+      });
 
-      /* TODO: Add at least one test for matrix.IDTYPE_ROW
       QUnit.module('IDTYPE_ROW', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(matrix.IDTYPE_ROW(), '???');
+        QUnit.test('value', function(assert) {
+          assert.equal(matrix.IDTYPE_ROW, 0);
         });
-      })
-      */
-
+      });
 
     });
 

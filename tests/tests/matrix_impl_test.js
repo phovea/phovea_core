@@ -11,21 +11,28 @@ define(["require", "exports", 'matrix_impl'], function (require, exports, matrix
         ]);
       });
 
-      /* TODO: Add at least one test for matrix_impl.Matrix
       QUnit.module('Matrix', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(matrix_impl.Matrix(), '???');
+        QUnit.test('constructor', function(assert) {
+          assert.throws( // TODO
+            function() {
+              new matrix_impl.Matrix();
+            },
+            TypeError
+          );
         });
-      })
-      */
+      });
 
-      /* TODO: Add at least one test for matrix_impl.MatrixBase
-      QUnit.module('MatrixBase', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(matrix_impl.MatrixBase(), '???');
-        });
-      })
-      */
+      // TODO: Even the error test is not working for me.
+      // QUnit.module('MatrixBase', function() {
+      //   QUnit.test('constructor', function(assert) {
+      //     assert.throws( // TODO
+      //       function() {
+      //         new matrix_impl.MatrixBase();
+      //       },
+      //       undefined
+      //     );
+      //   });
+      // });
 
       /* TODO: Add at least one test for matrix_impl.create
       QUnit.module('create', function() {
