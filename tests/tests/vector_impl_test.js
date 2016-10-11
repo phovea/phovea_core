@@ -22,7 +22,7 @@ define(["require", "exports", 'vector_impl'], function (require, exports, vector
       */
 
       QUnit.module('Vector', function() {
-        QUnit.test('constructor', function(assert) {
+        QUnit.test('TODO: error', function(assert) {
           assert.throws( // TODO
             function () {
               new vector_impl.Vector();
@@ -44,25 +44,30 @@ define(["require", "exports", 'vector_impl'], function (require, exports, vector
             "singleSelectionListener"
           ]);
         });
+        // TODO: Test behavior
       });
 
-      /* TODO: Add at least one test for vector_impl.create
       QUnit.module('create', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(vector_impl.create(), '???');
+        QUnit.test('TODO: error', function(assert) {
+          assert.throws( // TODO
+            function () {
+              vector_impl.create();
+            },
+            TypeError
+          );
         });
-      })
-      */
+      });
 
-      /* TODO: Add at least one test for vector_impl.wrap
       QUnit.module('wrap', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(vector_impl.wrap(), '???');
+        QUnit.test('TODO: error', function(assert) {
+          assert.throws( // TODO
+            function () {
+              vector_impl.wrap();
+            },
+            TypeError
+          );
         });
       })
-      */
-
-
 
     });
 
