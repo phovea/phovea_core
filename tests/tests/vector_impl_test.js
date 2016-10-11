@@ -21,21 +21,30 @@ define(["require", "exports", 'vector_impl'], function (require, exports, vector
       })
       */
 
-      /* TODO: Add at least one test for vector_impl.Vector
       QUnit.module('Vector', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(vector_impl.Vector(), '???');
+        QUnit.test('constructor', function(assert) {
+          assert.throws( // TODO
+            function () {
+              new vector_impl.Vector();
+            },
+            TypeError
+          );
         });
-      })
-      */
+      });
 
-      /* TODO: Add at least one test for vector_impl.VectorBase
       QUnit.module('VectorBase', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(vector_impl.VectorBase(), '???');
+        QUnit.test('Object.keys', function(assert) {
+          assert.deepEqual(Object.keys(new vector_impl.VectorBase()).sort(), [
+            "_root", // TODO: private?
+            "accumulateEvents",
+            "handlers",
+            "numSelectListeners",
+            "selectionCache",
+            "selectionListeners",
+            "singleSelectionListener"
+          ]);
         });
-      })
-      */
+      });
 
       /* TODO: Add at least one test for vector_impl.create
       QUnit.module('create', function() {
