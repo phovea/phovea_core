@@ -34,6 +34,7 @@ define(["require", "exports", 'math'], function (require, exports, math) {
             assert.deepEqual(clean, expected);
             // You can't in general expect equality to work on floats,
             // but the examples are simple enough that it works.
+            // TODO: Kurtosis and a couple others are in there, but don't count as ownProperties?
           });
         }
         assert_stats([1],
@@ -83,28 +84,28 @@ define(["require", "exports", 'math'], function (require, exports, math) {
       /* TODO: Add at least one test for math.hist
       QUnit.module('hist', function() {
         QUnit.test('???', function(assert) {
+          // Signature: (arr: IIterable<number>, indices: ranges.Range1D, size: number, bins: number, range: number[])
           assert.equal(math.hist(), '???');
         });
-      })
-      */
+      });
 
       /* TODO: Add at least one test for math.rangeHist
       QUnit.module('rangeHist', function() {
         QUnit.test('???', function(assert) {
+          // Signature: (range: ranges.CompositeRange1D)
           assert.equal(math.rangeHist(), '???');
         });
       })
       */
 
-      /* TODO: Add at least one test for math.wrapHist
+      /*
       QUnit.module('wrapHist', function() {
         QUnit.test('???', function(assert) {
-          assert.equal(math.wrapHist(), '???');
+          // TODO: ({arr:[], it:{from:0, to:0, step:1, act:0}}) is not a function
+          assert.equal(math.wrapHist([1], [1]), '???');
         });
-      })
+      });
       */
-
-
 
     });
 
