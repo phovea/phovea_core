@@ -21,13 +21,64 @@ define(["require", "exports", 'math'], function (require, exports, math) {
       })
       */
 
-      /* TODO: Add at least one test for math.computeStats
       QUnit.module('computeStats', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(math.computeStats(), '???');
-        });
-      })
-      */
+        function assert_stats(input, expected) {
+          QUnit.test(input, function(assert) {
+            var stats = math.computeStats(input);
+            var clean = {};
+            for (prop in stats) {
+              if (stats.hasOwnProperty(prop)) {
+                clean[prop] = stats[prop];
+              }
+            }
+            assert.deepEqual(clean, expected);
+            // You can't in general expect equality to work on floats,
+            // but the examples are simple enough that it works.
+          });
+        }
+        assert_stats([1],
+          {
+            "_var": 0,
+            "max": 1,
+            "mean": 1,
+            "min": 1,
+            "moment2": 0,
+            "moment3": 0,
+            "moment4": 0,
+            "n": 1,
+            "nans": 0,
+            "sum": 1
+          }
+        );
+        assert_stats([1,1],
+          {
+            "_var": 0,
+            "max": 1,
+            "mean": 1,
+            "min": 1,
+            "moment2": 0,
+            "moment3": 0,
+            "moment4": 0,
+            "n": 2,
+            "nans": 0,
+            "sum": 2
+          }
+        );
+        assert_stats([-1,1],
+          {
+            "_var": 2,
+            "max": 1,
+            "mean": 0,
+            "min": -1,
+            "moment2": 2,
+            "moment3": 0,
+            "moment4": 2,
+            "n": 2,
+            "nans": 0,
+            "sum": 0
+          }
+        );
+      });
 
       /* TODO: Add at least one test for math.hist
       QUnit.module('hist', function() {
