@@ -544,6 +544,7 @@ class PropertyHandler {
   }
 
   protected parse(code: string = '') {
+    //if available use https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
     this.map = {};
     if (code.length <= 1) { //just the starting character ? or #
       return;
