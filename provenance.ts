@@ -968,7 +968,7 @@ export class LocalStorageProvenanceGraphManager implements IProvenanceGraphManag
 
   private createDesc() {
     var lists = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
-    const id = this.options.prefix + (lists.length > 0 ? String(1 + d3.max(lists.map((d) => parseInt(d.slice(this.options.prefix.length), 10)))) : '0');
+    const id = this.options.prefix + (lists.length > 0 ? String(1 + Math.max(...lists.map((d) => parseInt(d.slice(this.options.prefix.length), 10)))) : '0');
     const desc = {
       type: 'provenance_graph',
       name: 'Local Workspace#' + id,

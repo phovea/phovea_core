@@ -155,7 +155,7 @@ export function tree(query ?: any): Promise<INode> {
  * @param query
  * @returns {any}
  */
-export function getFirst(query: any | string | RegExp) {
+export function getFirst(query: any | string | RegExp) : Promise<datatypes.IDataType> {
   if (typeof query === 'string' || query instanceof RegExp) {
     return getFirstByName(<string>query);
   }
@@ -164,7 +164,7 @@ export function getFirst(query: any | string | RegExp) {
     if (result.length === 0) {
       return Promise.reject({error : 'nothing found, matching', args: query});
     }
-    return result[0];
+    return Promise.resolve(result[0]);
   });
 }
 
