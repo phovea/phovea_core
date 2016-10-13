@@ -6,7 +6,6 @@
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
-/// <reference path="typings/globals/es6-shim/index.d.ts"/>
 
 declare var require: any;
 
