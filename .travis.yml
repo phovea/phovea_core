@@ -9,8 +9,11 @@ rvm:
 install:
 - bundle install
 - npm install
-# TODO: Build the same way web_bundle builds?
 - npm run compile
+
+- node --version
+- npm --version
+- tsc --version
 
 before_script:
 - 'export DISPLAY=:99.0'
