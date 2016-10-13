@@ -8,11 +8,9 @@ rvm:
 
 install:
 - bundle install
-- 'npm install -g typescript@1.8.0'
-- 'npm install -g typings@1.4.0'
-- typings install
+- npm install
 # TODO: Build the same way web_bundle builds?
-- ( cd tests/tests; ls *.js | perl -pne 's/_test.js/.ts/' ) | xargs tsc --target ES5 --module amd
+- npm run compile
 
 before_script:
 - 'export DISPLAY=:99.0'

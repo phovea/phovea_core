@@ -8,4 +8,5 @@
 *.css
 *.js
 typings/
+node_modules
 !tests/**/*
