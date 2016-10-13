@@ -1,0 +1,15 @@
+define(["require", "exports", 'provenance'], function (require, exports, provenance) {
+  exports.test = function(){
+
+    QUnit.module('provenance', function() {
+
+      QUnit.test('Object.keys', function(assert) {
+        assert.deepEqual(Object.keys(provenance).sort(), [
+          // TODO: tsc fails currently
+        ]);
+      });
+
+    });
+
+  }
+});

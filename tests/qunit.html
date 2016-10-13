@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Test</title>
+  <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.0.1.css">
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <script src="https://code.jquery.com/qunit/qunit-2.0.1.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.2/require.min.js"></script>
+  <script>
+      require.config({
+        baseUrl: '../src/'
+      });
+      // Not proper query parsing, but good enough.
+      var tests = location.search.substring(1).split('&')
+              .filter(function(kv){return kv.match(/^test=/)})
+              .map(function(kv){return kv.replace('test=', '../tests/tests/')});
+      require(tests, function(){
+        for (test_module of arguments) {
+          test_module.test();
+        }
+      });
+  </script>
+</body>
+</html>

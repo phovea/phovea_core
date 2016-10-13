@@ -1,4 +1,4 @@
-
+.idea/
 *.log
 *.pot
 *.pyc
@@ -7,3 +7,6 @@
 *.map
 *.css
 *.js
+typings/
+node_modules
+!tests/**/*

@@ -135,7 +135,7 @@ export class StratificationGroup extends idtypes.SelectAble implements IStratifi
     });
   }
 
-  idView(idRange:ranges.Range = ranges.all()):Promise<IStratification> {
+  idView(idRange:ranges.Range = ranges.all()):Promise<any> {
     return Promise.reject('not implemented');
   }
 

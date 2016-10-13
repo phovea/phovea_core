@@ -6,7 +6,6 @@
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
-/// <reference path="../../tsd.d.ts" />
 import plugin = require('./plugin');
 import C = require('./main');
 
