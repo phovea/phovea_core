@@ -170,3 +170,6 @@ export function getAPIData(url: string, data : any = {}, expectedDataType = 'jso
   }
   return getData(api2absURL(url), data, expectedDataType);
 }
+
+
+//maybe use of the https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch api

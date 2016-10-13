@@ -4,12 +4,12 @@
 /**
  * Created by Samuel Gratzl on 22.10.2014.
  */
-import C = require('../caleydo_core/main');
-import ajax = require('../caleydo_core/ajax');
-import idtypes = require('../caleydo_core/idtype');
-import datatypes = require('../caleydo_core/datatype');
-import ranges = require('../caleydo_core/range');
-import events = require('../caleydo_core/event');
+import C = require('./main');
+import ajax = require('./ajax');
+import idtypes = require('./idtype');
+import datatypes = require('./datatype');
+import ranges = require('./range');
+import events = require('./event');
 
 export class AttributeContainer extends events.EventHandler implements C.IPersistable {
   private _attrs : { [key: string] : any } = {};

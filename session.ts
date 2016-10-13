@@ -8,10 +8,10 @@
  */
 
 /**
- * Use a local variable as context.
+ * Use the browser's sessionStorage
  * @type {Storage}
  */
-const context : any = {};
+const context:Storage = sessionStorage;
 
 /**
  * Store any value for a given key and returns the previous stored value.
@@ -21,8 +21,8 @@ const context : any = {};
  * @returns {any}
  */
 export function store(key: string, value: any) {
-  var bak = context[key];
-  context[key] = value;
+  var bak = context.getItem(key);
+  context.setItem(key, JSON.stringify(value));
   return bak;
 }
 
@@ -31,7 +31,7 @@ export function store(key: string, value: any) {
  * @param key
  */
 export function remove(key: string) {
-  delete context[key];
+  context.removeItem(key);
 }
 
 /**
@@ -40,7 +40,7 @@ export function remove(key: string) {
  * @returns {boolean}
  */
 export function has(key: string) {
-  return key in context;
+  return (context.getItem(key) !== null);
 }
 
 /**
@@ -51,5 +51,5 @@ export function has(key: string) {
  * @returns {T}
  */
 export function retrieve<T>(key: string, default_ : T = null) : T {
-  return has(key) ? context[key] : default_;
+  return has(key) ? JSON.parse(context.getItem(key)) : default_;
 }
