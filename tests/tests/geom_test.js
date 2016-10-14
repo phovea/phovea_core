@@ -43,6 +43,25 @@ define(["require", "exports", 'geom'], function (require, exports, geom) {
 
       QUnit.module('Circle', function() {
         var circle = new geom.Circle(1,1,1);
+        QUnit.test('properties', function(assert) {
+          assert.deepEqual(properties(circle), [
+            "aabb",
+            "asIntersectionParams",
+            "bs",
+            "center",
+            "constructor",
+            "corner",
+            "intersects",
+            "radius",
+            "shift",
+            "shiftImpl",
+            "toString",
+            "transform",
+            "x",
+            "xy",
+            "y"
+          ]);
+        });
         QUnit.test('aabb', function(assert) {
           var aabb = circle.aabb();
           assert.equal(aabb.x, 0);
@@ -124,37 +143,123 @@ define(["require", "exports", 'geom'], function (require, exports, geom) {
         });
       });
 
-      /* TODO: Add at least one test for geom.Ellipse
       QUnit.module('Ellipse', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(geom.Ellipse(), '???');
+        var ellipse = new geom.Ellipse(1, 1, 1, 2);
+        QUnit.test('properties', function (assert) {
+          assert.deepEqual(properties(ellipse), [
+            "aabb",
+            "asIntersectionParams",
+            "bs",
+            "center",
+            "constructor",
+            "corner",
+            "intersects",
+            "radiusX",
+            "radiusY",
+            "shift",
+            "shiftImpl",
+            "toString",
+            "transform",
+            "x",
+            "xy",
+            "y"
+          ]);
         });
-      })
-      */
 
-      /* TODO: Add at least one test for geom.Line
+        // TODO
+      });
+
       QUnit.module('Line', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(geom.Line(), '???');
+        var line = new geom.Line(0, 0, 1, 1);
+        QUnit.test('properties', function (assert) {
+          assert.deepEqual(properties(line), [
+            "aabb",
+            "asIntersectionParams",
+            "bs",
+            "center",
+            "constructor",
+            "corner",
+            "intersects",
+            "shift",
+            "shiftImpl",
+            "toString",
+            "transform",
+            "x1",
+            "x1y1",
+            "x2",
+            "x2y2",
+            "xy",
+            "y1",
+            "y2"
+          ]);
         });
-      })
-      */
 
-      /* TODO: Add at least one test for geom.Polygon
-      QUnit.module('Polygon', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(geom.Polygon(), '???');
-        });
-      })
-      */
+        // TODO
+      });
 
-      /* TODO: Add at least one test for geom.Rect
-      QUnit.module('Rect', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(geom.Rect(), '???');
+     QUnit.module('Polygon', function() {
+        var polygon = new geom.Polygon([]);
+        QUnit.test('properties', function (assert) {
+          assert.deepEqual(properties(polygon), [
+            "aabb",
+            "area",
+            "asIntersectionParams",
+            "bs",
+            "center",
+            "centroid",
+            "constructor",
+            "corner",
+            "intersects",
+            "isClockwise",
+            "isConcave",
+            "isConvex",
+            "isCounterClockwise",
+            "length",
+            "pointInPolygon",
+            "points",
+            "push",
+            "shift",
+            "shiftImpl",
+            "toString",
+            "transform"
+          ]);
         });
-      })
-      */
+
+        // TODO
+      });
+
+     QUnit.module('Rect', function() {
+        var rect = new geom.Rect(1,1,1,2);
+        QUnit.test('properties', function (assert) {
+          assert.deepEqual(properties(rect), [
+            "aabb",
+            "asIntersectionParams",
+            "bs",
+            "center",
+            "constructor",
+            "corner",
+            "cx",
+            "cy",
+            "eq",
+            "h",
+            "intersects",
+            "shift",
+            "shiftImpl",
+            "size",
+            "toString",
+            "transform",
+            "w",
+            "x",
+            "x2",
+            "x2y2",
+            "xy",
+            "y",
+            "y2"
+          ]);
+        });
+
+        // TODO
+      });
 
       /* TODO: Add at least one test for geom.circle
       QUnit.module('circle', function() {
