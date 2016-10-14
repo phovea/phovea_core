@@ -10,14 +10,6 @@ define(["require", "exports", 'behavior'], function (require, exports, behavior)
         ]);
       });
 
-      function properties(object) {
-        var props = [];
-        for (p in object) {
-          props.push(p);
-        }
-        return props.sort();
-      }
-
       QUnit.module('ZoomBehavior', function() {
         QUnit.test('properties', function(assert) {
           document.getElementById('qunit-fixture').innerHTML = '<div id="fake">foo bar</div>';
