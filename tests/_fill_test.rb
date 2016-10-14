@@ -10,7 +10,7 @@ puts <<END
         QUnit.test('???', function(assert) {
           assert.equal(#{test}.#{prop}(), '???');
         });
-      })
+      });
       */
 
 END
