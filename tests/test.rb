@@ -5,7 +5,8 @@ driver = Selenium::WebDriver.for(:remote,
     desired_capabilities: {
       platform: "OS X 10.9",
       browserName: "firefox",
-      version: "47.0"
+      version: "47.0",
+      tunnel-identifier: ENV['TRAVIS_JOB_NUMBER']
     })
 
 url = ARGV[0]
