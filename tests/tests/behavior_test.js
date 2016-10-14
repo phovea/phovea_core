@@ -10,21 +10,71 @@ define(["require", "exports", 'behavior'], function (require, exports, behavior)
         ]);
       });
 
-      /* TODO: Add at least one test for behavior.ZoomBehavior
-      QUnit.module('ZoomBehavior', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(behavior.ZoomBehavior(), '???');
-        });
-      })
-      */
+      function properties(object) {
+        var props = [];
+        for (p in object) {
+          props.push(p);
+        }
+        return props.sort();
+      }
 
-      /* TODO: Add at least one test for behavior.ZoomLogic
-      QUnit.module('ZoomLogic', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(behavior.ZoomLogic(), '???');
+      QUnit.module('ZoomBehavior', function() {
+        QUnit.test('properties', function(assert) {
+          document.getElementById('qunit-fixture').innerHTML = '<div id="fake">foo bar</div>';
+          var node = document.getElementById('fake');
+          var v, meta;
+          var zb = new behavior.ZoomBehavior(node, v, meta);
+          assert.deepEqual(properties(zb), [
+            "constructor",
+            "fire",
+            "fireEvent",
+            "handlers",
+            "isFixedAspectRatio",
+            "isHeightFixed",
+            "isWidthFixed",
+            "list",
+            "meta",
+            "node",
+            "off",
+            "on",
+            "propagate",
+            "v",
+            "zoom",
+            "zoomIn",
+            "zoomOut",
+            "zoomSet",
+            "zoomTo"
+          ]);
         });
-      })
-      */
+
+      });
+
+      QUnit.module('ZoomLogic', function() {
+        QUnit.test('properties', function(assert) {
+          var v, meta;
+          var zl = new behavior.ZoomLogic(v, meta);
+          assert.deepEqual(properties(zl), [
+            "constructor",
+            "fire",
+            "fireEvent",
+            "handlers",
+            "isFixedAspectRatio",
+            "isHeightFixed",
+            "isWidthFixed",
+            "list",
+            "meta",
+            "off",
+            "on",
+            "propagate",
+            "v",
+            "zoom",
+            "zoomIn",
+            "zoomOut",
+            "zoomSet",
+            "zoomTo"
+          ]);
+        });
+      });
 
     });
 
