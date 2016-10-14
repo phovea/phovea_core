@@ -1,7 +1,12 @@
 require 'selenium-webdriver'
 
-driver = Selenium::WebDriver.for(:firefox)
-puts driver.capabilities.as_json
+driver = Selenium::WebDriver.for(:remote,
+    url: "https://#{ENV['SAUCE_USERNAME']}:#{ENV['SAUCE_ACCESS_KEY']}@ondemand.saucelabs.com:443/wd/hub",
+    desired_capabilities: {
+      platform: "OS X 10.9",
+      browserName: "firefox",
+      version: "47.0"
+    })
 
 url = ARGV[0]
 puts "Navigating to #{url}"
