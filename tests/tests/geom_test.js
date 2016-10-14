@@ -166,7 +166,133 @@ define(["require", "exports", 'geom'], function (require, exports, geom) {
           ]);
         });
 
-        // TODO
+        /* TODO: Add at least one test for ellipse.aabb
+        QUnit.module('aabb', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(ellipse.aabb(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for ellipse.asIntersectionParams
+        QUnit.module('asIntersectionParams', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(ellipse.asIntersectionParams(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for ellipse.bs
+        QUnit.module('bs', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(ellipse.bs(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for ellipse.center
+        QUnit.module('center', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(ellipse.center(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for ellipse.constructor
+        QUnit.module('constructor', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(ellipse.constructor(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for ellipse.corner
+        QUnit.module('corner', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(ellipse.corner(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for ellipse.intersects
+        QUnit.module('intersects', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(ellipse.intersects(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for ellipse.radiusX
+        QUnit.module('radiusX', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(ellipse.radiusX(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for ellipse.radiusY
+        QUnit.module('radiusY', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(ellipse.radiusY(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for ellipse.shift
+        QUnit.module('shift', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(ellipse.shift(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for ellipse.shiftImpl
+        QUnit.module('shiftImpl', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(ellipse.shiftImpl(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for ellipse.toString
+        QUnit.module('toString', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(ellipse.toString(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for ellipse.transform
+        QUnit.module('transform', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(ellipse.transform(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for ellipse.x
+        QUnit.module('x', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(ellipse.x(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for ellipse.xy
+        QUnit.module('xy', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(ellipse.xy(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for ellipse.y
+        QUnit.module('y', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(ellipse.y(), '???');
+          });
+        });
+        */
       });
 
       QUnit.module('Line', function() {
@@ -194,7 +320,150 @@ define(["require", "exports", 'geom'], function (require, exports, geom) {
           ]);
         });
 
-        // TODO
+        /* TODO: Add at least one test for line.aabb
+        QUnit.module('aabb', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.aabb(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.asIntersectionParams
+        QUnit.module('asIntersectionParams', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.asIntersectionParams(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.bs
+        QUnit.module('bs', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.bs(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.center
+        QUnit.module('center', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.center(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.constructor
+        QUnit.module('constructor', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.constructor(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.corner
+        QUnit.module('corner', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.corner(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.intersects
+        QUnit.module('intersects', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.intersects(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.shift
+        QUnit.module('shift', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.shift(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.shiftImpl
+        QUnit.module('shiftImpl', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.shiftImpl(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.toString
+        QUnit.module('toString', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.toString(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.transform
+        QUnit.module('transform', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.transform(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.x1
+        QUnit.module('x1', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.x1(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.x1y1
+        QUnit.module('x1y1', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.x1y1(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.x2
+        QUnit.module('x2', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.x2(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.x2y2
+        QUnit.module('x2y2', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.x2y2(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.xy
+        QUnit.module('xy', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.xy(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.y1
+        QUnit.module('y1', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.y1(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.y2
+        QUnit.module('y2', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.y2(), '???');
+          });
+        });
+        */
+
       });
 
      QUnit.module('Polygon', function() {
@@ -225,7 +494,174 @@ define(["require", "exports", 'geom'], function (require, exports, geom) {
           ]);
         });
 
-        // TODO
+        /* TODO: Add at least one test for polygon.aabb
+        QUnit.module('aabb', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.aabb(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.area
+        QUnit.module('area', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.area(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.asIntersectionParams
+        QUnit.module('asIntersectionParams', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.asIntersectionParams(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.bs
+        QUnit.module('bs', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.bs(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.center
+        QUnit.module('center', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.center(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.centroid
+        QUnit.module('centroid', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.centroid(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.constructor
+        QUnit.module('constructor', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.constructor(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.corner
+        QUnit.module('corner', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.corner(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.intersects
+        QUnit.module('intersects', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.intersects(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.isClockwise
+        QUnit.module('isClockwise', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.isClockwise(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.isConcave
+        QUnit.module('isConcave', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.isConcave(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.isConvex
+        QUnit.module('isConvex', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.isConvex(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.isCounterClockwise
+        QUnit.module('isCounterClockwise', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.isCounterClockwise(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.length
+        QUnit.module('length', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.length(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.pointInPolygon
+        QUnit.module('pointInPolygon', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.pointInPolygon(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.points
+        QUnit.module('points', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.points(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.push
+        QUnit.module('push', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.push(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.shift
+        QUnit.module('shift', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.shift(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.shiftImpl
+        QUnit.module('shiftImpl', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.shiftImpl(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.toString
+        QUnit.module('toString', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.toString(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for polygon.transform
+        QUnit.module('transform', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(polygon.transform(), '???');
+          });
+        });
+        */
+
       });
 
      QUnit.module('Rect', function() {
@@ -258,10 +694,192 @@ define(["require", "exports", 'geom'], function (require, exports, geom) {
           ]);
         });
 
-        // TODO
+        /* TODO: Add at least one test for line.aabb
+        QUnit.module('aabb', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.aabb(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.asIntersectionParams
+        QUnit.module('asIntersectionParams', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.asIntersectionParams(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.bs
+        QUnit.module('bs', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.bs(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.center
+        QUnit.module('center', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.center(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.constructor
+        QUnit.module('constructor', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.constructor(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.corner
+        QUnit.module('corner', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.corner(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.cx
+        QUnit.module('cx', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.cx(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.cy
+        QUnit.module('cy', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.cy(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.eq
+        QUnit.module('eq', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.eq(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.h
+        QUnit.module('h', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.h(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.intersects
+        QUnit.module('intersects', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.intersects(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.shift
+        QUnit.module('shift', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.shift(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.shiftImpl
+        QUnit.module('shiftImpl', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.shiftImpl(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.size
+        QUnit.module('size', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.size(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.toString
+        QUnit.module('toString', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.toString(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.transform
+        QUnit.module('transform', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.transform(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.w
+        QUnit.module('w', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.w(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.x
+        QUnit.module('x', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.x(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.x2
+        QUnit.module('x2', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.x2(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.x2y2
+        QUnit.module('x2y2', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.x2y2(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.xy
+        QUnit.module('xy', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.xy(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.y
+        QUnit.module('y', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.y(), '???');
+          });
+        });
+        */
+
+        /* TODO: Add at least one test for line.y2
+        QUnit.module('y2', function() {
+          QUnit.test('???', function(assert) {
+            assert.equal(line.y2(), '???');
+          });
+        });
+        */
       });
 
-      /* TODO: Add at least one test for geom.circle
+      /* TODO: Add at least one test for geom.circle (but maybe the constructor is enough?)
       QUnit.module('circle', function() {
         QUnit.test('???', function(assert) {
           assert.equal(geom.circle(), '???');
@@ -269,7 +887,7 @@ define(["require", "exports", 'geom'], function (require, exports, geom) {
       })
       */
 
-      /* TODO: Add at least one test for geom.ellipse
+      /* TODO: Add at least one test for geom.ellipse (but maybe the constructor is enough?)
       QUnit.module('ellipse', function() {
         QUnit.test('???', function(assert) {
           assert.equal(geom.ellipse(), '???');
@@ -277,7 +895,7 @@ define(["require", "exports", 'geom'], function (require, exports, geom) {
       })
       */
 
-      /* TODO: Add at least one test for geom.line
+      /* TODO: Add at least one test for geom.line (but maybe the constructor is enough?)
       QUnit.module('line', function() {
         QUnit.test('???', function(assert) {
           assert.equal(geom.line(), '???');
@@ -285,7 +903,7 @@ define(["require", "exports", 'geom'], function (require, exports, geom) {
       })
       */
 
-      /* TODO: Add at least one test for geom.polygon
+      /* TODO: Add at least one test for geom.polygon (but maybe the constructor is enough?)
       QUnit.module('polygon', function() {
         QUnit.test('???', function(assert) {
           assert.equal(geom.polygon(), '???');
@@ -293,7 +911,7 @@ define(["require", "exports", 'geom'], function (require, exports, geom) {
       })
       */
 
-      /* TODO: Add at least one test for geom.rect
+      /* TODO: Add at least one test for geom.rect (but maybe the constructor is enough?)
       QUnit.module('rect', function() {
         QUnit.test('???', function(assert) {
           assert.equal(geom.rect(), '???');
