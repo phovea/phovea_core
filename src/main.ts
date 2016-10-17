@@ -295,7 +295,7 @@ export function random_id(length = 8) {
  */
 export function fix_id(name: string) {
   var clean = name.replace(/[\s!#$%&'()*+,.\/:;<=>?@\[\\\]\^`{|}~_-]/g,' ');
-  var words = clean.split(/\s/);
+  var words = clean.trim().split(/\s+/); //remove heading and trailing spaces and combine multiple one during split
   return words.map((w, i) => (i === 0 ? w[0].toLowerCase() : w[0].toUpperCase()) + w.slice(1)).join('');
 }
 
