@@ -269,13 +269,17 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       })
       */
 
-      /* TODO: Add at least one test for main.isFunction
       QUnit.module('isFunction', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.isFunction(), '???');
+        QUnit.test('built-in', function(assert) {
+          assert.ok(main.isFunction(Math.sin));
         });
-      })
-      */
+        QUnit.test('in-line', function(assert) {
+          assert.ok(main.isFunction(function() {}));
+        });
+        QUnit.test('not a function', function(assert) {
+          assert.notOk(main.isFunction('not a function'));
+        });
+      });
 
       /* TODO: Add at least one test for main.isUndefined
       QUnit.module('isUndefined', function() {
