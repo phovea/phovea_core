@@ -54,13 +54,17 @@ define(["require", "exports", 'ajax'], function (require, exports, ajax) {
       });
 
       var xhr;
+      var requests =[];
       QUnit.module('stub to exercise Sinon until Phovea AJAX works', {
-        // before: function() {
-        //   xhr = sinon.useFakeXMLHttpRequest();
-        // },
-        // after: function() {
-        //   xhr.restore();
-        // }
+        before: function() {
+          xhr = sinon.useFakeXMLHttpRequest();
+          xhr.onCreate = function (xhr) {
+            requests.push(xhr);
+          }
+        },
+        after: function() {
+          xhr.restore();
+        }
       }, function() {
         QUnit.test('stub', function(assert) {
           var done = assert.async();
@@ -68,14 +72,20 @@ define(["require", "exports", 'ajax'], function (require, exports, ajax) {
           var httpRequest = new XMLHttpRequest();
           httpRequest.onreadystatechange = function() {
             console.log('readyState', this.readyState);
+            if (this.readyState > 1) {
+              // I don't really understand this part.
+              return;
+            }
+
+            requests[ 0 ].respond([ 200 , {}, 'body' ]);
             if (this.readyState === XMLHttpRequest.DONE) {
+
               console.log('status', this.status);
               assert.equal(this.status, 200);
               done();
             }
           };
           httpRequest.open('GET', 'http://www.example.org/some.file');
-          httpRequest.send(null);
         });
       });
 
