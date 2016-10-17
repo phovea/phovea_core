@@ -318,7 +318,7 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       });
 
       QUnit.module('offline', function() {
-        QUnit.test('???', function(assert) {
+        QUnit.test('offline', function(assert) {
           assert.equal(main.offline, false);
         });
       });
@@ -336,13 +336,21 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       //   });
       // });
 
-      /* TODO: Add at least one test for main.onDOMNodeRemoved
       QUnit.module('onDOMNodeRemoved', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.onDOMNodeRemoved(), '???');
+        QUnit.test('one node', function(assert) {
+          // TODO: with assert.async, the test just stalls?
+          //var done = assert.async();
+          document.getElementById('qunit-fixture').innerHTML = '<div id="stub"></div>';
+          var stub = document.getElementById('stub');
+          main.onDOMNodeRemoved(stub, function() {
+            assert.ok(true);
+            //done();
+          });
+          stub.remove();
+          assert.expect(0);
         });
-      })
-      */
+        // TODO: two node list.
+      });
 
       // TODO: Expose PropertyHandler for the sake of testing?
       // Running just against this url is fragile, and does not provide good coverage.
