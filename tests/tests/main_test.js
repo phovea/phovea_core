@@ -401,7 +401,7 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       QUnit.module('uniqueString', function() {
         // This depends on run order and is fragile.
         QUnit.test('first', function(assert) {
-          assert.equal(main.uniqueString(), "_default2");
+          assert.equal(main.uniqueString(), "_default0");
         });
         // TODO: This was failing on Travis:
         // QUnit.test('second', function(assert) {
