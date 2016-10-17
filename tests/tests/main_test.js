@@ -365,13 +365,14 @@ define(["require", "exports", 'main'], function (require, exports, main) {
         });
       });
 
-      /* TODO: Add at least one test for main.random_id
       QUnit.module('random_id', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.random_id(), '???');
+        QUnit.test('default', function(assert) {
+          assert.ok(main.random_id().match(/^[0-9a-z]{8}$/));
         });
-      })
-      */
+        QUnit.test('short', function(assert) {
+          assert.ok(main.random_id(1).match(/^[0-9a-z]$/));
+        });
+      });
 
       /* TODO: Add at least one test for main.resolveIn
       QUnit.module('resolveIn', function() {
