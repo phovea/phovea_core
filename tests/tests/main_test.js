@@ -261,13 +261,17 @@ define(["require", "exports", 'main'], function (require, exports, main) {
         assert_identity('string');
       });
 
-      /* TODO: Add at least one test for main.indexOf
       QUnit.module('indexOf', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.indexOf(), '???');
+        QUnit.test('not in there', function(assert) {
+          assert.equal(main.indexOf([1], function(x) {return x > 10}), -1);
         });
-      })
-      */
+        QUnit.test('one match', function(assert) {
+          assert.equal(main.indexOf([1,100], function(x) {return x > 10}), 1);
+        });
+        QUnit.test('two matches', function(assert) {
+          assert.equal(main.indexOf([20,100], function(x) {return x > 10}), 0);
+        });
+      });
 
       QUnit.module('isFunction', function() {
         QUnit.test('built-in', function(assert) {
