@@ -53,7 +53,34 @@ define(["require", "exports", 'ajax'], function (require, exports, ajax) {
         });
       });
 
+      var xhr;
+      QUnit.module('stub to exercise Sinon until Phovea AJAX works', {
+        // before: function() {
+        //   xhr = sinon.useFakeXMLHttpRequest();
+        // },
+        // after: function() {
+        //   xhr.restore();
+        // }
+      }, function() {
+        QUnit.test('stub', function(assert) {
+          var done = assert.async();
+
+          var httpRequest = new XMLHttpRequest();
+          httpRequest.onreadystatechange = function() {
+            console.log('readyState', this.readyState);
+            if (this.readyState === XMLHttpRequest.DONE) {
+              console.log('status', this.status);
+              assert.equal(this.status, 200);
+              done();
+            }
+          };
+          httpRequest.open('GET', 'http://www.example.org/some.file');
+          httpRequest.send(null);
+        });
+      });
+
       /* TODO: Add at least one test for ajax.getAPIData
+      // TODO: "C.registry is undefined"
       QUnit.module('getAPIData', function() {
         QUnit.test('???', function(assert) {
           assert.equal(ajax.getAPIData(), '???');
