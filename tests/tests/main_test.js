@@ -344,13 +344,26 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       })
       */
 
-      /* TODO: Add at least one test for main.param
+      // TODO: Expose PropertyHandler for the sake of testing?
+      // Running just against this url is fragile, and does not provide good coverage.
       QUnit.module('param', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.param(), '???');
+        QUnit.test('properties', function (assert) {
+          assert.deepEqual(properties(main.param), [
+            "forEach",
+            "getInt",
+            "getProp",
+            "is",
+            "keys",
+            "map",
+            "parse",
+            "removeProp",
+            "toString"
+          ]);
         });
-      })
-      */
+        QUnit.test('keys', function (assert) {
+          assert.deepEqual(main.param.keys(), ['test']);
+        });
+      });
 
       /* TODO: Add at least one test for main.random_id
       QUnit.module('random_id', function() {
