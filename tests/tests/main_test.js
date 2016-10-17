@@ -398,7 +398,7 @@ define(["require", "exports", 'main'], function (require, exports, main) {
             var present = Date.now();
             var actual = present - past;
             assert.ok(actual >= 200);
-            assert.ok(actual <= 300); // Could, conceivably, be even slower.
+            assert.ok(actual <= 1000); // Took travis 400ms; Round up to be safe.
             done();
           })
 
