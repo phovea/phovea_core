@@ -374,13 +374,20 @@ define(["require", "exports", 'main'], function (require, exports, main) {
         });
       });
 
-      /* TODO: Add at least one test for main.resolveIn
       QUnit.module('resolveIn', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.resolveIn(), '???');
+        QUnit.test('200ms', function(assert) {
+          var done = assert.async();
+          var past = Date.now();
+          main.resolveIn(200).then(function() {
+            var present = Date.now();
+            var actual = present - past;
+            assert.ok(actual >= 200);
+            assert.ok(actual <= 300); // Could, conceivably, be even slower.
+            done();
+          })
+
         });
-      })
-      */
+      });
 
       QUnit.module('search', function() {
         QUnit.test('no match', function(assert) {
