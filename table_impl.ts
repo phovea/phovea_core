@@ -53,7 +53,7 @@ export class TableBase extends idtypes.SelectAble {
   }
 
   reduce(f : (row : any[]) => any, this_f? : any, valuetype? : any, idtype? : idtypes.IDType) : vector.IVector {
-    return new MultITableVector(<def.ITable>(<any>this), f, this_f, valuetype, idtype);
+    return new MultiTableVector(<def.ITable>(<any>this), f, this_f, valuetype, idtype);
   }
 
   restore(persisted: any) : C.IPersistable {
@@ -424,7 +424,8 @@ export class TableVector extends vector_impl.VectorBase implements vector.IVecto
     super(null);
     this._root = this;
     this.valuetype = (<any>desc).value;
-    this.desc.fqname=table.desc.fqname+'/'+this.desc.name;
+    this.desc.fqname = table.desc.fqname + '/' + this.desc.name;
+    this.desc.id = table.desc.id + '_' + C.fix_id(this.desc.name);
     this.desc.type = 'vector';
   }
 
@@ -504,7 +505,7 @@ export class TableVector extends vector_impl.VectorBase implements vector.IVecto
 /**
  * a simple projection of a matrix columns to a vector
  */
-class MultITableVector extends vector_impl.VectorBase implements vector.IVector {
+class MultiTableVector extends vector_impl.VectorBase implements vector.IVector {
   desc : datatypes.IDataDescription;
 
   constructor(private table : def.ITable, private f : (row : any[]) => any, private this_f = table, public valuetype = null, private _idtype = table.rowtype) {
