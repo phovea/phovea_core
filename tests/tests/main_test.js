@@ -209,21 +209,29 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       })
       */
 
-      /* TODO: Add at least one test for main.flagId
+      // TODO: How is this used? And what's the desired behavior?
       QUnit.module('flagId', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.flagId(), '???');
+        QUnit.test('NaN', function(assert) {
+          assert.equal(main.flagId(), null);
         });
-      })
-      */
+        QUnit.test('domain', function(assert) {
+          assert.equal(main.flagId('fake-domain'), null);
+        });
+        QUnit.test('domain + ID', function(assert) {
+          assert.equal(main.flagId('fake-domain', 42), 42);
+        });
+      });
 
-      /* TODO: Add at least one test for main.getter
       QUnit.module('getter', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(main.getter(), '???');
+        QUnit.test('one arg', function(assert) {
+          getter = main.getter('a');
+          assert.equal(getter({a: 42}), 42);
         });
-      })
-      */
+        QUnit.test('two args', function(assert) {
+          getter = main.getter('a', 'z');
+          assert.deepEqual(getter({a: 42, z: 24}), [42, 24]);
+        });
+      });
 
       /* TODO: Add at least one test for main.hasDnDType
       QUnit.module('hasDnDType', function() {
@@ -315,17 +323,18 @@ define(["require", "exports", 'main'], function (require, exports, main) {
         });
       });
 
-      QUnit.module('offset', function() {
-        QUnit.test('header', function(assert) {
-          // fragile?
-          assert.deepEqual(main.offset(document.getElementById('qunit-header')), {
-            height: 48,
-            left: 8,
-            top: 8,
-            width: window.innerWidth - 16
-          });
-        });
-      });
+      // TODO: Fragile?
+      // QUnit.module('offset', function() {
+      //   QUnit.test('header', function(assert) {
+      //     // fragile?
+      //     assert.deepEqual(main.offset(document.getElementById('qunit-header')), {
+      //       height: 48,
+      //       left: 8,
+      //       top: 8,
+      //       width: window.innerWidth - 16
+      //     });
+      //   });
+      // });
 
       /* TODO: Add at least one test for main.onDOMNodeRemoved
       QUnit.module('onDOMNodeRemoved', function() {
