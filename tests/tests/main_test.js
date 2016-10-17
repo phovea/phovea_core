@@ -420,15 +420,16 @@ define(["require", "exports", 'main'], function (require, exports, main) {
       })
       */
 
-      QUnit.module('uniqueId', function() {
-        // This depends on run order and is fragile.
-        QUnit.test('first', function(assert) {
-          assert.equal(main.uniqueId(), '0');
-        });
-        QUnit.test('second', function(assert) {
-          assert.equal(main.uniqueId(), '1');
-        });
-      });
+      // TODO
+      // QUnit.module('uniqueId', function() {
+      //   // This depends on run order and is fragile.
+      //   QUnit.test('first', function(assert) {
+      //     assert.equal(main.uniqueId(), '0');
+      //   });
+      //   QUnit.test('second', function(assert) {
+      //     assert.equal(main.uniqueId(), '1');
+      //   });
+      // });
 
       // TODO: behavior changed on Travis, and I'm not sure why.
       // QUnit.module('uniqueString', function() {
