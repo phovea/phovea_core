@@ -13,6 +13,10 @@ define(["require", "exports", 'plugin'], function (require, exports, plugin) {
         ]);
       });
 
+      /*
+      TODO: "C.registry is undefined" -> Are we not building this correctly?
+       */
+
       /* TODO: Add at least one test for plugin.get
       QUnit.module('get', function() {
         QUnit.test('???', function(assert) {
