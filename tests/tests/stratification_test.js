@@ -63,14 +63,16 @@ define(["require", "exports", 'stratification'], function (require, exports, str
         });
       });
 
-      /* TODO: Add at least one test for stratification.guessColor
       QUnit.module('guessColor', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(stratification.guessColor(), '???');
+        QUnit.test('colors', function(assert) {
+          // TODO: Unused argument is weird.
+          assert.equal(stratification.guessColor('unused', 'MALE'), 'blue');
+          assert.equal(stratification.guessColor('unused', 'female'), 'red');
+          assert.equal(stratification.guessColor('unused', 'Deceased'), '#e41a1b');
+          assert.equal(stratification.guessColor('unused', 'lIvInG'), '#377eb8');
+          assert.equal(stratification.guessColor('unused', 'other-unknown-whatever'), 'gray');
         });
-      })
-      */
-
+      });
 
     });
 
