@@ -32,6 +32,12 @@ define(["require", "exports", 'ajax'], function (require, exports, ajax) {
         });
       });
 
+      /*
+      TODO: encodeParams is internal? Usage across all projects limited to:
+      ./caleydo_d3/ajax_adapter_d3.ts:        data = ajax.encodeParams(data); //encode in url
+      ./caleydo_d3/ajax_adapter_d3.ts:      xhr.send(method, data instanceof FormData ? data: ajax.encodeParams(data), (error, _raw) => {
+      */
+
       QUnit.module('encodeParams', function() {
         QUnit.test('null', function(assert) {
           assert.equal(ajax.encodeParams(null), null);
@@ -89,6 +95,13 @@ define(["require", "exports", 'ajax'], function (require, exports, ajax) {
         });
       });
 
+      /*
+      TODO: getAPIData is internal? Usage across all projects limited to:
+      ./caleydo_core/matrix_impl.ts:      return ajax.getAPIData('/dataset/matrix/'+desc.id+'/raw', {
+      ./caleydo_core/table_impl.ts:      return ajax.getAPIData('/dataset/table/'+desc.id+'/raw', {
+      ./caleydo_core/table_impl.ts:      return ajax.getAPIData('/dataset/table/'+desc.id+'/col/'+column, {
+      */
+
       /* TODO: Add at least one test for ajax.getAPIData
       // TODO: "C.registry is undefined"
       QUnit.module('getAPIData', function() {
@@ -128,6 +141,22 @@ define(["require", "exports", 'ajax'], function (require, exports, ajax) {
           assert.equal(ajax.send(), '???');
         });
       })
+      */
+
+      /*
+      TODO: sendAPI is internal? Usage across all projects limited to:
+      ./caleydo_core/data.ts:  return ajax.sendAPI('/dataset/',data, 'post').then(transformEntry);
+      ./caleydo_core/data.ts:  return ajax.sendAPI('/dataset/'+entry.desc.id, data, 'put').then((desc) => {
+      ./caleydo_core/data.ts:  return ajax.sendAPI('/dataset/'+entry.desc.id, data, 'post').then((desc) => {
+      ./caleydo_core/data.ts:  return ajax.sendAPI('/dataset/'+desc.id, {}, 'delete').then((result) => {
+      ./caleydo_core/graph.ts:    return ajax.sendAPI('/dataset/graph/' + this.desc.id + '/data').then((r) => {
+      ./caleydo_core/graph.ts:    return ajax.sendAPI('/dataset/graph/' + this.desc.id + '/node', {
+      ./caleydo_core/graph.ts:    return ajax.sendAPI('/dataset/graph/' + this.desc.id + '/node/'+n.id,{
+      ./caleydo_core/graph.ts:    return ajax.sendAPI('/dataset/graph/' + this.desc.id + '/node/'+n.id, {}, 'delete').then((r) => {
+      ./caleydo_core/graph.ts:      return ajax.sendAPI('/dataset/graph/' + this.desc.id + '/edge', {
+      ./caleydo_core/graph.ts:    return ajax.sendAPI('/dataset/graph/' + this.desc.id + '/edge/'+e.id, {}, 'delete').then((r) => {
+      ./caleydo_core/graph.ts:    return ajax.sendAPI('/dataset/graph/' + this.desc.id + '/edge/'+e.id, {
+      ./caleydo_core/graph.ts:    return ajax.sendAPI('/dataset/graph/'+this.desc.id + '/node', {}, 'delete').then((r) => {
       */
 
       /* TODO: Add at least one test for ajax.sendAPI
