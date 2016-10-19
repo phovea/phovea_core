@@ -78,6 +78,10 @@ define(["require", "exports", 'behavior'], function (require, exports, behavior)
           });
         });
         */
+
+        /*
+        TODO: isHeightFixed is internal? No usage outside behavior.ts
+        */
   
         /* TODO: Add at least one test for behavior.isHeightFixed
         QUnit.module('isHeightFixed', function() {
@@ -86,7 +90,11 @@ define(["require", "exports", 'behavior'], function (require, exports, behavior)
           });
         });
         */
-  
+
+        /*
+        TODO: isWidthFixed is internal? No usage outside behavior.ts
+        */
+
         /* TODO: Add at least one test for behavior.isWidthFixed
         QUnit.module('isWidthFixed', function() {
           QUnit.test('???', function(assert) {
@@ -166,13 +174,21 @@ define(["require", "exports", 'behavior'], function (require, exports, behavior)
           });
         });
         */
-  
+
+        /*
+        TODO: zoomOut is internal? No usage outside behavior.ts
+        */
+
         /* TODO: Add at least one test for behavior.zoomOut
         QUnit.module('zoomOut', function() {
           QUnit.test('???', function(assert) {
             assert.equal(behavior.zoomOut(), '???');
           });
         });
+        */
+
+        /*
+        TODO: zoomSet is internal? No usage outside behavior.ts
         */
   
         /* TODO: Add at least one test for behavior.zoomSet
