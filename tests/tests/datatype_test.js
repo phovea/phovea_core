@@ -15,6 +15,15 @@ define(["require", "exports", 'datatype'], function (require, exports, datatype)
         ]);
       });
 
+      /*
+      TODO: DataTypeBase is internal? Usage across all projects limited to:
+      ./caleydo_core/data.ts:    return cached(desc, Promise.resolve(new datatypes.DataTypeBase(desc)));
+      ./caleydo_core/graph.ts:export class GraphProxy extends datatypes.DataTypeBase {
+      ./caleydo_core/provenance.ts:export class ProvenanceGraph extends datatypes.DataTypeBase {
+      ./caleydo_core/stratification_impl.ts:export class Stratification extends datatypes.DataTypeBase implements def.IStratification {
+      ./caleydo_core/vector_impl.ts:export class StratificationVector extends datatypes.DataTypeBase implements stratification.IStratification {
+      */
+
       QUnit.module('DataTypeBase', function() {
         QUnit.test('properties', function(assert) {
           var data_description = {};
@@ -49,6 +58,15 @@ define(["require", "exports", 'datatype'], function (require, exports, datatype)
             "toString"
           ]);
         });
+
+        /*
+        TODO: accumulateEvents is internal? Usage across all projects limited to:
+        ./caleydo_core/idtype.ts:  private accumulateEvents = -1;
+        ./caleydo_core/idtype.ts:      if (this.accumulateEvents < 0 || (++this.accumulateEvents) === total) {
+        ./caleydo_core/idtype.ts:    this.accumulateEvents = -1; //reset
+        ./caleydo_core/idtype.ts:        this.accumulateEvents = 0;
+        ./caleydo_core/idtype.ts:        if (this.accumulateEvents > 0) { //one event has not been fires, so do it manually
+        */
 
         /* TODO: Add at least one test for datatype.accumulateEvents
         QUnit.module('accumulateEvents', function() {
@@ -130,6 +148,14 @@ define(["require", "exports", 'datatype'], function (require, exports, datatype)
         });
         */
 
+        /*
+        TODO: idView is internal? Usage across all projects limited to:
+        ./caleydo_core/matrix_impl.ts:  idView(idRange:ranges.Range = ranges.all()) : Promise<matrix.IMatrix> {
+        ./caleydo_core/stratification.ts:  idView(idRange:ranges.Range = ranges.all()):Promise<IStratification> {
+        ./caleydo_core/table_impl.ts:  idView(idRange:ranges.Range = ranges.all()) : Promise<def.ITable> {
+        ./caleydo_core/vector_impl.ts:  idView(idRange:ranges.Range = ranges.all()) : Promise<def.IVector> {
+        */
+
         /* TODO: Add at least one test for datatype.idView
         QUnit.module('idView', function() {
           QUnit.test('???', function(assert) {
@@ -161,6 +187,16 @@ define(["require", "exports", 'datatype'], function (require, exports, datatype)
           });
         });
         */
+
+        /*
+        TODO: numSelectListeners is internal? Usage across all projects limited to:
+        ./caleydo_core/idtype.ts:  private numSelectListeners = 0;
+        ./caleydo_core/idtype.ts:      this.numSelectListeners++;
+        ./caleydo_core/idtype.ts:      if (this.numSelectListeners === 1) {
+        ./caleydo_core/idtype.ts:      this.numSelectListeners--;
+        ./caleydo_core/idtype.ts:      if (this.numSelectListeners === 0) {
+        */
+
 
         /* TODO: Add at least one test for datatype.numSelectListeners
         QUnit.module('numSelectListeners', function() {
@@ -218,12 +254,33 @@ define(["require", "exports", 'datatype'], function (require, exports, datatype)
         });
         */
 
+        /*
+        TODO: selectImpl is internal? Usage across all projects limited to:
+        ./caleydo_core/idtype.ts:    return this.selectImpl(range, op, type);
+        ./caleydo_core/idtype.ts:  private selectImpl(range:ranges.Range, op = SelectOperation.SET, type:string = defaultSelectionType) {
+        ./caleydo_core/idtype.ts:    return this.selectImpl(ranges.none(), SelectOperation.SET, type);
+        ./caleydo_core/idtype.ts:    return this.selectImpl(range, op, type);
+        ./caleydo_core/idtype.ts:  private selectImpl(cells:ranges.Range[], op = SelectOperation.SET, type:string = defaultSelectionType) {
+        ./caleydo_core/idtype.ts:    return this.selectImpl([], SelectOperation.SET, type);
+        ./caleydo_core/idtype.ts:    return this.selectImpl(range, op, type, dim);
+        ./caleydo_core/idtype.ts:  private selectImpl(range:ranges.Range, op = SelectOperation.SET, type:string = defaultSelectionType, dim = -1) {
+        ./caleydo_core/idtype.ts:    return this.selectImpl(ranges.none(), SelectOperation.SET, type, dim);
+        */
+
         /* TODO: Add at least one test for datatype.selectImpl
         QUnit.module('selectImpl', function() {
           QUnit.test('???', function(assert) {
             assert.equal(datatype.selectImpl(), '???');
           });
         });
+        */
+
+        /*
+        TODO: selectionCache is internal? Usage across all projects limited to:
+        ./caleydo_core/idtype.ts:  private selectionCache = [];
+        ./caleydo_core/idtype.ts:      this.selectionCache[index] = {
+        ./caleydo_core/idtype.ts:      var entry = this.selectionCache[i];
+        ./caleydo_core/idtype.ts:    this.selectionCache = [];
         */
 
         /* TODO: Add at least one test for datatype.selectionCache
@@ -234,12 +291,37 @@ define(["require", "exports", 'datatype'], function (require, exports, datatype)
         });
         */
 
+        /*
+        TODO: selectionListener is internal? Usage across all projects limited to:
+        ./caleydo_core/idtype.ts:  private selectionListener = (event:events.IEvent, type:string, act:ranges.Range, added:ranges.Range, removed:ranges.Range) => {
+        ./caleydo_core/idtype.ts:    this.elems.forEach((elem) => elem.on('select', this.selectionListener));
+        ./caleydo_core/idtype.ts:    this.elems.forEach((elem) => elem.off('select', this.selectionListener));
+        ./caleydo_core/idtype.ts:  private selectionListeners = [];
+        ./caleydo_core/idtype.ts:  private selectionListener(idtype:IDType, index:number, total:number) {
+        ./caleydo_core/idtype.ts:    const selectionListener = (event:any, type:string, act:ranges.Range, added:ranges.Range, removed:ranges.Range) => {
+        ./caleydo_core/idtype.ts:    return selectionListener;
+        ./caleydo_core/idtype.ts:          this.selectionListeners.push(this.singleSelectionListener);
+        ./caleydo_core/idtype.ts:            const s = this.selectionListener(idtype, i, idt.length);
+        ./caleydo_core/idtype.ts:            this.selectionListeners.push(s);
+        ./caleydo_core/idtype.ts:        this.idtypes.forEach((idtype, i) => idtype.off('select', this.selectionListeners[i]));
+        ./caleydo_core/idtype.ts:        this.selectionListeners = [];
+        */
+
         /* TODO: Add at least one test for datatype.selectionListener
         QUnit.module('selectionListener', function() {
           QUnit.test('???', function(assert) {
             assert.equal(datatype.selectionListener(), '???');
           });
         });
+        */
+
+        /*
+        TODO: selectionListeners is internal? Usage across all projects limited to:
+        ./caleydo_core/idtype.ts:  private selectionListeners = [];
+        ./caleydo_core/idtype.ts:          this.selectionListeners.push(this.singleSelectionListener);
+        ./caleydo_core/idtype.ts:            this.selectionListeners.push(s);
+        ./caleydo_core/idtype.ts:        this.idtypes.forEach((idtype, i) => idtype.off('select', this.selectionListeners[i]));
+        ./caleydo_core/idtype.ts:        this.selectionListeners = [];
         */
 
         /* TODO: Add at least one test for datatype.selectionListeners
@@ -256,6 +338,13 @@ define(["require", "exports", 'datatype'], function (require, exports, datatype)
             assert.equal(datatype.selections(), '???');
           });
         });
+        */
+
+        /*
+        TODO: singleSelectionListener is internal? Usage across all projects limited to:
+        ./caleydo_core/idtype.ts:  private singleSelectionListener = (event:any, type:string, act:ranges.Range, added:ranges.Range, removed:ranges.Range) => {
+        ./caleydo_core/idtype.ts:          this.selectionListeners.push(this.singleSelectionListener);
+        ./caleydo_core/idtype.ts:          idt[0].on('select', this.singleSelectionListener);
         */
 
         /* TODO: Add at least one test for datatype.singleSelectionListener
@@ -275,12 +364,21 @@ define(["require", "exports", 'datatype'], function (require, exports, datatype)
         */
       });
 
+      /*
+      TODO: assignData is internal? No usage outside datatype.ts
+      */
+
       /* TODO: Add at least one test for datatype.assignData
       QUnit.module('assignData', function() {
         QUnit.test('???', function(assert) {
           assert.equal(datatype.assignData(), '???');
         });
       })
+      */
+
+      /*
+      TODO: categorical2partitioning is internal? Usage across all projects limited to:
+      ./caleydo_core/vector_impl.ts:        return datatypes.categorical2partitioning(d, v.categories.map((d) => typeof d === 'string' ? d : d.name), options);
       */
 
       /* TODO: Add at least one test for datatype.categorical2partitioning
@@ -291,12 +389,21 @@ define(["require", "exports", 'datatype'], function (require, exports, datatype)
       })
       */
 
+      /*
+      TODO: defineDataType is internal? No usage outside datatype.ts
+      */
+
       /* TODO: Add at least one test for datatype.defineDataType
       QUnit.module('defineDataType', function() {
         QUnit.test('???', function(assert) {
           assert.equal(datatype.defineDataType(), '???');
         });
       })
+      */
+
+      /*
+      TODO: isDataType is internal? Usage across all projects limited to:
+      ./caleydo_core/provenance.ts:  if (datatypes.isDataType(v)) {
       */
 
       /* TODO: Add at least one test for datatype.isDataType
