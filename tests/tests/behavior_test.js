@@ -166,7 +166,11 @@ define(["require", "exports", 'behavior'], function (require, exports, behavior)
           });
         });
         */
-  
+
+        /*
+        TODO: zoomIn is internal? No usage outside behavior.ts
+        */
+
         /* TODO: Add at least one test for behavior.zoomIn
         QUnit.module('zoomIn', function() {
           QUnit.test('???', function(assert) {
