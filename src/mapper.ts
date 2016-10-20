@@ -6,7 +6,6 @@
 /**
  * Created by Samuel Gratzl on 24.09.2014.
  */
-/// <reference path="../../tsd.d.ts" />
 import C = require('./main');
 import ajax = require('./ajax');
 import idtypes = require('./idtype');
