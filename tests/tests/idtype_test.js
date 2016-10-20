@@ -1,6 +1,59 @@
 define(["require", "exports", 'idtype'], function (require, exports, idtype) {
   exports.test = function(){
 
+/*
+TODO: LocalIDAssigner is defined but unused... delete?
+*/
+
+/* ObjectManager external usages:
+ caleydo_window/main.ts:export var manager = new idtypes.ObjectManager('uiwindow', 'Window');
+ stratomex_js/Column.ts:export const manager = new idtypes.ObjectManager<Column>('_column', 'Column');
+ */
+
+/*
+TODO: ProductIDType is limited to core... make private?
+*/
+
+/*
+TODO: ProductSelectAble is limited to core... make private?
+*/
+
+/*
+TODO: SelectAble is limited to core... make private?
+*/
+
+/*
+TODO: clearSelection is defined but unused... delete?
+*/
+
+/* createLocalAssigner external usages:
+ caleydo_d3/parser.ts:        rowassigner: idtypes.createLocalAssigner(),
+ caleydo_d3/parser.ts:        colassigner: idtypes.createLocalAssigner()
+ caleydo_d3/parser.ts:        rowassigner: idtypes.createLocalAssigner()
+ caleydo_d3/parser.ts:        rowassigner: idtypes.createLocalAssigner(),
+ */
+
+/*
+TODO: isId is limited to core... make private?
+*/
+
+/*
+TODO: resolveProduct is limited to core... make private?
+*/
+
+/* toId external usages: TODO: The method here is not used.
+ caleydo_d3/link.ts:function toId(a,b) {
+ caleydo_d3/link.ts:    this.id = toId(a, b);
+ caleydo_d3/link.ts:        var id = toId(ai, aj);
+ caleydo_d3/link.ts:        var id = toId(o, elem);
+ */
+
+/*
+TODO:  is limited to core... make private?
+*/
+
+
+
     QUnit.module('idtype', function() {
 
       QUnit.test('Object.keys', function(assert) {

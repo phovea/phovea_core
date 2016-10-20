@@ -1,6 +1,23 @@
 define(["require", "exports", 'range'], function (require, exports, range) {
   exports.test = function(){
 
+    /*
+    TODO: RangeElem is limited to core... make private?
+    */
+
+    /*
+    TODO: SingleRangeElem is limited to core... make private?
+    */
+
+    /* asUngrouped external usages:
+     caleydo_d3/link_representation.ts:      return [ranges.asUngrouped(ids)];
+     */
+
+    /*
+    TODO: composite is limited to core... make private?
+    */
+
+
     QUnit.module('range', function() {
 
       QUnit.test('Object.keys', function(assert) {

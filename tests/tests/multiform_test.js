@@ -1,6 +1,28 @@
 define(["require", "exports", 'multiform'], function (require, exports, multiform) {
   exports.test = function(){
 
+    /* MultiFormGrid external usages:
+     stratomex_js/Column.ts:  private grid:multiform.MultiFormGrid;
+     */
+
+    /* addIconVisChooser external usages:
+     caleydo_importer/app.ts:    addIconVisChooser(document.querySelector('header'), form);
+     stratomex_js/Column.ts:    multiform.addIconVisChooser(<Element>$toolbar.node(), multi);
+     stratomex_js/Column.ts:    multiform.addIconVisChooser(<Element>$t.node(), this.grid);
+     */
+
+    /*
+    TODO: addSelectVisChooser is defined but unused... delete?
+    */
+
+    /* createGrid external usages:
+     stratomex_js/Column.ts:    this.grid = multiform.createGrid(data, partitioning, <Element>this.$clusters.node(), function (data, range, pos) {
+     */
+
+    /*
+    TODO: toAvailableVisses is limited to core... make private?
+    */
+
     QUnit.module('multiform', function() {
 
       QUnit.test('Object.keys', function(assert) {

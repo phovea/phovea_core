@@ -1,6 +1,77 @@
 define(["require", "exports", 'geom'], function (require, exports, geom) {
   exports.test = function(){
 
+    /*
+    TODO: CORNER is limited to core... make private?
+    */
+
+    /*
+    TODO: Circle is limited to core... make private?
+    */
+
+    /*
+    TODO: Ellipse is limited to core... make private?
+    */
+
+    /* Line external usages: TODO: but none of these refer to this class; private?
+     caleydo_d3/link.ts:  line: d3.svg.Line<any>;
+     caleydo_importer/parser.ts:  skipEmptyLines: true
+     caleydo_vis/axis.ts:  private scale:d3.scale.Linear<number, number>;
+     caleydo_vis/barplot.ts:  private xscale:d3.scale.Linear<number, number>;
+     caleydo_vis/barplot.ts:  private yscale:d3.scale.Linear<number, number>;
+     caleydo_vis/box.ts:  private scale:d3.scale.Linear<number, number>;
+     caleydo_vis/distribution.ts:  private yscale:d3.scale.Linear<number, number>;
+     caleydo_vis/distribution.ts:  private scale:d3.scale.Linear<number, number>;
+     gapminder/gapminder.ts:    this.updateTimeLine();
+     gapminder/gapminder.ts:      this.updateHoverLine(ids);
+     gapminder/gapminder.ts:      this.updateSelectionLines(ids);
+     gapminder/gapminder.ts:  private updateHoverLine(ids: number[], animate = false) {
+     gapminder/gapminder.ts:  private updateSelectionLines(ids:number[], animate = false) {
+     gapminder/gapminder.ts:      this.updateHoverLine(r.rowtype.selections(idtypes.hoverSelectionType).dim(0).asList(), true);
+     gapminder/gapminder.ts:      this.updateSelectionLines(r.rowtype.selections().dim(0).asList(), true);
+     gapminder/gapminder.ts:  private updateTimeLine() {
+     */
+
+    /* Polygon external usages: TODO: but none of these refer to this class; private?
+     caleydo_vis/distribution.ts:function toPolygon(start:number, end:number, radius:number) {
+     caleydo_vis/distribution.ts:      return Promise.resolve(toPolygon(startAngle, endAngle, o.radius));
+     */
+
+    /* Rect external usages: TODO: but none of these refer to this class; private?
+     caleydo_d3/layout_d3util.ts:class SVGRectLayoutElem extends layout.ALayoutElem implements layout.ILayoutElem {
+     caleydo_d3/layout_d3util.ts:  private targetBounds : geom.Rect = null;
+     caleydo_d3/layout_d3util.ts:export function wrapSVGRect($elem: d3.Selection<any>, options:any = {}) {
+     caleydo_d3/layout_d3util.ts:  return new SVGRectLayoutElem($elem, options);
+     caleydo_d3/link.ts:  createBand(aBounds: geom.Rect, bBounds: geom.Rect, aIDs: ranges.Range1D, bIDs: ranges.Range1D, union: ranges.Range1D, id: string, clazz : string) : ILink[];
+     caleydo_d3/link.ts:  (context: IBandContext, a: IVisWrapper, aa: geom.Rect, b: IVisWrapper, bb: geom.Rect): Promise<ILink[]>;
+     caleydo_d3/link.ts:  createBand(aa: geom.Rect, bb: geom.Rect, ida: ranges.Range1D, idb: ranges.Range1D, union: ranges.Range1D, id: string, clazz : string) {
+     caleydo_d3/link.ts:  private shouldRender(a: VisWrapper, aa: geom.Rect, b: VisWrapper, bb: geom.Rect) {
+     caleydo_d3/link_representation.ts:export function createBlockRep(context: link.IBandContext, a: link.IVisWrapper, aa: geom.Rect, b: link.IVisWrapper, bb: geom.Rect):Promise<link.ILink[]> {
+     caleydo_d3/link_representation.ts:export function createGroupRep(context: link.IBandContext, a: link.IVisWrapper, aa: geom.Rect, b: link.IVisWrapper, bb: geom.Rect):Promise<link.ILink[]> {
+     caleydo_d3/link_representation.ts:export function createItemRep(context: link.IBandContext, a: link.IVisWrapper, aa: geom.Rect, b: link.IVisWrapper, bb: geom.Rect):Promise<link.ILink[]> {
+     caleydo_vis/heatmap.ts:    ctx.clearRect(0, 0, canvas.width, canvas.height);
+     caleydo_vis/heatmap.ts:      ctx.fillRect(0,0, canvas.width, canvas.height);
+     caleydo_vis/heatmap.ts:        ctx.fillRect(j,i, 1, 1);
+     caleydo_vis/heatmap.ts:        rect = c.getBoundingClientRect();
+     */
+
+    /*
+    TODO: ellipse is limited to core... make private?
+    */
+
+    /* polygon external usages:
+     caleydo_d3/link.ts:    var shape = geom.polygon(aa.corner('ne'), bb.corner('nw'), bb.corner('sw'), aa.corner('se'));
+     caleydo_vis/distribution.ts:  return geom.polygon(r);
+     */
+
+    /* vec2 external usages:
+     caleydo_vis/distribution.ts:    geom.vec2(radius, radius),
+     caleydo_vis/distribution.ts:    geom.vec2(radius + Math.cos(start) * radius, radius + Math.sin(start) * radius),
+     caleydo_vis/distribution.ts:    geom.vec2(radius + Math.cos(end) * radius, radius + Math.sin(end) * radius)
+     caleydo_vis/distribution.ts:    r.splice(2, 0, geom.vec2(radius + Math.cos((end - start) * 0.5) * radius, radius + Math.sin((end - start) * 0.5) * radius));
+     */
+
+
     QUnit.module('geom', function() {
 
       QUnit.test('Object.keys', function(assert) {

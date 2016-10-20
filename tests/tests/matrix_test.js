@@ -1,6 +1,18 @@
 define(["require", "exports", 'matrix'], function (require, exports, matrix) {
   exports.test = function(){
 
+    /*
+    TODO: IDTYPE_CELL is defined but unused... delete?
+    */
+
+    /*
+    TODO: IDTYPE_COLUMN is defined but unused... delete?
+    */
+
+    /*
+    TODO: IDTYPE_ROW is defined but unused... delete?
+    */
+
     QUnit.module('matrix', function() {
 
       QUnit.test('Object.keys', function(assert) {

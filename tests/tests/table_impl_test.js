@@ -1,6 +1,58 @@
 define(["require", "exports", 'table_impl'], function (require, exports, table_impl) {
   exports.test = function(){
 
+    /*
+    TODO: _root is limited to core... make private?
+    */
+
+    /*
+    TODO: accumulateEvents is limited to core... make private?
+    */
+
+    /*
+    TODO: fillAndSend is limited to core... make private?
+    */
+
+    /*
+    TODO: fireEvent is limited to core... make private?
+    */
+
+    /*
+    TODO: handlers is limited to core... make private?
+    */
+
+    /*
+    TODO: idView is limited to core... make private?
+    */
+
+    /*
+    TODO: numSelectListeners is limited to core... make private?
+    */
+
+    /*
+    TODO: queryView is limited to core... make private?
+    */
+
+    /*
+    TODO: selectImpl is limited to core... make private?
+    */
+
+    /*
+    TODO: selectionCache is limited to core... make private?
+    */
+
+    /*
+    TODO: selectionListener is limited to core... make private?
+    */
+
+    /*
+    TODO: selectionListeners is limited to core... make private?
+    */
+
+    /*
+    TODO: singleSelectionListener is limited to core... make private?
+    */
+
     QUnit.module('table_impl', function() {
 
       QUnit.test('Object.keys', function(assert) {

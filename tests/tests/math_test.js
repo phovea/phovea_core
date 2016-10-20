@@ -1,6 +1,42 @@
 define(["require", "exports", 'math'], function (require, exports, math) {
   exports.test = function(){
 
+    /*
+    TODO: categoricalHist is limited to core... make private?
+    */
+
+    /*
+    TODO: computeStats is limited to core... make private?
+    */
+
+    /*
+    TODO: rangeHist is limited to core... make private?
+    */
+
+    /*
+    TODO: wrapHist is limited to core... make private?
+    */
+
+    /*
+    TODO: _var is limited to core... make private?
+    */
+
+    /*
+    TODO: referenced, but not really used?
+     moment2 external usages:
+     caleydo_vis/box.ts:  var keys = ['min', 'max', 'sum', 'mean', 'var', 'sd', 'n', 'nans', 'moment2', 'moment3', 'moment4', 'kurtosis', 'skewness'];
+
+     moment3 external usages:
+     caleydo_vis/box.ts:  var keys = ['min', 'max', 'sum', 'mean', 'var', 'sd', 'n', 'nans', 'moment2', 'moment3', 'moment4', 'kurtosis', 'skewness'];
+
+     moment4 external usages:
+     caleydo_vis/box.ts:  var keys = ['min', 'max', 'sum', 'mean', 'var', 'sd', 'n', 'nans', 'moment2', 'moment3', 'moment4', 'kurtosis', 'skewness'];
+
+     nans external usages:
+     caleydo_vis/box.ts:  var keys = ['min', 'max', 'sum', 'mean', 'var', 'sd', 'n', 'nans', 'moment2', 'moment3', 'moment4', 'kurtosis', 'skewness'];
+     */
+
+
     QUnit.module('math', function() {
 
       QUnit.test('Object.keys', function(assert) {

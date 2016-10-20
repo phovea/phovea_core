@@ -1,6 +1,37 @@
 define(["require", "exports", 'layout'], function (require, exports, layout) {
   exports.test = function(){
 
+    /* ALayoutElem external usages:
+     caleydo_d3/layout_d3util.ts:class SVGTransformLayoutElem extends layout.ALayoutElem implements layout.ILayoutElem {
+     caleydo_d3/layout_d3util.ts:class SVGRectLayoutElem extends layout.ALayoutElem implements layout.ILayoutElem {
+     caleydo_d3/layout_d3util.ts:class HTMLLayoutElem extends layout.ALayoutElem implements layout.ILayoutElem {
+     */
+
+    /*
+    TODO: borderLayout is defined but unused... delete?
+    */
+
+    /*
+    TODO: distributeLayout is defined but unused... delete?
+    */
+
+    /*
+    TODO: flowLayout is limited to core... make private?
+    */
+
+    /*
+    TODO: layers is defined but unused... delete?
+    */
+
+    /*
+    TODO: no_padding is limited to core... make private?
+    */
+
+    /*
+    TODO: wrapDOM is defined but unused... delete?
+    */
+
+
     QUnit.module('layout', function() {
 
       QUnit.test('Object.keys', function(assert) {
