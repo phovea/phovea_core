@@ -7,12 +7,11 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-'use strict';
-import * as ranges from './range';
-import * as datatypes from './datatype';
-import * as idtypes from './idtype';
-import * as vector from './vector';
-import * as math from './math';
+import {Range, CompositeRange1D, all, list, Range1DGroup} from './range';
+import {IDataType} from './datatype';
+import {IDType, SelectAble} from './idtype';
+import {IVector} from './vector';
+import {IHistogram, rangeHist} from './math';
 
 export interface IGroup {
   name: string;
@@ -30,36 +29,36 @@ export function guessColor(stratification: string, group: string) {
   return 'gray';
 }
 
-export interface IStratification extends datatypes.IDataType {
-  range() : Promise<ranges.CompositeRange1D>;
-  idRange(): Promise<ranges.CompositeRange1D>;
-  vector(): Promise<vector.IVector>;
+export interface IStratification extends IDataType {
+  range() : Promise<CompositeRange1D>;
+  idRange(): Promise<CompositeRange1D>;
+  vector(): Promise<IVector>;
 
   names();
-  names(range:ranges.Range);
+  names(range:Range);
 
-  ids(): Promise<ranges.Range>;
-  ids(range:ranges.Range): Promise<ranges.Range>;
+  ids(): Promise<Range>;
+  ids(range:Range): Promise<Range>;
 
-  hist(bins? : number, range?:ranges.Range): Promise<math.IHistogram>;
+  hist(bins? : number, range?:Range): Promise<IHistogram>;
 
   length: number;
   ngroups: number;
 
   groups: IGroup[];
 
-  idtype: idtypes.IDType;
+  idtype: IDType;
 
   group(group: number): IStratification;
 
-  origin(): Promise<datatypes.IDataType>;
+  origin(): Promise<IDataType>;
 }
 
 
 /**
  * root matrix implementation holding the data
  */
-export class StratificationGroup extends idtypes.SelectAble implements IStratification {
+export class StratificationGroup extends SelectAble implements IStratification {
   constructor(private root:IStratification, private groupIndex:number, private groupDesc:IGroup) {
     super();
   }
@@ -87,31 +86,31 @@ export class StratificationGroup extends idtypes.SelectAble implements IStratifi
     return this.root.idtype;
   }
 
-  hist(bins?:number, range = ranges.all()):Promise<math.IHistogram> {
+  hist(bins?:number, range = all()):Promise<IHistogram> {
     //TODO
     return this.range().then((r) => {
-      return math.rangeHist(r);
+      return rangeHist(r);
     });
   }
 
-  vector():Promise<vector.IVector> {
-    return Promise.all<any>([this.root.vector(), this.rangeGroup()]).then((arr:[vector.IVector, ranges.Range1DGroup]) => arr[0].view(ranges.list(arr[1])));
+  vector():Promise<IVector> {
+    return Promise.all<any>([this.root.vector(), this.rangeGroup()]).then((arr:[IVector, Range1DGroup]) => arr[0].view(list(arr[1])));
   }
 
-  origin():Promise<datatypes.IDataType> {
+  origin():Promise<IDataType> {
     return this.root.origin();
   }
 
   range() {
     return this.rangeGroup().then((g) => {
-      return new ranges.CompositeRange1D(g.name, [g]);
+      return new CompositeRange1D(g.name, [g]);
     });
   }
 
   idRange() {
     return this.root.idRange().then((r) => {
       const g = r.groups[this.groupIndex];
-      return new ranges.CompositeRange1D(g.name, [g]);
+      return new CompositeRange1D(g.name, [g]);
     });
   }
 
@@ -121,21 +120,21 @@ export class StratificationGroup extends idtypes.SelectAble implements IStratifi
     });
   }
 
-  names(range:ranges.Range = ranges.all()) {
+  names(range:Range = all()) {
     return this.rangeGroup().then((g) => {
-      var r = ranges.list(g).preMultiply(range);
+      var r = list(g).preMultiply(range);
       return this.root.names(r);
     });
   }
 
-  ids(range:ranges.Range = ranges.all()):Promise<ranges.Range> {
+  ids(range:Range = all()):Promise<Range> {
     return this.rangeGroup().then((g) => {
-      var r = ranges.list(g).preMultiply(range);
+      var r = list(g).preMultiply(range);
       return this.root.ids(r);
     });
   }
 
-  idView(idRange:ranges.Range = ranges.all()):Promise<IStratification> {
+  idView(idRange:Range = all()):Promise<any> {
     return Promise.reject('not implemented');
   }
 

@@ -7,7 +7,6 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-'use strict';
 /**
  * basic iterator interface
  */
@@ -30,7 +29,7 @@ export interface IIterator<T> {
    */
   byMinusOne : boolean;
 
-  forEach(callbackfn:(value:T) => void, thisArg?:any): void;
+  forEach(callbackfn:(value:T, index: number) => void, thisArg?:any): void;
 
   /**
    * Calls a defined callback function on each element of an array, and returns an array that contains the results.
@@ -49,7 +48,7 @@ export class AIterator<T> {
     return null;
   }
 
-  forEach(callbackfn:(value:T) => void, thisArg?:any):void {
+  forEach(callbackfn:(value:T, index: number) => void, thisArg?:any):void {
     var i = 0;
     while (this.hasNext()) {
       callbackfn.call(thisArg, this.next(), i++);

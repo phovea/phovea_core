@@ -6,9 +6,8 @@
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
-
-import * as plugin from './plugin';
-import * as C from './index';
+import {list as listPlugins} from './plugin';
+import {offline as isOffline, server_url, server_json_suffix} from '.';
 
 /**
  * interface for the ajax adapter
@@ -23,7 +22,7 @@ function getConnector() {
   if (_impl != null) {
     return _impl;
   }
-  const adapters = plugin.list('ajax-adapter');
+  const adapters = listPlugins('ajax-adapter');
   var adapter = adapters[0];
   return _impl = adapter.load().then((p) => <IAjaxAdapter>p.factory());
 }
@@ -67,7 +66,7 @@ export function getData(url: string, data : any = {}, expectedDataType = 'json')
  * @returns {string}
  */
 export function api2absURL(url: string, data : any = null) {
-  url = `${C.server_url}${url}${C.server_json_suffix}`;
+  url = `${server_url}${url}${server_json_suffix}`;
   data = encodeParams(data);
   if (data) {
     url += (/\?/.test(url) ? '&' : '?') + data;
@@ -139,7 +138,7 @@ function offline(generator : OfflineGenerator, data : any = {}) {
  * @returns {Promise<any>}
  */
 export function sendAPI(url: string, data : any = {}, method = 'get', expectedDataType = 'json', offlineGenerator: OfflineGenerator = defaultOfflineGenerator): Promise<any> {
-  if (C.offline) {
+  if (isOffline) {
     return offline(offlineGenerator, data);
   }
   return send(api2absURL(url), data, method, expectedDataType);
@@ -152,7 +151,7 @@ export function sendAPI(url: string, data : any = {}, method = 'get', expectedDa
  * @returns {Promise<any>}
  */
 export function getAPIJSON(url: string, data : any = {}, offlineGenerator: OfflineGenerator = defaultOfflineGenerator): Promise<any> {
-  if (C.offline) {
+  if (isOffline) {
     return offline(offlineGenerator, data);
   }
   return getJSON(api2absURL(url), data);
@@ -166,7 +165,7 @@ export function getAPIJSON(url: string, data : any = {}, offlineGenerator: Offli
  * @returns {Promise<any>}
  */
 export function getAPIData(url: string, data : any = {}, expectedDataType = 'json', offlineGenerator: OfflineGenerator = () => defaultOfflineGenerator): Promise<any> {
-  if (C.offline) {
+  if (isOffline) {
     return offline(offlineGenerator, data);
   }
   return getData(api2absURL(url), data, expectedDataType);

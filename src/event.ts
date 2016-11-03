@@ -7,8 +7,6 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-'use strict';
-
 export interface IEventHandler {
   on(events, handler);
   off(events, handler);

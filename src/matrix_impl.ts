@@ -7,18 +7,17 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-'use strict';
-import * as C from './index';
-import * as ajax from './ajax';
-import * as ranges from './range';
-import * as idtypes from './idtype';
-import * as datatypes from './datatype';
-import * as vector from './vector';
-import * as vector_impl from './vector_impl';
-import * as math from './math';
-import * as matrix from './matrix';
+import {isFunction, argSort, argFilter, IPersistable} from './index';
+import {getAPIJSON, api2absURL, getAPIData} from './ajax';
+import {list as rlist, Range, all, range, join, Range1D, parse} from './range';
+import {IDType, ProductSelectAble, resolve as resolveIDType, resolveProduct, ProductIDType} from './idtype';
+import {IDataDescription, mask, transpose} from './datatype';
+import {IVector} from './vector';
+import {VectorBase} from './vector_impl';
+import {IStatistics, IHistogram, computeStats, hist, categoricalHist, wrapHist} from './math';
+import {IMatrix} from './matrix';
 
-function flatten(arr : any[][], indices: ranges.Range, select: number = 0) {
+function flatten(arr : any[][], indices: Range, select: number = 0) {
   var r = [], dim = [arr.length, arr[0].length];
   if (select === 0) {
     r = r.concat.apply(r, arr);
@@ -40,8 +39,8 @@ function flatten(arr : any[][], indices: ranges.Range, select: number = 0) {
 /**
  * base class for different Matrix implementations, views, transposed,...
  */
-export class MatrixBase extends idtypes.ProductSelectAble {
-  constructor(public _root:matrix.IMatrix) {
+export class MatrixBase extends ProductSelectAble {
+  constructor(public _root:IMatrix) {
     super();
   }
 
@@ -65,126 +64,126 @@ export class MatrixBase extends idtypes.ProductSelectAble {
     return this.dim[1];
   }
 
-  get indices() : ranges.Range {
-    return ranges.range([0, this.nrow], [0, this.ncol]);
+  get indices() : Range {
+    return range([0, this.nrow], [0, this.ncol]);
   }
 
   data() : Promise<any[]> {
     throw new Error('not implemented');
   }
 
-  view(): matrix.IMatrix;
-  view(range:ranges.Range) : matrix.IMatrix;
-  //view(filter: string): Promise<matrix.IMatrix>;
+  view(): IMatrix;
+  view(range:Range) : IMatrix;
+  //view(filter: string): Promise<IMatrix>;
   view(): any {
     if (typeof arguments[0] === 'string') {
       return this.dynview(<string>arguments[0]);
     }
-    var range : ranges.Range = arguments.length === 0 ? ranges.all() : arguments[0];
+    var range : Range = arguments.length === 0 ? all() : arguments[0];
     if (range.isAll) {
       return this._root;
     }
     return new MatrixView(this._root, range);
   }
 
-  dynview(filter: string): Promise<matrix.IMatrix> {
+  dynview(filter: string): Promise<IMatrix> {
     return null;
   }
 
-  slice(col: number) : vector.IVector {
-    return new SliceColVector((<matrix.IMatrix><any>this), col);
+  slice(col: number) : IVector {
+    return new SliceColVector((<IMatrix><any>this), col);
   }
 
-  stats() : Promise<math.IStatistics> {
-    return this.data().then((d) => math.computeStats.apply(math,d));
+  stats() : Promise<IStatistics> {
+    return this.data().then((d) => computeStats(...d));
   }
 
-  hist(bins? : number, range:ranges.Range = ranges.all(), containedIds = 0) : Promise<math.IHistogram> {
+  hist(bins? : number, range:Range = all(), containedIds = 0) : Promise<IHistogram> {
     var v = this._root.valuetype;
     return this.data().then((d) => {
       var flat = flatten(d, this.indices, containedIds);
       switch(v.type) {
         case 'categorical':
-          return math.categoricalHist(flat.data, flat.indices, flat.data.length, v.categories.map((d) => typeof d === 'string' ? d : d.name),
+          return categoricalHist(flat.data, flat.indices, flat.data.length, v.categories.map((d) => typeof d === 'string' ? d : d.name),
           v.categories.map((d) => typeof d === 'string' ? d : d.name || d.label),
           v.categories.map((d) => typeof d === 'string' ? 'gray' : d.color || 'gray'));
         case 'real':
         case 'int':
-          return math.hist(flat.data, flat.indices, flat.data.length, bins ? bins : Math.round(Math.sqrt(this.length)), v.range);
+          return hist(flat.data, flat.indices, flat.data.length, bins ? bins : Math.round(Math.sqrt(this.length)), v.range);
         default:
           return null; //cant create hist for unique objects or other ones
       }
     });
   }
 
-  idView(idRange:ranges.Range = ranges.all()) : Promise<matrix.IMatrix> {
+  idView(idRange:Range = all()) : Promise<IMatrix> {
     if (idRange.isAll) {
       return Promise.resolve(this._root);
     }
     return this.ids().then((ids) => this.view(ids.indexOf(idRange)));
   }
 
-  reduce(f : (row : any[]) => any, this_f? : any, valuetype? : any, idtype? : idtypes.IDType) : vector.IVector {
-    return new ProjectedVector(<matrix.IMatrix>(<any>this), f, this_f, valuetype, idtype);
+  reduce(f : (row : any[]) => any, this_f? : any, valuetype? : any, idtype? : IDType) : IVector {
+    return new ProjectedVector(<IMatrix>(<any>this), f, this_f, valuetype, idtype);
   }
 
-  restore(persisted: any) : C.IPersistable {
+  restore(persisted: any) : IPersistable {
     if (persisted && persisted.f) {
       /* tslint:disable:no-eval */
-      return this.reduce(eval(persisted.f), this, persisted.valuetype, persisted.idtype ? idtypes.resolve(persisted.idtype) : undefined);
+      return this.reduce(eval(persisted.f), this, persisted.valuetype, persisted.idtype ? resolveIDType(persisted.idtype) : undefined);
       /* tslint:enable:no-eval */
     } else if (persisted && persisted.range) { //some view onto it
-      return this.view(ranges.parse(persisted.range));
+      return this.view(parse(persisted.range));
     } else if (persisted && persisted.transposed) {
-      return (<matrix.IMatrix>(<any>this)).t;
+      return (<IMatrix>(<any>this)).t;
     } else if (persisted && persisted.col) {
       return this.slice(+persisted.col);
     } else if (persisted && persisted.row) {
-      return (<matrix.IMatrix>(<any>this)).t.slice(+persisted.row);
+      return (<IMatrix>(<any>this)).t.slice(+persisted.row);
     } else {
-      return <C.IPersistable>(<any>this);
+      return <IPersistable>(<any>this);
     }
   }
 
 }
 
 export interface IMatrixLoader {
-  (desc: datatypes.IDataDescription) : Promise<{
-    rowIds : ranges.Range;
+  (desc: IDataDescription) : Promise<{
+    rowIds : Range;
     rows : string[];
-    colIds : ranges.Range;
+    colIds : Range;
     cols : string[];
-    ids: ranges.Range;
+    ids: Range;
     data : any[][];
   }>;
 }
 
 export interface IMatrixLoader2 {
-  rowIds(desc: datatypes.IDataDescription, range: ranges.Range) : Promise<ranges.Range>;
-  rows(desc: datatypes.IDataDescription, range: ranges.Range) : Promise<string[]>;
-  colIds(desc: datatypes.IDataDescription, range: ranges.Range) : Promise<ranges.Range>;
-  cols(desc: datatypes.IDataDescription, range: ranges.Range) : Promise<string[]>;
-  ids(desc: datatypes.IDataDescription, range: ranges.Range) : Promise<ranges.Range>;
-  at(desc: datatypes.IDataDescription, i, j) : Promise<any>;
-  hist?(desc: datatypes.IDataDescription, range: ranges.Range, bins?: number): Promise<math.IHistogram>;
-  data(desc: datatypes.IDataDescription, range: ranges.Range) : Promise<any[][]>;
-  heatmapUrl?(desc: datatypes.IDataDescription, range:ranges.Range, options: { format?: string; transpose?: boolean; range?: [number,number]; palette?: string}): string;
+  rowIds(desc: IDataDescription, range: Range) : Promise<Range>;
+  rows(desc: IDataDescription, range: Range) : Promise<string[]>;
+  colIds(desc: IDataDescription, range: Range) : Promise<Range>;
+  cols(desc: IDataDescription, range: Range) : Promise<string[]>;
+  ids(desc: IDataDescription, range: Range) : Promise<Range>;
+  at(desc: IDataDescription, i, j) : Promise<any>;
+  hist?(desc: IDataDescription, range: Range, bins?: number): Promise<IHistogram>;
+  data(desc: IDataDescription, range: Range) : Promise<any[][]>;
+  heatmapUrl?(desc: IDataDescription, range:Range, options: { format?: string; transpose?: boolean; range?: [number,number]; palette?: string}): string;
 }
 
 function adapterOne2Two(loader: IMatrixLoader): IMatrixLoader2 {
   return {
-    rowIds: (desc: datatypes.IDataDescription, range: ranges.Range) => loader(desc).then((d) => range.preMultiply(d.rowIds, (<any>desc).size)),
-    rows: (desc: datatypes.IDataDescription, range: ranges.Range) => loader(desc).then((d) => range.dim(0).filter(d.rows, (<any>desc).size[0])),
-    colIds: (desc: datatypes.IDataDescription, range: ranges.Range) => loader(desc).then((d) => range.preMultiply(d.colIds, (<any>desc).size)),
-    cols: (desc: datatypes.IDataDescription, range: ranges.Range) => loader(desc).then((d) => range.dim(1).filter(d.cols, (<any>desc).size[1])),
-    ids: (desc: datatypes.IDataDescription, range:ranges.Range) => loader(desc).then((data) => range.preMultiply(data.ids, (<any>desc).size)),
-    at: (desc: datatypes.IDataDescription, i, j) => loader(desc).then((data) => data[i][j]),
-    data: (desc: datatypes.IDataDescription ,range: ranges.Range) => loader(desc).then((d) => range.filter(d.data, (<any>desc).size))
+    rowIds: (desc: IDataDescription, range: Range) => loader(desc).then((d) => range.preMultiply(d.rowIds, (<any>desc).size)),
+    rows: (desc: IDataDescription, range: Range) => loader(desc).then((d) => range.dim(0).filter(d.rows, (<any>desc).size[0])),
+    colIds: (desc: IDataDescription, range: Range) => loader(desc).then((d) => range.preMultiply(d.colIds, (<any>desc).size)),
+    cols: (desc: IDataDescription, range: Range) => loader(desc).then((d) => range.dim(1).filter(d.cols, (<any>desc).size[1])),
+    ids: (desc: IDataDescription, range:Range) => loader(desc).then((data) => range.preMultiply(data.ids, (<any>desc).size)),
+    at: (desc: IDataDescription, i, j) => loader(desc).then((data) => data[i][j]),
+    data: (desc: IDataDescription ,range: Range) => loader(desc).then((d) => range.filter(d.data, (<any>desc).size))
   };
 }
 
-function maskIt(desc: datatypes.IDataDescription) {
-  return (v) => datatypes.mask(v, desc);
+function maskIt(desc: IDataDescription) {
+  return (v) => mask(v, desc);
 }
 
 function viaAPI2Loader() {
@@ -195,49 +194,49 @@ function viaAPI2Loader() {
     data = null,
     hist = null;
   var r = {
-    rowIds: (desc:datatypes.IDataDescription, range:ranges.Range) => {
+    rowIds: (desc:IDataDescription, range:Range) => {
       if (rowIds == null) {
-        rowIds = ajax.getAPIJSON('/dataset/matrix/'+desc.id+'/rowIds').then((ids) => {
-          return ranges.parse(ids);
+        rowIds = getAPIJSON('/dataset/matrix/'+desc.id+'/rowIds').then((ids) => {
+          return parse(ids);
         });
       }
       return rowIds.then((d) => {
         return d.preMultiply(range, (<any>desc).size);
       });
     },
-    rows: (desc:datatypes.IDataDescription, range:ranges.Range) => {
+    rows: (desc:IDataDescription, range:Range) => {
       if (rows == null) {
-        rows = ajax.getAPIJSON('/dataset/matrix/' + desc.id + '/rows');
+        rows = getAPIJSON('/dataset/matrix/' + desc.id + '/rows');
       }
       return rows.then((d) => range.dim(0).filter(d, (<any>desc).size[0]));
     },
-    colIds: (desc:datatypes.IDataDescription, range:ranges.Range) => {
+    colIds: (desc:IDataDescription, range:Range) => {
       if (colIds == null) {
-        colIds = ajax.getAPIJSON('/dataset/matrix/' + desc.id + '/colIds').then((ids) => ranges.parse(ids));
+        colIds = getAPIJSON('/dataset/matrix/' + desc.id + '/colIds').then((ids) => parse(ids));
       }
       return colIds.then((d) => d.preMultiply(range, (<any>desc).size));
     },
-    cols: (desc:datatypes.IDataDescription, range:ranges.Range) => {
+    cols: (desc:IDataDescription, range:Range) => {
       if (cols == null) {
-        cols = ajax.getAPIJSON('/dataset/matrix/' + desc.id + '/cols');
+        cols = getAPIJSON('/dataset/matrix/' + desc.id + '/cols');
       }
       return cols.then((d) => range.dim(1).filter(d, (<any>desc).size[1]));
     },
-    ids: (desc:datatypes.IDataDescription, range:ranges.Range) => {
+    ids: (desc:IDataDescription, range:Range) => {
       if (range.ndim === 1) {
         return r.rowIds(desc, range);
       }
       range.dim(0); //ensure two dim
       range.dim(1); //ensure two dim
       var split = range.split();
-      return Promise.all([r.rowIds(desc, split[0] || ranges.all()), r.colIds(desc, split[1] || ranges.all())]).then((idsA: ranges.Range[]) => {
-        return ranges.join(idsA);
+      return Promise.all([r.rowIds(desc, split[0] || all()), r.colIds(desc, split[1] || all())]).then((idsA: Range[]) => {
+        return join(idsA);
       });
     },
-    hist: (desc:datatypes.IDataDescription, range: ranges.Range, bins: number = NaN) => {
+    hist: (desc:IDataDescription, range: Range, bins: number = NaN) => {
       if (range.isAll && isNaN(bins)) {
         if (hist == null) {
-          hist = ajax.getAPIJSON('/dataset/matrix/' + desc.id + '/hist').then((hist:number[]) => math.wrapHist(hist, (<any>desc).value.range));
+          hist = getAPIJSON('/dataset/matrix/' + desc.id + '/hist').then((hist:number[]) => wrapHist(hist, (<any>desc).value.range));
         }
         return hist;
       }
@@ -247,15 +246,15 @@ function viaAPI2Loader() {
       if (!isNaN(bins)) {
         args.bins = bins;
       }
-      return ajax.getAPIJSON('/dataset/matrix/'+desc.id+'/hist', args).then((hist: number[]) => {
-        return math.wrapHist(hist, (<any>desc).value.range);
+      return getAPIJSON('/dataset/matrix/'+desc.id+'/hist', args).then((hist: number[]) => {
+        return wrapHist(hist, (<any>desc).value.range);
       });
     },
-    at: (desc:datatypes.IDataDescription, i, j) => r.data(desc, ranges.list([i],[j])).then((data) => datatypes.mask(data[0][0], desc)),
-    data: (desc:datatypes.IDataDescription, range:ranges.Range) => {
+    at: (desc:IDataDescription, i, j) => r.data(desc, rlist([i],[j])).then((data) => mask(data[0][0], desc)),
+    data: (desc:IDataDescription, range:Range) => {
       if (range.isAll) {
         if (data == null) {
-          data = ajax.getAPIJSON('/dataset/matrix/' + desc.id + '/raw').then(maskIt(desc));
+          data = getAPIJSON('/dataset/matrix/' + desc.id + '/raw').then(maskIt(desc));
         }
         return data;
       }
@@ -264,15 +263,15 @@ function viaAPI2Loader() {
       }
       const size = (<any>desc).size;
       if (size[0] * size[1] < 1000 || (<any>desc).loadAtOnce ) { //small file load all
-        data = ajax.getAPIJSON('/dataset/matrix/' + desc.id + '/raw').then(maskIt(desc));
+        data = getAPIJSON('/dataset/matrix/' + desc.id + '/raw').then(maskIt(desc));
         return data.then((d) => range.filter(d, (<any>desc).size));
       }
       //server side slicing
-      return ajax.getAPIData('/dataset/matrix/'+desc.id+'/raw', {
+      return getAPIData('/dataset/matrix/'+desc.id+'/raw', {
         range: range.toString()
       }).then(maskIt(desc));
     },
-    heatmapUrl: (desc:datatypes.IDataDescription, range:ranges.Range, options: { format?: string; transpose?: boolean; range?: [number,number]; palette?: string}) => {
+    heatmapUrl: (desc:IDataDescription, range:Range, options: { format?: string; transpose?: boolean; range?: [number,number]; palette?: string}) => {
       var args : any = {
         format: options.format || 'png',
         range: range.toString()
@@ -287,7 +286,7 @@ function viaAPI2Loader() {
       if (options.palette) {
         args.format_palette = options.palette;
       }
-      return ajax.api2absURL(`/dataset/matrix/${desc.id}/data`, args);
+      return api2absURL(`/dataset/matrix/${desc.id}/data`, args);
     }
   };
   return r;
@@ -296,21 +295,21 @@ function viaAPI2Loader() {
 /**
  * root matrix implementation holding the data
  */
-export class Matrix extends MatrixBase implements matrix.IMatrix {
-  t:matrix.IMatrix;
+export class Matrix extends MatrixBase implements IMatrix {
+  t:IMatrix;
   valuetype:any;
-  rowtype:idtypes.IDType;
-  coltype:idtypes.IDType;
-  private producttype_: idtypes.ProductIDType;
+  rowtype:IDType;
+  coltype:IDType;
+  private producttype_: ProductIDType;
 
-  constructor(public desc: datatypes.IDataDescription, private loader: IMatrixLoader2) {
+  constructor(public desc: IDataDescription, private loader: IMatrixLoader2) {
     super(null);
     this._root = this;
     var d = <any>desc;
     this.valuetype = d.value;
-    this.rowtype = idtypes.resolve(d.rowtype);
-    this.coltype = idtypes.resolve(d.coltype);
-    this.producttype_ = idtypes.resolveProduct(this.rowtype, this.coltype);
+    this.rowtype = resolveIDType(d.rowtype);
+    this.coltype = resolveIDType(d.coltype);
+    this.producttype_ = resolveProduct(this.rowtype, this.coltype);
     this.t = new TransposedMatrix(this);
   }
 
@@ -332,10 +331,10 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
     return this.loader.at(this.desc, i, j);
   }
 
-  data(range: ranges.Range = ranges.all()) {
+  data(range: Range = all()) {
     return this.loader.data(this.desc, range);
   }
-  ids(range:ranges.Range = ranges.all()) {
+  ids(range:Range = all()) {
     return this.loader.ids(this.desc, range);
   }
 
@@ -344,10 +343,10 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
    * return the column ids of the matrix
    * @returns {*}
    */
-  cols(range: ranges.Range= ranges.all()) : Promise<string[]> {
+  cols(range: Range= all()) : Promise<string[]> {
     return this.loader.cols(this.desc, range);
   }
-  colIds(range:ranges.Range = ranges.all()) {
+  colIds(range:Range = all()) {
     return this.loader.colIds(this.desc, range);
   }
 
@@ -355,14 +354,14 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
    * return the row ids of the matrix
    * @returns {*}
    */
-  rows(range: ranges.Range = ranges.all()) : Promise<string[]> {
+  rows(range: Range = all()) : Promise<string[]> {
     return this.loader.rows(this.desc, range);
   }
-  rowIds(range:ranges.Range = ranges.all()) {
+  rowIds(range:Range = all()) {
     return this.loader.rowIds(this.desc, range);
   }
 
-  hist(bins? : number, range:ranges.Range = ranges.all(), containedIds = 0) : Promise<math.IHistogram> {
+  hist(bins? : number, range:Range = all(), containedIds = 0) : Promise<IHistogram> {
     if (this.loader.hist) {
       return this.loader.hist(this.desc, range, bins);
     }
@@ -377,7 +376,7 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
     return this.desc.id;
   }
 
-  heatmapUrl(range = ranges.all(), options : any = {}) {
+  heatmapUrl(range = all(), options : any = {}) {
     if (this.loader.heatmapUrl) {
       return this.loader.heatmapUrl(this.desc, range, options);
     }
@@ -390,8 +389,8 @@ export class Matrix extends MatrixBase implements matrix.IMatrix {
  * @param base
  * @constructor
  */
-class TransposedMatrix extends MatrixBase  implements matrix.IMatrix {
-  t:matrix.IMatrix;
+class TransposedMatrix extends MatrixBase  implements IMatrix {
+  t:IMatrix;
 
   constructor(base:Matrix) {
     super(base);
@@ -429,31 +428,31 @@ class TransposedMatrix extends MatrixBase  implements matrix.IMatrix {
     return [this.rowtype, this.coltype];
   }
 
-  ids(range:ranges.Range = ranges.all()) {
+  ids(range:Range = all()) {
     return this.t.ids(range ? range.swap() : undefined).then((ids) => ids.swap());
   }
 
-  cols(range:ranges.Range = ranges.all()): Promise<string[]> {
+  cols(range:Range = all()): Promise<string[]> {
     return this.t.rows(range ? range.swap() : undefined);
   }
-  colIds(range:ranges.Range = ranges.all()) {
+  colIds(range:Range = all()) {
     return this.t.rowIds(range ? range.swap() : undefined);
   }
 
-  rows(range:ranges.Range = ranges.all()): Promise<string[]> {
+  rows(range:Range = all()): Promise<string[]> {
     return this.t.cols(range ? range.swap() : undefined);
   }
-  rowIds(range:ranges.Range = ranges.all()) {
+  rowIds(range:Range = all()) {
     return this.t.colIds(range ? range.swap() : undefined);
   }
 
-  view(range:ranges.Range = ranges.all()) : matrix.IMatrix {
+  view(range:Range = all()) : IMatrix {
     if (range.isAll) {
       return this;
     }
     return new MatrixView(this._root, range.swap()).t;
   }
-  slice(col: number): vector.IVector {
+  slice(col: number): IVector {
     return new SliceRowVector(this._root, col);
   }
 
@@ -466,15 +465,15 @@ class TransposedMatrix extends MatrixBase  implements matrix.IMatrix {
     return this.t.at(j, i);
   }
 
-  data(range:ranges.Range = ranges.all()) {
-    return this.t.data(range ? range.swap() : undefined).then((data : any[][]) => datatypes.transpose(data));
+  data(range:Range = all()) {
+    return this.t.data(range ? range.swap() : undefined).then((data : any[][]) => transpose(data));
   }
 
-  hist(bins? : number, range: ranges.Range = ranges.all(), containedIds = 0) : Promise<math.IHistogram> {
+  hist(bins? : number, range: Range = all(), containedIds = 0) : Promise<IHistogram> {
     return this.t.hist(bins, range ? range.swap() : undefined, 1-containedIds);
   }
 
-  heatmapUrl(range = ranges.all(), options : any = {}) {
+  heatmapUrl(range = all(), options : any = {}) {
     options.transpose = options.transpose !== true;
     return this.t.heatmapUrl(range ? range.swap() : undefined, options);
   }
@@ -487,8 +486,8 @@ class TransposedMatrix extends MatrixBase  implements matrix.IMatrix {
  * @param t optional its transposed version
  * @constructor
  */
-class MatrixView extends MatrixBase implements matrix.IMatrix {
-  constructor(root: matrix.IMatrix, private range: ranges.Range, public t: matrix.IMatrix = null) {
+class MatrixView extends MatrixBase implements IMatrix {
+  constructor(root: IMatrix, private range: Range, public t: IMatrix = null) {
     super(root);
     this.range = range;
     //ensure that there are two dimensions
@@ -510,21 +509,21 @@ class MatrixView extends MatrixBase implements matrix.IMatrix {
     };
   }
 
-  ids(range: ranges.Range = ranges.all()) {
+  ids(range: Range = all()) {
     return this._root.ids(this.range.preMultiply(range, this._root.dim));
   }
 
-  cols(range: ranges.Range = ranges.all()) {
+  cols(range: Range = all()) {
     return this._root.cols(this.range.preMultiply(range, this._root.dim));
   }
-  colIds(range: ranges.Range = ranges.all()) {
+  colIds(range: Range = all()) {
     return this._root.colIds(this.range.preMultiply(range, this._root.dim));
   }
 
-  rows(range: ranges.Range = ranges.all()) {
+  rows(range: Range = all()) {
     return this._root.rows(this.range.preMultiply(range, this._root.dim));
   }
-  rowIds(range: ranges.Range = ranges.all()) {
+  rowIds(range: Range = all()) {
     return this._root.rowIds(this.range.preMultiply(range, this._root.dim));
   }
 
@@ -537,19 +536,19 @@ class MatrixView extends MatrixBase implements matrix.IMatrix {
     return this._root.at(inverted[0], inverted[1]);
   }
 
-  data(range: ranges.Range = ranges.all()) {
+  data(range: Range = all()) {
     return this._root.data(this.range.preMultiply(range, this._root.dim));
   }
 
-  hist(bins? : number, range: ranges.Range = ranges.all(), containedIds = 0) : Promise<math.IHistogram> {
+  hist(bins? : number, range: Range = all(), containedIds = 0) : Promise<IHistogram> {
     return this._root.hist(bins, this.range.preMultiply(range, this._root.dim), containedIds);
   }
 
-  heatmapUrl(range = ranges.all(), options : any = {}) {
+  heatmapUrl(range = all(), options : any = {}) {
     return this._root.heatmapUrl(this.range.preMultiply(range, this._root.dim), options);
   }
 
-  view(range: ranges.Range = ranges.all()) {
+  view(range: Range = all()) {
     if (range.isAll) {
       return this;
     }
@@ -581,12 +580,12 @@ class MatrixView extends MatrixBase implements matrix.IMatrix {
 /**
  * a simple projection of a matrix columns to a vector
  */
-class SliceColVector extends vector_impl.VectorBase implements vector.IVector {
-  desc : datatypes.IDataDescription;
-  private colRange: ranges.Range1D;
-  constructor(private m : matrix.IMatrix, private col: number) {
+class SliceColVector extends VectorBase implements IVector {
+  desc : IDataDescription;
+  private colRange: Range1D;
+  constructor(private m : IMatrix, private col: number) {
     super(null);
-    this.colRange = ranges.Range1D.from([this.col]);
+    this.colRange = Range1D.from([this.col]);
     this.desc = {
       name : m.desc.name+'-c'+col,
       fqname : m.desc.fqname+'-c'+col,
@@ -606,9 +605,9 @@ class SliceColVector extends vector_impl.VectorBase implements vector.IVector {
   }
 
   restore(persisted: any) {
-    var r : vector.IVector = this;
+    var r : IVector = this;
     if (persisted && persisted.range) { //some view onto it
-      r = r.view(ranges.parse(persisted.range));
+      r = r.view(parse(persisted.range));
     }
     return r;
   }
@@ -631,10 +630,10 @@ class SliceColVector extends vector_impl.VectorBase implements vector.IVector {
   /**
    * return the associated ids of this vector
    */
-  names(range?:ranges.Range) : Promise<string[]> {
+  names(range?:Range) : Promise<string[]> {
     return this.m.rows(range);
   }
-  ids(range?:ranges.Range) {
+  ids(range?:Range) {
     return this.m.rowIds(range);
   }
 
@@ -649,8 +648,8 @@ class SliceColVector extends vector_impl.VectorBase implements vector.IVector {
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range:ranges.Range = ranges.all()) : Promise<any[]> {
-    const r = ranges.list(range.dim(0),this.colRange);
+  data(range:Range = all()) : Promise<any[]> {
+    const r = rlist(range.dim(0),this.colRange);
     return this.m.data(r).then((d)=> {
       if (d.length > 0 && Array.isArray(d[0])) {
         return d.map((di) => di[0]);
@@ -659,22 +658,22 @@ class SliceColVector extends vector_impl.VectorBase implements vector.IVector {
     });
   }
 
-  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): Promise<vector.IVector> {
+  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): Promise<IVector> {
     return this.data().then((d) => {
-      var indices = C.argSort(d, compareFn, thisArg);
-      return this.view(ranges.list(indices));
+      var indices = argSort(d, compareFn, thisArg);
+      return this.view(rlist(indices));
     });
   }
 
-  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): Promise<vector.IVector> {
+  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): Promise<IVector> {
     //FIXME
     return null;
   }
 
-  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<vector.IVector> {
+  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<IVector> {
     return this.data().then((d) => {
-      var indices = C.argFilter(d, callbackfn, thisArg);
-      return this.view(ranges.list(indices));
+      var indices = argFilter(d, callbackfn, thisArg);
+      return this.view(rlist(indices));
     });
   }
 }
@@ -683,12 +682,12 @@ class SliceColVector extends vector_impl.VectorBase implements vector.IVector {
 /**
  * a simple projection of a matrix columns to a vector
  */
-class SliceRowVector extends vector_impl.VectorBase implements vector.IVector {
-  desc : datatypes.IDataDescription;
-  private rowRange: ranges.Range1D;
-  constructor(private m : matrix.IMatrix, private row: number) {
+class SliceRowVector extends VectorBase implements IVector {
+  desc : IDataDescription;
+  private rowRange: Range1D;
+  constructor(private m : IMatrix, private row: number) {
     super(null);
-    this.rowRange = ranges.Range1D.from([this.row]);
+    this.rowRange = Range1D.from([this.row]);
     this.desc = {
       name : m.desc.name+'-r'+row,
       fqname : m.desc.fqname+'-r'+row,
@@ -708,9 +707,9 @@ class SliceRowVector extends vector_impl.VectorBase implements vector.IVector {
   }
 
   restore(persisted: any) {
-    var r : vector.IVector = this;
+    var r : IVector = this;
     if (persisted && persisted.range) { //some view onto it
-      r = r.view(ranges.parse(persisted.range));
+      r = r.view(parse(persisted.range));
     }
     return r;
   }
@@ -733,10 +732,10 @@ class SliceRowVector extends vector_impl.VectorBase implements vector.IVector {
   /**
    * return the associated ids of this vector
    */
-  names(range?:ranges.Range) : Promise<string[]> {
+  names(range?:Range) : Promise<string[]> {
     return this.m.cols(range);
   }
-  ids(range?:ranges.Range) {
+  ids(range?:Range) {
     return this.m.colIds(range);
   }
 
@@ -751,29 +750,29 @@ class SliceRowVector extends vector_impl.VectorBase implements vector.IVector {
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range:ranges.Range = ranges.all()) : Promise<any[]> {
-    const r = ranges.list(this.rowRange,range.dim(0));
+  data(range:Range = all()) : Promise<any[]> {
+    const r = rlist(this.rowRange,range.dim(0));
     return this.m.data(r).then((d)=> {
       return d[0];
     });
   }
 
-  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): Promise<vector.IVector> {
+  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): Promise<IVector> {
     return this.data().then((d) => {
-      var indices = C.argSort(d, compareFn, thisArg);
-      return this.view(ranges.list(indices));
+      var indices = argSort(d, compareFn, thisArg);
+      return this.view(rlist(indices));
     });
   }
 
-  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): Promise<vector.IVector> {
+  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): Promise<IVector> {
     //FIXME
     return null;
   }
 
-  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<vector.IVector> {
+  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<IVector> {
     return this.data().then((d) => {
-      var indices = C.argFilter(d, callbackfn, thisArg);
-      return this.view(ranges.list(indices));
+      var indices = argFilter(d, callbackfn, thisArg);
+      return this.view(rlist(indices));
     });
   }
 }
@@ -781,10 +780,10 @@ class SliceRowVector extends vector_impl.VectorBase implements vector.IVector {
 /**
  * a simple projection of a matrix columns to a vector
  */
-class ProjectedVector extends vector_impl.VectorBase implements vector.IVector {
-  desc : datatypes.IDataDescription;
+class ProjectedVector extends VectorBase implements IVector {
+  desc : IDataDescription;
 
-  constructor(private m : matrix.IMatrix, private f : (row : any[]) => any, private this_f = m, public valuetype = m.valuetype, private _idtype = m.rowtype) {
+  constructor(private m : IMatrix, private f : (row : any[]) => any, private this_f = m, public valuetype = m.valuetype, private _idtype = m.rowtype) {
     super(null);
     this.desc = {
       name : m.desc.name+'-p',
@@ -807,9 +806,9 @@ class ProjectedVector extends vector_impl.VectorBase implements vector.IVector {
   }
 
   restore(persisted: any) {
-    var r : vector.IVector = this;
+    var r : IVector = this;
     if (persisted && persisted.range) { //some view onto it
-      r = r.view(ranges.parse(persisted.range));
+      r = r.view(parse(persisted.range));
     }
     return r;
   }
@@ -828,10 +827,10 @@ class ProjectedVector extends vector_impl.VectorBase implements vector.IVector {
   /**
    * return the associated ids of this vector
    */
-  names(range?:ranges.Range) : Promise<string[]> {
+  names(range?:Range) : Promise<string[]> {
     return this.m.rows(range);
   }
-  ids(range?:ranges.Range) {
+  ids(range?:Range) {
     return this.m.rowIds(range);
   }
 
@@ -841,7 +840,7 @@ class ProjectedVector extends vector_impl.VectorBase implements vector.IVector {
    * @param j
    */
   at(i:number) : Promise<any> {
-    return this.m.data(ranges.list(i)).then((d)=> {
+    return this.m.data(rlist(i)).then((d)=> {
       return this.f.call(this.this_f, d[0]);
     });
   }
@@ -849,28 +848,28 @@ class ProjectedVector extends vector_impl.VectorBase implements vector.IVector {
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range?:ranges.Range) : Promise<any[]> {
+  data(range?:Range) : Promise<any[]> {
     return this.m.data(range).then((d)=> {
       return d.map(this.f, this.this_f);
     });
   }
 
-  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): Promise<vector.IVector> {
+  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): Promise<IVector> {
     return this.data().then((d) => {
-      var indices = C.argSort(d, compareFn, thisArg);
-      return this.view(ranges.list(indices));
+      var indices = argSort(d, compareFn, thisArg);
+      return this.view(rlist(indices));
     });
   }
 
-  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): Promise<vector.IVector> {
+  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): Promise<IVector> {
     //FIXME
     return null;
   }
 
-  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<vector.IVector> {
+  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<IVector> {
     return this.data().then((d) => {
-      var indices = C.argFilter(d, callbackfn, thisArg);
-      return this.view(ranges.list(indices));
+      var indices = argFilter(d, callbackfn, thisArg);
+      return this.view(rlist(indices));
     });
   }
 }
@@ -880,8 +879,8 @@ class ProjectedVector extends vector_impl.VectorBase implements vector.IVector {
  * @param desc
  * @returns {IMatrix}
  */
-export function create(desc: datatypes.IDataDescription, loader?: IMatrixLoader2): matrix.IMatrix {
-  if (C.isFunction((<any>desc).loader)) {
+export function create(desc: IDataDescription, loader?: IMatrixLoader2): IMatrix {
+  if (isFunction((<any>desc).loader)) {
     return new Matrix(desc, adapterOne2Two((<any>desc).loader));
   }
   return new Matrix(desc, loader ? loader: viaAPI2Loader());

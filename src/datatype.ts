@@ -7,11 +7,9 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-'use strict';
-
-import * as C from './index';
-import * as idtypes from './idtype';
-import * as ranges from './range';
+import {IPersistable, isFunction, extendClass, mixin, argList} from './index';
+import {ISelectAble, SelectAble} from './idtype';
+import {all, none, Range1D, Range1DGroup, composite, Range} from './range';
 
 /**
  * basic description elements
@@ -41,7 +39,7 @@ export interface IDataDescription {
 /**
  * basic data type interface
  */
-export interface IDataType extends idtypes.ISelectAble, C.IPersistable {
+export interface IDataType extends ISelectAble, IPersistable {
   /**
    * its description
    */
@@ -53,7 +51,7 @@ export interface IDataType extends idtypes.ISelectAble, C.IPersistable {
   dim: number[];
 
 
-  idView(idRange?: ranges.Range) : Promise<IDataType>;
+  idView(idRange?: Range) : Promise<IDataType>;
 }
 
 export function isDataType(v: any) {
@@ -61,7 +59,7 @@ export function isDataType(v: any) {
     return true;
   }
   //sounds good
-  return (C.isFunction(v.idView) && C.isFunction(v.persist) && C.isFunction(v.restore) && v instanceof idtypes.SelectAble && ('desc' in v) && ('dim' in v));
+  return (isFunction(v.idView) && isFunction(v.persist) && isFunction(v.restore) && v instanceof SelectAble && ('desc' in v) && ('dim' in v));
 }
 
 /**
@@ -76,7 +74,7 @@ export function assignData(node: Element, data: IDataType) {
 /**
  * dummy data type just holding the description
  */
-export class DataTypeBase extends idtypes.SelectAble implements IDataType {
+export class DataTypeBase extends SelectAble implements IDataType {
   constructor(public desc: IDataDescription) {
     super();
   }
@@ -85,11 +83,11 @@ export class DataTypeBase extends idtypes.SelectAble implements IDataType {
     return [];
   }
 
-  ids(range:ranges.Range = ranges.all()) : Promise<ranges.Range> {
-    return Promise.resolve(ranges.none());
+  ids(range:Range = all()) : Promise<Range> {
+    return Promise.resolve(none());
   }
 
-  idView(idRange?: ranges.Range) : Promise<DataTypeBase> {
+  idView(idRange?: Range) : Promise<DataTypeBase> {
     return Promise.resolve(this);
   }
 
@@ -152,7 +150,7 @@ export function mask(arr: any|any[], desc: { type: string; missing?: number}) {
  * @return {any}
  */
 export function categorical2partitioning<T>(data: T[], categories: T[], options = {}) {
-  const m = C.mixin({
+  const m = mixin({
     skipEmptyCategories : true,
     colors: ['gray'],
     labels: null,
@@ -175,9 +173,9 @@ export function categorical2partitioning<T>(data: T[], categories: T[], options 
     groups = groups.filter((g) => g.indices.length > 0);
   }
   var granges = groups.map((g) => {
-    return new ranges.Range1DGroup(g.name, g.color, ranges.Range1D.from(g.indices));
+    return new Range1DGroup(g.name, g.color, Range1D.from(g.indices));
   });
-  return ranges.composite(m.name, granges);
+  return composite(m.name, granges);
 }
 
 /**
@@ -189,13 +187,13 @@ export function categorical2partitioning<T>(data: T[], categories: T[], options 
 export function defineDataType(name: string, functions: any) {
   function DataType(desc: IDataDescription) {
     DataTypeBase.call(this, desc);
-    if (C.isFunction(this.init)) {
-      this.init.apply(this, C.argList(arguments));
+    if (isFunction(this.init)) {
+      this.init.apply(this, argList(arguments));
     }
   }
-  C.extendClass(DataType, DataTypeBase);
+  extendClass(DataType, DataTypeBase);
   DataType.prototype.toString = () => name;
-  DataType.prototype = C.mixin(DataType.prototype, functions);
+  DataType.prototype = mixin(DataType.prototype, functions);
 
   return DataType;
 }

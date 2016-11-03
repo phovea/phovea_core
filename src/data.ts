@@ -6,21 +6,21 @@
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
-import * as C from './index';
-import * as ajax from './ajax';
-import * as plugins from './plugin';
-import * as datatypes from './datatype';
-import * as tables from './table';
-import * as tables_impl from './table_impl';
+import {random_id as core_random_id, offline as isOffline, constantTrue} from './index';
+import {getAPIJSON, sendAPI} from './ajax';
+import {list as listPlugins} from './plugin';
+import {IDataDescription, IDataType, DataTypeBase} from './datatype';
+import {ITable} from './table';
+import {wrapObjects} from './table_impl';
 
 //find all datatype plugins
-const available = plugins.list('datatype');
+const available = listPlugins('datatype');
 
-var cacheById:{ [key : string]: Promise<datatypes.IDataType> } = {};
-var cacheByName:{ [key : string]: Promise<datatypes.IDataType> } = {};
-var cacheByFQName:{ [key : string]: Promise<datatypes.IDataType> } = {};
+var cacheById:{ [key : string]: Promise<IDataType> } = {};
+var cacheByName:{ [key : string]: Promise<IDataType> } = {};
+var cacheByFQName:{ [key : string]: Promise<IDataType> } = {};
 
-export function clearCache(dataset?: datatypes.IDataType | datatypes.IDataDescription) {
+export function clearCache(dataset?: IDataType | IDataDescription) {
   if (dataset) {
     const desc : any = (<any>dataset).desc || dataset;
     delete cacheById[desc.id];
@@ -33,11 +33,11 @@ export function clearCache(dataset?: datatypes.IDataType | datatypes.IDataDescri
   }
 }
 
-function getCachedEntries() : Promise<datatypes.IDataType[]> {
+function getCachedEntries() : Promise<IDataType[]> {
   return Promise.all(Object.keys(cacheById).map((k) => cacheById[k]));
 }
 
-function cached(desc : datatypes.IDataDescription, result : Promise<datatypes.IDataType>) {
+function cached(desc : IDataDescription, result : Promise<IDataType>) {
   cacheById[desc.id] = result;
   cacheByFQName[desc.fqname] = result;
   cacheByName[desc.name] = result;
@@ -58,14 +58,14 @@ export function fixId(id) {
   return r;
 }
 
-export const random_id = C.random_id;
+export const random_id = core_random_id;
 
 /**
  * create an object out of a description
  * @param desc
  * @returns {*}
  */
-function transformEntry(desc: any) : Promise<datatypes.IDataType> {
+function transformEntry(desc: any) : Promise<IDataType> {
   if (desc === undefined) {
     return null;
   }
@@ -80,7 +80,7 @@ function transformEntry(desc: any) : Promise<datatypes.IDataType> {
   const plugin = available.filter((p) => p.id === desc.type);
   //no type there create a dummy one
   if (plugin.length === 0) {
-    return cached(desc, Promise.resolve(new datatypes.DataTypeBase(desc)));
+    return cached(desc, Promise.resolve(new DataTypeBase(desc)));
   }
   //take the first matching one
   return cached(desc, plugin[0].load().then((p) => {
@@ -90,20 +90,20 @@ function transformEntry(desc: any) : Promise<datatypes.IDataType> {
 
 /**
  * returns a promise for getting a map of all available data
- * @returns {Promise<datatypes.IDataType[]>}
+ * @returns {Promise<IDataType[]>}
  */
-export function list(): Promise<datatypes.IDataType[]>;
-export function list(query : { [key: string] : string }): Promise<datatypes.IDataType[]>;
-export function list(filter : (d: datatypes.IDataType) => boolean): Promise<datatypes.IDataType[]>;
+export function list(): Promise<IDataType[]>;
+export function list(query : { [key: string] : string }): Promise<IDataType[]>;
+export function list(filter : (d: IDataType) => boolean): Promise<IDataType[]>;
 export function list(query?: any) {
-  const f = (typeof query === 'function') ? <(d: datatypes.IDataType) => boolean>query : C.constantTrue;
+  const f = (typeof query === 'function') ? <(d: IDataType) => boolean>query : constantTrue;
   const q = (typeof query !== 'undefined' && typeof query !== 'function') ? <any>query : {};
 
-  var r = C.offline ? getCachedEntries() : ajax.getAPIJSON('/dataset/', q).then(function (descs) {
+  var r = isOffline ? getCachedEntries() : getAPIJSON('/dataset/', q).then(function (descs) {
       //load descriptions and create data out of them
       return <any> Promise.all(descs.map((desc) => transformEntry(desc)));
   });
-  if (f !== C.constantTrue) {
+  if (f !== constantTrue) {
     r = r.then((arr) => arr.filter(f));
   }
   return r;
@@ -120,7 +120,7 @@ export interface INode {
  * @param list
  * @returns {{children: Array, name: string, data: null}}
  */
-export function convertToTree(list: datatypes.IDataType[]) {
+export function convertToTree(list: IDataType[]) {
   //create a tree out of the list by the fqname
   const root = { children: [], name: '/', data: null};
   list.forEach((entry) => {
@@ -145,7 +145,7 @@ export function convertToTree(list: datatypes.IDataType[]) {
  */
 export function tree(): Promise<INode>;
 export function tree(query : { [key: string] : string }): Promise<INode>;
-export function tree(filter : (d: datatypes.IDataType) => boolean): Promise<INode>;
+export function tree(filter : (d: IDataType) => boolean): Promise<INode>;
 export function tree(query ?: any): Promise<INode> {
   return list(query).then(convertToTree);
 }
@@ -155,7 +155,7 @@ export function tree(query ?: any): Promise<INode> {
  * @param query
  * @returns {any}
  */
-export function getFirst(query: any | string | RegExp) : Promise<datatypes.IDataType> {
+export function getFirst(query: any | string | RegExp) : Promise<IDataType> {
   if (typeof query === 'string' || query instanceof RegExp) {
     return getFirstByName(<string>query);
   }
@@ -200,15 +200,15 @@ function getById(id: string) {
   if (id in cacheById) {
     return cacheById[id];
   }
-  return ajax.getAPIJSON('/dataset/'+id+'/desc', {}).then(transformEntry);
+  return getAPIJSON('/dataset/'+id+'/desc', {}).then(transformEntry);
 }
 
 /**
  * returns a promise for getting a specific dataset
  * @param persisted an id or peristed object containing the id
- * @returns {Promise<datatypes.IDataType>}
+ * @returns {Promise<IDataType>}
  */
-export function get(persisted: any | string) : Promise<datatypes.IDataType> {
+export function get(persisted: any | string) : Promise<IDataType> {
   if (typeof persisted === 'string') {
     return getById(<string>persisted);
   }
@@ -226,9 +226,9 @@ export function get(persisted: any | string) : Promise<datatypes.IDataType> {
 /**
  * creates a new dataset for the given description
  * @param desc
- * @returns {Promise<datatypes.IDataType>}
+ * @returns {Promise<IDataType>}
  */
-export function create(desc: any) : Promise<datatypes.IDataType> {
+export function create(desc: any) : Promise<IDataType> {
   return transformEntry(desc);
 }
 
@@ -247,9 +247,9 @@ function prepareData(desc: any, file?) {
  * @param file
  * @returns {Promise<*>}
  */
-export function upload(desc: any, file?) : Promise<datatypes.IDataType> {
+export function upload(desc: any, file?) : Promise<IDataType> {
   const data = prepareData(desc, file);
-  return ajax.sendAPI('/dataset/',data, 'post').then(transformEntry);
+  return sendAPI('/dataset/',data, 'post').then(transformEntry);
 }
 
 /**
@@ -258,9 +258,9 @@ export function upload(desc: any, file?) : Promise<datatypes.IDataType> {
  * @param file
  * @returns {Promise<*>} returns the update dataset
  */
-export function update(entry: datatypes.IDataType, desc: any, file?) : Promise<datatypes.IDataType> {
+export function update(entry: IDataType, desc: any, file?) : Promise<IDataType> {
   const data = prepareData(desc, file);
-  return ajax.sendAPI('/dataset/'+entry.desc.id, data, 'put').then((desc) => {
+  return sendAPI('/dataset/'+entry.desc.id, data, 'put').then((desc) => {
     clearCache(entry);
     return transformEntry(desc);
   });
@@ -272,9 +272,9 @@ export function update(entry: datatypes.IDataType, desc: any, file?) : Promise<d
  * @param file
  * @returns {Promise<*>} returns the update dataset
  */
-export function modify(entry: datatypes.IDataType, desc: any, file?) : Promise<datatypes.IDataType> {
+export function modify(entry: IDataType, desc: any, file?) : Promise<IDataType> {
   const data = prepareData(desc, file);
-  return ajax.sendAPI('/dataset/'+entry.desc.id, data, 'post').then((desc) => {
+  return sendAPI('/dataset/'+entry.desc.id, data, 'post').then((desc) => {
     clearCache(entry);
     return transformEntry(desc);
   });
@@ -285,9 +285,9 @@ export function modify(entry: datatypes.IDataType, desc: any, file?) : Promise<d
  * @param entry
  * @returns {Promise<boolean>}
  */
-export function remove(entry: datatypes.IDataType | datatypes.IDataDescription): Promise<Boolean> {
+export function remove(entry: IDataType | IDataDescription): Promise<Boolean> {
   const desc : any = (<any>entry).desc || entry;
-  return ajax.sendAPI('/dataset/'+desc.id, {}, 'delete').then((result) => {
+  return sendAPI('/dataset/'+desc.id, {}, 'delete').then((result) => {
     clearCache(desc);
     return true;
   });
@@ -298,8 +298,8 @@ export function remove(entry: datatypes.IDataType | datatypes.IDataDescription):
  * @param list
  * @returns {any}
  */
-export function convertToTable(list : datatypes.IDataType[]) {
-  return tables_impl.wrapObjects({
+export function convertToTable(list : IDataType[]) {
+  return wrapObjects({
     id : '_data',
     name: 'data',
     fqname: 'custom/data',
@@ -336,19 +336,19 @@ export function convertToTable(list : datatypes.IDataType[]) {
         getter: (d) => d.idtypes.join(' x ')
       },
     ]
-  }, list, (d : datatypes.IDataType) => d.desc.name);
+  }, list, (d : IDataType) => d.desc.name);
 }
 
 /**
  * utilility function converting all contained tables in their vectors of individual columns
  * @param list
- * @returns {datatypes.IDataType[]}
+ * @returns {IDataType[]}
  */
-export function convertTableToVectors(list: datatypes.IDataType[]) {
-  const r : datatypes.IDataType[] = [];
+export function convertTableToVectors(list: IDataType[]) {
+  const r : IDataType[] = [];
   list.forEach((d) => {
     if (d.desc.type === 'table') {
-      r.push.apply(r, (<tables.ITable>d).cols());
+      r.push.apply(r, (<ITable>d).cols());
     } else {
       r.push(d);
     }

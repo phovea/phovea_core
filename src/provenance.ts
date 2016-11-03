@@ -1,13 +1,13 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import * as C from './index';
-import * as plugins from './plugin';
-import * as datas from './data';
+import {isFunction, constant, argList, mixin, search, hash, resolveIn} from './index';
+import {get as getData, remove as removeData, upload, list as listData} from './data';
 import * as graph from './graph';
-import * as idtypes from './idtype';
-import * as ranges from './range';
-import * as datatypes from './datatype';
+import {IDType, SelectOperation, defaultSelectionType, resolve as resolveIDType} from './idtype';
+import {Range, list as rlist, Range1D, all} from './range';
+import {isDataType, IDataType, IDataDescription, DataTypeBase} from './datatype';
+import {list as listPlugins, load as loadPlugin} from './plugin';
 import * as session from './session';
 
 /**
@@ -133,8 +133,8 @@ function persistData(v:any):any {
       id = e.getAttribute('id');
     return {type: 'element', id: id};
   }
-  if (datatypes.isDataType(v)) {
-    let e = <datatypes.IDataType>v;
+  if (isDataType(v)) {
+    let e = <IDataType>v;
     return {type: 'dataset', id: e.desc.id, persist: e.persist()};
   }
   if (typeof v === 'string' || typeof v === 'number') {
@@ -154,7 +154,7 @@ function restoreData(v:any):any {
       }
       return null;
     case 'dataset':
-      return datas.get(v.persist);
+      return getData(v.persist);
     case 'primitive':
       return Promise.resolve(v.v);
   }
@@ -787,10 +787,10 @@ function compositeCompressor(cs:IActionCompressor[]) {
   };
 }
 function createCompressor(path:ActionNode[]) {
-  var toload = plugins.list('actionCompressor').filter((plugin:any) => {
+  var toload = listPlugins('actionCompressor').filter((plugin:any) => {
     return path.some((action) => action.f_id.match(plugin.matches) != null);
   });
-  return plugins.load(toload).then((loaded) => {
+  return loadPlugin(toload).then((loaded) => {
     return compositeCompressor(loaded.map((l) => <IActionCompressor>l.factory));
   });
 }
@@ -834,8 +834,8 @@ function findCommon<T>(a:T[], b:T[]) {
 }
 
 function asFunction(i) {
-  if (!C.isFunction(i)) { //make a function
-    return C.constant(i);
+  if (!isFunction(i)) { //make a function
+    return constant(i);
   }
   return i;
 }
@@ -857,7 +857,7 @@ function createNoop() {
 }
 
 function createLazyCmdFunctionFactory():ICmdFunctionFactory {
-  const facts = plugins.list('actionFactory');
+  const facts = listPlugins('actionFactory');
 
   function resolveFun(id) {
     if (id === 'noop') {
@@ -873,7 +873,7 @@ function createLazyCmdFunctionFactory():ICmdFunctionFactory {
   const lazyFunction = (id) => {
     var _resolved = null;
     return function (inputs:IObjectRef<any>[], parameters:any) {
-      var that = this, args = C.argList(arguments);
+      var that = this, args = argList(arguments);
       if (_resolved == null) {
         _resolved = resolveFun(id);
       }
@@ -906,11 +906,11 @@ export enum ProvenanceGraphDim {
 }
 
 export interface IProvenanceGraphManager {
-  list(): Promise<datatypes.IDataDescription[]>;
-  get(desc:datatypes.IDataDescription): Promise<ProvenanceGraph>;
+  list(): Promise<IDataDescription[]>;
+  get(desc:IDataDescription): Promise<ProvenanceGraph>;
   create(): Promise<ProvenanceGraph>;
 
-  delete(desc:datatypes.IDataDescription): Promise<boolean>;
+  delete(desc:IDataDescription): Promise<boolean>;
 
   import(json:any): Promise<ProvenanceGraph>;
 }
@@ -923,7 +923,7 @@ export class LocalStorageProvenanceGraphManager implements IProvenanceGraphManag
   };
 
   constructor(options = {}) {
-    C.mixin(this.options, options);
+    mixin(this.options, options);
   }
 
   list() {
@@ -933,11 +933,11 @@ export class LocalStorageProvenanceGraphManager implements IProvenanceGraphManag
   }
 
 
-  getGraph(desc:datatypes.IDataDescription):Promise<graph.LocalStorageGraph> {
+  getGraph(desc:IDataDescription):Promise<graph.LocalStorageGraph> {
     return Promise.resolve(graph.LocalStorageGraph.load(desc, provenanceGraphFactory(), this.options.storage));
   }
 
-  get(desc:datatypes.IDataDescription):Promise<ProvenanceGraph> {
+  get(desc:IDataDescription):Promise<ProvenanceGraph> {
     return this.getGraph(desc).then((impl) => new ProvenanceGraph(desc, impl));
   }
 
@@ -957,7 +957,7 @@ export class LocalStorageProvenanceGraphManager implements IProvenanceGraphManag
     });
   }
 
-  delete(desc:datatypes.IDataDescription) {
+  delete(desc:IDataDescription) {
     var lists = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
     lists.splice(lists.indexOf(desc.id), 1);
     graph.LocalStorageGraph.delete(desc);
@@ -1014,24 +1014,24 @@ export class RemoteStorageProvenanceGraphManager implements IProvenanceGraphMana
   };
 
   constructor(options = {}) {
-    C.mixin(this.options, options);
+    mixin(this.options, options);
   }
 
   list() {
-    return datas.list((d) => d.desc.type === 'graph' && (<any>d.desc).attrs.graphtype === 'provenance_graph' && (<any>d.desc).attrs.of === this.options.application).then((d) => d.map((di) => di.desc));
+    return listData((d) => d.desc.type === 'graph' && (<any>d.desc).attrs.graphtype === 'provenance_graph' && (<any>d.desc).attrs.of === this.options.application).then((d) => d.map((di) => di.desc));
   }
 
-  getGraph(desc:datatypes.IDataDescription):Promise<graph.GraphBase> {
-    return datas.get(desc.id)
+  getGraph(desc:IDataDescription):Promise<graph.GraphBase> {
+    return getData(desc.id)
       .then((graph:graph.GraphProxy) => graph.impl(provenanceGraphFactory()));
   }
 
-  get(desc:datatypes.IDataDescription):Promise<ProvenanceGraph> {
+  get(desc:IDataDescription):Promise<ProvenanceGraph> {
     return this.getGraph(desc).then((impl:graph.GraphBase) => new ProvenanceGraph(desc, impl));
   }
 
-  delete(desc:datatypes.IDataDescription) {
-    return datas.remove(desc);
+  delete(desc:IDataDescription) {
+    return removeData(desc);
   }
 
   import(json:any):Promise<ProvenanceGraph> {
@@ -1049,7 +1049,7 @@ export class RemoteStorageProvenanceGraphManager implements IProvenanceGraphMana
       nodes: json.nodes,
       edges: json.edges
     };
-    return datas.upload(desc)
+    return upload(desc)
       .then((graph:graph.GraphProxy) => graph.impl(provenanceGraphFactory()))
       .then((impl:graph.GraphBase) => new ProvenanceGraph(impl.desc, impl));
   }
@@ -1066,7 +1066,7 @@ export class RemoteStorageProvenanceGraphManager implements IProvenanceGraphMana
       ts: Date.now(),
       description: ''
     };
-    return datas.upload(desc)
+    return upload(desc)
       .then((graph:graph.GraphProxy) => graph.impl(provenanceGraphFactory()))
       .then((impl:graph.GraphBase) => new ProvenanceGraph(impl.desc, impl));
   }
@@ -1090,11 +1090,11 @@ export class MixedStorageProvenanceGraphManager implements IProvenanceGraphManag
     return this.local.list();
   }
 
-  list():Promise<datatypes.IDataDescription[]> {
+  list():Promise<IDataDescription[]> {
     return Promise.all([this.listLocal(), this.listRemote()]).then((arr) => arr[0].concat(arr[1]));
   }
 
-  delete(desc:datatypes.IDataDescription):Promise<boolean> {
+  delete(desc:IDataDescription):Promise<boolean> {
     if ((<any>desc).local) {
       return this.local.delete(desc);
     } else {
@@ -1102,7 +1102,7 @@ export class MixedStorageProvenanceGraphManager implements IProvenanceGraphManag
     }
   }
 
-  get(desc:datatypes.IDataDescription):Promise<ProvenanceGraph> {
+  get(desc:IDataDescription):Promise<ProvenanceGraph> {
     if ((<any>desc).local) {
       return this.local.get(desc);
     } else {
@@ -1110,7 +1110,7 @@ export class MixedStorageProvenanceGraphManager implements IProvenanceGraphManag
     }
   }
 
-  getGraph(desc:datatypes.IDataDescription):Promise<graph.GraphBase> {
+  getGraph(desc:IDataDescription):Promise<graph.GraphBase> {
     if ((<any>desc).local) {
       return this.local.getGraph(desc);
     } else {
@@ -1118,7 +1118,7 @@ export class MixedStorageProvenanceGraphManager implements IProvenanceGraphManag
     }
   }
 
-  cloneLocal(desc:datatypes.IDataDescription):Promise<ProvenanceGraph> {
+  cloneLocal(desc:IDataDescription):Promise<ProvenanceGraph> {
     return this.getGraph(desc).then(this.local.clone.bind(this.local));
   }
 
@@ -1151,7 +1151,7 @@ function findMetaObject<T>(find:IObjectRef<T>) {
   return (obj:ObjectNode<any>) => find === obj || ((obj.value === null || obj.value === find.value) && (find.hash === obj.hash));
 }
 
-export class ProvenanceGraph extends datatypes.DataTypeBase {
+export class ProvenanceGraph extends DataTypeBase {
   private _actions:ActionNode[] = [];
   private _objects:ObjectNode<any>[] = [];
   private _states:StateNode[] = [];
@@ -1165,7 +1165,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
   executeCurrentActionWithin = -1;
   private nextQueue:(()=>any)[] = [];
 
-  constructor(desc:datatypes.IDataDescription, public backend:graph.GraphBase) {
+  constructor(desc:IDataDescription, public backend:graph.GraphBase) {
     super(desc);
     this.propagate(this.backend, 'sync', 'add_edge', 'add_node', 'sync_node', 'sync_edge', 'sync_start');
 
@@ -1191,31 +1191,31 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
     return [this._actions.length, this._objects.length, this._states.length, this._slides.length];
   }
 
-  ids(range:ranges.Range = ranges.all()) {
+  ids(range:Range = all()) {
     const to_id = (a:any) => a.id;
-    const actions = ranges.Range1D.from(this._actions.map(to_id));
-    const objects = ranges.Range1D.from(this._objects.map(to_id));
-    const states = ranges.Range1D.from(this._states.map(to_id));
-    const stories = ranges.Range1D.from(this._slides.map(to_id));
-    return Promise.resolve(range.preMultiply(ranges.list(actions, objects, states, stories)));
+    const actions = Range1D.from(this._actions.map(to_id));
+    const objects = Range1D.from(this._objects.map(to_id));
+    const states = Range1D.from(this._states.map(to_id));
+    const stories = Range1D.from(this._slides.map(to_id));
+    return Promise.resolve(range.preMultiply(rlist(actions, objects, states, stories)));
   }
 
-  selectState(state:StateNode, op:idtypes.SelectOperation = idtypes.SelectOperation.SET, type = idtypes.defaultSelectionType, extras = {}) {
+  selectState(state:StateNode, op:SelectOperation = SelectOperation.SET, type = defaultSelectionType, extras = {}) {
     this.fire('select_state,select_state_' + type, state, type, op, extras);
     this.select(ProvenanceGraphDim.State, type, state ? [this._states.indexOf(state)] : [], op);
   }
 
-  selectSlide(state:SlideNode, op:idtypes.SelectOperation = idtypes.SelectOperation.SET, type = idtypes.defaultSelectionType, extras = {}) {
+  selectSlide(state:SlideNode, op:SelectOperation = SelectOperation.SET, type = defaultSelectionType, extras = {}) {
     this.fire('select_slide,select_slide_' + type, state, type, op, extras);
     this.select(ProvenanceGraphDim.Slide, type, state ? [this._slides.indexOf(state)] : [], op);
   }
 
-  selectAction(action:ActionNode, op:idtypes.SelectOperation = idtypes.SelectOperation.SET, type = idtypes.defaultSelectionType) {
+  selectAction(action:ActionNode, op:SelectOperation = SelectOperation.SET, type = defaultSelectionType) {
     this.fire('select_action,select_action_' + type, action, type, op);
     this.select(ProvenanceGraphDim.Action, type, action ? [this._actions.indexOf(action)] : [], op);
   }
 
-  selectedStates(type = idtypes.defaultSelectionType):StateNode[] {
+  selectedStates(type = defaultSelectionType):StateNode[] {
     const sel = this.idtypes[ProvenanceGraphDim.State].selections(type);
     if (sel.isNone) {
       return [];
@@ -1233,7 +1233,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
   }
 
 
-  selectedSlides(type = idtypes.defaultSelectionType):SlideNode[] {
+  selectedSlides(type = defaultSelectionType):SlideNode[] {
     const sel = this.idtypes[ProvenanceGraphDim.Slide].selections(type);
     if (sel.isNone) {
       return [];
@@ -1250,8 +1250,8 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
     return nodes;
   }
 
-  get idtypes():idtypes.IDType[] {
-    return ['_provenance_actions', '_provenance_objects', '_provenance_states', '_provenance_stories'].map(idtypes.resolve);
+  get idtypes():IDType[] {
+    return ['_provenance_actions', '_provenance_objects', '_provenance_states', '_provenance_stories'].map(resolveIDType);
   }
 
   clear() {
@@ -1275,7 +1275,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
   }
 
   getStateById(id:number) {
-    return C.search(this._states, (s) => s.id === id);
+    return search(this._states, (s) => s.id === id);
   }
 
   get actions() {
@@ -1283,7 +1283,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
   }
 
   getActionById(id:number) {
-    return C.search(this._actions, (s) => s.id === id);
+    return search(this._actions, (s) => s.id === id);
   }
 
   get objects() {
@@ -1291,7 +1291,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
   }
 
   getObjectById(id:number) {
-    return C.search(this._objects, (s) => s.id === id);
+    return search(this._objects, (s) => s.id === id);
   }
 
   get stories() {
@@ -1299,7 +1299,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
   }
 
   getSlideById(id:number) {
-    return C.search(this._slides, (s) => s.id === id);
+    return search(this._slides, (s) => s.id === id);
   }
 
   getSlideChains() {
@@ -1381,7 +1381,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
   }
 
   findObject<T>(value:T) {
-    var r = C.search(this._objects, (obj) => obj.value === value);
+    var r = search(this._objects, (obj) => obj.value === value);
     if (r) {
       return r;
     }
@@ -1431,7 +1431,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
       return <ObjectNode<any>>(<any>r)._resolvesTo;
     }
     //else create a new instance
-    const result = C.search(arr, findMetaObject(r));
+    const result = search(arr, findMetaObject(r));
     (<any>r)._resolvesTo = result;
     return result;
   }
@@ -1454,7 +1454,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
     }
     if (j.hasOwnProperty('value') && j.hasOwnProperty('name')) { //sounds like an proxy
       j.category = j.category || cat.data;
-      r = C.search(this._objects, findMetaObject(j));
+      r = search(this._objects, findMetaObject(j));
       if (r) {
         if (r.value === null) { //restore instance
           r.value = j.value;
@@ -1465,7 +1465,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
       }
       return this.addObjectImpl(j.value, j.name, j.category, j.hash, createEdge);
     } else { //raw value
-      r = C.search(this._objects, (obj) => (obj.value === null || obj.value === i) && (name === null || obj.name === name) && (type === null || type === obj.category));
+      r = search(this._objects, (obj) => (obj.value === null || obj.value === i) && (name === null || obj.name === name) && (type === null || type === obj.category));
       if (r) {
         if (r.value === null) { //restore instance
           r.value = i;
@@ -1492,7 +1492,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
   private executedAction(action: ActionNode, newState: boolean, result) {
     const current = this.act;
     const next = action.resultsIn;
-    result = C.mixin({created: [], removed: [], inverse: null, consumed: 0}, result);
+    result = mixin({created: [], removed: [], inverse: null, consumed: 0}, result);
     this.fire('executed', action, result);
 
     var firstTime = !action.onceExecuted;
@@ -1555,12 +1555,12 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
       this.addEdge(action, 'resultsIn', next);
     }
     this.fire('execute', action);
-    if (C.hash.is('debug')) {
+    if (hash.is('debug')) {
       console.log('execute ' + action.meta + ' ' + action.f_id);
     }
     this.currentlyRunning = true;
 
-    if (C.isFunction(withinMilliseconds)) {
+    if (isFunction(withinMilliseconds)) {
       withinMilliseconds = (<any>withinMilliseconds)();
     }
     this.executeCurrentActionWithin = <number>withinMilliseconds;
@@ -1596,7 +1596,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
   private runChain(actions:ActionNode[], withinMilliseconds = -1) {
     if (actions.length === 0) {
       if (withinMilliseconds > 0) {
-        return C.resolveIn(withinMilliseconds).then(() => []);
+        return resolveIn(withinMilliseconds).then(() => []);
       }
       return Promise.resolve([]);
     }
@@ -1651,7 +1651,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
       var actions:ActionNode[] = [],
         act = this.act;
       if (act === state) { //jump to myself
-        return withinMilliseconds >= 0 ? C.resolveIn(withinMilliseconds).then(() => []) : Promise.resolve([]);
+        return withinMilliseconds >= 0 ? resolveIn(withinMilliseconds).then(() => []) : Promise.resolve([]);
       }
       //lets look at the simple past
       var act_path = act.path,
@@ -1808,7 +1808,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
         clone.setAttr(attr, state.getAttr(attr, null));
       }
     });
-    clone.setAttr('annotations', state.annotations.map((a) => C.mixin({}, a)));
+    clone.setAttr('annotations', state.annotations.map((a) => mixin({}, a)));
     return clone;
   }
 

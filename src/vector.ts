@@ -7,14 +7,13 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-'use strict';
-import * as ranges from './range';
-import * as idtypes from './idtype';
-import * as datatypes from './datatype';
-import * as stratification from './stratification';
-import * as math from './math';
+import {Range, CompositeRange1D} from './range';
+import {IDType} from './idtype';
+import {IDataType} from './datatype';
+import {IStratification} from './stratification';
+import {IStatistics, IHistogram} from './math';
 
-export interface IVector extends datatypes.IDataType {
+export interface IVector extends IDataType {
   /**
    * length of the vector
    */
@@ -26,17 +25,17 @@ export interface IVector extends datatypes.IDataType {
   /**
    * id type
    */
-  idtype:idtypes.IDType;
+  idtype:IDType;
 
   /**
    * return the associated ids of this vector
    */
-  names(range?:ranges.Range) : Promise<string[]>;
+  names(range?:Range) : Promise<string[]>;
   /**
    * creates a new view on this matrix specified by the given range
    * @param range
    */
-  view(range?:ranges.Range) : IVector;
+  view(range?:Range) : IVector;
   /**
    * returns a promise for getting one cell
    * @param i
@@ -47,11 +46,11 @@ export interface IVector extends datatypes.IDataType {
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range?:ranges.Range) : Promise<any[]>;
+  data(range?:Range) : Promise<any[]>;
 
-  stats() : Promise<math.IStatistics>;
+  stats() : Promise<IStatistics>;
 
-  hist(bins? : number, range?:ranges.Range) : Promise<math.IHistogram>;
+  hist(bins? : number, range?:Range) : Promise<IHistogram>;
 
 
   /**
@@ -130,7 +129,7 @@ export interface IVector extends datatypes.IDataType {
   /**
    * return the range of this vector as a grouped range, depending on the type this might be a single group or multiple ones
    */
-  groups(): Promise<ranges.CompositeRange1D>;
+  groups(): Promise<CompositeRange1D>;
 
-  stratification(): Promise<stratification.IStratification>;
+  stratification(): Promise<IStratification>;
 }

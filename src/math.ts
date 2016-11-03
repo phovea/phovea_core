@@ -7,8 +7,8 @@
  * Created by Samuel Gratzl on 29.08.2014.
  */
 
-import * as ranges from './range';
-import * as C from './index';
+import {none, list, Range, Range1D, CompositeRange1D} from './range';
+import {indexOf} from './index';
 /**
  * simple number statistics similar to DoubleStatistics in Caleydo
  * TODO use a standard library for that
@@ -48,12 +48,12 @@ export interface IHistogram extends IIterable<number> {
   validCount: number;
 
   frequency(bin: number) : number;
-  range(bin: number): ranges.Range;
+  range(bin: number): Range;
 
   binOf(value: any) : number;
 
   missing: number;
-  missingRange: ranges.Range;
+  missingRange: Range;
 
   forEach(callbackfn: (value: number, index: number) => void, thisArg?: any): void;
 }
@@ -144,19 +144,19 @@ export function computeStats(...arr: IIterable<number>[]) : IStatistics {
   return r;
 }
 
-export function hist(arr: IIterable<number>, indices: ranges.Range1D, size: number, bins: number, range: number[]) : IHistogram {
+export function hist(arr: IIterable<number>, indices: Range1D, size: number, bins: number, range: number[]) : IHistogram {
   const r = new Histogram(bins, range);
   r.pushAll(arr, indices, size);
   return r;
 }
 
-export function categoricalHist<T>(arr: IIterable<T>, indices: ranges.Range1D, size: number, categories: T[], labels: string[], colors: string[]) : IHistogram {
+export function categoricalHist<T>(arr: IIterable<T>, indices: Range1D, size: number, categories: T[], labels: string[], colors: string[]) : IHistogram {
   const r = new CatHistogram(categories, labels, colors);
   r.pushAll(arr, indices, size);
   return r;
 }
 
-export function rangeHist(range: ranges.CompositeRange1D) {
+export function rangeHist(range: CompositeRange1D) {
   return new RangeHistogram(range);
 }
 export function wrapHist(hist: number[], value_range: number[]) {
@@ -166,8 +166,8 @@ export function wrapHist(hist: number[], value_range: number[]) {
 class AHistogram implements IHistogram {
   private bins_ : number[];
   private missing_ : number = 0;
-  private ranges_ : ranges.Range[];
-  private missingRange_  = ranges.none();
+  private ranges_ : Range[];
+  private missingRange_  = none();
 
   constructor(bins: number, hist?: number[]) {
     this.bins_ = [];
@@ -205,7 +205,7 @@ class AHistogram implements IHistogram {
   }
 
   range(bin:number) {
-    return this.ranges_ ? this.ranges_[bin] : ranges.none();
+    return this.ranges_ ? this.ranges_[bin] : none();
   }
 
   get missing() {
@@ -216,7 +216,7 @@ class AHistogram implements IHistogram {
     return this.missingRange_;
   }
 
-  pushAll(arr: IIterable<any>, indices: ranges.Range1D, size: number) {
+  pushAll(arr: IIterable<any>, indices: Range1D, size: number) {
     var binindex = [], missingindex = [];
     for(var i = this.bins-1; i>=0; --i) {
       binindex.push([]);
@@ -235,8 +235,8 @@ class AHistogram implements IHistogram {
         }
       });
       //build range and remove duplicates
-      this.ranges_ = binindex.map((d) => ranges.list(d.sort().filter((di, i, a) => di !== a[i-1])));
-      this.missingRange_ = ranges.list(missingindex.sort().filter((di, i, a) => di !== a[i-1]));
+      this.ranges_ = binindex.map((d) => list(d.sort().filter((di, i, a) => di !== a[i-1])));
+      this.missingRange_ = list(missingindex.sort().filter((di, i, a) => di !== a[i-1]));
     } else {
       arr.forEach((x) => {
         const bin = this.binOf(x);
@@ -296,7 +296,7 @@ class CatHistogram extends AHistogram implements ICatHistogram {
 
 
 class RangeHistogram implements ICatHistogram {
-  constructor(private range_: ranges.CompositeRange1D) {
+  constructor(private range_: CompositeRange1D) {
   }
 
   get categories() {
@@ -328,7 +328,7 @@ class RangeHistogram implements ICatHistogram {
   }
 
   binOf(value: any) {
-    return C.indexOf(this.range_.groups, (g) => g.name === value);
+    return indexOf(this.range_.groups, (g) => g.name === value);
   }
 
   frequency(bin: number) {
@@ -336,7 +336,7 @@ class RangeHistogram implements ICatHistogram {
   }
 
   range(bin:number) {
-    return ranges.list(this.range_.groups[bin]);
+    return list(this.range_.groups[bin]);
   }
 
   get missing() {
@@ -344,7 +344,7 @@ class RangeHistogram implements ICatHistogram {
   }
 
   get missingRange() {
-    return ranges.none();
+    return none();
   }
 
   forEach(callbackfn: (value: number, index: number) => void, thisArg?: any) {

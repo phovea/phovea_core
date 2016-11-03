@@ -4,20 +4,20 @@
 /**
  * Created by Samuel Gratzl on 22.10.2014.
  */
-import * as C from './index';
-import * as ajax from './ajax';
-import * as idtypes from './idtype';
-import * as datatypes from './datatype';
-import * as ranges from './range';
-import * as events from './event';
+import {mixin, IPersistable, flagId, uniqueId} from './index';
+import {sendAPI} from './ajax';
+import {SelectAble, SelectOperation, resolve as idtypes_resolve} from './idtype';
+import {DataTypeBase, IDataDescription} from './datatype';
+import {all, none, Range, list} from './range';
+import {EventHandler, IEvent} from './event';
 
-export class AttributeContainer extends events.EventHandler implements C.IPersistable {
+export class AttributeContainer extends EventHandler implements IPersistable {
   private _attrs : { [key: string] : any } = {};
 
   persist():any {
     if (Object.keys(this._attrs).length > 0) {
       return {
-        attrs : C.mixin({}, this._attrs) //copy
+        attrs : mixin({}, this._attrs) //copy
       };
     }
     return {
@@ -65,12 +65,12 @@ export class GraphNode extends AttributeContainer {
 
   constructor(public type:string = 'node', id:number = NaN) {
     super();
-    this._id = C.flagId('graph_node', id);
+    this._id = flagId('graph_node', id);
   }
 
   get id() {
     if (isNaN(this._id)) {
-      this._id = C.uniqueId('graph_node');
+      this._id = uniqueId('graph_node');
     }
     return this._id;
   }
@@ -85,7 +85,7 @@ export class GraphNode extends AttributeContainer {
   restore(persisted:any) {
     super.restore(persisted);
     this.type = persisted.type;
-    this._id = C.flagId('graph_node', persisted.id);
+    this._id = flagId('graph_node', persisted.id);
     return this;
   }
 }
@@ -96,7 +96,7 @@ export class GraphEdge extends AttributeContainer {
 
   constructor(public type:string = 'edge', public source:GraphNode = null, public target:GraphNode = null, id:number = NaN) {
     super();
-    this._id = C.flagId('graph_edge', id);
+    this._id = flagId('graph_edge', id);
     if (source && target) {
       this.init();
     }
@@ -104,7 +104,7 @@ export class GraphEdge extends AttributeContainer {
 
   get id() {
     if (isNaN(this._id)) {
-      this._id = C.uniqueId('graph_edge');
+      this._id = uniqueId('graph_edge');
     }
     return this._id;
   }
@@ -139,7 +139,7 @@ export class GraphEdge extends AttributeContainer {
   restore(p:any, nodes?:(id:number) => GraphNode) {
     super.restore(p);
     this.type = p.type;
-    this._id = C.flagId('graph_edge', p.id);
+    this._id = flagId('graph_edge', p.id);
     this.source = nodes(p.source);
     this.target = nodes(p.target);
     this.init();
@@ -151,7 +151,7 @@ export function isType(type:string|RegExp) {
   return (edge:GraphEdge) => type instanceof RegExp ? type.test(edge.type) : edge.type === type;
 }
 
-export class AGraph extends idtypes.SelectAble {
+export class AGraph extends SelectAble {
 
   get nodes() : GraphNode[] {
     return [];
@@ -180,11 +180,11 @@ const defaultGraphFactory:IGraphFactory = {
   makeEdge: (p:any, lookup) => ((new GraphEdge()).restore(p, lookup))
 };
 
-export class GraphProxy extends datatypes.DataTypeBase {
+export class GraphProxy extends DataTypeBase {
   private _impl:Promise<AGraph> = null;
   private _loaded:AGraph = null;
 
-  constructor(desc:datatypes.IDataDescription) {
+  constructor(desc:IDataDescription) {
     super(desc);
   }
 
@@ -234,15 +234,15 @@ export class GraphProxy extends datatypes.DataTypeBase {
     return this._impl;
   }
 
-  ids(range:ranges.Range = ranges.all()) {
+  ids(range:Range = all()) {
     if (this._impl) {
       return this._impl.then((i) => i.ids(range));
     }
-    return Promise.resolve(ranges.none());
+    return Promise.resolve(none());
   }
 
   get idtypes() {
-    return ['_nodes', '_edges'].map(idtypes.resolve);
+    return ['_nodes', '_edges'].map(idtypes_resolve);
   }
 }
 
@@ -251,13 +251,13 @@ export class GraphProxy extends datatypes.DataTypeBase {
  * @param desc
  * @returns {IMatrix}
  */
-export function create(desc:datatypes.IDataDescription):GraphProxy {
+export function create(desc:IDataDescription):GraphProxy {
   return new GraphProxy(desc);
 }
 
 
 export class GraphBase extends AGraph {
-  constructor(public desc:datatypes.IDataDescription, private _nodes: GraphNode[] = [], private _edges:GraphEdge[] = []) {
+  constructor(public desc:IDataDescription, private _nodes: GraphNode[] = [], private _edges:GraphEdge[] = []) {
     super();
   }
 
@@ -324,11 +324,11 @@ export class GraphBase extends AGraph {
     return [this._nodes.length, this._edges.length];
   }
 
-  ids(range:ranges.Range = ranges.all()) {
-    return Promise.resolve(ranges.list(this._nodes.map((n) => n.id), this._edges.map((n) => n.id)));
+  ids(range:Range = all()) {
+    return Promise.resolve(list(this._nodes.map((n) => n.id), this._edges.map((n) => n.id)));
   }
 
-  selectNode(node: GraphNode, op = idtypes.SelectOperation.SET) {
+  selectNode(node: GraphNode, op = SelectOperation.SET) {
     this.select(0, [this._nodes.indexOf(node)], op);
   }
 
@@ -340,7 +340,7 @@ export class GraphBase extends AGraph {
     });
   }
 
-  selectEdge(edge: GraphEdge, op = idtypes.SelectOperation.SET) {
+  selectEdge(edge: GraphEdge, op = SelectOperation.SET) {
     this.select(1, [this._edges.indexOf(edge)], op);
   }
 
@@ -353,7 +353,7 @@ export class GraphBase extends AGraph {
   }
 
   get idtypes() {
-    return ['_nodes', '_edges'].map(idtypes.resolve);
+    return ['_nodes', '_edges'].map(idtypes_resolve);
   }
 
   clear() : any {
@@ -373,8 +373,8 @@ export class GraphBase extends AGraph {
 
 }
 
-export class MemoryGraph extends GraphBase implements C.IPersistable {
-  constructor(desc:datatypes.IDataDescription, _nodes:GraphNode[] = [], _edges:GraphEdge[] = [], private factory = defaultGraphFactory) {
+export class MemoryGraph extends GraphBase implements IPersistable {
+  constructor(desc:IDataDescription, _nodes:GraphNode[] = [], _edges:GraphEdge[] = [], private factory = defaultGraphFactory) {
     super(desc, _nodes, _edges);
   }
   restore(persisted:any) {
@@ -396,7 +396,7 @@ export class MemoryGraph extends GraphBase implements C.IPersistable {
 
 
 export class RemoteStoreGraph extends GraphBase {
-  private updateHandler = (event: events.IEvent) => {
+  private updateHandler = (event: IEvent) => {
     const s = event.target;
     if (s instanceof GraphNode) {
       this.updateNode(<GraphNode>s);
@@ -409,7 +409,7 @@ export class RemoteStoreGraph extends GraphBase {
   private _wait_for_synced = 0;
 
 
-  constructor(desc:datatypes.IDataDescription, _nodes: GraphNode[] = [], _edges:GraphEdge[] = []) {
+  constructor(desc:IDataDescription, _nodes: GraphNode[] = [], _edges:GraphEdge[] = []) {
     super(desc, _nodes, _edges);
   }
 
@@ -419,7 +419,7 @@ export class RemoteStoreGraph extends GraphBase {
   }
 
   private load(factory: IGraphFactory) {
-    return ajax.sendAPI('/dataset/graph/' + this.desc.id + '/data').then((r) => {
+    return sendAPI('/dataset/graph/' + this.desc.id + '/data').then((r) => {
       this.loadImpl(r.nodes, r.edges, factory);
       this.fire('sync_load,sync', --this._wait_for_synced);
       return this;
@@ -452,7 +452,7 @@ export class RemoteStoreGraph extends GraphBase {
     n.on('setAttr', this.updateHandler);
 
     this.fire('sync_start_node,sync_start', ++this._wait_for_synced, 'add_node', n);
-    return ajax.sendAPI('/dataset/graph/' + this.desc.id + '/node', {
+    return sendAPI('/dataset/graph/' + this.desc.id + '/node', {
       desc: JSON.stringify(n.persist())
     }, 'post').then((r) => {
       this.fire('sync_node,sync', --this._wait_for_synced, n);
@@ -463,7 +463,7 @@ export class RemoteStoreGraph extends GraphBase {
   updateNode(n: GraphNode): any {
     super.updateNode(n);
     this.fire('sync_start_node,sync_start', ++this._wait_for_synced, 'update_node', n);
-    return ajax.sendAPI('/dataset/graph/' + this.desc.id + '/node/'+n.id,{
+    return sendAPI('/dataset/graph/' + this.desc.id + '/node/'+n.id,{
       desc: JSON.stringify(n.persist())
     }, 'put').then((r) => {
       this.fire('sync_node,sync', --this._wait_for_synced,n);
@@ -477,7 +477,7 @@ export class RemoteStoreGraph extends GraphBase {
     }
     n.off('setAttr', this.updateHandler);
     this.fire('sync_start_node,sync_start', ++this._wait_for_synced, 'remove_node', n);
-    return ajax.sendAPI('/dataset/graph/' + this.desc.id + '/node/'+n.id, {}, 'delete').then((r) => {
+    return sendAPI('/dataset/graph/' + this.desc.id + '/node/'+n.id, {}, 'delete').then((r) => {
       this.fire('sync_node,sync', --this._wait_for_synced, n);
       return this;
     });
@@ -489,7 +489,7 @@ export class RemoteStoreGraph extends GraphBase {
       let e = <GraphEdge>e_or_s;
       e.on('setAttr', this.updateHandler);
       this.fire('sync_start_edge,sync_start', ++this._wait_for_synced, 'add_edge', e);
-      return ajax.sendAPI('/dataset/graph/' + this.desc.id + '/edge', {
+      return sendAPI('/dataset/graph/' + this.desc.id + '/edge', {
         desc: JSON.stringify(e.persist())
       }, 'post').then((r) => {
         this.fire('sync_edge,sync', --this._wait_for_synced, e);
@@ -505,7 +505,7 @@ export class RemoteStoreGraph extends GraphBase {
     }
     e.off('setAttr', this.updateHandler);
     this.fire('sync_start_edge,sync_start', ++this._wait_for_synced, 'remove_edge', e);
-    return ajax.sendAPI('/dataset/graph/' + this.desc.id + '/edge/'+e.id, {}, 'delete').then((r) => {
+    return sendAPI('/dataset/graph/' + this.desc.id + '/edge/'+e.id, {}, 'delete').then((r) => {
       this.fire('sync_edge,sync', --this._wait_for_synced,e);
       return this;
     });
@@ -514,7 +514,7 @@ export class RemoteStoreGraph extends GraphBase {
   updateEdge(e: GraphEdge): any {
     super.updateEdge(e);
     this.fire('sync_start_edge,sync_start', ++this._wait_for_synced, 'update_edge', e);
-    return ajax.sendAPI('/dataset/graph/' + this.desc.id + '/edge/'+e.id, {
+    return sendAPI('/dataset/graph/' + this.desc.id + '/edge/'+e.id, {
       desc: JSON.stringify(e.persist())
     }, 'put').then((r) => {
       this.fire('sync_edge,sync', --this._wait_for_synced,e);
@@ -530,7 +530,7 @@ export class RemoteStoreGraph extends GraphBase {
     this.edges.forEach((n) => n.off('setAttr', this.updateHandler));
     super.clear();
     this.fire('sync_start', ++this._wait_for_synced, 'clear');
-    return ajax.sendAPI('/dataset/graph/'+this.desc.id + '/node', {}, 'delete').then((r) => {
+    return sendAPI('/dataset/graph/'+this.desc.id + '/node', {}, 'delete').then((r) => {
       this.fire('sync');
       return this;
     });
@@ -539,7 +539,7 @@ export class RemoteStoreGraph extends GraphBase {
 
 export class LocalStorageGraph extends GraphBase {
 
-  private updateHandler = (event: events.IEvent) => {
+  private updateHandler = (event: IEvent) => {
     const s = event.target;
     if (s instanceof GraphNode) {
       this.updateNode(<GraphNode>s);
@@ -549,7 +549,7 @@ export class LocalStorageGraph extends GraphBase {
     }
   };
 
-  constructor(desc:datatypes.IDataDescription, _nodes: GraphNode[] = [], _edges:GraphEdge[] = [], private storage: Storage = sessionStorage) {
+  constructor(desc:IDataDescription, _nodes: GraphNode[] = [], _edges:GraphEdge[] = [], private storage: Storage = sessionStorage) {
     super(desc, _nodes, _edges);
   }
 
@@ -596,7 +596,7 @@ export class LocalStorageGraph extends GraphBase {
     this.fire('loaded');
   }
 
-  static delete(desc:datatypes.IDataDescription, storage: Storage = sessionStorage) {
+  static delete(desc:IDataDescription, storage: Storage = sessionStorage) {
     const uid = 'graph' + desc.id;
     JSON.parse(storage.getItem(uid+'.nodes')).forEach((id) => {
       storage.removeItem(uid+'.node.'+id);

@@ -7,18 +7,17 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-'use strict';
-import * as ranges from './range';
-import * as idtypes from './idtype';
-import * as datatypes from './datatype';
-import * as vector from './vector';
-import * as math from './math';
+import {Range} from './range';
+import {IProductSelectAble, IDType} from './idtype';
+import {IDataType} from './datatype';
+import {IVector} from './vector';
+import {IHistogram, IStatistics} from './math';
 
 export const IDTYPE_ROW = 0;
 export const IDTYPE_COLUMN = 1;
 export const IDTYPE_CELL = 2;
 
-export interface IMatrix extends datatypes.IDataType, idtypes.IProductSelectAble {
+export interface IMatrix extends IDataType, IProductSelectAble {
   /**
    * nrow * ncol
    */
@@ -39,20 +38,20 @@ export interface IMatrix extends datatypes.IDataType, idtypes.IProductSelectAble
   /**
    * row id type
    */
-  rowtype:idtypes.IDType;
+  rowtype:IDType;
 
   /**
    * column id type
    */
-  coltype:idtypes.IDType;
+  coltype:IDType;
 
   /**
    * creates a new view on this matrix specified by the given range
    * @param range
    */
-  view(range?:ranges.Range) : IMatrix;
+  view(range?:Range) : IMatrix;
 
-  slice(col:number): vector.IVector;
+  slice(col:number): IVector;
 
   //view(filter: string): Promise<IMatrix>;
 
@@ -63,7 +62,7 @@ export interface IMatrix extends datatypes.IDataType, idtypes.IProductSelectAble
    * @param valuetype the new value type by default the same as matrix valuetype
    * @param idtype the new vlaue type by default the same as matrix rowtype
    */
-  reduce(f:(row:any[]) => any, this_f?:any, valuetype?:any, idtype?:idtypes.IDType) : vector.IVector;
+  reduce(f:(row:any[]) => any, this_f?:any, valuetype?:any, idtype?:IDType) : IVector;
   /**
    * transposed version of this matrix
    */
@@ -73,14 +72,14 @@ export interface IMatrix extends datatypes.IDataType, idtypes.IProductSelectAble
    * @param range
    * @returns {IPromise<string[]>}
    */
-  cols(range?:ranges.Range) : Promise<string[]>;
-  colIds(range?:ranges.Range) : Promise<ranges.Range>;
+  cols(range?:Range) : Promise<string[]>;
+  colIds(range?:Range) : Promise<Range>;
   /**
    * returns a promise for getting the row names of the matrix
    * @param range
    */
-  rows(range?:ranges.Range) : Promise<string[]>;
-  rowIds(range?:ranges.Range) : Promise<ranges.Range>;
+  rows(range?:Range) : Promise<string[]>;
+  rowIds(range?:Range) : Promise<Range>;
 
   /**
    * returns a promise for getting one cell
@@ -92,12 +91,12 @@ export interface IMatrix extends datatypes.IDataType, idtypes.IProductSelectAble
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range?:ranges.Range) : Promise<any[][]>;
+  data(range?:Range) : Promise<any[][]>;
 
-  stats() : Promise<math.IStatistics>;
+  stats() : Promise<IStatistics>;
 
-  hist(bins?:number, range?:ranges.Range, containedIds?:number) : Promise<math.IHistogram>;
+  hist(bins?:number, range?:Range, containedIds?:number) : Promise<IHistogram>;
 
 
-  heatmapUrl(range?:ranges.Range, options?:{ format?: string; transpose?: boolean; range?: [number,number]}): string;
+  heatmapUrl(range?:Range, options?:{ format?: string; transpose?: boolean; range?: [number,number]}): string;
 }

@@ -7,9 +7,8 @@
  * Created by Samuel Gratzl on 08.10.2014.
  */
 
-import * as C from './index';
-
-import * as _2D from './2D';
+import {argList} from './index';
+import {Vector2D, IShape, IIntersectionParam, Intersection} from './2D';
 
 
 export const CORNER:any = <any>[];
@@ -22,23 +21,23 @@ CORNER.SW = CORNER[5] = 'sw';
 CORNER.W = CORNER[6] = 'w';
 CORNER.NW = CORNER[7] = 'nw';
 
-export function vec(x : number, y: number): _2D.Vector2D;
-export function vec(vec: { x: number; y: number}): _2D.Vector2D;
-export function vec(x: any, y: number = Number.NaN): _2D.Vector2D {
-  return _2D.vec(x,y);
+export function vec(x : number, y: number): Vector2D;
+export function vec(vec: { x: number; y: number}): Vector2D;
+export function vec(x: any, y: number = Number.NaN): Vector2D {
+  return vec(x,y);
 }
 
 /**
  * a simple basic shape
  */
-export class AShape implements _2D.IShape {
+export class AShape implements IShape {
   /**
    * shift the shape by the given amount
    * @param x
    * @param y
    */
   shift(x:number, y:number):AShape;
-  shift(xy:_2D.Vector2D):AShape;
+  shift(xy:Vector2D):AShape;
   shift(xy:[number, number]):AShape;
   shift() {
     if (typeof arguments[0] === 'number') {
@@ -55,7 +54,7 @@ export class AShape implements _2D.IShape {
    * center of this shape
    * @returns {Circle}
    */
-  get center():_2D.Vector2D {
+  get center():Vector2D {
     return this.bs().xy;
   }
 
@@ -69,9 +68,9 @@ export class AShape implements _2D.IShape {
   /**
    * a specific corner of th axis aligned bounding box
    * @param corner
-   * @returns {_2D.Vector2D}
+   * @returns {Vector2D}
    */
-  corner(corner:string):_2D.Vector2D {
+  corner(corner:string):Vector2D {
     const r = this.aabb();
     switch (corner) {
       case CORNER.N:
@@ -105,12 +104,12 @@ export class AShape implements _2D.IShape {
     throw new Error('Not Implemented');
   }
 
-  asIntersectionParams():_2D.IIntersectionParam {
+  asIntersectionParams():IIntersectionParam {
     throw new Error('Not Implemented');
   }
 
   intersects(other:AShape) {
-    return _2D.Intersection.intersectShapes(this, other);
+    return Intersection.intersectShapes(this, other);
   }
 }
 
@@ -131,15 +130,15 @@ export class Rect extends AShape {
   }
 
   get xy() {
-    return _2D.vec(this.x, this.y);
+    return vec(this.x, this.y);
   }
 
   get x2y2() {
-    return _2D.vec(this.x2, this.y2);
+    return vec(this.x2, this.y2);
   }
 
   get size() {
-    return _2D.vec(this.w, this.h);
+    return vec(this.w, this.h);
   }
 
   get cx() : number {
@@ -192,7 +191,7 @@ export class Rect extends AShape {
     return rect(this.x * scale[0], this.y * scale[1], this.w * scale[0], this.h * scale[1]);
   }
 
-  asIntersectionParams():_2D.IIntersectionParam {
+  asIntersectionParams():IIntersectionParam {
     return {
       name: 'Rectangle',
       params: [this.xy, this.x2y2]
@@ -207,7 +206,7 @@ export class Circle extends AShape {
   }
 
   get xy() {
-    return _2D.vec(this.x, this.y);
+    return vec(this.x, this.y);
   }
 
   toString() {
@@ -232,7 +231,7 @@ export class Circle extends AShape {
     return circle(this.x * scale[0], this.y * scale[1], this.radius * (scale[0] + scale[1]) / 2);
   }
 
-  asIntersectionParams():_2D.IIntersectionParam {
+  asIntersectionParams():IIntersectionParam {
     return {
       name: 'Circle',
       params: [this.xy, this.radius]
@@ -246,7 +245,7 @@ export class Ellipse extends AShape {
   }
 
   get xy() {
-    return _2D.vec(this.x, this.y);
+    return vec(this.x, this.y);
   }
 
   toString() {
@@ -271,7 +270,7 @@ export class Ellipse extends AShape {
     return new Ellipse(this.x * scale[0], this.y * scale[1], this.radiusX * scale[0], this.radiusX * scale[1]);
   }
 
-  asIntersectionParams():_2D.IIntersectionParam {
+  asIntersectionParams():IIntersectionParam {
     return {
       name: 'Ellipse',
       params: [this.xy, this.radiusX, this.radiusY]
@@ -285,7 +284,7 @@ export class Line extends AShape {
   }
 
   get xy() {
-    return _2D.vec(this.x1, this.y1);
+    return vec(this.x1, this.y1);
   }
 
   get x1y1() {
@@ -293,7 +292,7 @@ export class Line extends AShape {
   }
 
   get x2y2() {
-    return _2D.vec(this.x2, this.y2);
+    return vec(this.x2, this.y2);
   }
 
   toString() {
@@ -322,7 +321,7 @@ export class Line extends AShape {
     return new Line(this.x1 * scale[0], this.y1 * scale[1], this.x2 * scale[0], this.y2 * scale[1]);
   }
 
-  asIntersectionParams():_2D.IIntersectionParam {
+  asIntersectionParams():IIntersectionParam {
     return {
       name: 'Line',
       params: [this.xy, this.x2y2]
@@ -332,17 +331,17 @@ export class Line extends AShape {
 
 
 export class Polygon extends AShape {
-  constructor(private points:_2D.Vector2D[] = []) {
+  constructor(private points:Vector2D[] = []) {
     super();
   }
 
   push(x:number, y:number);
-  push(...points:_2D.Vector2D[]);
+  push(...points:Vector2D[]);
   push() {
     if (arguments.length === 2 && typeof arguments[0] === 'number') {
       this.points.push(vec2(arguments[0], arguments[1]));
     } else {
-      this.points.push.apply(this.points, <_2D.Vector2D[]>C.argList(arguments));
+      this.points.push(...argList(arguments));
     }
   }
 
@@ -406,7 +405,7 @@ export class Polygon extends AShape {
     return polygon(this.points.map((p) => vec2(p.x * scale[0], p.y * scale[1])));
   }
 
-  pointInPolygon(point:_2D.Vector2D) {
+  pointInPolygon(point:Vector2D) {
     const length = this.points.length;
     var counter = 0;
     var x_inter;
@@ -472,8 +471,8 @@ export class Polygon extends AShape {
       var p0 = this.points[i];
       var p1 = this.points[(i + 1) % length];
       var p2 = this.points[(i + 2) % length];
-      var v0 = _2D.Vector2D.fromPoints(p0, p1);
-      var v1 = _2D.Vector2D.fromPoints(p1, p2);
+      var v0 = Vector2D.fromPoints(p0, p1);
+      var v1 = Vector2D.fromPoints(p1, p2);
       var cross = v0.cross(v1);
       if (cross < 0) {
         negative++;
@@ -488,7 +487,7 @@ export class Polygon extends AShape {
     return !this.isConcave;
   }
 
-  asIntersectionParams():_2D.IIntersectionParam {
+  asIntersectionParams():IIntersectionParam {
     return {
       name: 'Polygon',
       params: [this.points.slice()]
@@ -496,8 +495,8 @@ export class Polygon extends AShape {
   }
 }
 
-export function vec2(x:number, y:number):_2D.Vector2D {
-  return _2D.vec(x, y);
+export function vec2(x:number, y:number):Vector2D {
+  return vec(x, y);
 }
 
 export function rect(x:number, y:number, w:number, h:number):Rect {
@@ -512,13 +511,13 @@ export function ellipse(x:number, y:number, radiusX:number, radiusY:number):Elli
 export function line(x1:number, y1:number, x2:number, y2:number):Line {
   return new Line(x1, y1, x2, y2);
 }
-export function polygon(...points:_2D.Vector2D[]):Polygon;
-export function polygon(points:_2D.Vector2D[]):Polygon;
+export function polygon(...points:Vector2D[]):Polygon;
+export function polygon(points:Vector2D[]):Polygon;
 export function polygon():Polygon {
   if (Array.isArray(arguments[0])) {
     return new Polygon(arguments[0]);
   }
-  return new Polygon(C.argList(arguments));
+  return new Polygon(argList(arguments));
 }
 
 export function wrap(obj:any):AShape {

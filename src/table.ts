@@ -7,40 +7,37 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-'use strict';
-import * as ranges from './range';
-import * as idtypes from './idtype';
-import * as datatypes from './datatype';
-import * as vector from './vector';
+import {Range} from './range';
+import {IDType} from './idtype';
+import {IDataType} from './datatype';
+import {IVector as IVVector} from './vector';
 
-export interface IVector extends vector.IVector {
+export declare type IVector = IVVector;
 
-}
-
-export interface ITable extends datatypes.IDataType {
+export interface ITable extends IDataType {
   ncol : number;
   nrow : number;
 
   /**
    * id type
    */
-  rowtype:idtypes.IDType;
+  rowtype:IDType;
 
-  cols(range?:ranges.Range) : vector.IVector[];
+  cols(range?:Range) : IVector[];
 
-  col(i:number) : vector.IVector;
+  col(i:number) : IVector;
   /**
    * returns a promise for getting the row names of the matrix
    * @param range
    */
-  rows(range?:ranges.Range) : Promise<string[]>;
-  rowIds(range?:ranges.Range) : Promise<ranges.Range>;
+  rows(range?:Range) : Promise<string[]>;
+  rowIds(range?:Range) : Promise<Range>;
 
   /**
    * creates a new view on this matrix specified by the given range
    * @param range
    */
-  view(range?:ranges.Range) : ITable;
+  view(range?:Range) : ITable;
 
   queryView(name: string, args: any): ITable;
 
@@ -51,7 +48,7 @@ export interface ITable extends datatypes.IDataType {
    * @param valuetype the new value type by default the same as matrix valuetype
    * @param idtype the new vlaue type by default the same as matrix rowtype
    */
-  reduce(f : (row : any[]) => any, this_f? : any, valuetype? : any, idtype? : idtypes.IDType) : vector.IVector;
+  reduce(f : (row : any[]) => any, this_f? : any, valuetype? : any, idtype? : IDType) : IVector;
   /**
    * returns a promise for getting one cell
    * @param i
@@ -62,11 +59,11 @@ export interface ITable extends datatypes.IDataType {
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range?:ranges.Range) : Promise<any[][]>;
+  data(range?:Range) : Promise<any[][]>;
 
   /**
    * returns a promise for getting the data as an array of objects
    * @param range
    */
-  objects(range?:ranges.Range) : Promise<any[]>;
+  objects(range?:Range) : Promise<any[]>;
 }

@@ -7,26 +7,26 @@
  * Created by sam on 25.02.2015.
  */
 
-import * as layouts from './layout';
-import * as plugins from './plugin';
-import * as datatypes from './datatype';
-import * as idtypes from './idtype';
-import * as events from './event';
-import * as geom from './geom';
+import {ILayoutElem} from './layout';
+import {list as listPlugins, IPluginDesc} from './plugin';
+import {IDataType} from './datatype';
+import {IDType} from './idtype';
+import {EventHandler, IEventHandler} from './event';
+import {Rect, rect} from './geom';
 
 
-export interface IViewDesc extends plugins.IPluginDesc {
+export interface IViewDesc extends IPluginDesc {
   type: string; //support, main
   location: string; //left, top, bottom, right, center
 }
 
-export interface IView extends layouts.ILayoutElem, events.IEventHandler {
-  data : datatypes.IDataType[];
-  idtypes : idtypes.IDType[];
+export interface IView extends ILayoutElem, IEventHandler {
+  data : IDataType[];
+  idtypes : IDType[];
 
 }
 
-export class AView extends events.EventHandler implements IView {
+export class AView extends EventHandler implements IView {
   private _layoutOptions : any = {};
 
   constructor() {
@@ -46,8 +46,8 @@ export class AView extends events.EventHandler implements IView {
     return null;
   }
 
-  getBounds(): geom.Rect {
-    return geom.rect(0,0,0,0);
+  getBounds(): Rect {
+    return rect(0,0,0,0);
   }
 
   setLayoutOption(name: string, value: any) {
@@ -62,7 +62,7 @@ export class AView extends events.EventHandler implements IView {
   }
 }
 
-function convertDesc(desc: plugins.IPluginDesc) : IViewDesc {
+function convertDesc(desc: IPluginDesc) : IViewDesc {
   var d = <any>desc;
   d.type = d.type || 'main';
   d.location = d.location || 'center';
@@ -70,5 +70,5 @@ function convertDesc(desc: plugins.IPluginDesc) : IViewDesc {
 }
 
 export function list() {
-  return plugins.list('view').map(convertDesc);
+  return listPlugins('view').map(convertDesc);
 }

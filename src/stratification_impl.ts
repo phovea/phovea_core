@@ -7,29 +7,28 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-'use strict';
-import * as C from './index';
-import * as ajax from './ajax';
-import * as ranges from './range';
-import * as idtypes from './idtype';
-import * as datatypes from './datatype';
-import * as datas from './data';
-import * as vector from './vector';
-import * as vector_impl from './vector_impl';
-import * as math from './math';
-import * as def from './stratification';
+import {argFilter, argSort} from './index';
+import {getAPIJSON} from './ajax';
+import {parse, Range1DGroup, composite, Range, list as rlist, CompositeRange1D, all} from './range';
+import {IDType, resolve as resolveIDType} from './idtype';
+import {IDataDescription, DataTypeBase, IDataType} from './datatype';
+import {getFirstByFQName} from './data';
+import {IVector} from './vector';
+import {VectorBase} from './vector_impl';
+import {rangeHist, IHistogram} from './math';
+import {IStratification, IGroup, StratificationGroup} from './stratification';
 
 export interface IStratificationLoader {
-  (desc:datatypes.IDataDescription) : Promise<{
-    rowIds : ranges.Range;
+  (desc:IDataDescription) : Promise<{
+    rowIds : Range;
     rows: string[];
-    range: ranges.CompositeRange1D;
+    range: CompositeRange1D;
   }>;
 }
 
 function createRangeFromGroups(name:string, groups:any[]) {
-  return ranges.composite(name, groups.map((g) => {
-    var r = new ranges.Range1DGroup(g.name, g.color || 'gray', ranges.parse(g.range).dim(0));
+  return composite(name, groups.map((g) => {
+    var r = new Range1DGroup(g.name, g.color || 'gray', parse(g.range).dim(0));
     return r;
   }));
 }
@@ -40,9 +39,9 @@ function viaAPILoader() {
     if (_data) { //in the cache
       return _data;
     }
-    _data = ajax.getAPIJSON('/dataset/' + desc.id).then(function (data) {
+    _data = getAPIJSON('/dataset/' + desc.id).then(function (data) {
       var d = {
-        rowIds: ranges.parse(data.rowIds),
+        rowIds: parse(data.rowIds),
         rows: data.rows,
         range: createRangeFromGroups(desc.name, data.groups)
       };
@@ -52,14 +51,14 @@ function viaAPILoader() {
   };
 }
 
-function viaDataLoader(rows:string[], rowIds:number[], range:ranges.CompositeRange1D) {
+function viaDataLoader(rows:string[], rowIds:number[], range:CompositeRange1D) {
   var _data = undefined;
   return (desc) => {
     if (_data) { //in the cache
       return Promise.resolve(_data);
     }
     _data = {
-      rowIds: ranges.list(rowIds),
+      rowIds: rlist(rowIds),
       rows: rows,
       range: range
     };
@@ -70,14 +69,14 @@ function viaDataLoader(rows:string[], rowIds:number[], range:ranges.CompositeRan
 /**
  * root matrix implementation holding the data
  */
-export class Stratification extends datatypes.DataTypeBase implements def.IStratification {
-  private _idtype:idtypes.IDType;
-  private _v:Promise<vector.IVector>;
+export class Stratification extends DataTypeBase implements IStratification {
+  private _idtype:IDType;
+  private _v:Promise<IVector>;
 
-  constructor(public desc:datatypes.IDataDescription, private loader:IStratificationLoader) {
+  constructor(public desc:IDataDescription, private loader:IStratificationLoader) {
     super(desc);
     var d = <any>desc;
-    this._idtype = idtypes.resolve(d.idtype);
+    this._idtype = resolveIDType(d.idtype);
   }
 
   get idtype() {
@@ -85,11 +84,11 @@ export class Stratification extends datatypes.DataTypeBase implements def.IStrat
   }
 
   get groups() {
-    return <def.IGroup[]>(<any>this.desc).groups;
+    return <IGroup[]>(<any>this.desc).groups;
   }
 
-  group(group:number):def.IStratification {
-    return new def.StratificationGroup(this, group, this.groups[group]);
+  group(group:number):IStratification {
+    return new StratificationGroup(this, group, this.groups[group]);
   }
 
   /**
@@ -98,21 +97,21 @@ export class Stratification extends datatypes.DataTypeBase implements def.IStrat
    * @returns {*}
    */
   private load():Promise<{
-    rowIds : ranges.Range;
+    rowIds : Range;
     rows: string[];
-    range: ranges.CompositeRange1D;
+    range: CompositeRange1D;
   }> {
     return this.loader(this.desc);
   }
 
-  hist(bins?:number, range?:ranges.Range):Promise<math.IHistogram> {
+  hist(bins?:number, range?:Range):Promise<IHistogram> {
     //TODO
     return this.range().then((r) => {
-      return math.rangeHist(r);
+      return rangeHist(r);
     });
   }
 
-  vector():Promise<vector.IVector> {
+  vector():Promise<IVector> {
     if (this._v) {
       return this._v;
     }
@@ -120,9 +119,9 @@ export class Stratification extends datatypes.DataTypeBase implements def.IStrat
     return this._v;
   }
 
-  origin():Promise<datatypes.IDataType> {
+  origin():Promise<IDataType> {
     if ('origin' in this.desc) {
-      return datas.getFirstByFQName((<any>this.desc).origin);
+      return getFirstByFQName((<any>this.desc).origin);
     }
     return Promise.reject('no origin specified');
   }
@@ -142,14 +141,14 @@ export class Stratification extends datatypes.DataTypeBase implements def.IStrat
     });
   }
 
-  names(range:ranges.Range = ranges.all()) {
+  names(range:Range = all()) {
     var that = this;
     return this.load().then(function (data) {
       return range.filter(data.rows, that.dim);
     });
   }
 
-  ids(range:ranges.Range = ranges.all()):Promise<ranges.Range> {
+  ids(range:Range = all()):Promise<Range> {
     var that = this;
     return this.load().then(function (data) {
       return data.rowIds.preMultiply(range, that.dim);
@@ -184,13 +183,13 @@ export class Stratification extends datatypes.DataTypeBase implements def.IStrat
 /**
  * root matrix implementation holding the data
  */
-export class StratificationVector extends vector_impl.VectorBase implements vector.IVector {
+export class StratificationVector extends VectorBase implements IVector {
   valuetype:any;
-  desc:datatypes.IDataDescription;
+  desc:IDataDescription;
 
   private _cache:Promise<string[]> = null;
 
-  constructor(private strat:Stratification, private range:ranges.CompositeRange1D, desc:datatypes.IDataDescription) {
+  constructor(private strat:Stratification, private range:CompositeRange1D, desc:IDataDescription) {
     super(null);
     this._root = this;
     this.valuetype = {
@@ -223,9 +222,9 @@ export class StratificationVector extends vector_impl.VectorBase implements vect
   }
 
   restore(persisted:any) {
-    var r:vector.IVector = this;
+    var r:IVector = this;
     if (persisted && persisted.range) { //some view onto it
-      r = r.view(ranges.parse(persisted.range));
+      r = r.view(parse(persisted.range));
     }
     return r;
   }
@@ -252,18 +251,18 @@ export class StratificationVector extends vector_impl.VectorBase implements vect
     });
   }
 
-  data(range:ranges.Range = ranges.all()) {
+  data(range:Range = all()) {
     var that = this;
     return this.load().then(function (data) {
       return range.filter(data, that.dim);
     });
   }
 
-  names(range:ranges.Range = ranges.all()) {
+  names(range:Range = all()) {
     return this.strat.names(range);
   }
 
-  ids(range:ranges.Range = ranges.all()) {
+  ids(range:Range = all()) {
     return this.strat.ids(range);
   }
 
@@ -271,22 +270,22 @@ export class StratificationVector extends vector_impl.VectorBase implements vect
     return this.strat.size();
   }
 
-  sort(compareFn?:(a:any, b:any) => number, thisArg?:any):Promise<vector.IVector> {
+  sort(compareFn?:(a:any, b:any) => number, thisArg?:any):Promise<IVector> {
     return this.data().then((d) => {
-      var indices = C.argSort(d, compareFn, thisArg);
-      return this.view(ranges.list(indices));
+      var indices = argSort(d, compareFn, thisArg);
+      return this.view(rlist(indices));
     });
   }
 
-  map<U>(callbackfn:(value:any, index:number) => U, thisArg?:any):Promise<vector.IVector> {
+  map<U>(callbackfn:(value:any, index:number) => U, thisArg?:any):Promise<IVector> {
     //FIXME
     return null;
   }
 
-  filter(callbackfn:(value:any, index:number) => boolean, thisArg?:any):Promise<vector.IVector> {
+  filter(callbackfn:(value:any, index:number) => boolean, thisArg?:any):Promise<IVector> {
     return this.data().then((d) => {
-      var indices = C.argFilter(d, callbackfn, thisArg);
-      return this.view(ranges.list(indices));
+      var indices = argFilter(d, callbackfn, thisArg);
+      return this.view(rlist(indices));
     });
   }
 }
@@ -296,17 +295,17 @@ export class StratificationVector extends vector_impl.VectorBase implements vect
  * @param desc
  * @returns {IVector}
  */
-export function create(desc:datatypes.IDataDescription):Stratification {
+export function create(desc:IDataDescription):Stratification {
   return new Stratification(desc, viaAPILoader());
 }
 
-export function wrap(desc:datatypes.IDataDescription, rows:string[], rowIds:number[], range:ranges.CompositeRange1D) {
+export function wrap(desc:IDataDescription, rows:string[], rowIds:number[], range:CompositeRange1D) {
   return new Stratification(desc, viaDataLoader(rows, rowIds, range));
 }
 
 
-export function wrapCategoricalVector(v: vector.IVector) {
-  var desc : datatypes.IDataDescription = {
+export function wrapCategoricalVector(v: IVector) {
+  var desc : IDataDescription = {
     id: v.desc.id+'-s',
     type: 'stratification',
     name: v.desc.name+'-s',

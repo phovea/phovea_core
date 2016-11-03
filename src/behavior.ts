@@ -7,14 +7,14 @@
  * Created by Samuel Gratzl on 16.12.2014.
  */
 
-import * as vis from './vis';
-import * as events from './event';
+import {IVisInstance, IVisMetaData} from './vis';
+import {EventHandler} from './event';
 
 /**
  * utility logic for zooming a vis instance
  */
-export class ZoomLogic extends events.EventHandler {
-  constructor(public v: vis.IVisInstance, public meta: vis.IVisMetaData) {
+export class ZoomLogic extends EventHandler {
+  constructor(public v: IVisInstance, public meta: IVisMetaData) {
     super();
   }
 
@@ -111,7 +111,7 @@ export class ZoomLogic extends events.EventHandler {
  * addition to ZoomLogic taking care of mouse wheel operations on the vis instance
  */
 export class ZoomBehavior extends ZoomLogic {
-  constructor(private node: Element, v: vis.IVisInstance, meta : vis.IVisMetaData) {
+  constructor(private node: Element, v: IVisInstance, meta : IVisMetaData) {
     super(v, meta);
     node.addEventListener('mousewheel', (event : any) => {
       if (!this.v) {

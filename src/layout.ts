@@ -6,12 +6,12 @@
 /**
  * Created by Samuel Gratzl on 15.12.2014.
  */
-import * as geom from './geom';
+import {Rect, rect} from './geom';
 
 export interface ILayoutElem {
   setBounds(x:number, y:number, w:number, h:number) : Promise<void>;
 
-  getBounds(): geom.Rect;
+  getBounds(): Rect;
 
   layoutOption<T>(name:string) : T;
   layoutOption<T>(name:string, default_:T) : T;
@@ -22,8 +22,8 @@ export class ALayoutElem {
 
   }
 
-  getBounds(): geom.Rect {
-    return geom.rect(0,0,0,0);
+  getBounds(): Rect {
+    return rect(0,0,0,0);
   }
 
   getLocation() {
@@ -67,7 +67,7 @@ class HTMLLayoutElem extends ALayoutElem implements ILayoutElem {
       }
       return 0;
     }
-    return geom.rect(v(style.left),v(style.top), v(style.width),v(style.height));
+    return rect(v(style.left),v(style.top), v(style.width),v(style.height));
   }
 }
 
