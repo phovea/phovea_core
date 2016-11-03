@@ -7,8 +7,8 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import * as C from './index';
-import * as Iterator from './iterator';
+import {argList, identity} from './index';
+import {IIterator, Iterator, single, concat, forList} from './iterator';
 
 export interface IRangeElem {
   isAll : boolean;
@@ -17,8 +17,8 @@ export interface IRangeElem {
   size(size?:number):number;
   clone() : IRangeElem;
   invert(index:number, size?:number);
-  __iterator__: Iterator.IIterator<number>;
-  iter(size?:number):Iterator.IIterator<number>;
+  __iterator__: IIterator<number>;
+  iter(size?:number):IIterator<number>;
   toString();
   from: number;
   step: number;
@@ -112,8 +112,8 @@ export class RangeElem implements IRangeElem {
    * creates an iterator of this range
    * @param size the underlying size for negative indices
    */
-  iter(size?:number):Iterator.IIterator<number> {
-    return Iterator.range(fix(this.from, size), fix(this.to, size), this.step);
+  iter(size?:number):IIterator<number> {
+    return range(fix(this.from, size), fix(this.to, size), this.step);
   }
 
   get __iterator__() {
@@ -202,8 +202,8 @@ export class SingleRangeElem implements IRangeElem {
     return fix(this.from, size) + index;
   }
 
-  iter(size?:number):Iterator.IIterator<number> {
-    return Iterator.single(fix(this.from, size));
+  iter(size?:number):IIterator<number> {
+    return single(fix(this.from, size));
   }
 
   get __iterator__() {
@@ -546,7 +546,7 @@ export class Range1D {
       }
       arr = arguments[0];
     } else {
-      arr = C.argList(arguments);
+      arr = argList(arguments);
     }
     if (arr.length === 0) {
       return [];
@@ -604,14 +604,14 @@ export class Range1D {
    * @param size the total size for resolving negative indices
    * @returns {*}
    */
-  filter(data:any[], size?:number, transform:(any) => any = C.identity) {
+  filter(data:any[], size?:number, transform:(any) => any = identity) {
     if (this.isAll) {
       return data.map(transform);
     }
     var it = this.iter(size);
     //optimization
-    if (it.byOne && it instanceof Iterator.Iterator) {
-      return data.slice((<Iterator.Iterator><any>it).from, (<Iterator.Iterator><any>it).to).map(transform);
+    if (it.byOne && it instanceof Iterator) {
+      return data.slice((<Iterator><any>it).from, (<Iterator><any>it).to).map(transform);
       //} else if (it.byMinusOne) {
       //  var d = data.slice();
       //  d.reverse();
@@ -629,11 +629,12 @@ export class Range1D {
    * creates an iterator of this range
    * @param size the underlying size for negative indices
    */
-  iter(size?:number):Iterator.IIterator<number> {
+  iter(size?:number):IIterator<number> {
     if (this.isList) {
-      return Iterator.forList(this.arr.map((d) => (<any>d).from));
+      return forList(this.arr.map((d) => (<any>d).from));
     }
-    return Iterator.concat.apply(Iterator, this.arr.map((d) => d.iter(size)));
+    const its : IIterator<number>[] = this.arr.map((d) => d.iter(size));
+    return concat.apply(null, its);
   }
 
   get __iterator__() {
@@ -663,7 +664,7 @@ export class Range1D {
    * @param callbackfn
    * @param thisArg
    */
-  forEach(callbackfn:(value:number) => void, thisArg?:any):void {
+  forEach(callbackfn:(value:number, index: number) => void, thisArg?:any):void {
     return this.iter().forEach(callbackfn, thisArg);
   }
 
@@ -993,7 +994,7 @@ export class Range {
     //recursive variant for just filtering the needed rows
     function filterDim(i:number) {
       if (i >= ndim) { //out of range no filtering anymore
-        return C.identity;
+        return identity;
       }
       var d = that.dim(i);
       var next = filterDim(i + 1); //compute next transform
@@ -1066,7 +1067,7 @@ export class Range {
       }
       arr = arguments[0];
     } else {
-      arr = C.argList(arguments);
+      arr = argList(arguments);
     }
     if (arr.length === 0) {
       return [];
@@ -1154,7 +1155,7 @@ export function range() {
   }
   var r = new Range();
   if (Array.isArray(arguments[0])) { //array mode
-    C.argList(arguments).forEach((arr:number[], i) => {
+    argList(arguments).forEach((arr:number[], i) => {
       if (arr.length === 0) {
         return;
       }
@@ -1175,15 +1176,13 @@ export function join() {
   var r = new Range();
   var ranges = arguments[0];
   if (!Array.isArray(ranges)) { //array mode
-    ranges = C.argList(arguments);
+    ranges = argList(arguments);
   }
   r.dims = ranges.map((r) => r.dim(0));
   return r;
 }
 
-export function list(...indices:number[]):Range;
-export function list(...indexarrays:number[][]):Range;
-export function list(...dims:Range1D[]):Range;
+export function list(...dims_indices_indexarray:(Range1D | number[] | number)[]):Range;
 export function list(dims:Range1D[]):Range;
 export function list():Range {
   if (arguments.length === 0) {
@@ -1193,7 +1192,7 @@ export function list():Range {
   if (Array.isArray(arguments[0]) && arguments[0][0] instanceof Range1D) {
     r.dims = arguments[0];
   } else if (Array.isArray(arguments[0])) { //array mode
-    C.argList(arguments).forEach((arr:any, i) => {
+    argList(arguments).forEach((arr:any, i) => {
       if (arr instanceof Range1D) {
         r.dims[i] = arr;
       } else {
@@ -1201,9 +1200,9 @@ export function list():Range {
       }
     });
   } else if (typeof arguments[0] === 'number') { //single slice mode
-    r.dim(0).setList(C.argList(arguments));
+    r.dim(0).setList(argList(arguments));
   } else if (arguments[0] instanceof Range1D) {
-    r.dims = C.argList(arguments);
+    r.dims = argList(arguments);
   }
   return r;
 }
@@ -1348,7 +1347,7 @@ export function parse(arange:RangeLike = null) {
     }
     return list(<number[]>arange);
   }
-  return parseRange(C.argList(arguments).map(String).join(','));
+  return parseRange(argList(arguments).map(String).join(','));
 }
 
 export function cell(...dim_indices: number[]) {
