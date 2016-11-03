@@ -7,24 +7,10 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-/// <amd-dependency path="module" name="module"/>
-
-declare var require: any;
-
-declare var module: {
-  config() : any;
-};
-
-if (!(<any>window).Promise) {
-  //inject es6-promise polyfill if needed
-  let r = require;
-  r(['es6-promise']);
-}
-
 /**
  * version of the core
  */
-export const version = '0.0.1-alpha';
+export const version = '__VERSION__';
 
 /**
  * whether the standard api calls should be prevented
@@ -42,29 +28,48 @@ export var server_url:string = '/api';
  */
 export var server_json_suffix:string = '';
 
-export var registry : { baseUrl: string; extensions: any[]; relativeUrl: string};
-
+/**
+ * initializes certain properties of the core
+ * @param config
+ */
+export function init(config : { offline?: boolean, server_url?: string, server_json_suffix?: string} = {}) {
+  config = mixin({
+    offline: offline,
+    server_url: server_url,
+    server_json_suffix : server_json_suffix
+  }, config);
+  offline = config.offline;
+  server_url = config.server_url;
+  server_json_suffix = config.server_json_suffix;
+}
 
 /**
- * if no module config is here, we can manually initialize the core
- * @param config
+ * initializes itself based on script data attributes
  * @private
  */
-export function _init(config: { apiUrl?: string; apiJSONSuffix?: string, offline? : boolean, registry?: { baseUrl: string; extensions: any[]; relativeUrl: string } }) {
-  server_url = config.apiUrl || '/api';
-  server_json_suffix = config.apiJSONSuffix || '';
-  offline = config.offline === true;
-
-  registry = {
-    baseUrl: config.registry && config.registry.baseUrl || '',
-    relativeUrl: config.registry && config.registry.relativeUrl || '..',
-    extensions: config.registry && config.registry.extensions || []
-  };
+function _init() {
+  function find(name: string, camelCaseName = name.slice(0,1).toUpperCase()+name.slice(1)) {
+    const node : HTMLElement = <HTMLElement>document.currentScript || <HTMLElement>document.querySelector(`script[data-phovea-${name}]`);
+    if (!node) {
+      return undefined;
+    }
+    return node.dataset['phovea'+camelCaseName];
+  }
+  const config : any = {};
+  if ('true' === find('offline')) {
+    config.offline = true;
+  }
+  var v;
+  if ((v = find('server-url', 'ServerUrl')) !== undefined) {
+    config.server_url = v;
+  }
+  if ((v = find('server-json-suffix', 'ServerJsonSuffix')) !== undefined) {
+    config.server_json_suffix = v;
+  }
+  //init myself
+  init(config);
 }
-
-if (module != null && typeof module.config === 'function') {
-  _init(module.config());
-}
+_init();
 
 /**
  * integrate b into a and override all duplicates
@@ -173,7 +178,7 @@ export function constantTrue() {
  * @returns {boolean}
  */
 export function constantFalse() {
-  return true;
+  return false;
 }
 
 /**
