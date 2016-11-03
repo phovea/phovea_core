@@ -3,15 +3,8 @@
  * Copyright (c) The Caleydo Team. All rights reserved.
  * Licensed under the new BSD license, available at http://caleydo.org/license
  **************************************************************************** */
-/**
- * Created by Samuel Gratzl on 05.08.2014.
- */
 
-/// <amd-dependency path="require" name="requir_e"/>
-declare var requir_e : (deps:string[], callback:(deps:any[])=>any) => any;
-
-import * as C from './index';
-
+import {mixin, constantTrue, search, uniqueString} from './index';
 
 /**
  * basic interface of a plugin
@@ -32,16 +25,6 @@ export interface IPluginDesc {
   name: string;
 
   /**
-   * name of the require.js module to load
-   * @default ./<name>/index
-   */
-  module : string;
-  /**
-   * name of the method, which is the entry point of this plugin
-   * @default create
-   */
-  factory: string;
-  /**
    * version of this plugin
    * @default 1.0
    */
@@ -52,10 +35,21 @@ export interface IPluginDesc {
   description: string;
 
   /**
+   * name of the method, which is the entry point of this plugin
+   * @default create
+   */
+  factory: string;
+
+  /**
    * function for loading this plugin
    * @returns a promise for the loaded plugin
    */
   load() : Promise<IPlugin>;
+
+  /**
+   * anything custom
+   */
+  [key: string]: any;
 }
 
 /**
@@ -70,100 +64,63 @@ export interface IPlugin {
    * link to the referenced method as described in the description
    */
   factory(...args:any[]): any;
-
-  [extras: string]: any;
 }
 
-function toInstance(instance: any, desc: IPluginDesc): IPlugin {
-  return {
-    desc: desc,
-    impl: instance,
-    factory: instance[desc.factory]
-  };
-}
-
-/**
- * utility function to create a loading promise function which wraps require.js
- * @param desc
- * @returns {function(): Promise}
- */
-function loadHelper(desc:IPluginDesc):() => Promise<IPlugin> {
-  return () => {
-    if ((<any>desc).instance || (<any>desc).loader) {
-      return Promise.resolve((<any>desc).instance || (<any>desc).loader()).then((impl) => toInstance(impl, desc));
-    }
-    //require module
-    return new Promise<IPlugin>((resolve) => {
-      requir_e([desc.module], (m) => {
-        //create a plugin entry
-        resolve(toInstance(m, desc));
-      });
-    });
-  };
-}
+const registry : IPluginDesc[] = [];
+const knownPlugins = {};
 
 
-function parsePlugin(desc: any,  baseUrl: string = '', relativeUrl: string = '..') {
-  //provide some default values
-  desc = C.mixin({
-    name : desc.id,
-    folder: desc.folder,
-    file: 'main',
+function push(type: string, id_or_loader: string | (()=>any), desc_or_loader: any, desc?: any) {
+  const id = typeof id_or_loader === 'string' ? <string>id_or_loader : uniqueString(type);
+  const loader = typeof id_or_loader === 'string' ? <()=>any>desc_or_loader : <()=>any>desc_or_loader;
+  const p: IPluginDesc = mixin({
+    type: type,
+    id: id,
+    name: id,
     factory: 'create',
     description: '',
-    version: '1.0'
-  },desc);
-  desc = C.mixin({
-    'module' : desc.folder+'/'+desc.file,
-    baseUrl: baseUrl + '/' + desc.folder
-  }, desc);
-  desc.module = relativeUrl + '/' +desc.module;
-  desc.load = loadHelper(<IPluginDesc>desc);
-  return <IPluginDesc>desc;
-}
-/**
- * parses the given descriptions and creates a full description out of it
- * @param descs
- * @returns {IPluginDesc[]}
- */
-function parsePlugins(descs : any[], baseUrl: string = '', relativeUrl: string = '..') {
-  return descs.map((desc) => parsePlugin(desc, baseUrl, relativeUrl));
+    version: '1.0.0',
+    load: ()=> Promise.resolve(loader()).then((instance) => ({ desc: p, factory: instance[p.factory]}))
+  }, typeof desc_or_loader === 'function' ? desc: desc_or_loader);
+
+  registry.push(p);
 }
 
+export interface IRegistry {
+  push(type: string, loader: ()=>any, desc?: any);
+  push(type: string, id: string, loader: ()=>any, desc?: any);
+  push(type: string, id_or_loader: string | (()=>any), desc_or_loader: any, desc?: any);
+}
 
-//map to descriptions
-var _extensions : IPluginDesc[] = [];
+export function register(plugin: string, generator?: (registry: IRegistry) => void) {
+  if (typeof generator !== 'function') {
+     //wrong type - not a function, maybe a dummy inline
+    return;
+  }
+  if (plugin in knownPlugins) {
+    return; // don't call it twice
+  }
+  knownPlugins[plugin] = true;
 
+  generator({
+    push: push
+  });
+}
 
-/**
- * returns a list of matching plugin descs
- * @param filter the filter function to apply
- * @returns {IPluginDesc[]}
- */
-export function list(filter : (desc : IPluginDesc) => boolean): IPluginDesc[];
-/**
- * returns a list of matching plugin descs
- * @param type the desired plugin type
- * @returns {IPluginDesc[]}
- */
-export function list(type : string): IPluginDesc[];
 /**
  * returns a list of matching plugin descs
  * @param filter
  * @returns {IPluginDesc[]}
  */
-export function list(filter : any = C.constantTrue) {
+export function list(filter : (string | ((desc:IPluginDesc)=>boolean)) = constantTrue) {
   if (typeof filter === 'string') {
-    var v = filter;
-     filter = (desc) => desc.type === v;
+    const v = filter;
+    filter = (desc) => desc.type === v;
   }
-  if (_extensions.length === 0) {
-    _extensions = parsePlugins(C.registry.extensions, C.registry.baseUrl, C.registry.relativeUrl);
+  if (filter === constantTrue) {
+    return registry.slice();
   }
-  if (filter === C.constantTrue) {
-    return _extensions;
-  }
-  return _extensions.filter(filter);
+  return registry.filter(<any>filter);
 }
 
 /**
@@ -173,50 +130,9 @@ export function list(filter : any = C.constantTrue) {
  * @returns {IPluginDesc}
  */
 export function get(type: string, id : string) : IPluginDesc {
-  return C.search(_extensions, (d) => d.type === type && d.id === id);
+  return search(registry, (d) => d.type === type && d.id === id);
 }
 
-/**
- * pushes a new description to the registry
- * @param desc
- * @param baseUrl
- * @param relativeUrl
- * @returns {IPluginDesc}
- */
-export function push(desc: any, baseUrl = C.registry.baseUrl, relativeUrl = C.registry.relativeUrl) {
-  if (_extensions.length === 0) {
-    _extensions = parsePlugins(C.registry.extensions, C.registry.baseUrl, C.registry.relativeUrl);
-  }
-  const p = parsePlugin(desc, baseUrl, relativeUrl);
-  _extensions.push(p);
-  return p;
-}
-
-export function pushAll(descs: any[], baseUrl = C.registry.baseUrl, relativeUrl = C.registry.relativeUrl) {
-  return descs.map((desc) => push(desc, baseUrl, relativeUrl));
-}
-
-/**
- * loads all given plugins at once and returns a promise
- * @param plugins
- * @returns {Promise}
- */
-export function load(plugins: IPluginDesc[]) :Promise<IPlugin[]> {
-  if (plugins.length === 0) {
-    return Promise.resolve([]);
-  }
-  return new Promise((resolve) => {
-    //do we have all instances?
-    if (plugins.every(desc => (!!(<any>desc).instance) || !!(<any>desc).loader)) {
-      Promise.all(plugins.map((p:any) => p.instance || p.loader()))
-        .then((impls) => impls.map((impl, i) => toInstance(impl, plugins[i])))
-        .then(resolve);
-    } else {
-      //old way
-      requir_e(plugins.map((desc) => desc.module), (...impls:any[]) => {
-        //loaded now convert to plugins
-        resolve(impls.map((p, i) => toInstance(p, plugins[i])));
-      });
-    }
-  });
+export function load(desc: IPluginDesc[]) {
+  return Promise.all(desc.map((d) => d.load()));
 }
