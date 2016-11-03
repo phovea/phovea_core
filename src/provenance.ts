@@ -1,14 +1,14 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import C = require('./main');
-import plugins = require('./plugin');
-import datas = require('./data');
-import graph = require('./graph');
-import idtypes = require('./idtype');
-import ranges = require('./range');
-import datatypes = require('./datatype');
-import session = require('./session');
+import * as C from './index';
+import * as plugins from './plugin';
+import * as datas from './data';
+import * as graph from './graph';
+import * as idtypes from './idtype';
+import * as ranges from './range';
+import * as datatypes from './datatype';
+import * as session from './session';
 
 /**
  * reexport the edge type

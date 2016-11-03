@@ -7,9 +7,9 @@
  * Created by Samuel Gratzl on 08.10.2014.
  */
 
-import C = require('./main');
+import * as C from './index';
 
-import _2D = require('./2D');
+import * as _2D from './2D';
 
 
 export const CORNER:any = <any>[];

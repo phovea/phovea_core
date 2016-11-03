@@ -6,7 +6,7 @@
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
-/// <reference path="../../tsd.d.ts" />
+
 /// <amd-dependency path="module" name="module"/>
 
 declare var require: any;

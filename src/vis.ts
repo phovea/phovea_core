@@ -6,11 +6,11 @@
 /**
  * Created by Samuel Gratzl on 05.08.2014.
  */
-import C = require('./main');
-import plugins = require('./plugin');
-import datatypes = require('./datatype');
-import ranges = require('./range');
-import events = require('./event');
+import * as C from './index';
+import * as plugins from './plugin';
+import * as datatypes from './datatype';
+import * as ranges from './range';
+import * as events from './event';
 
 
 /**

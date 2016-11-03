@@ -8,15 +8,15 @@
  */
 
 'use strict';
-import C = require('./main');
-import ajax = require('./ajax');
-import ranges = require('./range');
-import idtypes = require('./idtype');
-import datatypes = require('./datatype');
-import vector = require('./vector');
-import vector_impl = require('./vector_impl');
-import math = require('./math');
-import matrix = require('./matrix');
+import * as C from './index';
+import * as ajax from './ajax';
+import * as ranges from './range';
+import * as idtypes from './idtype';
+import * as datatypes from './datatype';
+import * as vector from './vector';
+import * as vector_impl from './vector_impl';
+import * as math from './math';
+import * as matrix from './matrix';
 
 function flatten(arr : any[][], indices: ranges.Range, select: number = 0) {
   var r = [], dim = [arr.length, arr[0].length];

@@ -7,8 +7,8 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import C = require('./main');
-import Iterator = require('./iterator');
+import * as C from './index';
+import * as Iterator from './iterator';
 
 export interface IRangeElem {
   isAll : boolean;

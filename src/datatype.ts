@@ -8,10 +8,10 @@
  */
 
 'use strict';
-/// <reference path="../../tsd.d.ts" />
-import C = require('./main');
-import idtypes = require('./idtype');
-import ranges = require('./range');
+
+import * as C from './index';
+import * as idtypes from './idtype';
+import * as ranges from './range';
 
 /**
  * basic description elements

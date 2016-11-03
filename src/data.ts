@@ -6,12 +6,12 @@
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
-import C = require('./main');
-import ajax = require('./ajax');
-import plugins = require('./plugin');
-import datatypes = require('./datatype');
-import tables = require('./table');
-import tables_impl = require('./table_impl');
+import * as C from './index';
+import * as ajax from './ajax';
+import * as plugins from './plugin';
+import * as datatypes from './datatype';
+import * as tables from './table';
+import * as tables_impl from './table_impl';
 
 //find all datatype plugins
 const available = plugins.list('datatype');

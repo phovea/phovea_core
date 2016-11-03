@@ -8,11 +8,11 @@
  */
 
 'use strict';
-import ranges = require('./range');
-import idtypes = require('./idtype');
-import datatypes = require('./datatype');
-import stratification = require('./stratification');
-import math = require('./math');
+import * as ranges from './range';
+import * as idtypes from './idtype';
+import * as datatypes from './datatype';
+import * as stratification from './stratification';
+import * as math from './math';
 
 export interface IVector extends datatypes.IDataType {
   /**

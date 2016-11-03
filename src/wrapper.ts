@@ -7,12 +7,12 @@
  * Created by Samuel Gratzl on 29.12.2014.
  */
 
-import C_ = require('./main');
-import data_ = require('./data');
-import ranges_ = require('./range');
-import idtypes_ = require('./idtype');
-import events_ = require('./event');
-import geom_ = require('./geom');
+import * as C_ from './index';
+import * as data_ from './data';
+import * as ranges_ from './range';
+import * as idtypes_ from './idtype';
+import * as events_ from './event';
+import * as geom_ from './geom';
 
 export const C = C_;
 export const data = data_;

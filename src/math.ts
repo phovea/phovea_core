@@ -7,8 +7,8 @@
  * Created by Samuel Gratzl on 29.08.2014.
  */
 
-import ranges = require('./range');
-import C = require('./main');
+import * as ranges from './range';
+import * as C from './index';
 /**
  * simple number statistics similar to DoubleStatistics in Caleydo
  * TODO use a standard library for that

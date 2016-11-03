@@ -8,10 +8,10 @@
  */
 
 'use strict';
-import ranges = require('./range');
-import idtypes = require('./idtype');
-import datatypes = require('./datatype');
-import vector = require('./vector');
+import * as ranges from './range';
+import * as idtypes from './idtype';
+import * as datatypes from './datatype';
+import * as vector from './vector';
 
 export interface IVector extends vector.IVector {
 

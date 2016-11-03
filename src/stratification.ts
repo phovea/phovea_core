@@ -8,11 +8,11 @@
  */
 
 'use strict';
-import ranges = require('./range');
-import datatypes = require('./datatype');
-import idtypes = require('./idtype');
-import vector = require('./vector');
-import math = require('./math');
+import * as ranges from './range';
+import * as datatypes from './datatype';
+import * as idtypes from './idtype';
+import * as vector from './vector';
+import * as math from './math';
 
 export interface IGroup {
   name: string;

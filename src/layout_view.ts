@@ -7,12 +7,12 @@
  * Created by sam on 25.02.2015.
  */
 
-import layouts = require('./layout');
-import plugins = require('./plugin');
-import datatypes = require('./datatype');
-import idtypes = require('./idtype');
-import events = require('./event');
-import geom = require('./geom');
+import * as layouts from './layout';
+import * as plugins from './plugin';
+import * as datatypes from './datatype';
+import * as idtypes from './idtype';
+import * as events from './event';
+import * as geom from './geom';
 
 
 export interface IViewDesc extends plugins.IPluginDesc {

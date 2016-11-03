@@ -4,12 +4,12 @@
 /**
  * Created by Samuel Gratzl on 22.10.2014.
  */
-import C = require('./main');
-import ajax = require('./ajax');
-import idtypes = require('./idtype');
-import datatypes = require('./datatype');
-import ranges = require('./range');
-import events = require('./event');
+import * as C from './index';
+import * as ajax from './ajax';
+import * as idtypes from './idtype';
+import * as datatypes from './datatype';
+import * as ranges from './range';
+import * as events from './event';
 
 export class AttributeContainer extends events.EventHandler implements C.IPersistable {
   private _attrs : { [key: string] : any } = {};

@@ -6,11 +6,11 @@
 /**
  * Created by Samuel Gratzl on 24.09.2014.
  */
-/// <reference path="../../tsd.d.ts" />
-import C = require('./main');
-import ajax = require('./ajax');
-import idtypes = require('./idtype');
-import ranges = require('./range');
+
+import * as C from './index';
+import * as ajax from './ajax';
+import * as idtypes from './idtype';
+import * as ranges from './range';
 
 export interface IIDMapper {
   (...id:number[]) : Promise<ranges.Range>;

@@ -10,7 +10,7 @@
 /// <amd-dependency path="require" name="requir_e"/>
 declare var requir_e : (deps:string[], callback:(deps:any[])=>any) => any;
 
-import C = require('./main');
+import * as C from './index';
 
 
 /**

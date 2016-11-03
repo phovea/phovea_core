@@ -7,10 +7,10 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import C = require('./main');
-import ajax = require('./ajax');
-import events = require('./event');
-import ranges = require('./range');
+import * as C from './index';
+import * as ajax from './ajax';
+import * as events from './event';
+import * as ranges from './range';
 
 const cache:{ [id: string] : IDType|ProductIDType } = {};
 var filledUp = false;

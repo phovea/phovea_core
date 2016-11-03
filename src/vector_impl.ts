@@ -8,14 +8,14 @@
  */
 
 'use strict';
-import C = require('./main');
-import ajax = require('./ajax');
-import ranges = require('./range');
-import idtypes = require('./idtype');
-import datatypes = require('./datatype');
-import math = require('./math');
-import def = require('./vector');
-import stratification = require('./stratification');
+import * as C from './index';
+import * as ajax from './ajax';
+import * as ranges from './range';
+import * as idtypes from './idtype';
+import * as datatypes from './datatype';
+import * as math from './math';
+import * as def from './vector';
+import * as stratification from './stratification';
 
 /**
  * base class for different Vector implementations, views, transposed,...

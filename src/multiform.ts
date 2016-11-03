@@ -7,11 +7,11 @@
  * Created by Samuel Gratzl on 27.08.2014.
  */
 
-import C = require('./main');
-import vis = require('./vis');
-import ranges = require('./range');
-import datatypes = require('./datatype');
-import geom = require('./geom');
+import * as C from './index';
+import * as vis from './vis';
+import * as ranges from './range';
+import * as datatypes from './datatype';
+import * as geom from './geom';
 
 class ProxyMetaData implements vis.IVisMetaData {
   constructor(private proxy : () => vis.IVisMetaData) {

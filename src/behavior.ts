@@ -7,8 +7,8 @@
  * Created by Samuel Gratzl on 16.12.2014.
  */
 
-import vis = require('./vis');
-import events = require('./event');
+import * as vis from './vis';
+import * as events from './event';
 
 /**
  * utility logic for zooming a vis instance

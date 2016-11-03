@@ -8,14 +8,14 @@
  */
 
 'use strict';
-import C = require('./main');
-import ajax = require('./ajax');
-import ranges = require('./range');
-import idtypes = require('./idtype');
-import datatypes = require('./datatype');
-import vector = require('./vector');
-import vector_impl = require('./vector_impl');
-import def = require('./table');
+import * as C from './index';
+import * as ajax from './ajax';
+import * as ranges from './range';
+import * as idtypes from './idtype';
+import * as datatypes from './datatype';
+import * as vector from './vector';
+import * as vector_impl from './vector_impl';
+import * as def from './table';
 /**
  * base class for different Table implementations, views, transposed,...
  */
