@@ -6,11 +6,11 @@
 /**
  * Created by Samuel Gratzl on 05.08.2014.
  */
-import * as C from './index';
-import * as plugins from './plugin';
-import * as datatypes from './datatype';
-import * as ranges from './range';
-import * as events from './event';
+import {IPersistable, uniqueId, isFunction, constantTrue} from './index';
+import {IPluginDesc, list as listPlugins} from './plugin';
+import {IDataType} from './datatype';
+import {Range} from './range';
+import {IEventHandler, EventHandler} from './event';
 
 
 /**
@@ -35,16 +35,16 @@ export interface ILocateAble {
   /**
    * data represented by this vis
    */
-  data: datatypes.IDataType;
+  data: IDataType;
 
   /**
    * locate method, by convention, when just a single range is given, then return
    * just a promise with this range, else an array
    * the return type should be something convertable using the geom module
    */
-  locate(...range: ranges.Range[]): Promise<any>;
+  locate(...range: Range[]): Promise<any>;
 
-  locateById(... range: ranges.Range[]): Promise<any>;
+  locateById(... range: Range[]): Promise<any>;
 }
 
 /**
@@ -80,12 +80,12 @@ export interface IVisMetaData {
 /**
  * formal description of the interface of a plugin description
  */
-export interface IVisPluginDesc extends plugins.IPluginDesc, IVisMetaData {
+export interface IVisPluginDesc extends IPluginDesc, IVisMetaData {
   /**
    * determines whether the given data can be represented using this visualization technique
    * @param data
    */
-  filter(data: datatypes.IDataType) : boolean;
+  filter(data: IDataType) : boolean;
 
   /**
    * add all icon information of this vis to the given html element
@@ -97,7 +97,7 @@ export interface IVisPluginDesc extends plugins.IPluginDesc, IVisMetaData {
 /**
  * basic interface of an visualization instance
  */
-export interface IVisInstance extends C.IPersistable, events.IEventHandler, ILocateAble {
+export interface IVisInstance extends IPersistable, IEventHandler, ILocateAble {
   /**
    * the unique id of this vis instance
    */
@@ -111,7 +111,7 @@ export interface IVisInstance extends C.IPersistable, events.IEventHandler, ILoc
   /**
    * the represented data
    */
-  data: datatypes.IDataType;
+  data: IDataType;
 
   /**
    * current size of this vis
@@ -167,8 +167,8 @@ export function assignVis(node: Element, vis: IVisInstance) {
 /**
  * base class for an visualization
  */
-export class AVisInstance extends events.EventHandler {
-  id = C.uniqueId('vis');
+export class AVisInstance extends EventHandler {
+  id = uniqueId('vis');
   private _built = false;
 
   option(name: string, value?: any) {
@@ -194,14 +194,14 @@ export class AVisInstance extends events.EventHandler {
     }
   }
 
-  locate(...range:ranges.Range[]) {
+  locate(...range:Range[]) {
     if (range.length === 1) {
       return this.locateImpl(range[0]);
     }
     return Promise.all(range.map(this.locateImpl, this));
   }
 
-  locateById(...range:ranges.Range[]) {
+  locateById(...range:Range[]) {
     return (<any>this).data.ids().then((ids) => {
       if (range.length === 1) {
         return this.locateImpl(ids.indexOf(range[0]));
@@ -210,7 +210,7 @@ export class AVisInstance extends events.EventHandler {
     });
   }
 
-  locateImpl(range: ranges.Range) {
+  locateImpl(range: Range) {
     //no resolution by default
     return Promise.resolve(null);
   }
@@ -254,7 +254,7 @@ export class AVisInstance extends events.EventHandler {
 function extrapolateFilter(r: any) {
   const v = r.filter;
   if (typeof v === 'undefined') {
-    r.filter = C.constantTrue;
+    r.filter = constantTrue;
   } else if (typeof v === 'string') {
     r.filter = (data) => data && data.desc.type && data.desc.type.match(v);
   } else if (Array.isArray(v)) {
@@ -263,22 +263,25 @@ function extrapolateFilter(r: any) {
 }
 
 function extrapolateIconify(r: any) {
-  if (C.isFunction(r.iconify)) {
+  if (isFunction(r.iconify)) {
     return;
   }
   r.iconify = function iconfiy(node: HTMLElement) {
     node.title = this.name;
     if(this.iconcss) {
-      node.classList.add('fa');
-      node.classList.add('vis-icon');
+      node.classList.add('phovea-vis-icon');
       node.classList.add(this.iconcss);
     } else if (this.icon) {
-      node.classList.add('fa');
-      node.classList.add('fa-fw');
-      node.classList.add('vis-icon');
+      node.classList.add('phovea-vis-icon');
       node.style.width = '1em';
-      node.style['background-image'] = 'url(' + this.baseUrl + '/' + this.icon + ')';
-      node.style['background-size'] = '100%';
+      node.style.display = 'inline-block';
+      node.style.textAlign = 'center';
+      node.style.backgroundSize = '100%';
+      node.style.backgroundRepeat = 'no-repeat';
+      //lazy load icon
+      this.icon().then((iconData) => {
+        node.style.backgroundImage = `url(${iconData})`;
+      });
       node.innerHTML = '&nbsp';
     } else {
       node.innerText = this.name.substr(0, 1).toUpperCase();
@@ -315,7 +318,7 @@ function extrapolateRotation(r : any) {
   }
 }
 
-function toVisPlugin(plugin : plugins.IPluginDesc) : IVisPluginDesc {
+function toVisPlugin(plugin : IPluginDesc) : IVisPluginDesc {
   const r : any = plugin;
   extrapolateFilter(r);
   extrapolateIconify(r);
@@ -329,7 +332,7 @@ function toVisPlugin(plugin : plugins.IPluginDesc) : IVisPluginDesc {
  * @param data the data type to visualize
  * @returns {IPluginDesc[]}
  */
-export function list(data:datatypes.IDataType): IVisPluginDesc[] {
+export function list(data:IDataType): IVisPluginDesc[] {
   //filter additionally with the filter attribute, which can be a function or the expected data type
-  return plugins.list('vis').map(toVisPlugin).filter((desc) => desc.filter(data));
+  return listPlugins('vis').map(toVisPlugin).filter((desc) => desc.filter(data));
 }
