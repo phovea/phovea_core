@@ -1241,9 +1241,13 @@ function parseRange(code:string) {
         dims.push(Range1D.all());
         break;
       default:
-        t = parseRange1D(code, act);
-        act = t.act + 1; //skip ,
-        dims.push(t.dim);
+        if (c.match(/\s/)) {
+          act++;
+        } else {
+          t = parseRange1D(code, act);
+          act = t.act + 1; //skip ,
+          dims.push(t.dim);
+        }
         break;
     }
   }
