@@ -1,9 +1,9 @@
 phovea_core [![Phovea][phovea-image]][phovea-url] [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
 =====================
 
-Phovea is a framework for developing web-based visualization applications. This is the core repository, but you will find the code distributed among [many repositories](http://caleydo.org/documentation/list_of_plugins).
+Phovea is a framework for developing web-based visualization applications. This is the core repository, but you will find the code distributed among [many repositories](http://phovea.caleydo.org/list_of_plugins).
 
-If you want to learn how to use Phovea, check out the [documentation](http://caleydo.org/documentation).
+If you want to learn how to use Phovea, check out the [documentation](http://phovea.caleydo.org).
 
 Installation
 ------------
