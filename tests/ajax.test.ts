@@ -1,16 +1,29 @@
-import {api2absURL} from '../src/ajax';
+import {api2absURL, encodeParams} from '../src/ajax';
 
 describe('api2absURL', () => {
-  describe('one arg', () => {
-    it('no query', () => expect(api2absURL('/path')).toEqual('/api/path'));
-  });
-  describe('empty query', () => {
-    it('no query', () => expect(api2absURL('/path', {})).toEqual('/api/path'));
-  });
-  describe('query', () => {
-    it('no query', () => expect(api2absURL('/path', {foo: 'bar'})).toEqual('/api/path?foo=bar'));
-  });
-  describe('url w/ query', () => {
-    it('no query', () => expect(api2absURL('/path?query=fake', {foo: 'bar'})).toEqual('/api/path?query=fake&foo=bar'));
-  });
+  it('one arg',
+      () => expect(api2absURL('/path')).toEqual('/api/path'));
+  it('empty query',
+      () => expect(api2absURL('/path', {})).toEqual('/api/path'));
+  it('query',
+      () => expect(api2absURL('/path', {foo: 'bar'})).toEqual('/api/path?foo=bar'));
+  it('url w/ query',
+      () => expect(api2absURL('/path?query=fake', {foo: 'bar'})).toEqual('/api/path?query=fake&foo=bar'));
 });
+
+describe('encodeParams', () => {
+  it('null',
+      () => expect(ajax.encodeParams(null)).toEqual(null));
+  it('empty array',
+      () => expect(ajax.encodeParams([])).toEqual(null));
+  it('full array',
+      () => expect(ajax.encodeParams(['99% & \\', '\u2603', '2+2', 4])).toEqual('0=99%25+%26+%5C&1=%E2%98%83&2=2%2B2&3=4'));
+  it('hash',
+      () => expect(ajax.encodeParams({foo: 'bar'})).toEqual('foo=bar'));
+  it('hash of array',
+      () => expect(ajax.encodeParams({foo: ['b', 'a', 'r']})).toEqual('foo%5B%5D=b&foo%5B%5D=a&foo%5B%5D=r'));
+  it('hash of hash',
+      () => expect(ajax.encodeParams({foo: [{nested: true}, 'bar']})).toEqual('foo%5B0%5D%5Bnested%5D=true&foo%5B%5D=bar'));
+});
+
+

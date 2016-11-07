@@ -16,48 +16,11 @@ define(["require", "exports", 'ajax'], function (require, exports, ajax) {
         ]);
       });
 
-      QUnit.module('api2absURL', function() {
-        // TODO: test that C.server_url and C.server_json_suffix are used.
-        QUnit.test('no query', function(assert) {
-          assert.equal(ajax.api2absURL('/path'), '/api/path');
-        });
-        QUnit.test('empty query', function(assert) {
-          assert.equal(ajax.api2absURL('/path', {}), '/api/path');
-        });
-        QUnit.test('query', function(assert) {
-          assert.equal(ajax.api2absURL('/path', {foo: 'bar'}), '/api/path?foo=bar');
-        });
-        QUnit.test('url w/ query', function(assert) {
-          assert.equal(ajax.api2absURL('/path?query=fake', {foo: 'bar'}), '/api/path?query=fake&foo=bar');
-        });
-      });
-
       /*
       TODO: encodeParams is internal? Usage across all projects limited to:
       ./caleydo_d3/ajax_adapter_d3.ts:        data = ajax.encodeParams(data); //encode in url
       ./caleydo_d3/ajax_adapter_d3.ts:      xhr.send(method, data instanceof FormData ? data: ajax.encodeParams(data), (error, _raw) => {
       */
-
-      QUnit.module('encodeParams', function() {
-        QUnit.test('null', function(assert) {
-          assert.equal(ajax.encodeParams(null), null);
-        });
-        QUnit.test('empty array', function(assert) {
-          assert.equal(ajax.encodeParams([]), null);
-        });
-        QUnit.test('full array', function(assert) {
-          assert.equal(ajax.encodeParams(['99% & \\', '\u2603', '2+2', 4]), '0=99%25+%26+%5C&1=%E2%98%83&2=2%2B2&3=4');
-        });
-        QUnit.test('hash', function(assert) {
-          assert.equal(ajax.encodeParams({foo: 'bar'}), 'foo=bar');
-        });
-        QUnit.test('hash of array', function(assert) {
-          assert.equal(ajax.encodeParams({foo: ['b', 'a', 'r']}), 'foo%5B%5D=b&foo%5B%5D=a&foo%5B%5D=r');
-        });
-        QUnit.test('hash of hash', function(assert) {
-          assert.equal(ajax.encodeParams({foo: [{nested: true}, 'bar']}), 'foo%5B0%5D%5Bnested%5D=true&foo%5B%5D=bar');
-        });
-      });
 
       var xhr;
       var requests =[];
