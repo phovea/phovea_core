@@ -1,4 +1,4 @@
-import {Circle, CORNER} from '../src/geom';
+import {Circle} from '../src/geom';
 
 describe('Circle', () => {
   var circle = new Circle(1,1,1);
