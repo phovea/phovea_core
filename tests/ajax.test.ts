@@ -13,17 +13,25 @@ describe('api2absURL', () => {
 
 describe('encodeParams', () => {
   it('null',
-      () => expect(ajax.encodeParams(null)).toEqual(null));
+      () => expect(encodeParams(null)).toEqual(null));
   it('empty array',
-      () => expect(ajax.encodeParams([])).toEqual(null));
+      () => expect(encodeParams([])).toEqual(null));
   it('full array',
-      () => expect(ajax.encodeParams(['99% & \\', '\u2603', '2+2', 4])).toEqual('0=99%25+%26+%5C&1=%E2%98%83&2=2%2B2&3=4'));
+      () => expect(encodeParams(['99% & \\', '\u2603', '2+2', 4])).toEqual('0=99%25+%26+%5C&1=%E2%98%83&2=2%2B2&3=4'));
   it('hash',
-      () => expect(ajax.encodeParams({foo: 'bar'})).toEqual('foo=bar'));
+      () => expect(encodeParams({foo: 'bar'})).toEqual('foo=bar'));
   it('hash of array',
-      () => expect(ajax.encodeParams({foo: ['b', 'a', 'r']})).toEqual('foo%5B%5D=b&foo%5B%5D=a&foo%5B%5D=r'));
+      () => expect(encodeParams({foo: ['b', 'a', 'r']})).toEqual('foo%5B%5D=b&foo%5B%5D=a&foo%5B%5D=r'));
   it('hash of hash',
-      () => expect(ajax.encodeParams({foo: [{nested: true}, 'bar']})).toEqual('foo%5B0%5D%5Bnested%5D=true&foo%5B%5D=bar'));
+      () => expect(encodeParams({foo: [{nested: true}, 'bar']})).toEqual('foo%5B0%5D%5Bnested%5D=true&foo%5B%5D=bar'));
 });
 
+/* TODO: Add at least one test for ajax.getAPIData */
 
+/* TODO: Add at least one test for ajax.getAPIJSON */
+
+/* TODO: Add at least one test for ajax.getData */
+
+/* TODO: Add at least one test for ajax.getJSON */
+
+/* TODO: Add at least one test for ajax.send */

@@ -65,47 +65,6 @@ define(["require", "exports", 'ajax'], function (require, exports, ajax) {
       ./caleydo_core/table_impl.ts:      return ajax.getAPIData('/dataset/table/'+desc.id+'/col/'+column, {
       */
 
-      /* TODO: Add at least one test for ajax.getAPIData
-      // TODO: "C.registry is undefined"
-      QUnit.module('getAPIData', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(ajax.getAPIData(), '???');
-        });
-      })
-      */
-
-      /* TODO: Add at least one test for ajax.getAPIJSON
-      QUnit.module('getAPIJSON', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(ajax.getAPIJSON(), '???');
-        });
-      })
-      */
-
-      /* TODO: Add at least one test for ajax.getData
-      QUnit.module('getData', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(ajax.getData(), '???');
-        });
-      })
-      */
-
-      /* TODO: Add at least one test for ajax.getJSON
-      QUnit.module('getJSON', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(ajax.getJSON(), '???');
-        });
-      })
-      */
-
-      /* TODO: Add at least one test for ajax.send
-      QUnit.module('send', function() {
-        QUnit.test('???', function(assert) {
-          assert.equal(ajax.send(), '???');
-        });
-      })
-      */
-
       /*
       TODO: sendAPI is internal? Usage across all projects limited to:
       ./caleydo_core/data.ts:  return ajax.sendAPI('/dataset/',data, 'post').then(transformEntry);
