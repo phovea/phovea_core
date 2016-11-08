@@ -8,7 +8,7 @@
  */
 
 import {argList, identity} from './index';
-import {IIterator, Iterator, single, concat, forList} from './iterator';
+import {IIterator, Iterator, single, concat, forList, range as iRange} from './iterator';
 
 export interface IRangeElem {
   isAll : boolean;
@@ -113,7 +113,7 @@ export class RangeElem implements IRangeElem {
    * @param size the underlying size for negative indices
    */
   iter(size?:number):IIterator<number> {
-    return range(fix(this.from, size), fix(this.to, size), this.step);
+    return iRange(fix(this.from, size), fix(this.to, size), this.step);
   }
 
   get __iterator__() {
