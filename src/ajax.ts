@@ -6,27 +6,42 @@
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
-import {list as listPlugins} from './plugin';
 import {offline as isOffline, server_url, server_json_suffix} from '.';
 
-/**
- * interface for the ajax adapter
- */
-export interface IAjaxAdapter {
-  send(url: string, data: any, method : string, expectedDataType : string): Promise<any>;
-}
-
-var _impl : Promise<IAjaxAdapter> = null;
-
-function getConnector() {
-  if (_impl != null) {
-    return _impl;
+class AjaxError extends Error {
+  constructor(public response: any) {
+    super(response.statusText);
   }
-  const adapters = listPlugins('ajax-adapter');
-  var adapter = adapters[0];
-  return _impl = adapter.load().then((p) => <IAjaxAdapter>p.factory());
 }
 
+function checkStatus(response) {
+  if (response.ok) {
+    return response;
+  } else {
+    throw new AjaxError(response);
+  }
+}
+
+function parseType(expectedDataType: string, response) {
+  expectedDataType = expectedDataType.trim().toLowerCase();
+  switch (expectedDataType) {
+    case 'json':
+    case 'application/json':
+      return response.json();
+    case 'text':
+    case 'text/plain':
+      return response.text();
+    case 'blob':
+      return response.blob();
+    case 'formdata':
+      return response.formData();
+    case 'arraybuffer':
+      return response.arrayBuffer();
+    default:
+      console.warn('unknown expected data type: ' + expectedDataType + ' returning blob');
+      return response.blob();
+  }
+}
 
 /**
  * sends an XML http request to the server
@@ -37,7 +52,31 @@ function getConnector() {
  * @returns {Promise<any>}
  */
 export function send(url: string, data : any = {}, method = 'get', expectedDataType = 'json'): Promise<any> {
-  return getConnector().then((c) => c.send(url, data, method, expectedDataType));
+  if (method === 'get' || method === 'head') {
+    data = encodeParams(data); //encode in url
+    if (data) {
+      url += (/\?/.test(url) ? '&' : '?') + data;
+    }
+    data = null;
+  }
+  const options :any = {
+    credentials: 'same-origin',
+    method: method.toUpperCase(),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+  };
+  if (data && !(data instanceof FormData)) {
+    options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    options.body = encodeParams(data);
+  } else if (data) {
+    options.body = data;
+  }
+
+  return (<any>self).fetch(url, options)
+    .then(checkStatus)
+    .then(parseType.bind(null,expectedDataType));
 }
 /**
  * to get some ajax json file
