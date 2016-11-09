@@ -97,6 +97,11 @@ export function mixin<T>(a: T, ...bs : any[]): T {
   return a;
 }
 
+/**
+ * @deprecated use obj === undefined directly
+ * @param obj
+ * @return {boolean}
+ */
 export function isUndefined(obj:any) {
   return typeof obj === 'undefined';
 }
@@ -109,6 +114,7 @@ export function mod(n: number, m: number) {
 
 /**
  * binds the given function to the given context / this arg
+ * @deprecated use Function.prototype.bind directly
  * @param f
  * @param thisArg
  * @returns {function(): any}
@@ -121,6 +127,7 @@ export function bind(f : () => any, thisArg : any, ...args: any[]) {
 
 /**
  * getter generator by name or index
+ * @deprecated too simple to write
  * @param attr
  */
 export function getter(...index: number[]);
@@ -132,11 +139,17 @@ export function getter(...attr: any[]) {
   return (obj) => attr.map((a) => obj[a]);
 }
 
+/**
+ * @deprecated use `typeof(f) === 'function`
+ * @param f
+ * @return {boolean}
+ */
 export function isFunction(f: any) {
   return typeof(f) === 'function';
 }
 
 /**
+ * @deprecated use `(d) => d`
  * identity function
  */
 export function identity(d:any) {
@@ -145,6 +158,7 @@ export function identity(d:any) {
 
 /**
  * a dummy function, which does exactly nothing, i.e. used as default
+ * @deprecated use `()=>undefined`
  */
 export function noop() {
   //no op
@@ -152,6 +166,7 @@ export function noop() {
 
 /**
  * just returns the argument in any case
+ * @deprecated use `() => x`
  * @param r - the value to return
  * @returns {*}
  */
@@ -167,6 +182,7 @@ export function constant(r) {
 
 /**
  * special constant function which returns always true, i.e., as a default for a filter function
+ * @deprecated use ()=>true
  * @returns {boolean}
  */
 export function constantTrue() {
@@ -175,6 +191,7 @@ export function constantTrue() {
 
 /**
  * special constant function which returns always false, i.e., as a default for a filter function
+ * @deprecated use ()=>false
  * @returns {boolean}
  */
 export function constantFalse() {
@@ -185,6 +202,7 @@ export function constantFalse() {
  * copies a plain object into a function and call a specific method onto direct call
  * @param obj - the
  * @param f
+ * @deprecated
  */
 export function callable(obj:any, f:string) {
   //assert this.isPlainObject(obj);
@@ -207,6 +225,7 @@ export function callable(obj:any, f:string) {
  * search item in array by function
  * @param arr
  * @param f
+ * @deprecated use Array.prototype.find
  * @return {T}
  */
 export function search<T>(arr: T[], f : (v: T) => boolean) : T {
@@ -221,6 +240,13 @@ export function search<T>(arr: T[], f : (v: T) => boolean) : T {
   return r;
 }
 
+/**
+ *
+ * @deprecated use Array.prototype.findIndex
+ * @param arr
+ * @param f
+ * @return {number}
+ */
 export function indexOf<T>(arr: T[], f : (v: T) => boolean) : number {
   var r = -1;
   arr.some((v,i) => {
@@ -236,6 +262,7 @@ export function indexOf<T>(arr: T[], f : (v: T) => boolean) : number {
 /**
  * converts the given arguments object into an array
  * @param args
+ * @deprecated use Array.from(arguments) instead
  * @returns {*|Array}
  */
 export function argList(args:IArguments) {
@@ -287,24 +314,26 @@ export function argFilter<T>(arr:T[], callbackfn:(value:T, index:number) => bool
  * @param length length of the id
  * @returns {string}
  */
-export function random_id(length = 8) {
+export function randomId(length = 8) {
   var id = '';
   while (id.length < length) {
     id += Math.random().toString(36).slice(-8);
   }
   return id.substr(0, length);
 }
+export const random_id = randomId;
 
 /**
  * fixes a given name by converting it to plain camelcase
  * @param name
  * @return {string}
  */
-export function fix_id(name: string) {
+export function fixId(name: string) {
   var clean = name.replace(/[\s!#$%&'()*+,.\/:;<=>?@\[\\\]\^`{|}~_-]/g,' ');
   var words = clean.trim().split(/\s+/); //remove heading and trailing spaces and combine multiple one during split
   return words.map((w, i) => (i === 0 ? w[0].toLowerCase() : w[0].toUpperCase()) + w.slice(1)).join('');
 }
+export const fix_id = fixId;
 
 /**
  * utility function to get notified, when the given dom element is removed from its parent
@@ -340,6 +369,7 @@ export function onDOMNodeRemoved(node:Element|Element[], callback:() => void, th
   });
 }
 
+// TODO convert to Map
 /**
  * unique id container
  * @type {{}}
@@ -464,6 +494,7 @@ export interface IPersistable {
 }
 
 class PropertyHandler {
+  // TODO convert to Map
   protected map: any = {};
 
   constructor(code?:string) {

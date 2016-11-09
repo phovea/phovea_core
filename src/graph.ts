@@ -12,6 +12,7 @@ import {all, none, Range, list} from './range';
 import {EventHandler, IEvent} from './event';
 
 export class AttributeContainer extends EventHandler implements IPersistable {
+  // TODO convert to Map
   private _attrs : { [key: string] : any } = {};
 
   persist():any {
