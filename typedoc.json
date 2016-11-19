@@ -1,16 +1,13 @@
 {
   "mode": "modules",
-  "out": "./dist/docs",
+  "out": "./docs",
   "theme": "minimal",
-  "ignoreCompilerErrors": "true",
-  "experimentalDecorators": "true",
-  "emitDecoratorMetadata": "true",
-  "target": "ES5",
-  "moduleResolution": "node",
-  "preserveConstEnums": "true",
-  "stripInternal": "true",
-  "suppressExcessPropertyErrors": "true",
-  "suppressImplicitAnyIndexErrors": "true",
-  "module": "commonjs",
-  "exclude": "**/*.spec.ts"
+  "ignoreCompilerErrors": false,
+  "experimentalDecorators": true,
+  "emitDecoratorMetadata": true,
+  "preserveConstEnums": true,
+  "stripInternal": true,
+  "suppressExcessPropertyErrors": true,
+  "suppressImplicitAnyIndexErrors": true,
+  "exclude": "**/*.test.ts"
 }

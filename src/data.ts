@@ -16,6 +16,7 @@ import {wrapObjects} from './table_impl';
 //find all datatype plugins
 const available = listPlugins('datatype');
 
+// TODO convert to Map
 var cacheById:{ [key : string]: Promise<IDataType> } = {};
 var cacheByName:{ [key : string]: Promise<IDataType> } = {};
 var cacheByFQName:{ [key : string]: Promise<IDataType> } = {};

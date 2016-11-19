@@ -9,6 +9,7 @@
 
 /**
  * basic iterator interface
+ * @deprecated use native iterator concept
  */
 export interface IIterator<T> {
   hasNext() : boolean;

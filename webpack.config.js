@@ -4,7 +4,7 @@
  * Licensed under the new BSD license, available at http://caleydo.org/license
  **************************************************************************** */
 
-const {libraryAliases, modules, entries, ignores, type} = require('./.yo-rc.json')['generator-phovea'];
+const {libraryAliases, libraryExternals, modules, entries, ignores, type} = require('./.yo-rc.json')['generator-phovea'];
 const resolve = require('path').resolve;
 const pkg = require('./package.json');
 const webpack = require('webpack');
@@ -20,7 +20,7 @@ const banner = '/*! ' + (pkg.title || pkg.name) + ' - v' + pkg.version + ' - ' +
 
 //list of loaders and their mappings
 const webpackloaders = [
-  {test: /\.scss$/, loader: 'style!css!sass'},
+  {test: /\.scss$/, loader: 'style-loader!css-loader!sass-loader'},
   {test: /\.tsx?$/, loader: 'awesome-typescript-loader'},
   {test: /\.json$/, loader: 'json-loader'},
   {
@@ -49,17 +49,6 @@ const webpackloaders = [
   {test: /\.(ttf|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'file-loader'}
 ];
 
-/**
- * creates a shallow copy of an object
- *
- **/
-function simpleCopy(obj, r) {
-  r = r || {};
-  Object.keys(obj).forEach(function (d) {
-    r[d] = obj[d];
-  });
-  return r;
-}
 /**
  * tests whether the given phovea module name is matching the requested file and if so convert it to an external lookup
  * depending on the loading type
@@ -94,7 +83,8 @@ function testPhoveaModules(modules) {
 }
 
 // use ueber registry file if available
-const registryFile = exists(resolve(__dirname, '..', 'phovea_registry.js')) ? '../phovea_registry.js' : './phovea_registry.js';
+const isUeberContext = exists(resolve(__dirname, '..', 'phovea_registry.js'));
+const registryFile = isUeberContext ? '../phovea_registry.js' : './phovea_registry.js';
 
 /**
  * inject the registry to be included
@@ -122,18 +112,18 @@ function generateWebpack(options) {
     entry: injectRegistry(options.entries),
     output: {
       path: resolve(__dirname, 'build'),
-      filename: (options.name || (pkg.name + (options.bundle ? '_bundle' : ''))) + (options.min ? '.min' : '') + '.js',
+      filename: (options.name || (pkg.name + (options.bundle ? '_bundle' : ''))) + (options.min && !options.nosuffix ? '.min' : '') + '.js',
       publicPath: '' //no public path = relative
     },
     resolve: {
       // Add `.ts` and `.tsx` as a resolvable extension.
       extensions: ['.webpack.js', '.web.js', '.ts', '.tsx', '.js'],
-      alias: simpleCopy(options.libs || {}),
-      //fallback to the directory above if they are siblings
-      modules: [
+      alias: Object.assign({}, options.libs || {}),
+      //fallback to the directory above if they are siblings just in the ueber context
+      modules: isUeberContext ? [
         resolve(__dirname, '../'),
         'node_modules'
-      ]
+      ] : ['node_modules']
     },
     plugins: [
       new webpack.BannerPlugin({
@@ -160,6 +150,18 @@ function generateWebpack(options) {
         '/api/*': {
           target: 'http://localhost:9000',
           secure: false
+        },
+        '/login': {
+          target: 'http://localhost:9000',
+          secure: false
+        },
+        '/logout': {
+          target: 'http://localhost:9000',
+          secure: false
+        },
+        '/loggedinas': {
+          target: 'http://localhost:9000',
+          secure: false
         }
       },
       contentBase: resolve(__dirname, 'build')
@@ -180,7 +182,7 @@ function generateWebpack(options) {
 
   if (!options.bundle) {
     //if we don't bundle don't include external libraries and other phovea modules
-    base.externals.push.apply(base.externals, Object.keys(options.libs || {}));
+    base.externals.push(...(options.externals || Object.keys(options.libs || {})));
 
     //ignore all phovea modules
     if (options.modules) {
@@ -189,19 +191,20 @@ function generateWebpack(options) {
 
     //ignore extra modules
     (options.ignore || []).forEach(function (d) {
-      base.module.loaders.push({test: new RegExp(d), loader: 'null'}); //use null loader
+      base.module.loaders.push({test: new RegExp(d), loader: 'null-loader'}); //use null loader
     });
     //ingore phovea module registry calls
     (options.modules || []).forEach(function (m) {
-      base.module.loaders.push({test: new RegExp('.*[\\\\/]' + m + '[\\\\/]phovea_registry.js'), loader: 'null'}); //use null loader
+      base.module.loaders.push({test: new RegExp('.*[\\\\/]' + m + '[\\\\/]phovea_registry.js'), loader: 'null-loader'}); //use null loader
     });
-
+  }
+  if (!options.bundle || options.extractCss) {
     //extract the included css file to own file
-    var p = new ExtractTextPlugin('style' + (options.min ? '.min' : '') + '.css');
+    var p = new ExtractTextPlugin('style' + (options.min && !options.nosuffix ? '.min' : '') + '.css');
     base.plugins.push(p);
     base.module.loaders[0] = {
       test: /\.scss$/,
-      loader: p.extract(['css', 'sass'])
+      loader: p.extract(['css-loader', 'sass-loader'])
     };
   }
   if (options.commons) {
@@ -243,17 +246,19 @@ function generateWebpackConfig(env) {
   const base = {
     entries: entries,
     libs: libraryAliases,
+    externals: libraryExternals,
     modules: modules,
     ignore: ignores
   };
 
   if (isTest) {
-    return generateWebpack(simpleCopy(base, {
+    return generateWebpack(Object.assign({}, base, {
       bundle: true
     }));
   }
 
-  if (type === 'app') {
+  if (type.startsWith('app')) {
+    base.extractCss = true;
     base.bundle = true; //bundle everything together
     base.name = '[name]'; //multiple entries case
     base.commons = true; //extract commons module
@@ -269,12 +274,17 @@ function generateWebpackConfig(env) {
   //single generation
   if (isDev) {
     return generateWebpack(base);
+  } else if (type === 'app') { //isProduction app
+    return generateWebpack(Object.assign({}, base, {
+        min: true,
+        nosuffix: true
+      }));
   } else { //isProduction
     return [
       //plain
       generateWebpack(base),
       //minified
-      generateWebpack(simpleCopy(base, {
+      generateWebpack(Object.assign({}, base, {
         min: true
       }))
     ];

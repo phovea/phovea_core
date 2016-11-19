@@ -82,6 +82,7 @@ export interface IPadding {
   bottom : number;
 }
 
+//TODO rename to camelCase
 export var no_padding = {
   top: 0,
   left: 0,

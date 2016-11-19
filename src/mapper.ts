@@ -5,6 +5,7 @@
  **************************************************************************** */
 /**
  * Created by Samuel Gratzl on 24.09.2014.
+ * @deprecated isn't it obsolete to idtype functions?
  */
 import {argList} from './index';
 import {getAPIJSON} from './ajax';
@@ -49,6 +50,7 @@ export function map(source:IDType, target:IDType) : any {
   return mapImpl(source, target, range);
 }
 
+//TODO convert to Map
 var cache : {[key:string] : Promise<Range> } = {};
 
 function mapImpl(source:IDType, target:IDType, range:Range) {
