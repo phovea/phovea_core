@@ -67,6 +67,7 @@ export interface IPlugin {
 }
 
 const registry : IPluginDesc[] = [];
+//TODO convert to Map
 const knownPlugins = {};
 
 

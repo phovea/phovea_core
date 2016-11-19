@@ -5,6 +5,7 @@
  **************************************************************************** */
 /**
  * Created by Samuel Gratzl on 29.12.2014.
+ * @deprecated use direct imports
  */
 
 import * as C_ from './index';

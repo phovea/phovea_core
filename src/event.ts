@@ -120,6 +120,7 @@ export interface IEventListener {
  * EventHandler base class, in the backend JQuery is used
  */
 export class EventHandler implements IEventHandler {
+  // TODO convert to Map
   private handlers : any = {};
 
   /**

@@ -12,6 +12,7 @@ import {getAPIJSON} from './ajax';
 import {EventHandler, IEventHandler, IEvent, IEventListener, fire as global_fire} from './event';
 import {none, all, Range, join, RangeLike, parse, Range1D, list as rlist} from './range';
 
+// TODO convert to Map
 const cache:{ [id: string] : IDType|ProductIDType } = {};
 var filledUp = false;
 
@@ -80,10 +81,13 @@ export class IDType extends EventHandler implements IIDType {
    * the current selections
    * @type {{}}
    */
+  // TODO convert to Map
   private sel = {};
 
   // TODO: is this cache ever emptied, or do we assume a reasonable upper bound on the entities in IDType?
+  // TODO convert to Map
   private name2id_cache:{ [k:string] : number } = {};
+  // TODO convert to Map
   private id2name_cache:{ [k:number] : string } = {};
 
   private canBeMappedTo: Promise<IDType[]> = null;
@@ -324,6 +328,7 @@ function removeCells(b:Range[], without:Range[], ndim:number) {
  * a product idtype is a product of multiple underlying ones, e.g. patient x gene.
  */
 export class ProductIDType extends EventHandler implements IIDType {
+  // TODO convert to Map
   private sel:{ [type: string] : Range[] } = {};
 
   private isOn = false;
