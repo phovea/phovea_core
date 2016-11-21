@@ -47,28 +47,14 @@ describe('Circle', () => {
     it('smaller', () => expect(! circle.intersects(new Circle(1,1,0.5))));
     it('larger', () => expect(! circle.intersects(new Circle(1,1,2))));
   });
-  
-      //   QUnit.test('radius', function(assert) {
-      //     assert.deepEqual(circle.radius, 1);
-      //   });
-      //   // QUnit.test('shift', function(assert) {
-      //   //   assert.deepEqual(circle.shift(), '???');
-      //   // });
-      //   // QUnit.test('shiftImpl', function(assert) {
-      //   //   assert.deepEqual(circle.shiftImpl(), '???');
-      //   // });
-      //   QUnit.test('toString', function(assert) {
-      //     assert.deepEqual(circle.toString(), 'Circle(x=1,y=1,radius=1)');
-      //   });
-      //   // QUnit.test('transform', function(assert) {
-      //   //   assert.deepEqual(circle.transform(), '???');
-      //   // });
-      //   QUnit.test('x', function(assert) {
-      //     assert.deepEqual(circle.x, 1);
-      //   });
-      //   QUnit.test('y', function(assert) {
-      //     assert.deepEqual(circle.y, 1);
-      //   });
+
+  it('radius', () => expect(circle.radius).toEqual(1));
+  // it('shift', () => expect(circle.shift()).toEqual('???'));
+  // it('shiftImpl', () => expect(circle.shiftImpl()).toEqual('???'));
+  it('toString', () => expect(circle.toString()).toEqual('Circle(x=1,y=1,radius=1)'));
+  it('x', () => expect(circle.x).toEqual(1));
+  it('y', () => expect(circle.y).toEqual(1));
+
       //   QUnit.test('xy', function(assert) {
       //     // TODO: How is this different from .center?
       //     assert.deepEqual(circle.xy.x, 1);
