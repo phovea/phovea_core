@@ -24,7 +24,7 @@ CORNER.NW = CORNER[7] = 'nw';
 export function vec(x : number, y: number): Vector2D;
 export function vec(vec: { x: number; y: number}): Vector2D;
 export function vec(x: any, y: number = Number.NaN): Vector2D {
-  return vec(x,y);
+  return new Vector2D(x,y);
 }
 
 /**
