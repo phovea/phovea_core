@@ -21,16 +21,6 @@ describe('Circle', () => {
     it('name', () => expect(params.params[1]).toEqual(1));  // TODO: Is this the radius?
   });
 
-  describe('center', () => {
-    it('x', () => expect(circle.center.x).toEqual(1));
-    it('y', () => expect(circle.center.y).toEqual(1));
-  });
-
-  describe('bs', () => {
-    // "bounding sphere"
-    it('toString', () => expect(circle.bs().toString()).toEqual('Circle(x=1,y=1,radius=1)'))
-  });
-
   describe('corner', () => {
     function corner(label, expected) {
       it(label, () => expect(circle.corner(CORNER[label]).toString()).toEqual(expected));
@@ -59,6 +49,12 @@ describe('Circle', () => {
   it('x', () => expect(circle.x).toEqual(1));
   it('y', () => expect(circle.y).toEqual(1));
   it('xy', () => expect(circle.xy.toString()).toEqual('1,1'));
+  // "bounding sphere"
+  it('bs', () => expect(circle.bs().toString()).toEqual('Circle(x=1,y=1,radius=1)'));
+  it('corner', () => expect(circle.center.toString()).toEqual('1,1'));
+
+  // TODO: Perhaps a transformed circle should be an ellipse?
+  it('transform', () => expect(circle.transform([2,0],0).toString()).toEqual('Circle(x=2,y=0,radius=1)'));
 
   // it('shift', () => expect(circle.shift()).toEqual('???'));
   // it('shiftImpl', () => expect(circle.shiftImpl()).toEqual('???'));
