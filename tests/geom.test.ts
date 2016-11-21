@@ -26,9 +26,10 @@ describe('Circle', () => {
     it('y', () => expect(circle.center.y).toEqual(1));
   });
 
-  // QUnit.test('bs', function(assert) { TODO: What does this mean?
-  //   assert.deepEqual(circle.bs(), '???');
-  // });
+  describe('bs', () => {
+    // "bounding sphere"
+    it('toString', () => expect(circle.bs().toString()).toEqual('Circle(x=1,y=1,radius=1)'))
+  });
 
   describe('corner', () => {
     it('NW', () => expect(circle.corner(CORNER.NW).toString()).toEqual('0,0'));
@@ -39,32 +40,14 @@ describe('Circle', () => {
   });
 
   describe('intersects', () => {
-    it('self', () => expect(circle.intersects(new Circle(1,1,1))))
+    it('self', () => expect(circle.intersects(new Circle(1,1,1))));
+    it('outside', () => expect(! circle.intersects(new Circle(-1,-1,1))));
+    it('touch', () => expect(circle.intersects(new Circle(-1,1,1))));
+    it('overlap', () => expect(circle.intersects(new Circle(0,0,1))));
+    it('smaller', () => expect(! circle.intersects(new Circle(1,1,0.5))));
+    it('larger', () => expect(! circle.intersects(new Circle(1,1,2))));
   });
-
-      //   QUnit.test('intersects', function(assert) {
-      //     function assert_intersect(x,y,r,reverse) {
-      //       if (typeof reverse == 'undefined') {
-      //         reverse = true;
-      //       }
-      //       var other = new geom.Circle(x, y, r);
-      //       var intersection = circle.intersects(other);
-      //       if (!reverse) {
-      //         assert.ok(!intersection.intersects);
-      //       } else {
-      //         assert.ok(intersection.intersects);
-      //       }
-      //     }
-      //     assert_intersect(1,1,1); // same
-      //     assert_intersect(-1,-1,1, false); // outside
-      //     assert_intersect(-1,1,1); // touch
-      //     assert_intersect(0,0,1); // overlap
-      //     // TODO: Bug? Maybe intersection means the line of the circle edge,
-      //     // rather than the interior of the disk?
-      //     assert_intersect(1,1,0.5, false); // smaller
-      //     assert_intersect(1,1,2, false); // larger
-      //     // TODO: Test other methods of intersection object
-      //   });
+  
       //   QUnit.test('radius', function(assert) {
       //     assert.deepEqual(circle.radius, 1);
       //   });
