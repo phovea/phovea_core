@@ -1,0 +1,53 @@
+{
+  "generator-phovea": {
+    "type": "lib",
+    "name": "phovea_core",
+    "author": "The Caleydo Team",
+    "githubAccount": "phovea",
+    "modules": [],
+    "extensions": [
+      {
+        "type": "datatype",
+        "id": "matrix",
+        "module": "matrix_impl",
+        "extras": {}
+      },
+      {
+        "type": "datatype",
+        "id": "table",
+        "module": "table_impl",
+        "extras": {}
+      },
+      {
+        "type": "datatype",
+        "id": "vector",
+        "module": "vector_impl",
+        "extras": {}
+      },
+      {
+        "type": "datatype",
+        "id": "stratification",
+        "module": "stratification_impl",
+        "extras": {}
+      },
+      {
+        "type": "datatype",
+        "id": "graph",
+        "module": "graph",
+        "extras": {}
+      }
+    ],
+    "sextensions": [],
+    "libraries": [],
+    "unknown": {
+      "requirements": [],
+      "debianPackages": [],
+      "redhatPackages": []
+    },
+    "libraryAliases": {},
+    "entries": "./index.js",
+    "ignores": [],
+    "today": "Thu, 03 Nov 2016 13:26:14 GMT",
+    "libraryExternals": []
+  }
+}
