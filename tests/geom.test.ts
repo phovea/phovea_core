@@ -32,11 +32,17 @@ describe('Circle', () => {
   });
 
   describe('corner', () => {
-    it('NW', () => expect(circle.corner(CORNER.NW).toString()).toEqual('0,0'));
-    // TODO: These should not all be the same?
-    it('NE', () => expect(circle.corner(CORNER.NW).toString()).toEqual('0,0'));
-    it('SE', () => expect(circle.corner(CORNER.NW).toString()).toEqual('0,0'));
-    it('SW', () => expect(circle.corner(CORNER.NW).toString()).toEqual('0,0'));
+    function corner(label, expected) {
+      it(label, () => expect(circle.corner(CORNER[label]).toString()).toEqual(expected));
+    }
+    corner('NW', '0,0');
+    corner('NE', '2,0');
+    corner('SE', '2,2');
+    corner('SW', '0,2');
+    corner('N', '1,0');
+    corner('S', '1,2');
+    corner('E', '2,1');
+    corner('W', '0,1');
   });
 
   describe('intersects', () => {
@@ -49,18 +55,13 @@ describe('Circle', () => {
   });
 
   it('radius', () => expect(circle.radius).toEqual(1));
-  // it('shift', () => expect(circle.shift()).toEqual('???'));
-  // it('shiftImpl', () => expect(circle.shiftImpl()).toEqual('???'));
   it('toString', () => expect(circle.toString()).toEqual('Circle(x=1,y=1,radius=1)'));
   it('x', () => expect(circle.x).toEqual(1));
   it('y', () => expect(circle.y).toEqual(1));
+  it('xy', () => expect(circle.xy.toString()).toEqual('1,1'));
 
-      //   QUnit.test('xy', function(assert) {
-      //     // TODO: How is this different from .center?
-      //     assert.deepEqual(circle.xy.x, 1);
-      //     assert.deepEqual(circle.xy.y, 1);
-      //     // TODO: more
-      //   });
-      // });
+  // it('shift', () => expect(circle.shift()).toEqual('???'));
+  // it('shiftImpl', () => expect(circle.shiftImpl()).toEqual('???'));
+  // TODO: shiftImpl modifies object in place. Would immutability be a good thing?
 
 });
