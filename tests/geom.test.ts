@@ -1,4 +1,4 @@
-import {Circle} from '../src/geom';
+import {Circle, CORNER} from '../src/geom';
 
 describe('Circle', () => {
   var circle = new Circle(1,1,1);
@@ -30,10 +30,13 @@ describe('Circle', () => {
   //   assert.deepEqual(circle.bs(), '???');
   // });
 
-  // describe('corner', () => {
-  //   var corner = circle.corner(CORNER.NW);
-  //   it('toString', () => expect(corner.toString).toEqual('1,1'));
-  // });
+  describe('corner', () => {
+    it('NW', () => expect(circle.corner(CORNER.NW).toString()).toEqual('0,0'));
+    // TODO: These should not all be the same?
+    it('NE', () => expect(circle.corner(CORNER.NW).toString()).toEqual('0,0'));
+    it('SE', () => expect(circle.corner(CORNER.NW).toString()).toEqual('0,0'));
+    it('SW', () => expect(circle.corner(CORNER.NW).toString()).toEqual('0,0'));
+  });
 
   describe('intersects', () => {
     it('self', () => expect(circle.intersects(new Circle(1,1,1))))
