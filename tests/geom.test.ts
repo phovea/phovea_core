@@ -13,36 +13,31 @@ describe('Circle', () => {
     // TODO: more
   });
 
-  // TODO: "Circle asIntersectionParams encountered a declaration exception FAILED"
-  // describe('asIntersectionParams', () => {
-  //   var params = circle.asIntersectionParams();
-  //   it('name', () => expect(params.name).toEqual('Circle'));
-  //   it('name', () => expect(params.params[0].x).toEqual(1));
-  //   it('name', () => expect(params.params[0].y).toEqual(1));
-  //   it('name', () => expect(params.params[1]).toEqual(1));  // TODO: Is this the radius?
-  //   // TODO: more
-  // });
+  describe('asIntersectionParams', () => {
+    var params = circle.asIntersectionParams();
+    it('name', () => expect(params.name).toEqual('Circle'));
+    it('name', () => expect(params.params[0].x).toEqual(1));
+    it('name', () => expect(params.params[0].y).toEqual(1));
+    it('name', () => expect(params.params[1]).toEqual(1));  // TODO: Is this the radius?
+  });
 
-  // TODO: "RangeError: Maximum call stack size exceeded"
-  // describe('center', () => {
-  //   it('x', () => expect(circle.center.x).toEqual(1));
-  //   it('y', () => expect(circle.center.y).toEqual(1));
-  // });
+  describe('center', () => {
+    it('x', () => expect(circle.center.x).toEqual(1));
+    it('y', () => expect(circle.center.y).toEqual(1));
+  });
 
   // QUnit.test('bs', function(assert) { TODO: What does this mean?
   //   assert.deepEqual(circle.bs(), '???');
   // });
 
-  // TODO: "RangeError: Maximum call stack size exceeded"
   // describe('corner', () => {
   //   var corner = circle.corner(CORNER.NW);
   //   it('toString', () => expect(corner.toString).toEqual('1,1'));
   // });
 
-  // TODO: "RangeError: Maximum call stack size exceeded"
-  // describe('intersects', () => {
-  //   it('self', () => expect(circle.intersects(new Circle(1,1,1))))
-  // });
+  describe('intersects', () => {
+    it('self', () => expect(circle.intersects(new Circle(1,1,1))))
+  });
 
       //   QUnit.test('intersects', function(assert) {
       //     function assert_intersect(x,y,r,reverse) {
