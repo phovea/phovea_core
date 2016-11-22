@@ -1,4 +1,4 @@
-import {argFilter, argSort, bounds, mod, version, uniqueId} from '../src';
+import {argFilter, argSort, bounds, mod, version, uniqueId, uniqueString, resolveIn} from '../src';
 
 describe('argFilter', () => {
   it('evens', () => expect(argFilter([1, 3, 5, 2, 4, 6, 7, 9, 11], (d) => d % 2 === 0))
@@ -33,64 +33,97 @@ describe('uniqueId', () => {
   it('first time', () => expect(uniqueId()).toEqual(0));
   it('second time', () => expect(uniqueId()).toEqual(1));
 });
-    
-    // TODO: IdPool is limited to core... make private?
-    // TODO: _init is limited to core... make private?
-    // TODO: argFilter is limited to core... make private?
 
-    //  argList external usages:
-    //  caleydo_window/main.ts:        return vis.locate.apply(vis, C.argList(arguments)).then(function (r) {
-    //  caleydo_window/main.ts:        return vis.locateById.apply(vis, C.argList(arguments)).then(function (r) {
+describe('uniqueString', () => {
+  it('first time', () => expect(uniqueString()).toEqual('_default2'));
+  it('second time', () => expect(uniqueString()).toEqual('_default3'));
+  it('foobar time', () => expect(uniqueString('foobar')).toEqual('foobar0'));
+});
 
-    // TODO: argSort is limited to core... make private?
-    // TODO: callable is defined but unused... delete?
+describe('resolveIn', () => {
+  it('200ms', (done) => {
+    var past = Date.now();
+    resolveIn(200).then(function() {
+      var present = Date.now();
+      var actual = present - past;
+      expect(actual).toBeGreaterThanOrEqual(200);
+      done();
+    });
+  });
+});
 
-     // constantFalse external usages:
-     // caleydo_d3/link.ts:    canHover: C.constantFalse
+      // QUnit.module('random_id', function() {
+      //   QUnit.test('default', function(assert) {
+      //     assert.ok(main.random_id().match(/^[0-9a-z]{8}$/));
+      //   });
+      //   QUnit.test('short', function(assert) {
+      //     assert.ok(main.random_id(1).match(/^[0-9a-z]$/));
+      //   });
+      // });
 
-     // constantTrue external usages:
-     // caleydo_clue/selection.ts:      filter: C.constantTrue,
-     // caleydo_d3/databrowser.ts:      filter: C.constantTrue
-     // caleydo_d3/link.ts:      filter = this.options.filter || C.constantTrue;
-     // caleydo_d3/link.ts:    filter: C.constantTrue,
-     // caleydo_d3/link.ts:    idTypeFilter : <(idtype: idtypes.IDType, i: number, dataVis: IDataVis) => boolean>C.constantTrue,
-     // caleydo_d3/link.ts:    canSelect : C.constantTrue,
-     // caleydo_d3/selectioninfo.ts:    filterSelectionTypes : <(selectionType: string) => boolean>C.constantTrue
-     // caleydo_d3/selectioninfo.ts:    filterSelectionTypes : <(selectionType: string) => boolean>C.constantTrue,
-     // caleydo_d3/selectioninfo.ts:    filter : <(idtype: idtypes.IDType) => boolean>C.constantTrue
 
-    // TODO: copyDnD is limited to core... make private?
-    // TODO: delayedCall is defined but unused... delete?
+// TODO: IdPool is limited to core... make private?
+// TODO: _init is limited to core... make private?
+// TODO: argFilter is limited to core... make private?
 
-     // extendClass external usages:
-     // caleydo_d3/d3util.ts:  C.extendClass(VisTechnique, vis.AVisInstance);
-     // fix_id external usages:
-     // caleydo_importer/importtable.ts:    id: fix_id(common.name+random_id(2)),
-     // caleydo_importer/importtable.ts:    id: fix_id(common.name+random_id(3)),
+//  argList external usages:
+//  caleydo_window/main.ts:        return vis.locate.apply(vis, C.argList(arguments)).then(function (r) {
+//  caleydo_window/main.ts:        return vis.locateById.apply(vis, C.argList(arguments)).then(function (r) {
 
-    // TODO: flagId is limited to core... make private?
+// TODO: argSort is limited to core... make private?
+// TODO: callable is defined but unused... delete?
 
-     // isFunction external usages:
-     // caleydo_clue/multiform.ts:  if (C.isFunction((<any>m).switchTo)) {
-     // caleydo_d3/d3util.ts:    if (C.isFunction(this.init)) {
-     // caleydo_window/main.ts:    if (C.isFunction(vis_or_factory)) {
-     // caleydo_window/main.ts:        if (!C.isFunction(vis.locate)) {
-     // caleydo_window/main.ts:        if (!C.isFunction(vis.locateById)) {
+// constantFalse external usages:
+// caleydo_d3/link.ts:    canHover: C.constantFalse
 
-    // TODO: isUndefined is defined but unused... delete?
-    // TODO: noop is limited to core... make private?
+// constantTrue external usages:
+// caleydo_clue/selection.ts:      filter: C.constantTrue,
+// caleydo_d3/databrowser.ts:      filter: C.constantTrue
+// caleydo_d3/link.ts:      filter = this.options.filter || C.constantTrue;
+// caleydo_d3/link.ts:    filter: C.constantTrue,
+// caleydo_d3/link.ts:    idTypeFilter : <(idtype: idtypes.IDType, i: number, dataVis: IDataVis) => boolean>C.constantTrue,
+// caleydo_d3/link.ts:    canSelect : C.constantTrue,
+// caleydo_d3/selectioninfo.ts:    filterSelectionTypes : <(selectionType: string) => boolean>C.constantTrue
+// caleydo_d3/selectioninfo.ts:    filterSelectionTypes : <(selectionType: string) => boolean>C.constantTrue,
+// caleydo_d3/selectioninfo.ts:    filter : <(idtype: idtypes.IDType) => boolean>C.constantTrue
 
-     // offline external usages:
-     // caleydo_security_flask/login.ts:  if (!C.offline) {
-     // caleydo_security_flask/login.ts:  if (!C.offline) {
+// TODO: copyDnD is limited to core... make private?
+// TODO: delayedCall is defined but unused... delete?
 
-    // TODO: server_json_suffix is limited to core... make private?
-    // TODO: server_url is limited to core... make private?
-    // TODO: uniqueId is limited to core... make private?
+// extendClass external usages:
+// caleydo_d3/d3util.ts:  C.extendClass(VisTechnique, vis.AVisInstance);
+// fix_id external usages:
+// caleydo_importer/importtable.ts:    id: fix_id(common.name+random_id(2)),
+// caleydo_importer/importtable.ts:    id: fix_id(common.name+random_id(3)),
 
-     // uniqueString external usages:
-     // caleydo_d3/parser.ts:    const id = C.uniqueString('localData');
-     // caleydo_d3/parser.ts:    const id = C.uniqueString('localData');
-     // caleydo_d3/parser.ts:    const id = C.uniqueString('localData');
+// TODO: flagId is limited to core... make private?
 
-    // TODO: version is defined but unused... delete?
+// isFunction external usages:
+// caleydo_clue/multiform.ts:  if (C.isFunction((<any>m).switchTo)) {
+// caleydo_d3/d3util.ts:    if (C.isFunction(this.init)) {
+// caleydo_window/main.ts:    if (C.isFunction(vis_or_factory)) {
+// caleydo_window/main.ts:        if (!C.isFunction(vis.locate)) {
+// caleydo_window/main.ts:        if (!C.isFunction(vis.locateById)) {
+
+// TODO: isUndefined is defined but unused... delete?
+// TODO: noop is limited to core... make private?
+
+// offline external usages:
+// caleydo_security_flask/login.ts:  if (!C.offline) {
+// caleydo_security_flask/login.ts:  if (!C.offline) {
+
+// TODO: server_json_suffix is limited to core... make private?
+// TODO: server_url is limited to core... make private?
+// TODO: uniqueId is limited to core... make private?
+
+// uniqueString external usages:
+// caleydo_d3/parser.ts:    const id = C.uniqueString('localData');
+// caleydo_d3/parser.ts:    const id = C.uniqueString('localData');
+// caleydo_d3/parser.ts:    const id = C.uniqueString('localData');
+
+// TODO: version is defined but unused... delete?
+
+// TODO: Add at least one test for main.server_json_suffix
+// TODO: Add at least one test for main.server_url
+// TODO: Add at least one test for main.updateDropEffect
+
