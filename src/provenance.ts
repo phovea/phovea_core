@@ -4,16 +4,15 @@
 import {isFunction, constant, argList, mixin, search, hash, resolveIn} from './index';
 import {get as getData, remove as removeData, upload, list as listData} from './data';
 import * as graph from './graph';
-import {IDType, SelectOperation, defaultSelectionType, resolve as resolveIDType} from './idtype';
+import {IDType, SelectOperation, defaultSelectionType, resolve as resolveIDType, hoverSelectionType} from './idtype';
 import {Range, list as rlist, Range1D, all} from './range';
 import {isDataType, IDataType, IDataDescription, DataTypeBase} from './datatype';
 import {list as listPlugins, load as loadPlugin} from './plugin';
 import * as session from './session';
 
-import {SimHash, MatchedTokenTree} from '../caleydo_clue/simhash';
-import {IStateToken, StateTokenNode} from '../caleydo_clue/statetoken';
-import all = Promise.all;
-import {isUndefined} from '../caleydo_core/main';
+import {SimHash, MatchedTokenTree} from 'phovea_clue/src/simhash';
+import {IStateToken} from 'phovea_clue/src/statetoken';
+import {isUndefined} from 'phovea_core/src/index';
 
 /**
  * reexport the edge type
@@ -633,9 +632,13 @@ export class StateNode extends graph.GraphNode {
   }
 
   numberOfSetBits(i: number): number {
+    /*jshint bitwise:false */
+    /*tslint:disable:no-bitwise */
     i = i - ((i >> 1) & 0x55555555);
     i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
     return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
+    /*jshint bitwise:true */
+    /*tslint:enable:no-bitwise */
   }
 
   public duplicates: StateNode[] = [];
@@ -1301,7 +1304,7 @@ export class ProvenanceGraph extends DataTypeBase {
   public comparing: boolean = false;
 
   get compareMode(): boolean {
-    return this.comparing && this.selectedStates(idtypes.hoverSelectionType).length > 0;
+    return this.comparing && this.selectedStates(hoverSelectionType).length > 0;
   }
 
   private _similarityMode: boolean = false;
@@ -1357,7 +1360,6 @@ export class ProvenanceGraph extends DataTypeBase {
   selectState(state:StateNode, op:SelectOperation = SelectOperation.SET, type = defaultSelectionType, extras = {}) {
     this.fire('select_state,select_state_' + type, state, type, op, extras);
     this.select(ProvenanceGraphDim.State, type, state ? [this._states.indexOf(state)] : [], op);
-    this.fire('select_state,select_state_' + type, state, type, op, extras);
   }
 
   selectSlide(state:SlideNode, op:SelectOperation = SelectOperation.SET, type = defaultSelectionType, extras = {}) {
@@ -1690,7 +1692,7 @@ export class ProvenanceGraph extends DataTypeBase {
     action.updateInverse(this, <IInverseActionCreator>result.inverse);
 
     this.switchToImpl(action, next);
-    let hash = next.simHash;
+    //let hash = next.simHash;
     this.fire('action-execution-complete', action.resultsIn);
     return {
       action: action,
