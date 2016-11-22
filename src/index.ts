@@ -10,7 +10,8 @@
 /**
  * version of the core
  */
-export const version = '__VERSION__';
+declare var __VERSION__; 
+export const version = __VERSION__;
 
 /**
  * whether the standard api calls should be prevented
