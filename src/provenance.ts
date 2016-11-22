@@ -628,7 +628,7 @@ export class StateNode extends graph.GraphNode {
   }
 
   getSimForLineupTo(otherState: StateNode) {
-    return this.getMatchedTreeWithOtherState(otherState).similarityForLineup
+    return this.getMatchedTreeWithOtherState(otherState).similarityForLineup;
   }
 
   numberOfSetBits(i: number): number {
