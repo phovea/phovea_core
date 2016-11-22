@@ -1,4 +1,4 @@
-import {argFilter, argSort, bounds, mod, version, uniqueId, uniqueString, resolveIn, randomId} from '../src';
+import {argFilter, argSort, bounds, mod, version, uniqueId, uniqueString, resolveIn, randomId, flagId} from '../src';
 
 describe('argFilter', () => {
   it('evens', () => expect(argFilter([1, 3, 5, 2, 4, 6, 7, 9, 11], (d) => d % 2 === 0))
@@ -56,6 +56,19 @@ describe('randomId', () => {
   it('default', () => expect(randomId()).toMatch(/^[0-9a-z]{8}$/));
   it('short', () => expect(randomId(1)).toMatch(/^[0-9a-z]$/));
 });
+
+// TODO: What is this for?
+it('flagId', () => expect(flagId('fake', 1)).toEqual(1));
+
+// TODO: Add at least one test for copyDnD
+// TODO: Add at least one test for delayedCall
+// TODO: Add at least one test for extendClass
+// TODO: Add at least one test for fix_id
+// TODO: Add at least one test for hasDnDType
+// TODO: Add at least one test for hash
+// TODO: Add at least one test for mixin
+// TODO: Add at least one test for onDOMNodeRemoved
+// TODO: Add at least one test for param
 
 // TODO: IdPool is limited to core... make private?
 // TODO: _init is limited to core... make private?
