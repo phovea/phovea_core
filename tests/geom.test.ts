@@ -182,14 +182,56 @@ describe('Ellipse', () => {
   // TODO: shiftImpl modifies object in place. Would immutability be a good thing?
 });
 
-describe('Ellipse', () => {
-
-});
-
 describe('Polygon', () => {
+
+  // TODO: Add at least one test for polygon.aabb
+  // TODO: Add at least one test for polygon.area
+  // TODO: Add at least one test for polygon.asIntersectionParams
+  // TODO: Add at least one test for polygon.bs
+  // TODO: Add at least one test for polygon.center
+  // TODO: Add at least one test for polygon.centroid
+  // TODO: Add at least one test for polygon.constructor
+  // TODO: Add at least one test for polygon.corner
+  // TODO: Add at least one test for polygon.intersects
+  // TODO: Add at least one test for polygon.isClockwise
+  // TODO: Add at least one test for polygon.isConcave
+  // TODO: Add at least one test for polygon.isConvex
+  // TODO: Add at least one test for polygon.isCounterClockwise
+  // TODO: Add at least one test for polygon.length
+  // TODO: Add at least one test for polygon.pointInPolygon
+  // TODO: Add at least one test for polygon.points
+  // TODO: Add at least one test for polygon.push
+  // TODO: Add at least one test for polygon.shift
+  // TODO: Add at least one test for polygon.shiftImpl
+  // TODO: Add at least one test for polygon.toString
+  // TODO: Add at least one test for polygon.transform
 
 });
 
 describe('Line', () => {
+
+  // TODO: Add at least one test for line.aabb
+  // TODO: Add at least one test for line.asIntersectionParams
+  // TODO: Add at least one test for line.bs
+  // TODO: Add at least one test for line.center
+  // TODO: Add at least one test for line.constructor
+  // TODO: Add at least one test for line.corner
+  // TODO: Add at least one test for line.cx
+  // TODO: Add at least one test for line.cy
+  // TODO: Add at least one test for line.eq
+  // TODO: Add at least one test for line.h
+  // TODO: Add at least one test for line.intersects
+  // TODO: Add at least one test for line.shift
+  // TODO: Add at least one test for line.shiftImpl
+  // TODO: Add at least one test for line.size
+  // TODO: Add at least one test for line.toString
+  // TODO: Add at least one test for line.transform
+  // TODO: Add at least one test for line.w
+  // TODO: Add at least one test for line.x
+  // TODO: Add at least one test for line.x2
+  // TODO: Add at least one test for line.x2y2
+  // TODO: Add at least one test for line.xy
+  // TODO: Add at least one test for line.y
+  // TODO: Add at least one test for line.y2
 
 });
