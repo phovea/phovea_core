@@ -174,7 +174,22 @@ describe('Ellipse', () => {
 
   it('transform', () => expect(ellipse.transform([2,1],0).toString()).toEqual('Ellipse(x=2,y=2,radiusX=2NaN1)'));
 
+  it('radiusX', () => expect(ellipse.radiusX).toEqual(1));
+  it('radiusY', () => expect(ellipse.radiusY).toEqual(2));
+
   // it('shift', () => expect(rect.shift()).toEqual('???'));
   // it('shiftImpl', () => expect(rect.shiftImpl()).toEqual('???'));
   // TODO: shiftImpl modifies object in place. Would immutability be a good thing?
+});
+
+describe('Ellipse', () => {
+
+});
+
+describe('Polygon', () => {
+
+});
+
+describe('Line', () => {
+
 });
