@@ -10,7 +10,7 @@
 /**
  * version of the core
  */
-declare var __VERSION__; 
+declare var __VERSION__;
 export const version = __VERSION__;
 
 /**
