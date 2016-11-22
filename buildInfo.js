@@ -103,7 +103,7 @@ function resolveSingle() {
   const pkg = require(`./package.json`);
   const head = gitHead('.');
   const deps = {};
-  Object.keys(self.dependencies).forEach((d) => {
+  Object.keys(self.dependencies || {}).forEach((d) => {
     deps[d] = cleanupDependency(self.dependencies[d]);
   });
   return {
