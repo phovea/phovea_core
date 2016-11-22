@@ -1,4 +1,4 @@
-import {argFilter, argSort, bounds, mod} from '../src';
+import {argFilter, argSort, bounds, mod, version, uniqueId} from '../src';
 
 describe('argFilter', () => {
   it('evens', () => expect(argFilter([1, 3, 5, 2, 4, 6, 7, 9, 11], (d) => d % 2 === 0))
@@ -26,6 +26,13 @@ describe('bounds', () => {
   // TODO: DOM object
 });
 
+it('version', () => expect(version).toEqual('__VERSION__') );
+// TODO: (1) Doesn't seem right. (2) Does anything actually need it?
+
+describe('uniqueId', () => {
+  it('first time', () => expect(uniqueId()).toEqual(0));
+  it('second time', () => expect(uniqueId()).toEqual(1));
+});
     
     // TODO: IdPool is limited to core... make private?
     // TODO: _init is limited to core... make private?
