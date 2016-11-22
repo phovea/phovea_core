@@ -1,4 +1,4 @@
-import {argFilter, argSort, bounds, mod, version, uniqueId, uniqueString, resolveIn} from '../src';
+import {argFilter, argSort, bounds, mod, version, uniqueId, uniqueString, resolveIn, randomId} from '../src';
 
 describe('argFilter', () => {
   it('evens', () => expect(argFilter([1, 3, 5, 2, 4, 6, 7, 9, 11], (d) => d % 2 === 0))
@@ -52,15 +52,10 @@ describe('resolveIn', () => {
   });
 });
 
-      // QUnit.module('random_id', function() {
-      //   QUnit.test('default', function(assert) {
-      //     assert.ok(main.random_id().match(/^[0-9a-z]{8}$/));
-      //   });
-      //   QUnit.test('short', function(assert) {
-      //     assert.ok(main.random_id(1).match(/^[0-9a-z]$/));
-      //   });
-      // });
-
+describe('randomId', () => {
+  it('default', () => expect(randomId()).toMatch(/^[0-9a-z]{8}$/));
+  it('short', () => expect(randomId(1)).toMatch(/^[0-9a-z]$/));
+});
 
 // TODO: IdPool is limited to core... make private?
 // TODO: _init is limited to core... make private?
