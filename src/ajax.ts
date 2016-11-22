@@ -9,8 +9,8 @@
 import {offline as isOffline, server_url, server_json_suffix} from '.';
 
 class AjaxError extends Error {
-  constructor(public response: any) {
-    super(response.statusText);
+  constructor(public response: any, message?: string) {
+    super(message ? message : response.statusText);
   }
 }
 
@@ -23,8 +23,7 @@ function checkStatus(response) {
 }
 
 function parseType(expectedDataType: string, response) {
-  expectedDataType = expectedDataType.trim().toLowerCase();
-  switch (expectedDataType) {
+  switch (expectedDataType.trim().toLowerCase()) {
     case 'json':
     case 'application/json':
       return response.json();
@@ -38,8 +37,7 @@ function parseType(expectedDataType: string, response) {
     case 'arraybuffer':
       return response.arrayBuffer();
     default:
-      console.warn('unknown expected data type: ' + expectedDataType + ' returning blob');
-      return response.blob();
+      throw new AjaxError(response, `unknown expected data type: "${expectedDataType}"`);
   }
 }
 
@@ -51,17 +49,22 @@ function parseType(expectedDataType: string, response) {
  * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
  * @returns {Promise<any>}
  */
-export function send(url: string, data : any = {}, method = 'get', expectedDataType = 'json'): Promise<any> {
-  if (method === 'get' || method === 'head') {
+export function send(url: string, data: any = {}, method = 'GET', expectedDataType = 'json'): Promise<any> {
+  // for compatibility
+  method = method.toUpperCase();
+
+  // need to encode the body in the url in case of GET and HEAD
+  if (method === 'GET' || method === 'HEAD') {
     data = encodeParams(data); //encode in url
     if (data) {
       url += (/\?/.test(url) ? '&' : '?') + data;
+      data = null;
     }
-    data = null;
   }
-  const options :any = {
+
+  const options: any = {
     credentials: 'same-origin',
-    method: method.toUpperCase(),
+    method: method,
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
@@ -74,9 +77,10 @@ export function send(url: string, data : any = {}, method = 'get', expectedDataT
     options.body = data;
   }
 
+  // there are no typings for fetch so far
   return (<any>self).fetch(url, options)
     .then(checkStatus)
-    .then(parseType.bind(null,expectedDataType));
+    .then(parseType.bind(null, expectedDataType));
 }
 /**
  * to get some ajax json file
@@ -84,7 +88,7 @@ export function send(url: string, data : any = {}, method = 'get', expectedDataT
  * @param data
  * @returns {any}
  */
-export function getJSON(url: string, data : any = {}): Promise<any> {
+export function getJSON(url: string, data: any = {}): Promise<any> {
   return send(url, data);
 }
 /**
@@ -94,7 +98,7 @@ export function getJSON(url: string, data : any = {}): Promise<any> {
  * @param expectedDataType
  * @returns {any}
  */
-export function getData(url: string, data : any = {}, expectedDataType = 'json'): Promise<any> {
+export function getData(url: string, data: any = {}, expectedDataType = 'json'): Promise<any> {
   return send(url, data, 'get', expectedDataType);
 }
 
@@ -104,7 +108,7 @@ export function getData(url: string, data : any = {}, expectedDataType = 'json')
  * @param data
  * @returns {string}
  */
-export function api2absURL(url: string, data : any = null) {
+export function api2absURL(url: string, data: any = null) {
   url = `${server_url}${url}${server_json_suffix}`;
   data = encodeParams(data);
   if (data) {
@@ -132,26 +136,28 @@ export function encodeParams(data = null) {
     return null;
   }
   var s = [];
+
   function add(prefix, key, value) {
     if (Array.isArray(value)) {
       value.forEach((v, i) => {
         if (typeof v === 'object') {
-          add(prefix,key+'['+i+']', v);
+          add(prefix, key + '[' + i + ']', v);
         } else {
           //primitive values uses the same key
-          add(prefix,key+'[]', v);
+          add(prefix, key + '[]', v);
         }
       });
-    } else if (typeof value === 'object' ) {
+    } else if (typeof value === 'object') {
       Object.keys(value).forEach((v) => {
-        add(prefix, key+'['+v+']',value[v]);
+        add(prefix, key + '[' + v + ']', value[v]);
       });
     } else {
-      s.push(encodeURIComponent(prefix+key) + '=' + encodeURIComponent(value));
+      s.push(encodeURIComponent(prefix + key) + '=' + encodeURIComponent(value));
     }
   }
+
   keys.forEach((key) => {
-    add('',key, data[key]);
+    add('', key, data[key]);
   });
 
   // Return the resulting serialization
@@ -164,7 +170,7 @@ function defaultOfflineGenerator() {
   return Promise.reject('offline');
 }
 
-function offline(generator : OfflineGenerator, data : any = {}) {
+function offline(generator: OfflineGenerator, data: any = {}) {
   return Promise.resolve(typeof generator === 'function' ? generator(data) : generator);
 }
 
@@ -176,7 +182,7 @@ function offline(generator : OfflineGenerator, data : any = {}) {
  * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
  * @returns {Promise<any>}
  */
-export function sendAPI(url: string, data : any = {}, method = 'get', expectedDataType = 'json', offlineGenerator: OfflineGenerator = defaultOfflineGenerator): Promise<any> {
+export function sendAPI(url: string, data: any = {}, method = 'get', expectedDataType = 'json', offlineGenerator: OfflineGenerator = defaultOfflineGenerator): Promise<any> {
   if (isOffline) {
     return offline(offlineGenerator, data);
   }
@@ -189,7 +195,7 @@ export function sendAPI(url: string, data : any = {}, method = 'get', expectedDa
  * @param data arguments
  * @returns {Promise<any>}
  */
-export function getAPIJSON(url: string, data : any = {}, offlineGenerator: OfflineGenerator = defaultOfflineGenerator): Promise<any> {
+export function getAPIJSON(url: string, data: any = {}, offlineGenerator: OfflineGenerator = defaultOfflineGenerator): Promise<any> {
   if (isOffline) {
     return offline(offlineGenerator, data);
   }
@@ -203,12 +209,9 @@ export function getAPIJSON(url: string, data : any = {}, offlineGenerator: Offli
  * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
  * @returns {Promise<any>}
  */
-export function getAPIData(url: string, data : any = {}, expectedDataType = 'json', offlineGenerator: OfflineGenerator = () => defaultOfflineGenerator): Promise<any> {
+export function getAPIData(url: string, data: any = {}, expectedDataType = 'json', offlineGenerator: OfflineGenerator = () => defaultOfflineGenerator): Promise<any> {
   if (isOffline) {
     return offline(offlineGenerator, data);
   }
   return getData(api2absURL(url), data, expectedDataType);
 }
-
-
-//maybe use of the https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch api
