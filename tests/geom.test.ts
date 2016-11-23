@@ -1,5 +1,5 @@
 import {Circle, Rect, Ellipse, Polygon, Line, CORNER} from '../src/geom';
-import {Vector2D} from '../src/2D'
+import {Vector2D} from '../src/2D';
 
 describe('Circle', () => {
   var circle = new Circle(1,1,1);
