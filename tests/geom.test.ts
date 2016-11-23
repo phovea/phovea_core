@@ -246,33 +246,58 @@ describe('Polygon', () => {
   // it('shift', () => expect(rect.shift()).toEqual('???'));
   // it('shiftImpl', () => expect(rect.shiftImpl()).toEqual('???'));
   // TODO: shiftImpl modifies object in place. Would immutability be a good thing?
-
 });
 
 describe('Line', () => {
+  var line = new Line(0,0,2,2);
+  describe('aabb', () => {
+    var aabb = line.aabb();
+    it('x', () => expect(aabb.x).toEqual(0));
+    it('x2', () => expect(aabb.x2).toEqual(2));
+    it('y', () => expect(aabb.y).toEqual(0));
+    it('y2', () => expect(aabb.y2).toEqual(2));
+    it('h', () => expect(aabb.h).toEqual(2));
+    it('w', () => expect(aabb.w).toEqual(2));
+    // TODO: more
+  });
 
-  // TODO: Add at least one test for line.aabb
-  // TODO: Add at least one test for line.asIntersectionParams
-  // TODO: Add at least one test for line.bs
-  // TODO: Add at least one test for line.center
-  // TODO: Add at least one test for line.constructor
-  // TODO: Add at least one test for line.corner
-  // TODO: Add at least one test for line.cx
-  // TODO: Add at least one test for line.cy
-  // TODO: Add at least one test for line.eq
-  // TODO: Add at least one test for line.h
-  // TODO: Add at least one test for line.intersects
-  // TODO: Add at least one test for line.shift
-  // TODO: Add at least one test for line.shiftImpl
-  // TODO: Add at least one test for line.size
-  // TODO: Add at least one test for line.toString
-  // TODO: Add at least one test for line.transform
-  // TODO: Add at least one test for line.w
-  // TODO: Add at least one test for line.x
-  // TODO: Add at least one test for line.x2
-  // TODO: Add at least one test for line.x2y2
-  // TODO: Add at least one test for line.xy
-  // TODO: Add at least one test for line.y
-  // TODO: Add at least one test for line.y2
+  describe('asIntersectionParams', () => {
+    var params = line.asIntersectionParams();
+    it('name', () => expect(params.name).toEqual('Line'));
+    it('x', () => expect(params.params[0].x).toEqual(0));
+    it('y', () => expect(params.params[0].y).toEqual(0));
+    it('x', () => expect(params.params[1].x).toEqual(2));
+    it('y', () => expect(params.params[1].y).toEqual(2));
+  });
+
+  describe('corner', () => {
+    function corner(label, expected) {
+      it(label, () => expect(line.corner(CORNER[label]).toString()).toEqual(expected));
+    }
+    corner('NW', '0,0');
+    corner('NE', '2,0');
+    corner('SE', '2,2');
+    corner('SW', '0,2');
+    corner('N', '1,0');
+    corner('S', '1,2');
+    corner('E', '2,1');
+    corner('W', '0,1');
+  });
+
+  describe('intersects', () => {
+    it('self', () => expect(line.intersects(new Rect(0,0,2,2))));
+    it('outside', () => expect(! line.intersects(new Rect(-1,-1,4,4))));
+    it('inside', () => expect(! line.intersects(new Rect(0.5,0.5,1,1))));
+    it('touch', () => expect(line.intersects(new Rect(-1,-1,1,1))));
+    it('overlap', () => expect(line.intersects(new Rect(-1,-1,2,2))));
+  });
+
+  it('toString', () => expect(line.toString()).toEqual('Line(x1=0,y1=0,x2=2NaN2)'));
+  it('xy', () => expect(line.xy.toString()).toEqual('0,0'));
+  // "bounding sphere"
+  it('bs', () => expect(line.bs().toString()).toEqual('Circle(x=1,y=1,radius=1)')); // TODO: radius twice what it should be?
+  it('center', () => expect(line.center.toString()).toEqual('1,1'));
+
+  it('transform', () => expect(line.transform([2,1],0).toString()).toEqual('Line(x1=0,y1=0,x2=4NaN2)'));
 
 });
