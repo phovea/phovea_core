@@ -1,4 +1,5 @@
-import {Circle, Rect, Ellipse, CORNER} from '../src/geom';
+import {Circle, Rect, Ellipse, Polygon, Line, CORNER} from '../src/geom';
+import {Vector2D} from '../src/2D'
 
 describe('Circle', () => {
   var circle = new Circle(1,1,1);
@@ -183,28 +184,68 @@ describe('Ellipse', () => {
 });
 
 describe('Polygon', () => {
+  var poly = new Polygon([new Vector2D(0,0), new Vector2D(2,0), new Vector2D(0,2)]);
 
-  // TODO: Add at least one test for polygon.aabb
-  // TODO: Add at least one test for polygon.area
-  // TODO: Add at least one test for polygon.asIntersectionParams
-  // TODO: Add at least one test for polygon.bs
-  // TODO: Add at least one test for polygon.center
-  // TODO: Add at least one test for polygon.centroid
-  // TODO: Add at least one test for polygon.constructor
-  // TODO: Add at least one test for polygon.corner
-  // TODO: Add at least one test for polygon.intersects
-  // TODO: Add at least one test for polygon.isClockwise
-  // TODO: Add at least one test for polygon.isConcave
-  // TODO: Add at least one test for polygon.isConvex
-  // TODO: Add at least one test for polygon.isCounterClockwise
-  // TODO: Add at least one test for polygon.length
-  // TODO: Add at least one test for polygon.pointInPolygon
-  // TODO: Add at least one test for polygon.points
-  // TODO: Add at least one test for polygon.push
-  // TODO: Add at least one test for polygon.shift
-  // TODO: Add at least one test for polygon.shiftImpl
-  // TODO: Add at least one test for polygon.toString
-  // TODO: Add at least one test for polygon.transform
+  describe('aabb', () => {
+    var aabb = poly.aabb();
+    it('x', () => expect(aabb.x).toEqual(0));
+    it('x2', () => expect(aabb.x2).toEqual(2));
+    it('y', () => expect(aabb.y).toEqual(0));
+    it('y2', () => expect(aabb.y2).toEqual(2));
+    it('h', () => expect(aabb.h).toEqual(2));
+    it('w', () => expect(aabb.w).toEqual(2));
+    // TODO: more
+  });
+
+  it('area', () => expect(poly.area).toEqual(2));
+
+  describe('asIntersectionParams', () => {
+    var params = poly.asIntersectionParams();
+    it('name', () => expect(params.name).toEqual('Polygon'));
+    // TODO
+  });
+
+  describe('corner', () => {
+    function corner(label, expected) {
+      it(label, () => expect(poly.corner(CORNER[label]).toString()).toEqual(expected));
+    }
+    corner('NW', '0,0');
+    corner('NE', '2,0');
+    corner('SE', '2,2');
+    corner('SW', '0,2');
+    corner('N', '1,0');
+    corner('S', '1,2');
+    corner('E', '2,1');
+    corner('W', '0,1');
+  });
+
+  describe('intersects', () => {
+    it('self', () => expect(poly.intersects(new Rect(0,0,2,2))));
+    it('outside', () => expect(! poly.intersects(new Rect(-1,-1,4,4))));
+    it('inside', () => expect(! poly.intersects(new Rect(0.5,0.5,1,1))));
+    it('touch', () => expect(poly.intersects(new Rect(-1,-1,1,1))));
+    it('overlap', () => expect(poly.intersects(new Rect(-1,-1,2,2))));
+  });
+
+  it('toString', () => expect(poly.toString()).toEqual('Polygon(0,0,2,0,0,2)'));
+  // "bounding sphere"
+  it('bs', () => expect(poly.bs().toString()).toMatch(/Circle.x=0.666*,y=0.666*,radius=1.49/)); // TODO: x,y should be 1,1?
+  it('center', () => expect(poly.center.toString()).toMatch(/0.666*,0.666*/));
+
+  it('transform', () => expect(poly.transform([2,1],0).toString()).toEqual('Polygon(0,0,4,0,0,2)'));
+
+  it('centroid', () => expect(poly.centroid.toString()).toMatch(/0.666*,0.666*/));
+  it('isClockwise', () => expect(poly.isClockwise).toEqual(false));
+  it('isConcave', () => expect(poly.isConcave).toEqual(false));
+  it('isConvex', () => expect(poly.isConvex).toEqual(true));
+  it('isCounterClockwise', () => expect(poly.isCounterClockwise).toEqual(true));
+  it('length', () => expect(poly.length).toEqual(3)); // NOT perimeter
+  it('pointInPolygon', () => expect(poly.pointInPolygon(new Vector2D(0.6,0.6))).toEqual(true));
+  it('pointInPolygon', () => expect(poly.pointInPolygon(new Vector2D(6,6))).toEqual(false));
+
+  // it('shift', () => expect(rect.shift()).toEqual('???'));
+  // it('shiftImpl', () => expect(rect.shiftImpl()).toEqual('???'));
+  // TODO: shiftImpl modifies object in place. Would immutability be a good thing?
 
 });
 
