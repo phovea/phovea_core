@@ -26,8 +26,8 @@ describe('bounds', () => {
   // TODO: DOM object
 });
 
-it('version', () => expect(version).toEqual('__VERSION__') );
-// TODO: (1) Doesn't seem right. (2) Does anything actually need it?
+//regex for sem ver: https://github.com/sindresorhus/semver-regex/blob/master/index.js
+it('version is sem ver', () => expect(version).toMatch(/\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z\-]+(?:\.[\da-z\-]+)*)?(?:\+[\da-z\-]+(?:\.[\da-z\-]+)*)?\b/ig));
 
 describe('uniqueId', () => {
   it('first time', () => expect(uniqueId()).toEqual(0));
