@@ -4,24 +4,22 @@
 /**
  * Created by Samuel Gratzl on 22.10.2014.
  */
-import {mixin, IPersistable, flagId, uniqueId} from '../index';
-import {sendAPI} from '../ajax';
-import {SelectAble, SelectOperation, resolve as idtypes_resolve} from '../idtype';
-import {DataTypeBase, IDataDescription} from '../datatype';
-import {all, none, Range, list} from '../range';
-import {EventHandler, IEvent} from '../event';
+import {SelectOperation, resolve as idtypes_resolve} from '../idtype';
+import {IDataDescription} from '../datatype';
+import {all, Range, list} from '../range';
+import {GraphNode, GraphEdge, AGraph} from './graph';
 
 export interface IGraphFactory {
   makeNode(p: any): GraphNode;
   makeEdge(p: any, lookup: (id: number) => GraphNode): GraphEdge;
 }
 
-const defaultGraphFactory:IGraphFactory = {
+export const defaultGraphFactory:IGraphFactory = {
   makeNode: (p:any) => ((new GraphNode()).restore(p)),
   makeEdge: (p:any, lookup) => ((new GraphEdge()).restore(p, lookup))
 };
 
-export class GraphBase extends AGraph {
+export default class GraphBase extends AGraph {
   constructor(public desc:IDataDescription, private _nodes: GraphNode[] = [], private _edges:GraphEdge[] = []) {
     super();
   }

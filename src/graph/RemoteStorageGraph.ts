@@ -1,14 +1,13 @@
 /**
  * Created by Samuel Gratzl on 22.10.2014.
  */
-import {mixin, IPersistable, flagId, uniqueId} from '../index';
 import {sendAPI} from '../ajax';
-import {SelectAble, SelectOperation, resolve as idtypes_resolve} from '../idtype';
-import {DataTypeBase, IDataDescription} from '../datatype';
-import {all, none, Range, list} from '../range';
-import {EventHandler, IEvent} from '../event';
+import {IDataDescription} from '../datatype';
+import {IEvent} from '../event';
+import GraphBase, {IGraphFactory} from './GraphBase';
+import {GraphEdge, GraphNode} from './graph';
 
-export class RemoteStoreGraph extends GraphBase {
+export default class RemoteStoreGraph extends GraphBase {
   private updateHandler = (event: IEvent) => {
     const s = event.target;
     if (s instanceof GraphNode) {

@@ -1,17 +1,16 @@
 /**
  * Created by sam on 12.02.2015.
  */
-/**
- * Created by Samuel Gratzl on 22.10.2014.
- */
-import {mixin, IPersistable, flagId, uniqueId} from '../index';
-import {sendAPI} from '../ajax';
-import {SelectAble, SelectOperation, resolve as idtypes_resolve} from '../idtype';
+import {resolve as idtypes_resolve} from '../idtype';
 import {DataTypeBase, IDataDescription} from '../datatype';
-import {all, none, Range, list} from '../range';
-import {EventHandler, IEvent} from '../event';
+import {all, none, Range} from '../range';
+import {AGraph} from './graph';
+import {defaultGraphFactory, IGraphFactory, default as GraphBase} from './GraphBase';
+import RemoteStoreGraph from './RemoteStorageGraph';
+import MemoryGraph from './MemoryGraph';
+import LocalStorageGraph from './LocalStorageGraph';
 
-export class GraphProxy extends DataTypeBase {
+export default class GraphProxy extends DataTypeBase {
   private _impl:Promise<AGraph> = null;
   private _loaded:AGraph = null;
 

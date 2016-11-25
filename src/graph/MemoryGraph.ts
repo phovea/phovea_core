@@ -4,14 +4,12 @@
 /**
  * Created by Samuel Gratzl on 22.10.2014.
  */
-import {mixin, IPersistable, flagId, uniqueId} from '../index';
-import {sendAPI} from '../ajax';
-import {SelectAble, SelectOperation, resolve as idtypes_resolve} from '../idtype';
-import {DataTypeBase, IDataDescription} from '../datatype';
-import {all, none, Range, list} from '../range';
-import {EventHandler, IEvent} from '../event';
+import {IPersistable} from '../index';
+import {IDataDescription} from '../datatype';
+import GraphBase, {defaultGraphFactory} from './GraphBase';
+import {GraphEdge, GraphNode} from './graph';
 
-export class MemoryGraph extends GraphBase implements IPersistable {
+export default class MemoryGraph extends GraphBase implements IPersistable {
   constructor(desc:IDataDescription, _nodes:GraphNode[] = [], _edges:GraphEdge[] = [], private factory = defaultGraphFactory) {
     super(desc, _nodes, _edges);
   }

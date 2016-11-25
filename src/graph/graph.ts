@@ -5,11 +5,8 @@
  * Created by Samuel Gratzl on 22.10.2014.
  */
 import {mixin, IPersistable, flagId, uniqueId} from '../index';
-import {sendAPI} from '../ajax';
-import {SelectAble, SelectOperation, resolve as idtypes_resolve} from '../idtype';
-import {DataTypeBase, IDataDescription} from '../datatype';
-import {all, none, Range, list} from '../range';
-import {EventHandler, IEvent} from '../event';
+import {SelectAble} from '../idtype';
+import {EventHandler} from '../event';
 
 export class AttributeContainer extends EventHandler implements IPersistable {
   // TODO convert to Map
