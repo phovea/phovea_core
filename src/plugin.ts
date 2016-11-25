@@ -4,7 +4,7 @@
  * Licensed under the new BSD license, available at http://caleydo.org/license
  **************************************************************************** */
 
-import {mixin, constantTrue, search, uniqueString} from './index';
+import {mixin, uniqueString} from './index';
 
 /**
  * basic interface of a plugin
@@ -113,13 +113,10 @@ export function register(plugin: string, generator?: (registry: IRegistry) => vo
  * @param filter
  * @returns {IPluginDesc[]}
  */
-export function list(filter : (string | ((desc:IPluginDesc)=>boolean)) = constantTrue) {
+export function list(filter : (string | ((desc:IPluginDesc)=>boolean)) = ()=>true) {
   if (typeof filter === 'string') {
     const v = filter;
     filter = (desc) => desc.type === v;
-  }
-  if (filter === constantTrue) {
-    return registry.slice();
   }
   return registry.filter(<any>filter);
 }
@@ -131,7 +128,7 @@ export function list(filter : (string | ((desc:IPluginDesc)=>boolean)) = constan
  * @returns {IPluginDesc}
  */
 export function get(type: string, id : string) : IPluginDesc {
-  return search(registry, (d) => d.type === type && d.id === id);
+  return registry.find((d) => d.type === type && d.id === id);
 }
 
 export function load(desc: IPluginDesc[]) {

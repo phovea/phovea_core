@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {IPersistable, isFunction, extendClass, mixin, argList} from './index';
+import {IPersistable, extendClass, mixin} from './index';
 import {ISelectAble, SelectAble} from './idtype';
 import {all, none, Range1D, Range1DGroup, composite, Range} from './range';
 
@@ -59,7 +59,7 @@ export function isDataType(v: any) {
     return true;
   }
   //sounds good
-  return (isFunction(v.idView) && isFunction(v.persist) && isFunction(v.restore) && v instanceof SelectAble && ('desc' in v) && ('dim' in v));
+  return (typeof(v.idView) === 'function' && typeof(v.persist) === 'function' && typeof(v.restore) === 'function' && v instanceof SelectAble && ('desc' in v) && ('dim' in v));
 }
 
 /**
@@ -187,8 +187,8 @@ export function categorical2partitioning<T>(data: T[], categories: T[], options 
 export function defineDataType(name: string, functions: any) {
   function DataType(desc: IDataDescription) {
     DataTypeBase.call(this, desc);
-    if (isFunction(this.init)) {
-      this.init.apply(this, argList(arguments));
+    if (typeof(this.init) === 'function') {
+      this.init.apply(this, Array.from(arguments));
     }
   }
   extendClass(DataType, DataTypeBase);

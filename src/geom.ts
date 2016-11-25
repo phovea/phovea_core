@@ -7,7 +7,6 @@
  * Created by Samuel Gratzl on 08.10.2014.
  */
 
-import {argList} from './index';
 import {Vector2D, IShape, IIntersectionParam, Intersection} from './2D';
 
 
@@ -341,7 +340,7 @@ export class Polygon extends AShape {
     if (arguments.length === 2 && typeof arguments[0] === 'number') {
       this.points.push(vec2(arguments[0], arguments[1]));
     } else {
-      this.points.push(...argList(arguments));
+      this.points.push(...Array.from(arguments));
     }
   }
 
@@ -517,7 +516,7 @@ export function polygon():Polygon {
   if (Array.isArray(arguments[0])) {
     return new Polygon(arguments[0]);
   }
-  return new Polygon(argList(arguments));
+  return new Polygon(Array.from(arguments));
 }
 
 export function wrap(obj:any):AShape {

@@ -6,7 +6,7 @@
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
-import {random_id as core_random_id, offline as isOffline, constantTrue} from './index';
+import {random_id as core_random_id, offline as isOffline} from './index';
 import {getAPIJSON, sendAPI} from './ajax';
 import {list as listPlugins} from './plugin';
 import {IDataDescription, IDataType, DataTypeBase} from './datatype';
@@ -87,6 +87,10 @@ function transformEntry(desc: any) : Promise<IDataType> {
   return cached(desc, plugin[0].load().then((p) => {
     return p.factory(desc);
   }));
+}
+
+function constantTrue() {
+  return true;
 }
 
 /**

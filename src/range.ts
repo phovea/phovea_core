@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {argList, identity} from './index';
+import {argList} from './index';
 import {IIterator, Iterator, single, concat, forList, range as iRange} from './iterator';
 
 export interface IRangeElem {
@@ -604,7 +604,7 @@ export class Range1D {
    * @param size the total size for resolving negative indices
    * @returns {*}
    */
-  filter(data:any[], size?:number, transform:(any) => any = identity) {
+  filter(data:any[], size?:number, transform:(any) => any = (d)=>d) {
     if (this.isAll) {
       return data.map(transform);
     }
@@ -994,7 +994,7 @@ export class Range {
     //recursive variant for just filtering the needed rows
     function filterDim(i:number) {
       if (i >= ndim) { //out of range no filtering anymore
-        return identity;
+        return (d)=>d;
       }
       var d = that.dim(i);
       var next = filterDim(i + 1); //compute next transform

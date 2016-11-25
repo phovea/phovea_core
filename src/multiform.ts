@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 27.08.2014.
  */
 
-import {isFunction, IPersistable, indexOf, mixin, offset, search, identity, argList} from './index';
+import {IPersistable, mixin, offset} from './index';
 import {list as rlist, Range, all, Range1D, Range1DGroup, CompositeRange1D, asUngrouped} from './range';
 import {IDataType} from './datatype';
 import {IVisMetaData, IVisInstance, IVisPluginDesc, AVisInstance, assignVis, list as listVisses} from './vis';
@@ -49,7 +49,7 @@ function selectVis(initial: any, visses: IVisPluginDesc[]) {
     case 'number':
       return visses[Math.max(0, Math.min(initial, visses.length - 1))];
     case 'string':
-      return visses[Math.max(0, indexOf(visses, (v) => v.id === initial))];
+      return visses[Math.max(0, visses.findIndex((v) => v.id === initial))];
     default:
       return visses[Math.max(0, visses.indexOf(initial))];
   }
@@ -125,7 +125,7 @@ export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm 
   }
 
   destroy() {
-    if (this.actVis && isFunction(this.actVis.destroy)) {
+    if (this.actVis && typeof(this.actVis.destroy) === 'function') {
       this.actVis.destroy();
     }
     super.destroy();
@@ -134,17 +134,17 @@ export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm 
   persist(): any {
     return {
       id: this.actDesc ? this.actDesc.id : null,
-      content: this.actVis && isFunction(this.actVis.persist) ? this.actVis.persist() : null
+      content: this.actVis && typeof(this.actVis.persist) === 'function' ? this.actVis.persist() : null
     };
   }
 
   restore(persisted: any): Promise<MultiForm> {
     const that = this;
     if (persisted.id) {
-      const selected = search(this.visses, (e) => e.id === persisted.id);
+      const selected = this.visses.find((e) => e.id === persisted.id);
       if (selected) {
         return this.switchTo(selected).then((vis) => {
-          if (vis && persisted.content && isFunction(vis.restore)) {
+          if (vis && persisted.content && typeof(vis.restore) === 'function') {
             return Promise.resolve(vis.restore(persisted.content)).then(() => that);
           }
           return that;
@@ -158,7 +158,7 @@ export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm 
     const p = this.actVisPromise || Promise.resolve(null);
     return p.then((...aa) => {
       const vis = aa.length > 0 ? aa[0] : undefined;
-      if (vis && isFunction(vis.locate)) {
+      if (vis && typeof(vis.locate) === 'function') {
         return vis.locate.apply(vis, args);
       } else {
         return Promise.resolve((aa.length === 1 ? undefined : new Array(args.length)));
@@ -170,7 +170,7 @@ export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm 
     const p = this.actVisPromise || Promise.resolve(null);
     return p.then((...aa) => {
       const vis = aa.length > 0 ? aa[0] : undefined;
-      if (vis && isFunction(vis.locateById)) {
+      if (vis && typeof(vis.locateById) === 'function') {
         return vis.locateById.apply(vis, args);
       } else {
         return Promise.resolve((aa.length === 1 ? undefined : new Array(args.length)));
@@ -298,7 +298,7 @@ class GridElem implements IPersistable {
   }
 
   destroy() {
-    if (this.actVis && isFunction(this.actVis.destroy)) {
+    if (this.actVis && typeof(this.actVis.destroy) === 'function') {
       this.actVis.destroy();
     }
   }
@@ -314,7 +314,7 @@ class GridElem implements IPersistable {
   persist() {
     return {
       range: this.range.toString(),
-      content: this.actVis && isFunction(this.actVis.persist) ? this.actVis.persist() : null
+      content: this.actVis && typeof(this.actVis.persist) === 'function' ? this.actVis.persist() : null
     };
   }
 
@@ -336,7 +336,7 @@ class GridElem implements IPersistable {
   switchDestroy() {
     //remove content dom side
     clearNode(this.content);
-    if (this.actVis && isFunction(this.actVis.destroy)) {
+    if (this.actVis && typeof(this.actVis.destroy) === 'function') {
       this.actVis.destroy();
     }
     this.actVis = null;
@@ -496,7 +496,7 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
 
     //create content
     this.content = this.node;
-    const wrap = this.options.wrap || identity;
+    const wrap = this.options.wrap || ((d)=>d);
     //create groups for all grid elems
     //TODO how to layout as a grid
     if (this.dims.length === 1) {
@@ -561,11 +561,11 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
   restore(persisted: any): Promise<MultiFormGrid> {
     const that = this;
     if (persisted.id) {
-      const selected = search(this.visses, (e) => e.id === persisted.id);
+      const selected = this.visses.find((e) => e.id === persisted.id);
       if (selected) {
         return this.switchTo(selected).then((vis) => {
           //FIXME
-          if (vis && persisted.content && isFunction(vis.restore)) {
+          if (vis && persisted.content && typeof(vis.restore) === 'function') {
             return Promise.resolve(vis.restore(persisted.content)).then(() => that);
           }
           return Promise.resolve(that);
@@ -639,7 +639,7 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
   }
 
   locate() {
-    const p = this.actVisPromise || Promise.resolve(null), args = argList(arguments);
+    const p = this.actVisPromise || Promise.resolve(null), args = Array.from(arguments);
     return p.then(function (visses) {
       if (!visses) {
         return Promise.resolve((arguments.length === 1 ? undefined : new Array(args.length)));
@@ -658,7 +658,7 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
   }
 
   locateById(...range: Range[]) {
-    const p = this.actVisPromise || Promise.resolve(null), args = argList(arguments);
+    const p = this.actVisPromise || Promise.resolve(null), args = Array.from(arguments);
     return p.then(function (visses) {
       if (!visses) {
         return Promise.resolve((arguments.length === 1 ? undefined : new Array(args.length)));

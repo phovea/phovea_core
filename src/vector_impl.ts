@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {isFunction, argList, argSort, argFilter} from './index';
+import {argSort, argFilter} from './index';
 import {getAPIJSON} from './ajax';
 import {all, Range, range, CompositeRange1D, list as rlist, asUngrouped, composite, parse} from './range';
 import {SelectAble, resolve, IDType} from './idtype';
@@ -116,14 +116,14 @@ export class VectorBase extends SelectAble {
 
   reduce<T,U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U> {
     function helper() {
-      return callbackfn.apply(thisArg, argList(arguments));
+      return callbackfn.apply(thisArg, Array.from(arguments));
     }
     return this.data().then((d) => d.reduce(helper, initialValue));
   }
 
   reduceRight<T,U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U> {
     function helper() {
-      return callbackfn.apply(thisArg, argList(arguments));
+      return callbackfn.apply(thisArg, Array.from(arguments));
     }
     return this.data().then((d) => d.reduceRight(helper, initialValue));
   }
@@ -451,7 +451,7 @@ export class StratificationVector extends DataTypeBase implements IStratificatio
  * @returns {IVector}
  */
 export function create(desc: IDataDescription): IVector {
-  if (isFunction((<any>desc).loader)) {
+  if (typeof((<any>desc).loader) === 'function') {
     return new Vector(desc, (<any>desc).loader);
   }
   return new Vector(desc, viaAPILoader());

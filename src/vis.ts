@@ -6,7 +6,7 @@
 /**
  * Created by Samuel Gratzl on 05.08.2014.
  */
-import {IPersistable, uniqueId, isFunction, constantTrue} from './index';
+import {IPersistable, uniqueId} from './index';
 import {IPluginDesc, list as listPlugins} from './plugin';
 import {IDataType} from './datatype';
 import {Range} from './range';
@@ -254,7 +254,7 @@ export class AVisInstance extends EventHandler {
 function extrapolateFilter(r: any) {
   const v = r.filter;
   if (typeof v === 'undefined') {
-    r.filter = constantTrue;
+    r.filter = ()=>true;
   } else if (typeof v === 'string') {
     r.filter = (data) => data && data.desc.type && data.desc.type.match(v);
   } else if (Array.isArray(v)) {
@@ -263,7 +263,7 @@ function extrapolateFilter(r: any) {
 }
 
 function extrapolateIconify(r: any) {
-  if (isFunction(r.iconify)) {
+  if (typeof(r.iconify) === 'function') {
     return;
   }
   r.iconify = function iconfiy(node: HTMLElement) {

@@ -8,7 +8,6 @@
  */
 
 import {none, list, Range, Range1D, CompositeRange1D} from './range';
-import {indexOf} from './index';
 /**
  * simple number statistics similar to DoubleStatistics in Caleydo
  * TODO use a standard library for that
@@ -328,7 +327,7 @@ class RangeHistogram implements ICatHistogram {
   }
 
   binOf(value: any) {
-    return indexOf(this.range_.groups, (g) => g.name === value);
+    return this.range_.groups.findIndex((g) => g.name === value);
   }
 
   frequency(bin: number) {
