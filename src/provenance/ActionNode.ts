@@ -1,17 +1,15 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import {isFunction, constant, argList, mixin, search, hash, resolveIn} from '../index';
-import {get as getData, remove as removeData, upload, list as listData} from '../data';
-import * as graph from '../graph';
-import {IDType, SelectOperation, defaultSelectionType, resolve as resolveIDType} from '../idtype';
-import {Range, list as rlist, Range1D, all} from '../range';
-import {isDataType, IDataType, IDataDescription, DataTypeBase} from '../datatype';
-import {list as listPlugins, load as loadPlugin} from '../plugin';
-import * as session from '../session';
+
+import {GraphNode, AttributeContainer, isType} from '../graph/graph';
+import ObjectNode, {op, cat, IObjectRef} from './ObjectNode';
+import StateNode from './StateNode';
+import ProvenanceGraph, {ICmdFunction, ICmdResult, IInverseActionCreator, ICmdFunctionFactory} from './ProvenanceGraph';
+import {retrieve} from '../session';
 
 function getCurrentUser() {
-  return session.retrieve('username', 'Anonymous');
+  return retrieve('username', 'Anonymous');
 }
 
 /**
@@ -87,14 +85,14 @@ export function action(meta:ActionMetaData, id:string, f:ICmdFunction, inputs:IO
  * @param b
  * @returns {number}
  */
-function byIndex(a:graph.AttributeContainer, b:graph.AttributeContainer) {
+function byIndex(a:AttributeContainer, b:AttributeContainer) {
   const ai = +a.getAttr('index', 0);
   const bi = +b.getAttr('index', 0);
   return ai - bi;
 }
 
 
-export class ActionNode extends graph.GraphNode {
+export default class ActionNode extends GraphNode {
   private inverter:IInverseActionCreator;
 
   constructor(meta:ActionMetaData, f_id:string, private f:ICmdFunction, parameter:any = {}) {
@@ -148,7 +146,7 @@ export class ActionNode extends graph.GraphNode {
   }
 
   get inversedBy() {
-    var r = this.incoming.filter(graph.isType('inverses'))[0];
+    var r = this.incoming.filter(isType('inverses'))[0];
     return r ? <ActionNode>r.source : null;
   }
 
@@ -157,12 +155,12 @@ export class ActionNode extends graph.GraphNode {
    * @returns {ActionNode}
    */
   get inverses() {
-    var r = this.outgoing.filter(graph.isType('inverses'))[0];
+    var r = this.outgoing.filter(isType('inverses'))[0];
     return r ? <ActionNode>r.target : null;
   }
 
   get isInverse() {
-    return this.outgoing.filter(graph.isType('inverses'))[0] != null;
+    return this.outgoing.filter(isType('inverses'))[0] != null;
   }
 
   getOrCreateInverse(graph:ProvenanceGraph) {
@@ -209,28 +207,28 @@ export class ActionNode extends graph.GraphNode {
   }
 
   get uses():ObjectNode<any>[] {
-    return this.outgoing.filter(graph.isType(/(creates|removes|requires)/)).map((e) => <ObjectNode<any>>e.target);
+    return this.outgoing.filter(isType(/(creates|removes|requires)/)).map((e) => <ObjectNode<any>>e.target);
   }
 
   get creates():ObjectNode<any>[] {
-    return this.outgoing.filter(graph.isType('creates')).map((e) => <ObjectNode<any>>e.target);
+    return this.outgoing.filter(isType('creates')).map((e) => <ObjectNode<any>>e.target);
   }
 
   get removes():ObjectNode<any>[] {
-    return this.outgoing.filter(graph.isType('removes')).sort(byIndex).map((e) => <ObjectNode<any>>e.target);
+    return this.outgoing.filter(isType('removes')).sort(byIndex).map((e) => <ObjectNode<any>>e.target);
   }
 
   get requires():ObjectNode<any>[] {
-    return this.outgoing.filter(graph.isType('requires')).sort(byIndex).map((e) => <ObjectNode<any>>e.target);
+    return this.outgoing.filter(isType('requires')).sort(byIndex).map((e) => <ObjectNode<any>>e.target);
   }
 
   get resultsIn():StateNode {
-    var r = this.outgoing.filter(graph.isType('resultsIn'))[0];
+    var r = this.outgoing.filter(isType('resultsIn'))[0];
     return r ? <StateNode>r.target : null;
   }
 
   get previous():StateNode {
-    var r = this.incoming.filter(graph.isType('next'))[0];
+    var r = this.incoming.filter(isType('next'))[0];
     return r ? <StateNode>r.source : null;
   }
 }

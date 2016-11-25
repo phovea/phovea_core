@@ -1,16 +1,18 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import {isFunction, constant, argList, mixin, search, hash, resolveIn} from '../index';
-import {get as getData, remove as removeData, upload, list as listData} from '../data';
-import * as graph from '../graph';
-import {IDType, SelectOperation, defaultSelectionType, resolve as resolveIDType} from '../idtype';
-import {Range, list as rlist, Range1D, all} from '../range';
-import {isDataType, IDataType, IDataDescription, DataTypeBase} from '../datatype';
-import {list as listPlugins, load as loadPlugin} from '../plugin';
-import * as session from '../session';
+import {mixin} from '../index';
+import {IDataDescription} from '../datatype';
+import ProvenanceGraph, {IProvenanceGraphManager, provenanceGraphFactory} from './ProvenanceGraph';
+import {retrieve} from '../session';
+import GraphBase from '../graph/GraphBase';
+import LocalStorageGraph from '../graph/LocalStorageGraph';
 
-export class LocalStorageProvenanceGraphManager implements IProvenanceGraphManager {
+function getCurrentUser() {
+  return retrieve('username', 'Anonymous');
+}
+
+export default class LocalStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private options = {
     storage: localStorage,
     prefix: 'clue',
@@ -28,15 +30,15 @@ export class LocalStorageProvenanceGraphManager implements IProvenanceGraphManag
   }
 
 
-  getGraph(desc:IDataDescription):Promise<graph.LocalStorageGraph> {
-    return Promise.resolve(graph.LocalStorageGraph.load(desc, provenanceGraphFactory(), this.options.storage));
+  getGraph(desc:IDataDescription):Promise<LocalStorageGraph> {
+    return Promise.resolve(LocalStorageGraph.load(desc, provenanceGraphFactory(), this.options.storage));
   }
 
   get(desc:IDataDescription):Promise<ProvenanceGraph> {
     return this.getGraph(desc).then((impl) => new ProvenanceGraph(desc, impl));
   }
 
-  clone(graph:graph.GraphBase) {
+  clone(graph:GraphBase) {
     const desc = this.createDesc();
     return this.getGraph(desc).then((new_) => {
       new_.restoreDump(graph.persist(), provenanceGraphFactory());
@@ -55,7 +57,7 @@ export class LocalStorageProvenanceGraphManager implements IProvenanceGraphManag
   delete(desc:IDataDescription) {
     var lists = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
     lists.splice(lists.indexOf(desc.id), 1);
-    graph.LocalStorageGraph.delete(desc);
+    LocalStorageGraph.delete(desc);
     //just remove from the list
     this.options.storage.setItem(this.options.prefix + '_provenance_graphs', JSON.stringify(lists));
     return Promise.resolve(true);

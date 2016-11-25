@@ -2,19 +2,224 @@
  * Created by sam on 12.02.2015.
  */
 import {isFunction, constant, argList, mixin, search, hash, resolveIn} from '../index';
-import {get as getData, remove as removeData, upload, list as listData} from '../data';
-import * as graph from '../graph';
 import {IDType, SelectOperation, defaultSelectionType, resolve as resolveIDType} from '../idtype';
 import {Range, list as rlist, Range1D, all} from '../range';
-import {isDataType, IDataType, IDataDescription, DataTypeBase} from '../datatype';
+import {IDataDescription, DataTypeBase} from '../datatype';
 import {list as listPlugins, load as loadPlugin} from '../plugin';
-import * as session from '../session';
+import ObjectNode, {IObjectRef, cat} from './ObjectNode';
+import StateNode, {} from './StateNode';
+import ActionNode, {IAction, meta, ActionMetaData} from './ActionNode';
+import SlideNode from './SlideNode';
+import {isType, GraphEdge, GraphNode} from '../graph/graph';
+import GraphBase, {IGraphFactory} from '../graph/GraphBase';
+
+export interface IInverseActionCreator {
+  (inputs:IObjectRef<any>[], creates:IObjectRef<any>[], removes:IObjectRef<any>[]) : IAction;
+}
+
+export interface ICmdResult {
+  /**
+   * the command to revert this command
+   */
+  inverse : IAction | IInverseActionCreator;
+  /**
+   * the created references
+   */
+  created? : IObjectRef<any>[];
+  /**
+   * the removed references
+   */
+  removed? : IObjectRef<any>[];
+
+  /**
+   * then number of actual milliseconds consumed
+   */
+  consumed?: number;
+}
+
+/**
+ * abstract definition of a command
+ */
+export interface ICmdFunction {
+  (inputs:IObjectRef<any>[], parameters:any, graph:ProvenanceGraph, within:number) : Promise<ICmdResult> | ICmdResult;
+}
+/**
+ * a factory to create from an id the corresponding command
+ */
+export interface ICmdFunctionFactory {
+  (id:string): ICmdFunction;
+}
+
+
+/**
+ * an action compressor is used to compress a series of action to fewer one, e.g. create and remove can be annihilated
+ */
+export interface IActionCompressor {
+  (path:ActionNode[]) : ActionNode[];
+}
+
+
+function removeNoops(path:ActionNode[]) {
+  return path.filter((a) => a.f_id !== 'noop');
+}
+
+function compositeCompressor(cs:IActionCompressor[]) {
+  return (path:ActionNode[]) => {
+    path = removeNoops(path);
+    let before:number;
+    do {
+      before = path.length;
+      cs.forEach((c) => path = c(path));
+    } while (before > path.length);
+    return path;
+  };
+}
+function createCompressor(path:ActionNode[]) {
+  var toload = listPlugins('actionCompressor').filter((plugin:any) => {
+    return path.some((action) => action.f_id.match(plugin.matches) != null);
+  });
+  return loadPlugin(toload).then((loaded) => {
+    return compositeCompressor(loaded.map((l) => <IActionCompressor>l.factory));
+  });
+}
+/**
+ * returns a compressed version of the paths where just the last selection operation remains
+ * @param path
+ */
+export function compress(path:ActionNode[]) {
+  //return Promise.resolve(path);
+  //TODO find a strategy how to compress but also invert skipped actions
+  return createCompressor(path).then((compressor) => {
+    //return path;
+    let before:number;
+    do {
+      before = path.length;
+      path = compressor(path);
+    } while (before > path.length);
+    return path;
+  });
+
+}
+
+/**
+ * find common element in the list of two elements returning the indices of the first same item
+ * @param a
+ * @param b
+ * @returns {any}
+ */
+function findCommon<T>(a:T[], b:T[]) {
+  var c = 0;
+  while (c < a.length && c < b.length && a[c] === b[c]) { //go to next till a difference
+    c++;
+  }
+  if (c === 0) { //not even the root common
+    return null;
+  }
+  return {
+    i: c - 1,
+    j: c - 1
+  };
+}
+
+function asFunction(i) {
+  if (!isFunction(i)) { //make a function
+    return constant(i);
+  }
+  return i;
+}
+
+function noop(inputs:IObjectRef<any>[], parameter:any):ICmdResult {
+  return {
+    inverse: createNoop()
+  };
+}
+
+function createNoop() {
+  return {
+    meta: meta('noop', cat.custom),
+    id: 'noop',
+    f: noop,
+    inputs: [],
+    parameter: {}
+  };
+}
+
+function createLazyCmdFunctionFactory():ICmdFunctionFactory {
+  const facts = listPlugins('actionFactory');
+
+  function resolveFun(id) {
+    if (id === 'noop') {
+      return Promise.resolve(noop);
+    }
+    const factory = facts.filter((f:any) => id.match(f.creates) != null)[0];
+    if (factory == null) {
+      return Promise.reject('no factory found for ' + id);
+    }
+    return factory.load().then((f) => f.factory(id));
+  }
+
+  const lazyFunction = (id) => {
+    var _resolved = null;
+    return function (inputs:IObjectRef<any>[], parameters:any) {
+      var that = this, args = argList(arguments);
+      if (_resolved == null) {
+        _resolved = resolveFun(id);
+      }
+      return _resolved.then((f) => f.apply(that, args));
+    };
+  };
+  return (id) => lazyFunction(id);
+}
+
+
+export function provenanceGraphFactory():IGraphFactory {
+  const factory = createLazyCmdFunctionFactory();
+  var types = {
+    action: ActionNode,
+    state: StateNode,
+    object: ObjectNode,
+    story: SlideNode
+  };
+  return {
+    makeNode: (n) => types[n.type].restore(n, factory),
+    makeEdge: (n, lookup) => ((new GraphEdge()).restore(n, lookup))
+  };
+}
+
+export enum ProvenanceGraphDim {
+  Action = 0,
+  Object = 1,
+  State = 2,
+  Slide = 3
+}
+
+export function toSlidePath(s?:SlideNode) {
+  var r = [];
+  while (s) {
+    if (r.indexOf(s) >= 0) {
+      return r;
+    }
+    r.push(s);
+    s = s.next;
+  }
+  return r;
+}
+
+export interface IProvenanceGraphManager {
+  list(): Promise<IDataDescription[]>;
+  get(desc:IDataDescription): Promise<ProvenanceGraph>;
+  create(): Promise<ProvenanceGraph>;
+
+  delete(desc:IDataDescription): Promise<boolean>;
+
+  import(json:any): Promise<ProvenanceGraph>;
+}
 
 function findMetaObject<T>(find:IObjectRef<T>) {
   return (obj:ObjectNode<any>) => find === obj || ((obj.value === null || obj.value === find.value) && (find.hash === obj.hash));
 }
 
-export class ProvenanceGraph extends DataTypeBase {
+export default class ProvenanceGraph extends DataTypeBase {
   private _actions:ActionNode[] = [];
   private _objects:ObjectNode<any>[] = [];
   private _states:StateNode[] = [];
@@ -28,7 +233,7 @@ export class ProvenanceGraph extends DataTypeBase {
   executeCurrentActionWithin = -1;
   private nextQueue:(()=>any)[] = [];
 
-  constructor(desc:IDataDescription, public backend:graph.GraphBase) {
+  constructor(desc:IDataDescription, public backend:GraphBase) {
     super(desc);
     this.propagate(this.backend, 'sync', 'add_edge', 'add_node', 'sync_node', 'sync_edge', 'sync_start');
 
@@ -177,8 +382,8 @@ export class ProvenanceGraph extends DataTypeBase {
     return this.backend.edges;
   }
 
-  private addEdge(s:graph.GraphNode, type:string, t:graph.GraphNode, attrs = {}) {
-    var l = new graph.GraphEdge(type, s, t);
+  private addEdge(s:GraphNode, type:string, t:GraphNode, attrs = {}) {
+    var l = new GraphEdge(type, s, t);
     Object.keys(attrs).forEach((attr) => l.setAttr(attr, attrs[attr]));
     this.backend.addEdge(l);
     return l;
@@ -812,7 +1017,7 @@ export class ProvenanceGraph extends DataTypeBase {
   }
 
   setSlideJumpToTarget(node:SlideNode, state:StateNode) {
-    const old = node.outgoing.filter(graph.isType('jumpTo'))[0];
+    const old = node.outgoing.filter(isType('jumpTo'))[0];
     if (old) {
       this.backend.removeEdge(old);
     }

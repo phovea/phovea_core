@@ -1,20 +1,12 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import {isFunction, constant, argList, mixin, search, hash, resolveIn} from '../index';
-import {get as getData, remove as removeData, upload, list as listData} from '../data';
-import * as graph from '../graph';
-import {IDType, SelectOperation, defaultSelectionType, resolve as resolveIDType} from '../idtype';
-import {Range, list as rlist, Range1D, all} from '../range';
-import {isDataType, IDataType, IDataDescription, DataTypeBase} from '../datatype';
-import {list as listPlugins, load as loadPlugin} from '../plugin';
-import * as session from '../session';
+import {get as getData} from '../data';
+import {isDataType, IDataType} from '../datatype';
+import {GraphNode, isType} from '../graph/graph';
+import ActionNode from './ActionNode';
+import StateNode from './StateNode';
 
-/**
- * reexport the edge type
- */
-export type GraphEdge = graph.GraphEdge;
-export const graphModule = graph;
 
 /**
  * list of categories for actions and objects
@@ -85,43 +77,6 @@ export function ref<T>(v:T, name:string, category = cat.data, hash = name + '_' 
   };
 }
 
-export interface IInverseActionCreator {
-  (inputs:IObjectRef<any>[], creates:IObjectRef<any>[], removes:IObjectRef<any>[]) : IAction;
-}
-
-export interface ICmdResult {
-  /**
-   * the command to revert this command
-   */
-  inverse : IAction | IInverseActionCreator;
-  /**
-   * the created references
-   */
-  created? : IObjectRef<any>[];
-  /**
-   * the removed references
-   */
-  removed? : IObjectRef<any>[];
-
-  /**
-   * then number of actual milliseconds consumed
-   */
-  consumed?: number;
-}
-
-/**
- * abstract definition of a command
- */
-export interface ICmdFunction {
-  (inputs:IObjectRef<any>[], parameters:any, graph:ProvenanceGraph, within:number) : Promise<ICmdResult> | ICmdResult;
-}
-/**
- * a factory to create from an id the corresponding command
- */
-export interface ICmdFunctionFactory {
-  (id:string): ICmdFunction;
-}
-
 /**
  * tries to persist an object value supporting datatypes and DOM elements having an id
  * @param v
@@ -164,7 +119,7 @@ function restoreData(v:any):any {
 /**
  * a graph node of type object
  */
-export class ObjectNode<T> extends graph.GraphNode implements IObjectRef<T> {
+export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
   /**
    * a promise of the value accessible via .v
    */
@@ -252,21 +207,21 @@ export class ObjectNode<T> extends graph.GraphNode implements IObjectRef<T> {
   }
 
   get createdBy() {
-    var r = this.incoming.filter(graph.isType('creates'))[0];
+    var r = this.incoming.filter(isType('creates'))[0];
     return r ? <ActionNode>r.source : null;
   }
 
   get removedBy() {
-    var r = this.incoming.filter(graph.isType('removes'))[0];
+    var r = this.incoming.filter(isType('removes'))[0];
     return r ? <ActionNode>r.source : null;
   }
 
   get requiredBy() {
-    return this.incoming.filter(graph.isType('requires')).map((e) => <ActionNode>e.source);
+    return this.incoming.filter(isType('requires')).map((e) => <ActionNode>e.source);
   }
 
   get partOf() {
-    return this.incoming.filter(graph.isType('consistsOf')).map((e) => <StateNode>e.source);
+    return this.incoming.filter(isType('consistsOf')).map((e) => <StateNode>e.source);
   }
 
   toString() {

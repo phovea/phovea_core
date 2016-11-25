@@ -1,17 +1,19 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import {isFunction, constant, argList, mixin, search, hash, resolveIn} from '../index';
+import {mixin} from '../index';
 import {get as getData, remove as removeData, upload, list as listData} from '../data';
-import * as graph from '../graph';
-import {IDType, SelectOperation, defaultSelectionType, resolve as resolveIDType} from '../idtype';
-import {Range, list as rlist, Range1D, all} from '../range';
-import {isDataType, IDataType, IDataDescription, DataTypeBase} from '../datatype';
-import {list as listPlugins, load as loadPlugin} from '../plugin';
-import * as session from '../session';
+import {IDataDescription} from '../datatype';
+import ProvenanceGraph, {IProvenanceGraphManager, provenanceGraphFactory} from './ProvenanceGraph';
+import GraphBase from '../graph/GraphBase';
+import GraphProxy from '../graph/GraphProxy';
+import {retrieve} from '../session';
 
+function getCurrentUser() {
+  return retrieve('username', 'Anonymous');
+}
 
-export class RemoteStorageProvenanceGraphManager implements IProvenanceGraphManager {
+export default class RemoteStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private options = {
     application: 'unknown'
   };
@@ -24,13 +26,13 @@ export class RemoteStorageProvenanceGraphManager implements IProvenanceGraphMana
     return listData((d) => d.desc.type === 'graph' && (<any>d.desc).attrs.graphtype === 'provenance_graph' && (<any>d.desc).attrs.of === this.options.application).then((d) => d.map((di) => di.desc));
   }
 
-  getGraph(desc:IDataDescription):Promise<graph.GraphBase> {
+  getGraph(desc:IDataDescription):Promise<GraphBase> {
     return getData(desc.id)
-      .then((graph:graph.GraphProxy) => graph.impl(provenanceGraphFactory()));
+      .then((graph:GraphProxy) => graph.impl(provenanceGraphFactory()));
   }
 
   get(desc:IDataDescription):Promise<ProvenanceGraph> {
-    return this.getGraph(desc).then((impl:graph.GraphBase) => new ProvenanceGraph(desc, impl));
+    return this.getGraph(desc).then((impl:GraphBase) => new ProvenanceGraph(desc, impl));
   }
 
   delete(desc:IDataDescription) {
@@ -53,8 +55,8 @@ export class RemoteStorageProvenanceGraphManager implements IProvenanceGraphMana
       edges: json.edges
     };
     return upload(desc)
-      .then((graph:graph.GraphProxy) => graph.impl(provenanceGraphFactory()))
-      .then((impl:graph.GraphBase) => new ProvenanceGraph(impl.desc, impl));
+      .then((graph:GraphProxy) => graph.impl(provenanceGraphFactory()))
+      .then((impl:GraphBase) => new ProvenanceGraph(impl.desc, impl));
   }
 
   create() {
@@ -70,7 +72,7 @@ export class RemoteStorageProvenanceGraphManager implements IProvenanceGraphMana
       description: ''
     };
     return upload(desc)
-      .then((graph:graph.GraphProxy) => graph.impl(provenanceGraphFactory()))
-      .then((impl:graph.GraphBase) => new ProvenanceGraph(impl.desc, impl));
+      .then((graph:GraphProxy) => graph.impl(provenanceGraphFactory()))
+      .then((impl:GraphBase) => new ProvenanceGraph(impl.desc, impl));
   }
 }

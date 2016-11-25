@@ -1,14 +1,8 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import {isFunction, constant, argList, mixin, search, hash, resolveIn} from '../index';
-import {get as getData, remove as removeData, upload, list as listData} from '../data';
-import * as graph from '../graph';
-import {IDType, SelectOperation, defaultSelectionType, resolve as resolveIDType} from '../idtype';
-import {Range, list as rlist, Range1D, all} from '../range';
-import {isDataType, IDataType, IDataDescription, DataTypeBase} from '../datatype';
-import {list as listPlugins, load as loadPlugin} from '../plugin';
-import * as session from '../session';
+import {GraphNode, isType} from '../graph/graph';
+import StateNode from './StateNode';
 
 export const DEFAULT_DURATION = 1500; //ms
 export const DEFAULT_TRANSITION = 0; //ms
@@ -39,7 +33,7 @@ export interface IFrameStateAnnotation extends IStateAnnotation {
 }
 
 
-export class SlideNode extends graph.GraphNode {
+export default class SlideNode extends GraphNode {
   constructor() {
     super('story');
   }
@@ -61,11 +55,11 @@ export class SlideNode extends graph.GraphNode {
   }
 
   get isTextOnly() {
-    return !this.outgoing.some(graph.isType('jumpTo'));
+    return !this.outgoing.some(isType('jumpTo'));
   }
 
   get state() {
-    const edge = this.outgoing.filter(graph.isType('jumpTo'))[0];
+    const edge = this.outgoing.filter(isType('jumpTo'))[0];
     return edge ? <StateNode>edge.target : null;
   }
 
@@ -74,16 +68,16 @@ export class SlideNode extends graph.GraphNode {
   }
 
   get next() {
-    const n = this.outgoing.filter(graph.isType('next'))[0];
+    const n = this.outgoing.filter(isType('next'))[0];
     return n ? <SlideNode>n.target : null;
   }
 
   get nexts() {
-    return this.outgoing.filter(graph.isType('next')).map((n) => <SlideNode>n.target);
+    return this.outgoing.filter(isType('next')).map((n) => <SlideNode>n.target);
   }
 
   get previous() {
-    const n = this.incoming.filter(graph.isType('next'))[0];
+    const n = this.incoming.filter(isType('next'))[0];
     return n ? <SlideNode>n.source : null;
   }
 

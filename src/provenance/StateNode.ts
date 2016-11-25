@@ -1,20 +1,15 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import {isFunction, constant, argList, mixin, search, hash, resolveIn} from '../index';
-import {get as getData, remove as removeData, upload, list as listData} from '../data';
-import * as graph from '../graph';
-import {IDType, SelectOperation, defaultSelectionType, resolve as resolveIDType} from '../idtype';
-import {Range, list as rlist, Range1D, all} from '../range';
-import {isDataType, IDataType, IDataDescription, DataTypeBase} from '../datatype';
-import {list as listPlugins, load as loadPlugin} from '../plugin';
-import * as session from '../session';
+import {GraphNode, isType} from '../graph/graph';
+import ActionNode from './ActionNode';
+import ObjectNode from './ObjectNode';
 
 /**
  * a state node is one state in the visual exploration consisting of an action creating it and one or more following ones.
  * In addition, a state is characterized by the set of active object nodes
  */
-export class StateNode extends graph.GraphNode {
+export default class StateNode extends GraphNode {
   constructor(name:string, description = '') {
     super('state');
     super.setAttr('name', name);
@@ -47,7 +42,7 @@ export class StateNode extends graph.GraphNode {
    * @returns {ObjectNode<any>[]}
    */
   get consistsOf():ObjectNode<any>[] {
-    return this.outgoing.filter(graph.isType('consistsOf')).map((e) => <ObjectNode<any>>e.target);
+    return this.outgoing.filter(isType('consistsOf')).map((e) => <ObjectNode<any>>e.target);
   }
 
   /**
@@ -55,7 +50,7 @@ export class StateNode extends graph.GraphNode {
    * @returns {ActionNode[]}
    */
   get resultsFrom():ActionNode[] {
-    return this.incoming.filter(graph.isType('resultsIn')).map((e) => <ActionNode>e.source);
+    return this.incoming.filter(isType('resultsIn')).map((e) => <ActionNode>e.source);
   }
 
   /**
@@ -64,7 +59,7 @@ export class StateNode extends graph.GraphNode {
    */
   get creator() {
     //results and not a inversed actions
-    const from = this.incoming.filter(graph.isType('resultsIn')).map((e) => <ActionNode>e.source).filter((s) => !s.isInverse);
+    const from = this.incoming.filter(isType('resultsIn')).map((e) => <ActionNode>e.source).filter((s) => !s.isInverse);
     if (from.length === 0) {
       return null;
     }
@@ -72,7 +67,7 @@ export class StateNode extends graph.GraphNode {
   }
 
   get next():ActionNode[] {
-    return this.outgoing.filter(graph.isType('next')).map((e) => <ActionNode>e.target).filter((s) => !s.isInverse);
+    return this.outgoing.filter(isType('next')).map((e) => <ActionNode>e.target).filter((s) => !s.isInverse);
   }
 
   get previousState():StateNode {
