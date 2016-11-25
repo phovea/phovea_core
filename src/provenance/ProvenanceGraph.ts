@@ -1,7 +1,7 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import {isFunction, constant, argList, mixin, search, hash, resolveIn} from '../index';
+import {mixin, hash, resolveIn} from '../index';
 import {IDType, SelectOperation, defaultSelectionType, resolve as resolveIDType} from '../idtype';
 import {Range, list as rlist, Range1D, all} from '../range';
 import {IDataDescription, DataTypeBase} from '../datatype';
@@ -121,9 +121,9 @@ function findCommon<T>(a:T[], b:T[]) {
   };
 }
 
-function asFunction(i) {
-  if (!isFunction(i)) { //make a function
-    return constant(i);
+function asFunction(i: any) {
+  if (typeof(i) !== 'function') { //make a function
+    return () => i;
   }
   return i;
 }
@@ -161,7 +161,7 @@ function createLazyCmdFunctionFactory():ICmdFunctionFactory {
   const lazyFunction = (id) => {
     var _resolved = null;
     return function (inputs:IObjectRef<any>[], parameters:any) {
-      var that = this, args = argList(arguments);
+      var that = this, args = Array.from(arguments);
       if (_resolved == null) {
         _resolved = resolveFun(id);
       }
@@ -343,7 +343,7 @@ export default class ProvenanceGraph extends DataTypeBase {
   }
 
   getStateById(id:number) {
-    return search(this._states, (s) => s.id === id);
+    return this._states.find((s) => s.id === id);
   }
 
   get actions() {
@@ -351,7 +351,7 @@ export default class ProvenanceGraph extends DataTypeBase {
   }
 
   getActionById(id:number) {
-    return search(this._actions, (s) => s.id === id);
+    return this._actions.find((s) => s.id === id);
   }
 
   get objects() {
@@ -359,7 +359,7 @@ export default class ProvenanceGraph extends DataTypeBase {
   }
 
   getObjectById(id:number) {
-    return search(this._objects, (s) => s.id === id);
+    return this._objects.find((s) => s.id === id);
   }
 
   get stories() {
@@ -367,7 +367,7 @@ export default class ProvenanceGraph extends DataTypeBase {
   }
 
   getSlideById(id:number) {
-    return search(this._slides, (s) => s.id === id);
+    return this._slides.find((s) => s.id === id);
   }
 
   getSlideChains() {
@@ -449,7 +449,7 @@ export default class ProvenanceGraph extends DataTypeBase {
   }
 
   findObject<T>(value:T) {
-    var r = search(this._objects, (obj) => obj.value === value);
+    var r = this._objects.find((obj) => obj.value === value);
     if (r) {
       return r;
     }
@@ -499,7 +499,7 @@ export default class ProvenanceGraph extends DataTypeBase {
       return <ObjectNode<any>>(<any>r)._resolvesTo;
     }
     //else create a new instance
-    const result = search(arr, findMetaObject(r));
+    const result = arr.find(findMetaObject(r));
     (<any>r)._resolvesTo = result;
     return result;
   }
@@ -522,7 +522,7 @@ export default class ProvenanceGraph extends DataTypeBase {
     }
     if (j.hasOwnProperty('value') && j.hasOwnProperty('name')) { //sounds like an proxy
       j.category = j.category || cat.data;
-      r = search(this._objects, findMetaObject(j));
+      r = this._objects.find(findMetaObject(j));
       if (r) {
         if (r.value === null) { //restore instance
           r.value = j.value;
@@ -533,7 +533,7 @@ export default class ProvenanceGraph extends DataTypeBase {
       }
       return this.addObjectImpl(j.value, j.name, j.category, j.hash, createEdge);
     } else { //raw value
-      r = search(this._objects, (obj) => (obj.value === null || obj.value === i) && (name === null || obj.name === name) && (type === null || type === obj.category));
+      r = this._objects.find((obj) => (obj.value === null || obj.value === i) && (name === null || obj.name === name) && (type === null || type === obj.category));
       if (r) {
         if (r.value === null) { //restore instance
           r.value = i;
@@ -628,7 +628,7 @@ export default class ProvenanceGraph extends DataTypeBase {
     }
     this.currentlyRunning = true;
 
-    if (isFunction(withinMilliseconds)) {
+    if (typeof(withinMilliseconds) === 'function') {
       withinMilliseconds = (<any>withinMilliseconds)();
     }
     this.executeCurrentActionWithin = <number>withinMilliseconds;
