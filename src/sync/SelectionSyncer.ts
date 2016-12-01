@@ -18,11 +18,18 @@ export interface ISelectionSyncerOptions {
 function syncIDType(store: Store, idType: IDType, options: ISelectionSyncerOptions) {
   options.selectionTypes.forEach((type) => {
     const key = `${PREFIX}${idType.id}-${type}`;
+    let disable = false;
     idType.on('select-' + type, (event, type: string, selection: Range) => {
+      if (disable) {
+        return;
+      }
+      // sync just the latest state
       store.setValue(key, selection.toString());
     });
     store.on(key, (event, new_: string) => {
+      disable = true; //don't track on changes
       idType.select(type, new_);
+      disable = false;
     });
   });
 }
