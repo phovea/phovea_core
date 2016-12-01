@@ -13,7 +13,7 @@ export interface ITabSyncerOptions {
 
 export const SYNCER_EXTENSION_POINT = 'tabSyncer';
 
-export interface ISyncer {
+export interface ISyncerExtension {
   (store: Store);
 }
 

@@ -10,11 +10,6 @@ import {on as globalOn} from '../event';
 
 const PREFIX = 'selection-idtype-';
 
-export interface ISelectionInfo {
-  type: string;
-  selection: string;
-}
-
 export interface ISelectionSyncerOptions {
   filter?(idType: IDType): boolean;
   selectionTypes?: string[];
