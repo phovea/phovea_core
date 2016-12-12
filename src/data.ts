@@ -156,7 +156,7 @@ export function tree(query ?: any): Promise<INode> {
  * @param query
  * @returns {any}
  */
-export function getFirst(query: any | string | RegExp) : Promise<IDataType> {
+export function getFirst(query: any | string | RegExp) : Promise<IDataType[]> {
   if (typeof query === 'string' || query instanceof RegExp) {
     return getFirstByName(<string>query);
   }
