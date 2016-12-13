@@ -96,7 +96,7 @@ function transformEntry(desc: any) : Promise<IDataType> {
 export function list(): Promise<IDataType[]>;
 export function list(query : { [key: string] : string }): Promise<IDataType[]>;
 export function list(filter : (d: IDataType) => boolean): Promise<IDataType[]>;
-export function list(query?: any) {
+export function list(query?: any): Promise<IDataType[]> {
   const f = (typeof query === 'function') ? <(d: IDataType) => boolean>query : constantTrue;
   const q = (typeof query !== 'undefined' && typeof query !== 'function') ? <any>query : {};
 
@@ -156,12 +156,12 @@ export function tree(query ?: any): Promise<INode> {
  * @param query
  * @returns {any}
  */
-export function getFirst(query: any | string | RegExp) : Promise<IDataType[]> {
+export function getFirst(query: any | string | RegExp) : Promise<IDataType> {
   if (typeof query === 'string' || query instanceof RegExp) {
     return getFirstByName(<string>query);
   }
   query.limit = 1;
-  return list(query).then((result) => {
+  return list(query).then<IDataType>((result) => {
     if (result.length === 0) {
       return Promise.reject({error : 'nothing found, matching', args: query});
     }
