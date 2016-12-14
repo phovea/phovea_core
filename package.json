@@ -9,7 +9,7 @@
   ],
   "engines": {
     "npm": "3.10.9",
-    "node": "7.2.1",
+    "node":"7.2.1"
   },
   "scripts": {
     "compile": "tsc",
