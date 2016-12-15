@@ -35,7 +35,7 @@ export default class TabSyncer {
 
     // instantiate plugins
     loadPlugins(listPlugins(SYNCER_EXTENSION_POINT)).then((instances) => {
-      instances.forEach((i) => i.factory(this.store));
+      instances.forEach((i) => this.push(i.factory));
     });
 
     this.registerTab(document.location.href);
@@ -43,6 +43,10 @@ export default class TabSyncer {
     window.addEventListener('beforeunload', () => {
       this.unregisterTab(document.location.href);
     });
+  }
+
+  push(syncer: ISyncerExtension) {
+    syncer(this.store);
   }
 
   private registerTab(url: string) {
