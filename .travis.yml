@@ -8,6 +8,8 @@ before_install:
 - sh -e /etc/init.d/xvfb start
 - if [[ `npm -v` != 3* ]]; then npm i -g npm@3; fi
 
+addons:
+  firefox: 49.0.1
 script: npm run dist
 
 deploy:
