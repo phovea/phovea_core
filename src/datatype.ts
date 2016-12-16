@@ -12,6 +12,20 @@ import {ISelectAble, SelectAble} from './idtype';
 import {all, none, Range1D, Range1DGroup, composite, Range} from './range';
 
 /**
+ * TODO
+ */
+export interface IDataDescriptionValue {
+  /**
+   * the type of the datatype, e.g. matrix, vector, stratification, ...
+   */
+  type: string;
+  /**
+   * TODO
+   */
+  range: number[];
+}
+
+/**
  * basic description elements
  */
 export interface IDataDescription {
