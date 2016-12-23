@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {IPersistable, argList, IdPool} from './index';
+import {IPersistable, IdPool} from './index';
 import {getAPIJSON} from './ajax';
 import {EventHandler, IEventHandler, IEvent, IEventListener, fire as global_fire} from './event';
 import {none, all, Range, join, RangeLike, parse, Range1D, list as rlist} from './range';
@@ -148,7 +148,7 @@ export class IDType extends EventHandler implements IIDType {
   select(type:string, range:RangeLike);
   select(type:string, range:RangeLike, op:SelectOperation);
   select() {
-    const a = argList(arguments);
+    const a = Array.from(arguments);
     const type = (typeof a[0] === 'string') ? a.shift() : defaultSelectionType,
       range = parse(a[0]),
       op = asSelectOperation(a[1]);
@@ -453,7 +453,7 @@ export class ProductIDType extends EventHandler implements IIDType {
   select(type:string, range:RangeLike[]);
   select(type:string, range:RangeLike[], op:SelectOperation);
   select() {
-    const a = argList(arguments);
+    const a = Array.from(arguments);
     const type = (typeof a[0] === 'string') ? a.shift() : defaultSelectionType,
       range = a[0].map(parse),
       op = asSelectOperation(a[1]);
@@ -831,7 +831,7 @@ export class SelectAble extends EventHandler implements ISelectAble {
   select(dim:number, type:string, range:RangeLike);
   select(dim:number, type:string, range:RangeLike, op:SelectOperation);
   select() {
-    const a = argList(arguments);
+    const a = Array.from(arguments);
     const dim = (typeof a[0] === 'number') ? +a.shift() : -1,
       type = (typeof a[0] === 'string') ? a.shift() : defaultSelectionType,
       range = parse(a[0]),
@@ -871,7 +871,7 @@ export class SelectAble extends EventHandler implements ISelectAble {
   clear(dim:number);
   clear(dim:number, type:string);
   clear() {
-    const a = argList(arguments);
+    const a = Array.from(arguments);
     const dim = (typeof a[0] === 'number') ? +a.shift() : -1;
     const type = (typeof a[0] === 'string') ? a[0] : defaultSelectionType;
     return this.selectImpl(none(), SelectOperation.SET, type, dim);
@@ -947,7 +947,7 @@ export class ProductSelectAble extends SelectAble {
   selectProduct(range:RangeLike[], op?:SelectOperation);
   selectProduct(type:string, range:RangeLike[], op?:SelectOperation);
   selectProduct() {
-    const a = argList(arguments);
+    const a = Array.from(arguments);
     const type = (typeof a[0] === 'string') ? a.shift() : defaultSelectionType,
       range = a[0].map(parse),
       op = asSelectOperation(a[1]);
@@ -969,7 +969,7 @@ export class ProductSelectAble extends SelectAble {
   clear(dim:number);
   clear(dim:number, type:string);
   clear() {
-    const a = argList(arguments);
+    const a = Array.from(arguments);
     if (typeof a[0] === 'number') {
       a.shift();
     }

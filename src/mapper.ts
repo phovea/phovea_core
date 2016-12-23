@@ -7,7 +7,6 @@
  * Created by Samuel Gratzl on 24.09.2014.
  * @deprecated isn't it obsolete to idtype functions?
  */
-import {argList} from './index';
 import {getAPIJSON} from './ajax';
 import {IDType} from './idtype';
 import {Range, is as isRange, parse, list as rlist} from './range';
@@ -28,13 +27,13 @@ export function map(source:IDType, target:IDType) : any {
   if (arguments.length === 2) {
     //return a mapper
     return function() {
-      var args = argList(arguments);
+      var args = Array.from(arguments);
       args.unshift(target);
       args.unshift(source);
       return map.apply(that, args);
     };
   }
-  var args = argList(arguments);
+  var args = Array.from(arguments);
   args.shift(); //source
   args.shift(); //target
   var id = args.shift(), range;

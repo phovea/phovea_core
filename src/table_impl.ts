@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {IPersistable, argFilter, argSort, isFunction, search, getter} from './index';
+import {IPersistable, argFilter, argSort} from './index';
 import {getAPIJSON, getAPIData} from './ajax';
 import {Range, all, list as rlist, parse, range} from './range';
 import {SelectAble, resolve as idtypes_resolve, IDType} from './idtype';
@@ -184,7 +184,7 @@ function viaAPI2Loader(): ITableLoader2 {
       return r.objs(desc, range).then((objs) => toFlat(objs, (<any>desc).columns));
     },
     col: (desc: IDataDescription, column: string, range: Range) => {
-      const colDesc = search((<any>desc).columns, (c : any) => c.name === column);
+      const colDesc = (<any>desc).columns.find((c : any) => c.name === column);
       if (range.isAll) {
         if (cols[column] == null) {
           if (objs === null) {
@@ -219,7 +219,7 @@ function viaDataLoader(data: any[], nameProperty: any) {
     if (_data) { //in the cache
       return Promise.resolve(_data);
     }
-    var name : (any) => string = isFunction(nameProperty)? nameProperty : getter(nameProperty.toString());
+    var name : (any) => string = typeof(nameProperty) === 'function'? nameProperty : (d) => d[nameProperty.toString()];
     function toGetter(col) {
       if (col.getter) {
         return col.getter;
@@ -601,7 +601,7 @@ class MultITableVector extends VectorBase implements IVector {
  * @returns {ITable}
  */
 export function create(desc: IDataDescription): ITable {
-  if (isFunction((<any>desc).loader)) {
+  if (typeof((<any>desc).loader) === 'function') {
     return new Table(desc, adapterOne2Two((<any>desc).loader));
   }
   return new Table(desc, viaAPI2Loader());

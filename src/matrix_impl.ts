@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {isFunction, argSort, argFilter, IPersistable} from './index';
+import {argSort, argFilter, IPersistable} from './index';
 import {getAPIJSON, api2absURL, getAPIData} from './ajax';
 import {list as rlist, Range, all, range, join, Range1D, parse} from './range';
 import {IDType, ProductSelectAble, resolve as resolveIDType, resolveProduct, ProductIDType} from './idtype';
@@ -880,7 +880,7 @@ class ProjectedVector extends VectorBase implements IVector {
  * @returns {IMatrix}
  */
 export function create(desc: IDataDescription, loader?: IMatrixLoader2): IMatrix {
-  if (isFunction((<any>desc).loader)) {
+  if (typeof((<any>desc).loader) === 'function') {
     return new Matrix(desc, adapterOne2Two((<any>desc).loader));
   }
   return new Matrix(desc, loader ? loader: viaAPI2Loader());

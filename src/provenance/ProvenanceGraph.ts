@@ -1,89 +1,17 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import {isFunction, constant, argList, mixin, search, hash, resolveIn} from './index';
-import {get as getData, remove as removeData, upload, list as listData} from './data';
-import * as graph from './graph';
-import {IDType, SelectOperation, defaultSelectionType, resolve as resolveIDType} from './idtype';
-import {Range, list as rlist, Range1D, all} from './range';
-import {isDataType, IDataType, IDataDescription, DataTypeBase} from './datatype';
-import {list as listPlugins, load as loadPlugin} from './plugin';
-import * as session from './session';
-
-/**
- * reexport the edge type
- */
-export type GraphEdge = graph.GraphEdge;
-export const graphModule = graph;
-
-/**
- * list of categories for actions and objects
- */
-export const cat = {
-  data: 'data',
-  selection: 'selection',
-  visual: 'visual',
-  layout: 'layout',
-  logic: 'logic',
-  custom: 'custom',
-  annotation: 'annotation'
-};
-
-/**
- * list of operations
- */
-export const op = {
-  create: 'create',
-  update: 'update',
-  remove: 'remove'
-};
-
-
-/**
- * an object reference is a common description of an object node in the provenance graph
- */
-export interface IObjectRef<T> {
-  /**
-   * name of the object
-   */
-  name: string;
-  /**
-   * category one of categories
-   */
-  category : string;
-  /**
-   * the value
-   */
-  v : Promise<T>;
-
-  /**
-   * maybe null if not defined
-   */
-  value: T;
-
-  /**
-   * a hash for avoiding false duplicate detection
-   */
-  hash: string;
-}
-
-/**
- * creates an object reference to the given object
- * @param v
- * @param name
- * @param category
- * @param hash
- * @returns {{v: T, name: string, category: string}}
- */
-export function ref<T>(v:T, name:string, category = cat.data, hash = name + '_' + category):IObjectRef<T> {
-  return {
-    v: Promise.resolve(v),
-    value: v,
-    name: name,
-    category: category,
-    hash: hash
-  };
-}
+import {mixin, hash, resolveIn} from '../index';
+import {IDType, SelectOperation, defaultSelectionType, resolve as resolveIDType} from '../idtype';
+import {Range, list as rlist, Range1D, all} from '../range';
+import {IDataDescription, DataTypeBase} from '../datatype';
+import {list as listPlugins, load as loadPlugin} from '../plugin';
+import ObjectNode, {IObjectRef, cat} from './ObjectNode';
+import StateNode, {} from './StateNode';
+import ActionNode, {IAction, meta, ActionMetaData} from './ActionNode';
+import SlideNode from './SlideNode';
+import {isType, GraphEdge, GraphNode} from '../graph/graph';
+import GraphBase, {IGraphFactory} from '../graph/GraphBase';
 
 export interface IInverseActionCreator {
   (inputs:IObjectRef<any>[], creates:IObjectRef<any>[], removes:IObjectRef<any>[]) : IAction;
@@ -122,646 +50,6 @@ export interface ICmdFunctionFactory {
   (id:string): ICmdFunction;
 }
 
-/**
- * tries to persist an object value supporting datatypes and DOM elements having an id
- * @param v
- * @returns {any}
- */
-function persistData(v:any):any {
-  if (v instanceof Element) {
-    let e = <Element>v,
-      id = e.getAttribute('id');
-    return {type: 'element', id: id};
-  }
-  if (isDataType(v)) {
-    let e = <IDataType>v;
-    return {type: 'dataset', id: e.desc.id, persist: e.persist()};
-  }
-  if (typeof v === 'string' || typeof v === 'number') {
-    return {type: 'primitive', v: v};
-  }
-  return null;
-}
-
-function restoreData(v:any):any {
-  if (!v) {
-    return null;
-  }
-  switch (v.type) {
-    case 'element':
-      if (v.id) {
-        return Promise.resolve(document.getElementById(v.id));
-      }
-      return null;
-    case 'dataset':
-      return getData(v.persist);
-    case 'primitive':
-      return Promise.resolve(v.v);
-  }
-  return null;
-}
-
-/**
- * a graph node of type object
- */
-export class ObjectNode<T> extends graph.GraphNode implements IObjectRef<T> {
-  /**
-   * a promise of the value accessible via .v
-   */
-  private _promise:Promise<T>;
-  private _persisted:any = null;
-
-  constructor(private _v:T, name:string, category = cat.data, hash = name + '_' + category, description = '') {
-    super('object');
-    if (_v != null) { //if the value is given, auto generate a promise for it
-      this._promise = Promise.resolve(_v);
-    }
-    super.setAttr('name', name);
-    super.setAttr('category', category);
-    super.setAttr('hash', hash);
-    super.setAttr('description', description);
-  }
-
-  get value() {
-    this.checkPersisted();
-    return this._v;
-  }
-
-  set value(v:T) {
-    this._v = v;
-    this._promise = v== null ? null : Promise.resolve(v);
-    this._persisted = null;
-  }
-
-  /**
-   * checks whether the persisted value was already restored
-   */
-  private checkPersisted() {
-    if (this._persisted != null) {
-      this._promise = restoreData(this._persisted);
-      if (this._promise) {
-        this._promise.then((v) => {
-          this._v = v;
-        });
-      }
-      this._persisted = null;
-    }
-  }
-
-  get v() {
-    this.checkPersisted();
-    return this._promise;
-  }
-
-  get name():string {
-    return super.getAttr('name', '');
-  }
-
-  get category():string {
-    return super.getAttr('category', '');
-  }
-
-  get hash():string {
-    return super.getAttr('hash', '');
-  }
-
-  get description():string {
-    return super.getAttr('description', '');
-  }
-
-
-  persist() {
-    var r = super.persist();
-    if (!r.attrs) {
-      r.attrs = {};
-    }
-    r.attrs.v = this._persisted ? this._persisted : persistData(this.value);
-    return r;
-  }
-
-  restore(p:any) {
-    this._persisted = p.attrs.v;
-    delete p.attrs.v;
-    super.restore(p);
-    return this;
-  }
-
-  static restore(p) {
-    var r = new ObjectNode<any>(null, p.attrs.name, p.attrs.category, p.attrs.hash || p.attrs.name + '_' + p.attrs.category);
-    return r.restore(p);
-  }
-
-  get createdBy() {
-    var r = this.incoming.filter(graph.isType('creates'))[0];
-    return r ? <ActionNode>r.source : null;
-  }
-
-  get removedBy() {
-    var r = this.incoming.filter(graph.isType('removes'))[0];
-    return r ? <ActionNode>r.source : null;
-  }
-
-  get requiredBy() {
-    return this.incoming.filter(graph.isType('requires')).map((e) => <ActionNode>e.source);
-  }
-
-  get partOf() {
-    return this.incoming.filter(graph.isType('consistsOf')).map((e) => <StateNode>e.source);
-  }
-
-  toString() {
-    return this.name;
-  }
-}
-
-function getCurrentUser() {
-  return session.retrieve('username', 'Anonymous');
-}
-
-/**
- * additional data about a performed action
- */
-export class ActionMetaData {
-  constructor(public category:string, public operation:string, public name:string, public timestamp:number = Date.now(), public user:string = getCurrentUser()) {
-
-  }
-
-  static restore(p) {
-    return new ActionMetaData(p.category, p.operation, p.name, p.timestamp, p.user);
-  }
-
-  eq(that:ActionMetaData) {
-    return this.category === that.category && this.operation === that.operation && this.name === that.name;
-  }
-
-  /**
-   * checks whether this metadata are the inverse of the given one in terms of category and operation
-   * @param that
-   * @returns {boolean}
-   */
-  inv(that:ActionMetaData) {
-    if (this.category !== that.category) {
-      return false;
-    }
-    if (this.operation === op.update) {
-      return that.operation === op.update;
-    }
-    return this.operation === op.create ? that.operation === op.remove : that.operation === op.create;
-  }
-
-  toString() {
-    return `${this.category}:${this.operation} ${this.name}`;
-  }
-}
-
-export function meta(name:string, category:string = cat.data, operation:string = op.update, timestamp:number = Date.now(), user:string = getCurrentUser()) {
-  return new ActionMetaData(category, operation, name, timestamp, user);
-}
-
-export interface IAction {
-  meta: ActionMetaData;
-  id : string;
-  f : ICmdFunction;
-  inputs?: IObjectRef<any>[];
-  parameter?: any;
-}
-
-/**
- * creates an action given the data
- * @param meta
- * @param id
- * @param f
- * @param inputs
- * @param parameter
- * @returns {{meta: ActionMetaData, id: string, f: (function(IObjectRef<any>[], any, ProvenanceGraph): ICmdResult), inputs: IObjectRef<any>[], parameter: any}}
- */
-export function action(meta:ActionMetaData, id:string, f:ICmdFunction, inputs:IObjectRef<any>[] = [], parameter:any = {}):IAction {
-  return {
-    meta: meta,
-    id: id,
-    f: f,
-    inputs: inputs,
-    parameter: parameter
-  };
-}
-
-/**
- * comparator by index
- * @param a
- * @param b
- * @returns {number}
- */
-function byIndex(a:graph.AttributeContainer, b:graph.AttributeContainer) {
-  const ai = +a.getAttr('index', 0);
-  const bi = +b.getAttr('index', 0);
-  return ai - bi;
-}
-
-
-export class ActionNode extends graph.GraphNode {
-  private inverter:IInverseActionCreator;
-
-  constructor(meta:ActionMetaData, f_id:string, private f:ICmdFunction, parameter:any = {}) {
-    super('action');
-    super.setAttr('meta', meta);
-    super.setAttr('f_id', f_id);
-    super.setAttr('parameter', parameter);
-  }
-
-  clone() {
-    return new ActionNode(this.meta, this.f_id, this.f, this.parameter);
-  }
-
-  get name() {
-    return this.meta.name;
-  }
-
-  get meta():ActionMetaData {
-    return super.getAttr('meta');
-  }
-
-  get f_id():string {
-    return super.getAttr('f_id');
-  }
-
-  get parameter():any {
-    return super.getAttr('parameter');
-  }
-
-  set parameter(value:any) {
-    super.setAttr('parameter', value);
-  }
-
-  get onceExecuted():boolean {
-    return super.getAttr('onceExecuted', false);
-  }
-
-  set onceExecuted(value:boolean) {
-    if (this.onceExecuted !== value) {
-      super.setAttr('onceExecuted', value);
-    }
-  }
-
-  static restore(r, factory:ICmdFunctionFactory) {
-    var a = new ActionNode(ActionMetaData.restore(r.attrs.meta), r.attrs.f_id, factory(r.attrs.f_id), r.attrs.parameter);
-    return a.restore(r);
-  }
-
-  toString() {
-    return this.meta.name;
-  }
-
-  get inversedBy() {
-    var r = this.incoming.filter(graph.isType('inverses'))[0];
-    return r ? <ActionNode>r.source : null;
-  }
-
-  /**
-   * inverses another action
-   * @returns {ActionNode}
-   */
-  get inverses() {
-    var r = this.outgoing.filter(graph.isType('inverses'))[0];
-    return r ? <ActionNode>r.target : null;
-  }
-
-  get isInverse() {
-    return this.outgoing.filter(graph.isType('inverses'))[0] != null;
-  }
-
-  getOrCreateInverse(graph:ProvenanceGraph) {
-    var i = this.inversedBy;
-    if (i) {
-      return i;
-    }
-    if (this.inverter) {
-      return graph.createInverse(this, this.inverter);
-    }
-    this.inverter = null; //not needed anymore
-    return null;
-  }
-
-  updateInverse(graph:ProvenanceGraph, inverter:IInverseActionCreator) {
-    var i = this.inversedBy;
-    if (i) { //update with the actual values / parameter only
-      var c = inverter.call(this, this.requires, this.creates, this.removes);
-      i.parameter = c.parameter;
-      this.inverter = null;
-    } else if (!this.isInverse) {
-      //create inverse action immediatelly
-      graph.createInverse(this, inverter);
-      this.inverter = null;
-    } else {
-      this.inverter = inverter;
-    }
-  }
-
-  execute(graph:ProvenanceGraph, withinMilliseconds:number):Promise<ICmdResult> {
-    var r = this.f.call(this, this.requires, this.parameter, graph, <number>withinMilliseconds);
-    return Promise.resolve(r);
-  }
-
-  equals(that:ActionNode):boolean {
-    if (!(this.meta.category === that.meta.category && that.meta.operation === that.meta.operation)) {
-      return false;
-    }
-    if (this.f_id !== that.f_id) {
-      return false;
-    }
-    //TODO check parameters if they are the same
-    return true;
-  }
-
-  get uses():ObjectNode<any>[] {
-    return this.outgoing.filter(graph.isType(/(creates|removes|requires)/)).map((e) => <ObjectNode<any>>e.target);
-  }
-
-  get creates():ObjectNode<any>[] {
-    return this.outgoing.filter(graph.isType('creates')).map((e) => <ObjectNode<any>>e.target);
-  }
-
-  get removes():ObjectNode<any>[] {
-    return this.outgoing.filter(graph.isType('removes')).sort(byIndex).map((e) => <ObjectNode<any>>e.target);
-  }
-
-  get requires():ObjectNode<any>[] {
-    return this.outgoing.filter(graph.isType('requires')).sort(byIndex).map((e) => <ObjectNode<any>>e.target);
-  }
-
-  get resultsIn():StateNode {
-    var r = this.outgoing.filter(graph.isType('resultsIn'))[0];
-    return r ? <StateNode>r.target : null;
-  }
-
-  get previous():StateNode {
-    var r = this.incoming.filter(graph.isType('next'))[0];
-    return r ? <StateNode>r.source : null;
-  }
-}
-
-/**
- * a state node is one state in the visual exploration consisting of an action creating it and one or more following ones.
- * In addition, a state is characterized by the set of active object nodes
- */
-export class StateNode extends graph.GraphNode {
-  constructor(name:string, description = '') {
-    super('state');
-    super.setAttr('name', name);
-    super.setAttr('description', description);
-  }
-
-  get name():string {
-    return super.getAttr('name');
-  }
-
-  set name(value:string) {
-    super.setAttr('name', value);
-  }
-
-  get description():string {
-    return super.getAttr('description', '');
-  }
-
-  set description(value:string) {
-    super.setAttr('description', value);
-  }
-
-  static restore(p) {
-    var r = new StateNode(p.attrs.name);
-    return r.restore(p);
-  }
-
-  /**
-   * this state consists of the following objects
-   * @returns {ObjectNode<any>[]}
-   */
-  get consistsOf():ObjectNode<any>[] {
-    return this.outgoing.filter(graph.isType('consistsOf')).map((e) => <ObjectNode<any>>e.target);
-  }
-
-  /**
-   * returns the actions leading to this state
-   * @returns {ActionNode[]}
-   */
-  get resultsFrom():ActionNode[] {
-    return this.incoming.filter(graph.isType('resultsIn')).map((e) => <ActionNode>e.source);
-  }
-
-  /**
-   *
-   * @returns {any}
-   */
-  get creator() {
-    //results and not a inversed actions
-    const from = this.incoming.filter(graph.isType('resultsIn')).map((e) => <ActionNode>e.source).filter((s) => !s.isInverse);
-    if (from.length === 0) {
-      return null;
-    }
-    return from[0];
-  }
-
-  get next():ActionNode[] {
-    return this.outgoing.filter(graph.isType('next')).map((e) => <ActionNode>e.target).filter((s) => !s.isInverse);
-  }
-
-  get previousState():StateNode {
-    const a = this.creator;
-    if (a) {
-      return a.previous;
-    }
-    return null;
-  }
-
-  get previousStates():StateNode[] {
-    return this.resultsFrom.map((n) => n.previous);
-  }
-
-  get nextStates():StateNode[] {
-    return this.next.map((n) => n.resultsIn);
-  }
-
-  get nextState():StateNode {
-    var r = this.next[0];
-    return r ? r.resultsIn : null;
-  }
-
-  get path():StateNode[] {
-    var p = this.previousState,
-      r:StateNode[] = [];
-    r.unshift(this);
-    if (p) {
-      p.pathImpl(r);
-    }
-    return r;
-  }
-
-  private pathImpl(r:StateNode[]) {
-    var p = this.previousState;
-    r.unshift(this);
-    if (p && r.indexOf(p) < 0) { //no loop
-      //console.log(p.toString() + ' path '+ r.join(','));
-      p.pathImpl(r);
-    }
-  }
-
-  toString() {
-    return this.name;
-  }
-}
-
-export const DEFAULT_DURATION = 1500; //ms
-export const DEFAULT_TRANSITION = 0; //ms
-
-
-export interface IStateAnnotation {
-  type: string;
-  pos: [number, number] | { anchor: string, offset: [number, number] } ;
-  styles?: { [key: string]: string; };
-
-  [key: string] : any;
-}
-
-export interface ITextStateAnnotation extends IStateAnnotation {
-  text: string;
-  size?: [number, number];
-  rotation?: number;
-}
-
-export interface IArrowStateAnnotation extends IStateAnnotation {
-  at: [number, number];
-}
-
-export interface IFrameStateAnnotation extends IStateAnnotation {
-  size?: [number, number];
-  pos2?: [number, number];
-  rotation?: number;
-}
-
-
-export class SlideNode extends graph.GraphNode {
-  constructor() {
-    super('story');
-  }
-
-  get name():string {
-    return super.getAttr('name', '');
-  }
-
-  set name(value:string) {
-    super.setAttr('name', value);
-  }
-
-  get description():string {
-    return super.getAttr('description', '');
-  }
-
-  set description(value:string) {
-    super.setAttr('description', value);
-  }
-
-  get isTextOnly() {
-    return !this.outgoing.some(graph.isType('jumpTo'));
-  }
-
-  get state() {
-    const edge = this.outgoing.filter(graph.isType('jumpTo'))[0];
-    return edge ? <StateNode>edge.target : null;
-  }
-
-  static restore(dump:any) {
-    return new SlideNode().restore(dump);
-  }
-
-  get next() {
-    const n = this.outgoing.filter(graph.isType('next'))[0];
-    return n ? <SlideNode>n.target : null;
-  }
-
-  get nexts() {
-    return this.outgoing.filter(graph.isType('next')).map((n) => <SlideNode>n.target);
-  }
-
-  get previous() {
-    const n = this.incoming.filter(graph.isType('next'))[0];
-    return n ? <SlideNode>n.source : null;
-  }
-
-  get slideIndex() {
-    const p = this.previous;
-    return 1 + (p ? p.slideIndex : 0);
-  }
-
-  get duration() {
-    return <number>this.getAttr('duration', DEFAULT_DURATION);
-  }
-
-  set duration(value:number) {
-    this.setAttr('duration', value);
-  }
-
-  /**
-   * the number of milliseconds for the transitions
-   * @returns {number}
-   */
-  get transition() {
-    return <number>this.getAttr('transition', DEFAULT_TRANSITION);
-  }
-
-  set transition(value:number) {
-    this.setAttr('transition', value);
-  }
-
-  get annotations() {
-    return <IStateAnnotation[]>this.getAttr('annotations', []);
-  }
-
-  setAnnotation(index:number, ann:IStateAnnotation) {
-    var old = this.annotations;
-    old[index] = ann;
-    this.setAttr('annotations', old);
-  }
-
-  updateAnnotation(ann:IStateAnnotation) {
-    //since it is a reference just updated
-    this.setAttr('annotations', this.annotations);
-  }
-
-  removeAnnotation(index:number) {
-    var old = this.annotations;
-    old.splice(index, 1);
-    this.setAttr('annotations', old);
-  }
-
-  removeAnnotationElem(elem:IStateAnnotation) {
-    var old = this.annotations;
-    old.splice(old.indexOf(elem), 1);
-    this.setAttr('annotations', old);
-  }
-
-  pushAnnotation(ann:IStateAnnotation) {
-    var old = this.annotations;
-    old.push(ann);
-    this.setAttr('annotations', old);
-    this.fire('push-annotations', ann, old);
-  }
-
-  get isStart() {
-    return this.previous == null;
-  }
-
-  static makeText(title?:string) {
-    const s = new SlideNode();
-    if (title) {
-      s.pushAnnotation({
-        type: 'text',
-        pos: [25, 25],
-        text: '# ${name}'
-      });
-      s.name = title;
-    }
-    return s;
-  }
-}
 
 /**
  * an action compressor is used to compress a series of action to fewer one, e.g. create and remove can be annihilated
@@ -833,9 +121,9 @@ function findCommon<T>(a:T[], b:T[]) {
   };
 }
 
-function asFunction(i) {
-  if (!isFunction(i)) { //make a function
-    return constant(i);
+function asFunction(i: any) {
+  if (typeof(i) !== 'function') { //make a function
+    return () => i;
   }
   return i;
 }
@@ -873,7 +161,7 @@ function createLazyCmdFunctionFactory():ICmdFunctionFactory {
   const lazyFunction = (id) => {
     var _resolved = null;
     return function (inputs:IObjectRef<any>[], parameters:any) {
-      var that = this, args = argList(arguments);
+      var that = this, args = Array.from(arguments);
       if (_resolved == null) {
         _resolved = resolveFun(id);
       }
@@ -884,7 +172,7 @@ function createLazyCmdFunctionFactory():ICmdFunctionFactory {
 }
 
 
-function provenanceGraphFactory():graph.IGraphFactory {
+export function provenanceGraphFactory():IGraphFactory {
   const factory = createLazyCmdFunctionFactory();
   var types = {
     action: ActionNode,
@@ -894,7 +182,7 @@ function provenanceGraphFactory():graph.IGraphFactory {
   };
   return {
     makeNode: (n) => types[n.type].restore(n, factory),
-    makeEdge: (n, lookup) => ((new graph.GraphEdge()).restore(n, lookup))
+    makeEdge: (n, lookup) => ((new GraphEdge()).restore(n, lookup))
   };
 }
 
@@ -903,97 +191,6 @@ export enum ProvenanceGraphDim {
   Object = 1,
   State = 2,
   Slide = 3
-}
-
-export interface IProvenanceGraphManager {
-  list(): Promise<IDataDescription[]>;
-  get(desc:IDataDescription): Promise<ProvenanceGraph>;
-  create(): Promise<ProvenanceGraph>;
-
-  delete(desc:IDataDescription): Promise<boolean>;
-
-  import(json:any): Promise<ProvenanceGraph>;
-}
-
-export class LocalStorageProvenanceGraphManager implements IProvenanceGraphManager {
-  private options = {
-    storage: localStorage,
-    prefix: 'clue',
-    application: 'unknown'
-  };
-
-  constructor(options = {}) {
-    mixin(this.options, options);
-  }
-
-  list() {
-    const lists = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
-    var l = lists.map((id) => JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graph.' + id)));
-    return Promise.resolve(l);
-  }
-
-
-  getGraph(desc:IDataDescription):Promise<graph.LocalStorageGraph> {
-    return Promise.resolve(graph.LocalStorageGraph.load(desc, provenanceGraphFactory(), this.options.storage));
-  }
-
-  get(desc:IDataDescription):Promise<ProvenanceGraph> {
-    return this.getGraph(desc).then((impl) => new ProvenanceGraph(desc, impl));
-  }
-
-  clone(graph:graph.GraphBase):Promise<ProvenanceGraph> {
-    const desc = this.createDesc();
-    return this.getGraph(desc).then<ProvenanceGraph>((new_) => {
-      new_.restoreDump(graph.persist(), provenanceGraphFactory());
-      return new ProvenanceGraph(desc, new_);
-    });
-  }
-
-  import(json:any):Promise<ProvenanceGraph> {
-    const desc = this.createDesc();
-    return this.getGraph(desc).then((new_) => {
-      new_.restoreDump(json, provenanceGraphFactory());
-      return new ProvenanceGraph(desc, new_);
-    });
-  }
-
-  delete(desc:IDataDescription) {
-    var lists = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
-    lists.splice(lists.indexOf(desc.id), 1);
-    graph.LocalStorageGraph.delete(desc);
-    //just remove from the list
-    this.options.storage.setItem(this.options.prefix + '_provenance_graphs', JSON.stringify(lists));
-    return Promise.resolve(true);
-  }
-
-  private createDesc() {
-    var lists = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
-    const id = this.options.prefix + (lists.length > 0 ? String(1 + Math.max(...lists.map((d) => parseInt(d.slice(this.options.prefix.length), 10)))) : '0');
-    const desc = {
-      type: 'provenance_graph',
-      name: 'Local Workspace#' + id,
-      fqname: this.options.prefix + '.Provenance Graph #' + id,
-      id: id,
-      local: true,
-      size: [0, 0],
-      attrs: {
-        graphtype: 'provenance_graph',
-        of: this.options.application
-      },
-      creator: getCurrentUser(),
-      ts: Date.now(),
-      description: ''
-    };
-    lists.push(id);
-    this.options.storage.setItem(this.options.prefix + '_provenance_graphs', JSON.stringify(lists));
-    this.options.storage.setItem(this.options.prefix + '_provenance_graph.' + id, JSON.stringify(desc));
-    return desc;
-  }
-
-  create() {
-    const desc = this.createDesc();
-    return this.get(<any>desc);
-  }
 }
 
 export function toSlidePath(s?:SlideNode) {
@@ -1008,150 +205,21 @@ export function toSlidePath(s?:SlideNode) {
   return r;
 }
 
-export class RemoteStorageProvenanceGraphManager implements IProvenanceGraphManager {
-  private options = {
-    application: 'unknown'
-  };
+export interface IProvenanceGraphManager {
+  list(): Promise<IDataDescription[]>;
+  get(desc:IDataDescription): Promise<ProvenanceGraph>;
+  create(): Promise<ProvenanceGraph>;
 
-  constructor(options = {}) {
-    mixin(this.options, options);
-  }
+  delete(desc:IDataDescription): Promise<boolean>;
 
-  list() {
-    return listData((d) => d.desc.type === 'graph' && (<any>d.desc).attrs.graphtype === 'provenance_graph' && (<any>d.desc).attrs.of === this.options.application).then((d) => d.map((di) => di.desc));
-  }
-
-  getGraph(desc:IDataDescription):Promise<graph.GraphBase> {
-    return getData(desc.id)
-      .then((graph:graph.GraphProxy) => graph.impl(provenanceGraphFactory()));
-  }
-
-  get(desc:IDataDescription):Promise<ProvenanceGraph> {
-    return this.getGraph(desc).then((impl:graph.GraphBase) => new ProvenanceGraph(desc, impl));
-  }
-
-  delete(desc:IDataDescription) {
-    return removeData(desc);
-  }
-
-  import(json:any):Promise<ProvenanceGraph> {
-    const desc = {
-      type: 'graph',
-      attrs: {
-        graphtype: 'provenance_graph',
-        of: this.options.application
-      },
-      name: 'Workspace for ' + this.options.application,
-      creator: getCurrentUser(),
-      ts: Date.now(),
-      description: '',
-
-      nodes: json.nodes,
-      edges: json.edges
-    };
-    return upload(desc)
-      .then((graph:graph.GraphProxy) => graph.impl(provenanceGraphFactory()))
-      .then((impl:graph.GraphBase) => new ProvenanceGraph(impl.desc, impl));
-  }
-
-  create() {
-    const desc = {
-      type: 'graph',
-      attrs: {
-        graphtype: 'provenance_graph',
-        of: this.options.application
-      },
-      name: 'Workspace for ' + this.options.application,
-      creator: getCurrentUser(),
-      ts: Date.now(),
-      description: ''
-    };
-    return upload(desc)
-      .then((graph:graph.GraphProxy) => graph.impl(provenanceGraphFactory()))
-      .then((impl:graph.GraphBase) => new ProvenanceGraph(impl.desc, impl));
-  }
-}
-
-
-export class MixedStorageProvenanceGraphManager implements IProvenanceGraphManager {
-  private remote:RemoteStorageProvenanceGraphManager;
-  private local:LocalStorageProvenanceGraphManager;
-
-  constructor(options = {}) {
-    this.remote = new RemoteStorageProvenanceGraphManager(options);
-    this.local = new LocalStorageProvenanceGraphManager(options);
-  }
-
-  listRemote() {
-    return this.remote.list();
-  }
-
-  listLocal() {
-    return this.local.list();
-  }
-
-  list():Promise<IDataDescription[]> {
-    return Promise.all([this.listLocal(), this.listRemote()]).then((arr) => arr[0].concat(arr[1]));
-  }
-
-  delete(desc:IDataDescription):Promise<boolean> {
-    if ((<any>desc).local) {
-      return this.local.delete(desc);
-    } else {
-      return this.remote.delete(desc);
-    }
-  }
-
-  get(desc:IDataDescription):Promise<ProvenanceGraph> {
-    if ((<any>desc).local) {
-      return this.local.get(desc);
-    } else {
-      return this.remote.get(desc);
-    }
-  }
-
-  getGraph(desc:IDataDescription):Promise<graph.GraphBase> {
-    if ((<any>desc).local) {
-      return this.local.getGraph(desc);
-    } else {
-      return this.remote.getGraph(desc);
-    }
-  }
-
-  cloneLocal(desc:IDataDescription):Promise<ProvenanceGraph> {
-    return this.getGraph(desc).then<ProvenanceGraph>(this.local.clone.bind(this.local));
-  }
-
-  importLocal(json:any) {
-    return this.local.import(json);
-  }
-
-  importRemote(json:any) {
-    return this.remote.import(json);
-  }
-
-  import(json:any) {
-    return this.importLocal(json);
-  }
-
-  createLocal() {
-    return this.local.create();
-  }
-
-  createRemote() {
-    return this.remote.create();
-  }
-
-  create() {
-    return this.createLocal();
-  }
+  import(json:any): Promise<ProvenanceGraph>;
 }
 
 function findMetaObject<T>(find:IObjectRef<T>) {
   return (obj:ObjectNode<any>) => find === obj || ((obj.value === null || obj.value === find.value) && (find.hash === obj.hash));
 }
 
-export class ProvenanceGraph extends DataTypeBase {
+export default class ProvenanceGraph extends DataTypeBase {
   private _actions:ActionNode[] = [];
   private _objects:ObjectNode<any>[] = [];
   private _states:StateNode[] = [];
@@ -1165,7 +233,7 @@ export class ProvenanceGraph extends DataTypeBase {
   executeCurrentActionWithin = -1;
   private nextQueue:(()=>any)[] = [];
 
-  constructor(desc:IDataDescription, public backend:graph.GraphBase) {
+  constructor(desc:IDataDescription, public backend:GraphBase) {
     super(desc);
     this.propagate(this.backend, 'sync', 'add_edge', 'add_node', 'sync_node', 'sync_edge', 'sync_start');
 
@@ -1275,7 +343,7 @@ export class ProvenanceGraph extends DataTypeBase {
   }
 
   getStateById(id:number) {
-    return search(this._states, (s) => s.id === id);
+    return this._states.find((s) => s.id === id);
   }
 
   get actions() {
@@ -1283,7 +351,7 @@ export class ProvenanceGraph extends DataTypeBase {
   }
 
   getActionById(id:number) {
-    return search(this._actions, (s) => s.id === id);
+    return this._actions.find((s) => s.id === id);
   }
 
   get objects() {
@@ -1291,7 +359,7 @@ export class ProvenanceGraph extends DataTypeBase {
   }
 
   getObjectById(id:number) {
-    return search(this._objects, (s) => s.id === id);
+    return this._objects.find((s) => s.id === id);
   }
 
   get stories() {
@@ -1299,7 +367,7 @@ export class ProvenanceGraph extends DataTypeBase {
   }
 
   getSlideById(id:number) {
-    return search(this._slides, (s) => s.id === id);
+    return this._slides.find((s) => s.id === id);
   }
 
   getSlideChains() {
@@ -1314,8 +382,8 @@ export class ProvenanceGraph extends DataTypeBase {
     return this.backend.edges;
   }
 
-  private addEdge(s:graph.GraphNode, type:string, t:graph.GraphNode, attrs = {}) {
-    var l = new graph.GraphEdge(type, s, t);
+  private addEdge(s:GraphNode, type:string, t:GraphNode, attrs = {}) {
+    var l = new GraphEdge(type, s, t);
     Object.keys(attrs).forEach((attr) => l.setAttr(attr, attrs[attr]));
     this.backend.addEdge(l);
     return l;
@@ -1381,7 +449,7 @@ export class ProvenanceGraph extends DataTypeBase {
   }
 
   findObject<T>(value:T) {
-    var r = search(this._objects, (obj) => obj.value === value);
+    var r = this._objects.find((obj) => obj.value === value);
     if (r) {
       return r;
     }
@@ -1431,7 +499,7 @@ export class ProvenanceGraph extends DataTypeBase {
       return <ObjectNode<any>>(<any>r)._resolvesTo;
     }
     //else create a new instance
-    const result = search(arr, findMetaObject(r));
+    const result = arr.find(findMetaObject(r));
     (<any>r)._resolvesTo = result;
     return result;
   }
@@ -1454,7 +522,7 @@ export class ProvenanceGraph extends DataTypeBase {
     }
     if (j.hasOwnProperty('value') && j.hasOwnProperty('name')) { //sounds like an proxy
       j.category = j.category || cat.data;
-      r = search(this._objects, findMetaObject(j));
+      r = this._objects.find(findMetaObject(j));
       if (r) {
         if (r.value === null) { //restore instance
           r.value = j.value;
@@ -1465,7 +533,7 @@ export class ProvenanceGraph extends DataTypeBase {
       }
       return this.addObjectImpl(j.value, j.name, j.category, j.hash, createEdge);
     } else { //raw value
-      r = search(this._objects, (obj) => (obj.value === null || obj.value === i) && (name === null || obj.name === name) && (type === null || type === obj.category));
+      r = this._objects.find((obj) => (obj.value === null || obj.value === i) && (name === null || obj.name === name) && (type === null || type === obj.category));
       if (r) {
         if (r.value === null) { //restore instance
           r.value = i;
@@ -1560,7 +628,7 @@ export class ProvenanceGraph extends DataTypeBase {
     }
     this.currentlyRunning = true;
 
-    if (isFunction(withinMilliseconds)) {
+    if (typeof(withinMilliseconds) === 'function') {
       withinMilliseconds = (<any>withinMilliseconds)();
     }
     this.executeCurrentActionWithin = <number>withinMilliseconds;
@@ -1949,7 +1017,7 @@ export class ProvenanceGraph extends DataTypeBase {
   }
 
   setSlideJumpToTarget(node:SlideNode, state:StateNode) {
-    const old = node.outgoing.filter(graph.isType('jumpTo'))[0];
+    const old = node.outgoing.filter(isType('jumpTo'))[0];
     if (old) {
       this.backend.removeEdge(old);
     }
@@ -1958,23 +1026,4 @@ export class ProvenanceGraph extends DataTypeBase {
     }
     this.fire('set_jump_target', node, old ? old.target : null, state);
   }
-}
-
-export function findLatestPath(state:StateNode) {
-  var path = state.path.slice();
-  //compute the first path to the end
-  while ((state = state.nextState) != null && (path.indexOf(state) < 0)) {
-    path.push(state);
-  }
-  return path;
-}
-
-export function createDummy() {
-  const desc = {
-    type: 'provenance_graph',
-    id: 'dummy',
-    name: 'dummy',
-    fqname: 'dummy'
-  };
-  return new ProvenanceGraph(desc, new graph.MemoryGraph(desc, [], [], provenanceGraphFactory()));
 }
