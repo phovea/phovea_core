@@ -21,7 +21,7 @@ const context:Storage = sessionStorage;
  * @returns {any}
  */
 export function store(key: string, value: any) {
-  var bak = context.getItem(key);
+  const bak = context.getItem(key);
   context.setItem(key, JSON.stringify(value));
   return bak;
 }
