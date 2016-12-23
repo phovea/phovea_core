@@ -12,9 +12,8 @@ import {getAPIJSON} from './ajax';
 import {EventHandler, IEventHandler, IEvent, IEventListener, fire as global_fire} from './event';
 import {none, all, Range, join, RangeLike, parse, Range1D, list as rlist} from './range';
 
-// TODO convert to Map
-const cache:{ [id: string] : IDType|ProductIDType } = {};
-var filledUp = false;
+const cache = new Map<string, IDType|ProductIDType>();
+let filledUp = false;
 
 export const defaultSelectionType = 'selected';
 export const hoverSelectionType = 'hovered';
@@ -27,7 +26,7 @@ export enum SelectOperation {
  * converts the given mouse event to a select operation
  * @param event the mouse event to examine
  */
-export function toSelectOperation(event:any);
+export function toSelectOperation(event: any);
 /**
  * converts the given key modifiers to select operation
  * @param ctryKey
@@ -35,9 +34,9 @@ export function toSelectOperation(event:any);
  * @param shiftKey
  * @param metaKey
  */
-export function toSelectOperation(ctryKey:boolean, altKey:boolean, shiftKey:boolean, metaKey:boolean);
-export function toSelectOperation(event:any) {
-  var ctryKeyDown, shiftDown, altDown, metaDown;
+export function toSelectOperation(ctryKey: boolean, altKey: boolean, shiftKey: boolean, metaKey: boolean);
+export function toSelectOperation(event: any) {
+  let ctryKeyDown, shiftDown, altDown, metaDown;
   if (typeof event === 'boolean') {
     ctryKeyDown = event;
     altDown = arguments[1] || false;
@@ -58,16 +57,16 @@ export function toSelectOperation(event:any) {
 }
 
 export interface IIDType extends IEventHandler, IPersistable {
-  id: string;
-  name: string;
-  names: string;
-  internal: boolean;
-  toString(): string;
+  readonly id: string;
+  readonly name: string;
+  readonly names: string;
+  readonly internal: boolean;
+  readonly toString(): string;
 
   selectionTypes(): string[];
 
   clear();
-  clear(type:string);
+  clear(type: string);
 }
 
 /**
@@ -77,18 +76,15 @@ export interface IIDType extends IEventHandler, IPersistable {
  * which is mapped to a common, external identifier or name (string) as well.
  */
 export class IDType extends EventHandler implements IIDType {
+  readonly static EVENT_SELECT = 'select';
   /**
    * the current selections
-   * @type {{}}
    */
-  // TODO convert to Map
-  private sel = {};
+  private readonly sel = new Map<string, Range>();
 
   // TODO: is this cache ever emptied, or do we assume a reasonable upper bound on the entities in IDType?
-  // TODO convert to Map
-  private name2id_cache:{ [k:string] : number } = {};
-  // TODO convert to Map
-  private id2name_cache:{ [k:number] : string } = {};
+  private readonly name2idCache = new Map<string, number>();
+  private readonly id2nameCache = new Map<number, string>();
 
   private canBeMappedTo: Promise<IDType[]> = null;
 
@@ -98,13 +94,13 @@ export class IDType extends EventHandler implements IIDType {
    * @param names the plural form of above name
    * @param internal whether this is an internal type or not
    */
-  constructor(public id:string, public name:string, public names:string, public internal = false) {
+  constructor(public id: string, public readonly name: string, public readonly names: string, public readonly internal = false) {
     super();
   }
 
   persist() {
-    var s = {};
-    Object.keys(this.sel).forEach((type) => s[type] = this.sel[type].toString());
+    let s = {};
+    this.sel.forEach((v, k) => s[k] = v.toString());
     return {
       sel: s,
       name: this.name,
@@ -112,10 +108,10 @@ export class IDType extends EventHandler implements IIDType {
     };
   }
 
-  restore(persisted:any) {
+  restore(persisted: any) {
     this.name = persisted.name;
     this.names = persisted.names;
-    Object.keys(persisted.sel).forEach((type) => this.sel[type] = parse(persisted.sel[type]));
+    Object.keys(persisted.sel).forEach((type) => this.sel.put(type, persisted.sel[type]));
     return this;
   }
 
@@ -124,7 +120,7 @@ export class IDType extends EventHandler implements IIDType {
   }
 
   selectionTypes() {
-    return Object.keys(this.sel);
+    return Array.from(this.sel.keys());
   }
 
   /**
@@ -133,20 +129,22 @@ export class IDType extends EventHandler implements IIDType {
    * @returns {Range}
    */
   selections(type = defaultSelectionType) {
-    if (this.sel.hasOwnProperty(type)) {
-      return this.sel[type];
+    if (this.sel.has(type)) {
+      return this.sel.get(type);
     }
-    return this.sel[type] = none();
+    const v = none();
+    this.sel.set(type, v);
+    return v;
   }
 
   /**
    * select the given range as
    * @param range
    */
-  select(range:RangeLike);
-  select(range:RangeLike, op:SelectOperation);
-  select(type:string, range:RangeLike);
-  select(type:string, range:RangeLike, op:SelectOperation);
+  select(range: RangeLike);
+  select(range: RangeLike, op: SelectOperation);
+  select(type: string, range: RangeLike);
+  select(type: string, range: RangeLike, op: SelectOperation);
   select() {
     const a = Array.from(arguments);
     const type = (typeof a[0] === 'string') ? a.shift() : defaultSelectionType,
@@ -155,9 +153,9 @@ export class IDType extends EventHandler implements IIDType {
     return this.selectImpl(range, op, type);
   }
 
-  private selectImpl(range:Range, op = SelectOperation.SET, type:string = defaultSelectionType) {
+  private selectImpl(range: Range, op = SelectOperation.SET, type: string = defaultSelectionType) {
     const b = this.selections(type);
-    var new_:Range = none();
+    let new_: Range = none();
     switch (op) {
       case SelectOperation.SET:
         new_ = range;
@@ -172,11 +170,11 @@ export class IDType extends EventHandler implements IIDType {
     if (b.eq(new_)) {
       return b;
     }
-    this.sel[type] = new_;
-    var added = op !== SelectOperation.REMOVE ? range : none();
-    var removed = (op === SelectOperation.ADD ? none() : (op === SelectOperation.SET ? b : range));
-    this.fire('select', type, new_, added, removed, b);
-    this.fire('select-' + type, new_, added, removed, b);
+    this.sel.set(type, new_);
+    const added = op !== SelectOperation.REMOVE ? range : none();
+    const removed = (op === SelectOperation.ADD ? none() : (op === SelectOperation.SET ? b : range));
+    this.fire(IDType.EVENT_SELECT, type, new_, added, removed, b);
+    this.fire(`${IDType.EVENT_SELECT}-${type}`, new_, added, removed, b);
     return b;
   }
 
@@ -189,11 +187,11 @@ export class IDType extends EventHandler implements IIDType {
    * @param ids the entity identifiers to cache
    * @param names the matching entity names to cache
    */
-  fillMapCache(ids:number[], names:string[]) {
+  fillMapCache(ids: number[], names: string[]) {
     ids.forEach((id, i) => {
       const name = names[i];
-      this.name2id_cache[name] = id;
-      this.id2name_cache[id] = name;
+      this.name2idCache.set(name, id);
+      this.id2nameCache.set(id, name);
     });
   }
 
@@ -203,33 +201,33 @@ export class IDType extends EventHandler implements IIDType {
    */
   getCanBeMappedTo() {
     if (this.canBeMappedTo === null) {
-      this.canBeMappedTo = getAPIJSON('/idtype/'+this.id+'/').then((list) => list.map(resolve));
+      this.canBeMappedTo = getAPIJSON(`/idtype/${this.id}/`).then((list) => list.map(resolve));
     }
     return this.canBeMappedTo;
   }
 
-  mapToFirstName(ids_:Range | number[], to_idtype: string|IDType):Promise<string[]> {
-    const target = resolve(to_idtype);
-    const ids = ids_ instanceof Range ? <Range>ids_ : rlist(<number[]>ids_);
-    return getAPIJSON(`/idtype/${this.id}/${target.id}`, { ids: ids.toString(), mode : 'first'  });
+  mapToFirstName(ids: RangeLike, toIDType: string|IDType): Promise<string[]> {
+    const target = resolve(toIDType);
+    const r = parse(ids);
+    return getAPIJSON(`/idtype/${this.id}/${target.id}`, {ids: r.toString(), mode: 'first'});
   }
 
-  mapToName(ids_:Range | number[], to_idtype: string|IDType):Promise<string[][]> {
-    const target = resolve(to_idtype);
-    const ids = ids_ instanceof Range ? <Range>ids_ : rlist(<number[]>ids_);
-    return getAPIJSON(`/idtype/${this.id}/${target.id}`, { ids: ids.toString() });
+  mapToName(ids: RangeLike, toIDType: string|IDType): Promise<string[][]> {
+    const target = resolve(toIDType);
+    const r = parse(ids);
+    return getAPIJSON(`/idtype/${this.id}/${target.id}`, {ids: r.toString()});
   }
 
-  mapToFirstID(ids_:Range | number[], to_idtype: string|IDType):Promise<number[]> {
-    const target = resolve(to_idtype);
-    const ids = ids_ instanceof Range ? <Range>ids_ : rlist(<number[]>ids_);
-    return getAPIJSON(`/idtype/${this.id}/${target.id}/map`, { ids: ids.toString(), mode : 'first'  });
+  mapToFirstID(ids_: RangeLike, toIDType: string|IDType): Promise<number[]> {
+    const target = resolve(toIDType);
+    const r = parse(ids);
+    return getAPIJSON(`/idtype/${this.id}/${target.id}/map`, {ids: r.toString(), mode: 'first'});
   }
 
-  mapToID(ids_:Range | number[], to_idtype: string|IDType):Promise<number[][]> {
-    const target = resolve(to_idtype);
-    const ids = ids_ instanceof Range ? <Range>ids_ : rlist(<number[]>ids_);
-    return getAPIJSON(`/idtype/${this.id}/${target.id}/map`, { ids: ids.toString() });
+  mapToID(ids_: RangeLike, toIDType: string|IDType): Promise<number[][]> {
+    const target = resolve(toIDType);
+    const r = parse(ids);
+    return getAPIJSON(`/idtype/${this.id}/${target.id}/map`, {ids: r.toString()});
   }
 
   /**
@@ -237,16 +235,17 @@ export class IDType extends EventHandler implements IIDType {
    * @param names the entity names to resolve
    * @returns a promise of system identifiers that match the input names
    */
-  map(names:string[]):Promise<number[]> {
-    var to_resolve = names.filter((name) => !(name in this.name2id_cache));
-    if (to_resolve.length === 0) {
-      return Promise.resolve(names.map((name) => this.name2id_cache[name]));
+  map(names: string[]): Promise<number[]> {
+    const toResolve = names.filter((name) => !this.name2idCache.has(name));
+    if (toResolve.length === 0) {
+      return Promise.resolve(names.map((name) => this.name2idCache.get(name)));
     }
-    return getAPIJSON(`/idtype/${this.id}/map`, {ids: to_resolve}).then((ids) => {
-      to_resolve.forEach((name, i) => {
-        this.name2id_cache[name] = ids[i];
+    return getAPIJSON(`/idtype/${this.id}/map`, {ids: toResolve}).then((ids: number[]) => {
+      toResolve.forEach((name, i) => {
+        this.name2idCache.set(name, ids[i]);
+        this.id2nameCache.set(ids[i], name);
       });
-      return names.map((name) => this.name2id_cache[name]);
+      return names.map((name) => this.name2idCache.get(name));
     });
   }
 
@@ -255,21 +254,21 @@ export class IDType extends EventHandler implements IIDType {
    * @param ids the entity names to resolve
    * @returns a promise of system identifiers that match the input names
    */
-  unmap(ids_:Range | number[]):Promise<string[]> {
-    var ids = ids_ instanceof Range ? <Range>ids_ : rlist(<number[]>ids_);
-    var to_resolve = [];
-    ids.dim(0).forEach((name) => !(name in this.id2name_cache) ? to_resolve.push(name) : null);
-    if (to_resolve.length === 0) {
-      var r = [];
-      ids.dim(0).forEach((name) => r.push(this.id2name_cache[name]));
+  unmap(ids: RangeLike): Promise<string[]> {
+    let toResolve: number[] = [];
+    parse(ids).dim(0).forEach((name) => !(this.id2nameCache.has(name)) ? toResolve.push(name) : null);
+    if (toResolve.length === 0) {
+      let r = [];
+      ids.dim(0).forEach((name) => r.push(this.id2nameCache.get(name)));
       return Promise.resolve(r);
     }
-    return getAPIJSON(`/idtype/${this.id}/unmap`, {ids: rlist(to_resolve).toString()}).then((result) => {
-      to_resolve.forEach((name, i) => {
-        this.id2name_cache[name] = result[i];
+    return getAPIJSON(`/idtype/${this.id}/unmap`, {ids: rlist(toResolve).toString()}).then((result) => {
+      toResolve.forEach((id, i) => {
+        this.id2nameCache.set(id, result[i]);
+        this.name2idCache.set(result[i], id);
       });
-      var r = [];
-      ids.dim(0).forEach((name) => r.push(this.id2name_cache[name]));
+      let r = [];
+      ids.dim(0).forEach((name) => r.push(this.id2nameCache.get(name)));
       return r;
     });
   }
@@ -289,13 +288,13 @@ export class IDType extends EventHandler implements IIDType {
 //  return pairs.map((a) => rlist(...a));
 //}
 
-function overlaps(r:Range, with_:Range, ndim:number) {
+function overlaps(r: Range, with_: Range, ndim: number) {
   if (with_.ndim === 0) {
     return true; //catch all
   }
   for (let i = 0; i < Math.min(r.ndim, ndim); ++i) {
     let ri = r.dim(i);
-    var wi = with_.dim(i);
+    let wi = with_.dim(i);
     if (wi.isAll || ri.isAll) {
       return true;
     }
@@ -308,11 +307,11 @@ function overlaps(r:Range, with_:Range, ndim:number) {
   return false;
 }
 
-function removeCells(b:Range[], without:Range[], ndim:number) {
+function removeCells(b: Range[], without: Range[], ndim: number) {
   if (without.length === 0) {
     return b;
   }
-  var r:Range[] = [];
+  let r: Range[] = [];
   b.forEach((bi) => {
     if (without.some((w) => w.eq(bi))) {
       //skip
@@ -328,20 +327,22 @@ function removeCells(b:Range[], without:Range[], ndim:number) {
  * a product idtype is a product of multiple underlying ones, e.g. patient x gene.
  */
 export class ProductIDType extends EventHandler implements IIDType {
-  // TODO convert to Map
-  private sel:{ [type: string] : Range[] } = {};
+  static readonly EVENT_SELECT_DIM = 'selectDim';
+  static readonly EVENT_SELECT_PRODUCT = 'selectProduct';
+
+  private sel = new Map<string, Range[]>();
 
   private isOn = false;
-  private selectionListener = (event:IEvent, type:string, act:Range, added:Range, removed:Range) => {
-    this.fire('selectDim,selectProduct', this.elems.indexOf(<IDType>event.currentTarget), type, act, added, removed);
-    this.fire('selectDim-' + type + ',selectProduct-' + type, this.elems.indexOf(<IDType>event.currentTarget), act, added, removed);
+  private selectionListener = (event: IEvent, type: string, act: Range, added: Range, removed: Range) => {
+    this.fire(`${ProductIDType.EVENT_SELECT_DIM},${ProductIDType.EVENT_SELECT_PRODUCT}`, this.elems.indexOf(<IDType>event.currentTarget), type, act, added, removed);
+    this.fire(`${ProductIDType.EVENT_SELECT_DIM}-${type},${ProductIDType.EVENT_SELECT_PRODUCT}-${type}`, this.elems.indexOf(<IDType>event.currentTarget), act, added, removed);
   };
 
-  constructor(public elems:IDType[], public internal = false) {
+  constructor(public readonly elems: IDType[], public readonly internal = false) {
     super();
   }
 
-  on(events:any, listener?:IEventListener) {
+  on(events: string|{[key: string]: IEventListener}, listener?: IEventListener) {
     if (!this.isOn) {
       this.enable();
       this.isOn = true;
@@ -362,23 +363,23 @@ export class ProductIDType extends EventHandler implements IIDType {
   }
 
   private enable() {
-    this.elems.forEach((elem) => elem.on('select', this.selectionListener));
+    this.elems.forEach((elem) => elem.on(IDType.EVENT_SELECT, this.selectionListener));
   }
 
   private disable() {
-    this.elems.forEach((elem) => elem.off('select', this.selectionListener));
+    this.elems.forEach((elem) => elem.off(IDType.EVENT_SELECT, this.selectionListener));
   }
 
   persist() {
-    var s = {};
-    Object.keys(this.sel).forEach((type) => s[type] = this.sel[type].map((r) => r.toString()));
+    let s = {};
+    this.sel.forEach((v, type) => s[type] = v.map((r) => r.toString()));
     return {
       sel: s
     };
   }
 
-  restore(persisted:any) {
-    Object.keys(persisted.sel).forEach((type) => this.sel[type] = persisted.sel[type].map(parse));
+  restore(persisted: any) {
+    Object.keys(persisted.sel).forEach((type) => this.sel.set(type, persisted.sel[type].map(parse)));
     return this;
   }
 
@@ -387,7 +388,7 @@ export class ProductIDType extends EventHandler implements IIDType {
   }
 
   selectionTypes() {
-    return Object.keys(this.sel);
+    return Array.from(this.sel.keys());
   }
 
   /**
@@ -395,15 +396,15 @@ export class ProductIDType extends EventHandler implements IIDType {
    * @param type optional the selection type
    * @returns {Range[]}
    */
-  selections(type = defaultSelectionType):Range[] {
-    if (this.sel.hasOwnProperty(type)) {
-      return this.sel[type].slice();
+  selections(type = defaultSelectionType): Range[] {
+    if (this.sel.has(type)) {
+      return this.sel.get(type).slice();
     }
-    this.sel[type] = [];
+    this.sel.set(type, []);
     return [];
   }
 
-  productSelections(type = defaultSelectionType /*, wildcardLookup: (idtype: IDType) => Promise<number> */):Range[] {
+  productSelections(type = defaultSelectionType /*, wildcardLookup: (idtype: IDType) => Promise<number> */): Range[] {
     const cells = this.selections(type);
     const usedCells = this.toPerDim(cells);
     this.elems.forEach((e, i) => {
@@ -448,10 +449,10 @@ export class ProductIDType extends EventHandler implements IIDType {
    * select the given range as
    * @param range
    */
-  select(range:RangeLike[]);
-  select(range:RangeLike[], op:SelectOperation);
-  select(type:string, range:RangeLike[]);
-  select(type:string, range:RangeLike[], op:SelectOperation);
+  select(range: RangeLike[]);
+  select(range: RangeLike[], op: SelectOperation);
+  select(type: string, range: RangeLike[]);
+  select(type: string, range: RangeLike[], op: SelectOperation);
   select() {
     const a = Array.from(arguments);
     const type = (typeof a[0] === 'string') ? a.shift() : defaultSelectionType,
@@ -460,12 +461,12 @@ export class ProductIDType extends EventHandler implements IIDType {
     return this.selectImpl(range, op, type);
   }
 
-  private selectImpl(cells:Range[], op = SelectOperation.SET, type:string = defaultSelectionType) {
+  private selectImpl(cells: Range[], op = SelectOperation.SET, type: string = defaultSelectionType) {
     const rcells = cells.map(parse);
 
     const b = this.selections(type);
 
-    var new_:Range[] = [];
+    let new_: Range[] = [];
 
     switch (op) {
       case SelectOperation.SET:
@@ -489,16 +490,16 @@ export class ProductIDType extends EventHandler implements IIDType {
     this.elems.forEach((e, i) => e.select(type, perDimSelections[i]));
     this.enable();
 
-    var added = op !== SelectOperation.REMOVE ? rcells : [];
-    var removed = (op === SelectOperation.ADD ? [] : (op === SelectOperation.SET ? b : rcells));
-    this.fire('select', type, new_, added, removed, b);
-    this.fire('selectProduct', -1, type, new_, added, removed, b);
-    this.fire('select-' + type, new_, added, removed, b);
-    this.fire('selectProduct-' + type, -1, new_, added, removed, b);
+    const added = op !== SelectOperation.REMOVE ? rcells : [];
+    const removed = (op === SelectOperation.ADD ? [] : (op === SelectOperation.SET ? b : rcells));
+    this.fire(IDType.EVENT_SELECT, type, new_, added, removed, b);
+    this.fire(ProductIDType.EVENT_SELECT_PRODUCT, -1, type, new_, added, removed, b);
+    this.fire(`${IDType.EVENT_SELECT}-${type}`, new_, added, removed, b);
+    this.fire(`${ProductIDType.EVENT_SELECT_PRODUCT}-${type}`, -1, new_, added, removed, b);
     return b;
   }
 
-  private toPerDim(sel:Range[]) {
+  private toPerDim(sel: Range[]) {
     return this.elems.map((elem, i) => {
       if (sel.length === 0) {
         return none();
@@ -518,12 +519,12 @@ export interface IHasUniqueId {
   id: number;
 }
 
-export function toId(elem:IHasUniqueId) {
+export function toId(elem: IHasUniqueId) {
   return elem.id;
 }
 
-export function isId(id:number) {
-  return (elem:IHasUniqueId) => elem && elem.id === id;
+export function isId(id: number) {
+  return (elem: IHasUniqueId) => elem && elem.id === id;
 }
 
 /**
@@ -531,14 +532,14 @@ export function isId(id:number) {
  * Supports selections.
  */
 export class ObjectManager<T extends IHasUniqueId> extends IDType {
-  private instances:T[] = [];
+  private instances: T[] = [];
   private pool = new IdPool();
 
-  constructor(id:string, name:string) {
+  constructor(id: string, name: string) {
     super(id, name, name + 's', true);
   }
 
-  nextId(item?:T) {
+  nextId(item?: T) {
     const n = this.pool.checkOut();
     if (item) {
       item.id = n;
@@ -548,18 +549,18 @@ export class ObjectManager<T extends IHasUniqueId> extends IDType {
     return n;
   }
 
-  push(...items:T[]) {
+  push(...items: T[]) {
     items.forEach((item) => {
       this.instances[item.id] = item;
       this.fire('add', item.id, item);
     });
   }
 
-  byId(id:number) {
+  byId(id: number) {
     return this.instances[id];
   }
 
-  forEach(callbackfn:(value:T) => void, thisArg?:any):void {
+  forEach(callbackfn: (value: T) => void, thisArg?: any): void {
     this.instances.forEach((item, i) => this.pool.isCheckedOut(i) ? callbackfn.call(thisArg, item) : null);
   }
 
@@ -567,10 +568,10 @@ export class ObjectManager<T extends IHasUniqueId> extends IDType {
     return this.instances.filter((item, i) => this.pool.isCheckedOut(i));
   }
 
-  remove(id:number);
-  remove(item:T);
-  remove(item:any):T {
-    var old = null;
+  remove(id: number);
+  remove(item: T);
+  remove(item: any): T {
+    let old = null;
     if (typeof item.id === 'number') {
       item = item.id;
     }
@@ -595,13 +596,13 @@ export class ObjectManager<T extends IHasUniqueId> extends IDType {
 
 export class LocalIDAssigner {
   private pool = new IdPool();
-  private lookup:{  [key:string] : number } = {};
+  private lookup: {[key: string]: number} = {};
 
-  unmapOne(id:number) {
+  unmapOne(id: number) {
     return this.unmap([id])[0];
   }
 
-  unmap(ids:number[]) {
+  unmap(ids: number[]) {
     const keys = Object.keys(this.lookup);
     return ids.map((id) => {
       for (let k in keys) {
@@ -613,7 +614,7 @@ export class LocalIDAssigner {
     });
   }
 
-  mapOne(id:string):number {
+  mapOne(id: string): number {
     if (id in this.lookup) {
       return this.lookup[id];
     }
@@ -621,17 +622,17 @@ export class LocalIDAssigner {
     return this.lookup[id];
   }
 
-  map(ids:string[]):Range {
-    const numbers : number[] = ids.map((d) => this.mapOne(d));
+  map(ids: string[]): Range {
+    const numbers: number[] = ids.map((d) => this.mapOne(d));
     return rlist(...numbers);
   }
 }
 
 export function createLocalAssigner() {
   const pool = new IdPool();
-  const lookup:{  [key:string] : number } = {};
+  const lookup: {[key: string]: number} = {};
 
-  function mapOne(id:string):number {
+  function mapOne(id: string): number {
     if (id in lookup) {
       return lookup[id];
     }
@@ -639,10 +640,10 @@ export function createLocalAssigner() {
     return lookup[id];
   }
 
-  return (ids:string[]) => rlist(...ids.map(mapOne));
+  return (ids: string[]) => rlist(...ids.map(mapOne));
 }
 
-function asSelectOperation(v:any) {
+function asSelectOperation(v: any) {
   if (!v) {
     return SelectOperation.SET;
   }
@@ -659,7 +660,7 @@ function asSelectOperation(v:any) {
   return +v;
 }
 
-function fillWithNone(r:Range, ndim:number) {
+function fillWithNone(r: Range, ndim: number) {
   while (r.ndim < ndim) {
     r.dims[r.ndim] = Range1D.none();
   }
@@ -667,38 +668,40 @@ function fillWithNone(r:Range, ndim:number) {
 }
 
 export interface ISelectAble extends IEventHandler {
-  ids(range?:Range):Promise<Range>;
+  ids(range?: Range): Promise<Range>;
 
-  fromIdRange(idRange?:Range);
+  fromIdRange(idRange?: Range);
 
-  idtypes:IDType[];
+  readonly idtypes: IDType[];
 
-  selections(type?:string);
+  selections(type?: string);
 
-  select(range:RangeLike);
-  select(range:RangeLike, op:SelectOperation);
-  select(type:string, range:RangeLike);
-  select(type:string, range:RangeLike, op:SelectOperation);
-  select(dim:number, range:RangeLike);
-  select(dim:number, range:RangeLike, op:SelectOperation);
-  select(dim:number, type:string, range:RangeLike);
-  select(dim:number, type:string, range:RangeLike, op:SelectOperation);
+  select(range: RangeLike);
+  select(range: RangeLike, op: SelectOperation);
+  select(type: string, range: RangeLike);
+  select(type: string, range: RangeLike, op: SelectOperation);
+  select(dim: number, range: RangeLike);
+  select(dim: number, range: RangeLike, op: SelectOperation);
+  select(dim: number, type: string, range: RangeLike);
+  select(dim: number, type: string, range: RangeLike, op: SelectOperation);
 
   /**
    * clear the specific selection (type) and dimension
    */
   clear();
-  clear(type:string);
-  clear(dim:number);
-  clear(dim:number, type:string);
+  clear(type: string);
+  clear(dim: number);
+  clear(dim: number, type: string);
 }
 
 
-export class SelectAble extends EventHandler implements ISelectAble {
+export abstract class SelectAble extends EventHandler implements ISelectAble {
+  static readonly EVENT_SELECT = IDType.EVENT_SELECT;
+
   private numSelectListeners = 0;
   private selectionListeners = [];
-  private singleSelectionListener = (event:any, type:string, act:Range, added:Range, removed:Range) => {
-    this.ids().then((ids:Range) => {
+  private singleSelectionListener = (event: any, type: string, act: Range, added: Range, removed: Range) => {
+    this.ids().then((ids: Range) => {
       //filter to the right ids and convert to indices format
       //given all ids convert the selected ids to the indices in the data type
       act = ids.indexOf(act);
@@ -712,29 +715,25 @@ export class SelectAble extends EventHandler implements ISelectAble {
       fillWithNone(added, ids.ndim);
       fillWithNone(removed, ids.ndim);
 
-      this.fire('select', type, act, added, removed);
-      this.fire('select-' + type, act, added, removed);
+      this.fire(SelectAble.EVENT_SELECT, type, act, added, removed);
+      this.fire(`${SelectAble.EVENT_SELECT}-${type}`, act, added, removed);
     });
   };
   private selectionCache = [];
   private accumulateEvents = -1;
 
-  ids(range?:Range):Promise<Range> {
-    throw new Error('not implemented');
-  }
+  abstract ids(range?: Range): Promise<Range>;
 
-  fromIdRange(idRange:Range = all()) {
+  fromIdRange(idRange: Range = all()) {
     return this.ids().then((ids) => {
       return ids.indexOf(idRange);
     });
   }
 
-  get idtypes():IDType[] {
-    throw new Error('not implemented');
-  }
+  abstract get idtypes(): IDType[];
 
-  private selectionListener(idtype:IDType, index:number, total:number) {
-    const selectionListener = (event:any, type:string, act:Range, added:Range, removed:Range) => {
+  private selectionListener(idtype: IDType, index: number, total: number) {
+    const selectionListener = (event: any, type: string, act: Range, added: Range, removed: Range) => {
       this.selectionCache[index] = {
         act: act, added: added, removed: removed
       };
@@ -745,10 +744,10 @@ export class SelectAble extends EventHandler implements ISelectAble {
     return selectionListener;
   }
 
-  private fillAndSend(type:string, trigger:number) {
-    var ids = this.idtypes;
-    var full = ids.map((id, i) => {
-      var entry = this.selectionCache[i];
+  private fillAndSend(type: string, trigger: number) {
+    const ids = this.idtypes;
+    constfull = ids.map((id, i) => {
+      const entry = this.selectionCache[i];
       if (entry) {
         return entry;
       }
@@ -759,14 +758,14 @@ export class SelectAble extends EventHandler implements ISelectAble {
       };
     });
 
-    var act = join(full.map((entry) => entry.act));
-    var added = join(full.map((entry) => entry.added));
-    var removed = join(full.map((entry) => entry.removed));
+    const act = join(full.map((entry) => entry.act));
+    const added = join(full.map((entry) => entry.added));
+    const removed = join(full.map((entry) => entry.removed));
 
     this.selectionCache = [];
     this.accumulateEvents = -1; //reset
 
-    this.ids().then((ids:Range) => {
+    this.ids().then((ids: Range) => {
       //filter to the right ids and convert to indices format
       act = ids.indexOf(act);
       added = ids.indexOf(added);
@@ -779,24 +778,24 @@ export class SelectAble extends EventHandler implements ISelectAble {
       fillWithNone(added, ids.ndim);
       fillWithNone(removed, ids.ndim);
 
-      this.fire('select', type, act, added, removed);
-      this.fire('select-' + type, act, added, removed);
+      this.fire(SelectAble.EVENT_SELECT, type, act, added, removed);
+      this.fire(`${SelectAble.EVENT_SELECT}-${type}`, act, added, removed);
     });
   }
 
-  on(events, handler?) {
-    if (typeof events === 'string' && (events === 'select' || events.slice(0, 'select-'.length) === 'select-')) {
+  on(events: string|{[key: string]: IEventListener}, listener?: IEventListener) {
+    if (typeof events === 'string' && (events === SelectAble.EVENT_SELECT || events.slice(0, 'select-'.length) === 'select-')) {
       this.numSelectListeners++;
       if (this.numSelectListeners === 1) {
         const idt = this.idtypes;
         if (idt.length === 1) {
           this.selectionListeners.push(this.singleSelectionListener);
-          idt[0].on('select', this.singleSelectionListener);
+          idt[0].on(SelectAble.EVENT_SELECT, this.singleSelectionListener);
         } else {
           idt.forEach((idtype, i) => {
             const s = this.selectionListener(idtype, i, idt.length);
             this.selectionListeners.push(s);
-            idtype.on('select', s);
+            idtype.on(SelectAble.EVENT_SELECT, s);
           });
         }
       }
@@ -804,11 +803,11 @@ export class SelectAble extends EventHandler implements ISelectAble {
     return super.on(events, handler);
   }
 
-  off(events, handler?) {
-    if (typeof events === 'string' && events === 'select' || events.match('^select-') === 'select-') {
+  off(events: string|{[key: string]: IEventListener}, listener?: IEventListener) {
+    if (typeof events === 'string' && (events === SelectAble.EVENT_SELECT || events.slice(0, 'select-'.length) === 'select-')) {
       this.numSelectListeners--;
       if (this.numSelectListeners === 0) {
-        this.idtypes.forEach((idtype, i) => idtype.off('select', this.selectionListeners[i]));
+        this.idtypes.forEach((idtype, i) => idtype.off(SelectAble.EVENT_SELECT, this.selectionListeners[i]));
         this.selectionListeners = [];
       }
     }
@@ -816,20 +815,20 @@ export class SelectAble extends EventHandler implements ISelectAble {
   }
 
   selections(type = defaultSelectionType) {
-    return this.ids().then((ids:Range) => {
+    return this.ids().then((ids: Range) => {
       const r = join(this.idtypes.map((idtype) => idtype.selections(type)));
       return ids.indexRangeOf(r);
     });
   }
 
-  select(range:RangeLike);
-  select(range:RangeLike, op:SelectOperation);
-  select(type:string, range:RangeLike);
-  select(type:string, range:RangeLike, op:SelectOperation);
-  select(dim:number, range:RangeLike);
-  select(dim:number, range:RangeLike, op:SelectOperation);
-  select(dim:number, type:string, range:RangeLike);
-  select(dim:number, type:string, range:RangeLike, op:SelectOperation);
+  select(range: RangeLike);
+  select(range: RangeLike, op: SelectOperation);
+  select(type: string, range: RangeLike);
+  select(type: string, range: RangeLike, op: SelectOperation);
+  select(dim: number, range: RangeLike);
+  select(dim: number, range: RangeLike, op: SelectOperation);
+  select(dim: number, type: string, range: RangeLike);
+  select(dim: number, type: string, range: RangeLike, op: SelectOperation);
   select() {
     const a = Array.from(arguments);
     const dim = (typeof a[0] === 'number') ? +a.shift() : -1,
@@ -839,13 +838,13 @@ export class SelectAble extends EventHandler implements ISelectAble {
     return this.selectImpl(range, op, type, dim);
   }
 
-  private selectImpl(range:Range, op = SelectOperation.SET, type:string = defaultSelectionType, dim = -1) {
-    return this.ids().then((ids:Range) => {
+  private selectImpl(range: Range, op = SelectOperation.SET, type: string = defaultSelectionType, dim = -1) {
+    return this.ids().then((ids: Range) => {
       const types = this.idtypes;
       if (dim === -1) {
         range = ids.preMultiply(range);
         this.accumulateEvents = 0;
-        var r = join(range.split().map((r, i) => types[i].select(type, r, op)));
+        const r = join(range.split().map((r, i) => types[i].select(type, r, op)));
         if (this.accumulateEvents > 0) { //one event has not been fires, so do it manually
           this.fillAndSend(type, -1);
         }
@@ -867,9 +866,9 @@ export class SelectAble extends EventHandler implements ISelectAble {
    * clear the specific selection (type) and dimension
    */
   clear();
-  clear(type:string);
-  clear(dim:number);
-  clear(dim:number, type:string);
+  clear(type: string);
+  clear(dim: number);
+  clear(dim: number, type: string);
   clear() {
     const a = Array.from(arguments);
     const dim = (typeof a[0] === 'number') ? +a.shift() : -1;
@@ -880,41 +879,41 @@ export class SelectAble extends EventHandler implements ISelectAble {
 
 export interface IProductSelectAble extends ISelectAble {
   producttype: ProductIDType;
-  productSelections(type?:string): Promise<Range[]>;
+  productSelections(type?: string): Promise<Range[]>;
 
-  selectProduct(range:RangeLike[], op?:SelectOperation);
-  selectProduct(type:string, range:RangeLike[], op?:SelectOperation);
+  selectProduct(range: RangeLike[], op?: SelectOperation);
+  selectProduct(type: string, range: RangeLike[], op?: SelectOperation);
 }
 
 export class ProductSelectAble extends SelectAble {
   private numProductSelectListeners = 0;
 
-  private productSelectionListener = (event:IEvent, index:number, type:string) => {
+  private productSelectionListener = (event: IEvent, index: number, type: string) => {
     const cells = this.producttype.productSelections(type);
     if (cells.length === 0) {
-      this.fire('selectProduct', type, []);
-      this.fire('selectProduct-' + type, []);
+      this.fire(ProductIDType.EVENT_SELECT_PRODUCT, type, []);
+      this.fire(`${ProductIDType.EVENT_SELECT_PRODUCT}-${type}`, []);
       return;
     }
 
-    this.ids().then((ids:Range) => {
-      var act = cells.map((c) => ids.indexOf(c)).filter((c) => !c.isNone);
+    this.ids().then((ids: Range) => {
+      const act = cells.map((c) => ids.indexOf(c)).filter((c) => !c.isNone);
       if (act.length === 0) {
         return;
       }
       //ensure the right number of dimensions
       act.forEach((a) => fillWithNone(a, ids.ndim));
 
-      this.fire('selectProduct', type, act);
-      this.fire('selectProduct-' + type, act);
+      this.fire(ProductIDType.EVENT_SELECT_PRODUCT, type, act);
+      this.fire(`${ProductIDType.EVENT_SELECT_PRODUCT}-${type}`, act);
     });
   };
 
-  get producttype():ProductIDType {
+  get producttype(): ProductIDType {
     return null;
   }
 
-  on(events, handler?) {
+  on(events: string|{[key: string]: IEventListener}, listener?: IEventListener) {
     if (typeof events === 'string' && (events === 'select' || events === 'selectProduct' || events.slice(0, 'select-'.length) === 'select-')) {
       this.numProductSelectListeners++;
       if (this.numProductSelectListeners === 1) {
@@ -924,7 +923,7 @@ export class ProductSelectAble extends SelectAble {
     return super.on(events, handler);
   }
 
-  off(events, handler?) {
+  off(events: string|{[key: string]: IEventListener}, listener?: IEventListener) {
     if (typeof events === 'string' && (events === 'select' || events === 'selectProduct' || events.slice(0, 'select-'.length) === 'select-')) {
       this.numProductSelectListeners--;
       if (this.numProductSelectListeners === 0) {
@@ -934,18 +933,18 @@ export class ProductSelectAble extends SelectAble {
     return super.off(events, handler);
   }
 
-  productSelections(type = defaultSelectionType):Promise<Range[]> {
-    return this.ids().then((ids:Range) => {
+  productSelections(type = defaultSelectionType): Promise<Range[]> {
+    return this.ids().then((ids: Range) => {
       const cells = this.producttype.productSelections(type);
-      var act = cells.map((c) => ids.indexRangeOf(c)).filter((c) => !c.isNone);
+      const act = cells.map((c) => ids.indexRangeOf(c)).filter((c) => !c.isNone);
       //ensure the right number of dimensions
       act.forEach((a) => fillWithNone(a, ids.ndim));
       return act;
     });
   }
 
-  selectProduct(range:RangeLike[], op?:SelectOperation);
-  selectProduct(type:string, range:RangeLike[], op?:SelectOperation);
+  selectProduct(range: RangeLike[], op?: SelectOperation);
+  selectProduct(type: string, range: RangeLike[], op?: SelectOperation);
   selectProduct() {
     const a = Array.from(arguments);
     const type = (typeof a[0] === 'string') ? a.shift() : defaultSelectionType,
@@ -954,8 +953,8 @@ export class ProductSelectAble extends SelectAble {
     return this.selectProductImpl(range, op, type);
   }
 
-  private selectProductImpl(cells:Range[], op = SelectOperation.SET, type:string = defaultSelectionType) {
-    return this.ids().then((ids:Range) => {
+  private selectProductImpl(cells: Range[], op = SelectOperation.SET, type: string = defaultSelectionType) {
+    return this.ids().then((ids: Range) => {
       cells = cells.map((c) => ids.preMultiply(c));
       this.producttype.select(type, cells, op);
     });
@@ -965,9 +964,9 @@ export class ProductSelectAble extends SelectAble {
    * clear the specific selection (type) and dimension
    */
   clear();
-  clear(type:string);
-  clear(dim:number);
-  clear(dim:number, type:string);
+  clear(type: string);
+  clear(dim: number);
+  clear(dim: number, type: string);
   clear() {
     const a = Array.from(arguments);
     if (typeof a[0] === 'number') {
@@ -980,8 +979,8 @@ export class ProductSelectAble extends SelectAble {
 
 function fillUpData(entries) {
   entries.forEach(function (row) {
-    var entry = cache[row.id];
-    var new_ = false;
+    const entry = cache.get(row.id);
+    let new_ = false;
     if (entry) {
       if (entry instanceof IDType) {
         entry.name = row.name;
@@ -991,25 +990,15 @@ function fillUpData(entries) {
       entry = new IDType(row.id, row.name, row.names);
       new_ = true;
     }
-    cache[row.id] = entry;
+    cache.set(row.id, entry);
     if (new_) {
       global_fire('register.idtype', entry);
     }
   });
 }
 
-function fillUp() {
-  if (filledUp) {
-    return;
-  }
-  filledUp = true;
-  getAPIJSON('/idtype', {}, []).then(function (c) {
-    fillUpData(c);
-    return cache;
-  });
-}
 
-function toPlural(name:string) {
+function toPlural(name: string) {
   if (name[name.length - 1] === 'y') {
     return name.slice(0, name.length - 1) + 'ies';
   }
@@ -1018,51 +1007,67 @@ function toPlural(name:string) {
 
 export declare type IDTypeLike = string|IDType;
 
-export function resolve(id:IDTypeLike):IDType {
+export function resolve(id: IDTypeLike): IDType {
   if (id instanceof IDType) {
     return id;
   } else {
-    return <IDType>register(<string>id, new IDType(<string>id, <string>id, toPlural(<string>id)));
+    const sid = <string>id;
+    return <IDType>register(sid, new IDType(sid, sid, toPlural(sid)));
   }
 }
-export function resolveProduct(...idtypes:IDType[]):ProductIDType {
+export function resolveProduct(...idtypes: IDType[]): ProductIDType {
   const p = new ProductIDType(idtypes);
   return <ProductIDType>register(p.id, p);
 }
 
 /**
- * list all known
- * @returns {{}|HTTPCache|xm.http.HTTPCache|boolean}
+ * list currently resolved idtypes
+ * @returns {Array<IDType|ProductIDType>}
  */
-export function list() {
-  fillUp(); //trigger loading of the meta data
-  return Object.keys(cache).map((d) => cache[d]);
+export function list(): IIDType[] {
+  return Array.from(cache.values());
 }
 
-export function register(id:string, idtype:IDType|ProductIDType):IDType|ProductIDType {
-  fillUp(); //trigger loading of the meta data
-  if (cache.hasOwnProperty(id)) {
-    return cache[id];
+
+/**
+ * see list but with also the server side available ones
+ * @returns {any}
+ */
+function listAll(): Promise<IIDType[]> {
+  if (filledUp) {
+    return Promise.resolve(list());
   }
-  cache[id] = idtype;
+  filledUp = true;
+  return getAPIJSON('/idtype', {}, []).then((c) => {
+    fillUpData(c);
+    return list();
+  });
+}
+
+export function register(id: string, idtype: IDType|ProductIDType): IDType|ProductIDType {
+  if (cache.has(id)) {
+    return cache.get(id);
+  }
+  cache.set(id, idtype);
   global_fire('register.idtype', idtype);
   return idtype;
 }
 
 export function persist() {
-  var r = {};
-  Object.keys(cache).forEach((id) => {
-    r[id] = cache[id].persist();
+  let r = {};
+
+  cache.forEach((v, id) => {
+    r[id] = v.persist();
   });
   return r;
 }
 
-export function restore(persisted:any) {
+export function restore(persisted: any) {
   Object.keys(persisted).forEach((id) => {
     resolve(id).restore(persisted[id]);
   });
 }
 
 export function clearSelection(type = defaultSelectionType) {
-  Object.keys(cache).forEach((id) => cache[id].clear(type));
+  cache.forEach((v) => v.clear(type));
 }
