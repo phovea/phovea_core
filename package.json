@@ -63,7 +63,9 @@
     "webpack-dev-server": "2.1.0-beta.10",
     "extract-loader": "0.0.2"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@types/whatwg-fetch": "0.0.33"
+  },
   "name": "phovea_core",
   "description": "Phovea Core including plugin registry, data definition (+ common types: tables, matrix, vector, stratification), ajax, selections",
   "homepage": "https://phovea.caleydo.org",
