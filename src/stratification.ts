@@ -8,7 +8,7 @@
  */
 
 import {Range, CompositeRange1D, all, list, Range1DGroup} from './range';
-import {IDataType} from './datatype';
+import {IDataType, IDataDescription} from './datatype';
 import {IDType, SelectAble} from './idtype';
 import {IVector} from './vector';
 import {IHistogram, rangeHist} from './math';
@@ -27,6 +27,11 @@ export function guessColor(stratification: string, group: string) {
     case 'living': return '#377eb8';
   }
   return 'gray';
+}
+
+export interface IStratificationDataDescription extends IDataDescription {
+  size: number[];
+  ngroups: number;
 }
 
 export interface IStratification extends IDataType {
