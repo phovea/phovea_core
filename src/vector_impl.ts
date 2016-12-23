@@ -11,7 +11,22 @@ import {argSort, argFilter} from './index';
 import {getAPIJSON} from './ajax';
 import {all, Range, range, CompositeRange1D, list as rlist, asUngrouped, composite, parse} from './range';
 import {SelectAble, resolve, IDType} from './idtype';
-import {IDataDescription, categorical2partitioning, IValueType, IValueTypeDesc, ICategorical2PartitioningOptions, ICategory, IDataType, mask, DataTypeBase, ICategoricalValueTypeDesc, INumberValueTypeDesc, VALUE_TYPE_CATEGORICAL, VALUE_TYPE_INT, VALUE_TYPE_REAL} from './datatype';
+import {
+  IDataDescription,
+  categorical2partitioning,
+  IValueType,
+  IValueTypeDesc,
+  ICategorical2PartitioningOptions,
+  ICategory,
+  IDataType,
+  mask,
+  DataTypeBase,
+  ICategoricalValueTypeDesc,
+  INumberValueTypeDesc,
+  VALUE_TYPE_CATEGORICAL,
+  VALUE_TYPE_INT,
+  VALUE_TYPE_REAL
+} from './datatype';
 import {computeStats, IStatistics, IHistogram, categoricalHist, hist, rangeHist} from './math';
 import {IVector, IVectorDataDescription} from './vector';
 import {IStratification, IGroup, StratificationGroup, IStratificationDataDescription} from './stratification';
