@@ -4,14 +4,14 @@
 import {mixin, hash, resolveIn} from '../index';
 import {IDType, SelectOperation, defaultSelectionType, resolve as resolveIDType} from '../idtype';
 import {Range, list as rlist, Range1D, all} from '../range';
-import {IDataDescription, DataTypeBase} from '../datatype';
+import {IDataDescription, ADataType} from '../datatype';
 import {list as listPlugins, load as loadPlugin} from '../plugin';
 import ObjectNode, {IObjectRef, cat} from './ObjectNode';
 import StateNode, {} from './StateNode';
 import ActionNode, {IAction, meta, ActionMetaData} from './ActionNode';
 import SlideNode from './SlideNode';
 import {isType, GraphEdge, GraphNode} from '../graph/graph';
-import GraphBase, {IGraphFactory} from '../graph/GraphBase';
+import GraphBase, {IGraphFactory, IGraphDataDescription} from '../graph/GraphBase';
 
 export interface IInverseActionCreator {
   (inputs:IObjectRef<any>[], creates:IObjectRef<any>[], removes:IObjectRef<any>[]) : IAction;
@@ -219,7 +219,7 @@ function findMetaObject<T>(find:IObjectRef<T>) {
   return (obj:ObjectNode<any>) => find === obj || ((obj.value === null || obj.value === find.value) && (find.hash === obj.hash));
 }
 
-export default class ProvenanceGraph extends DataTypeBase {
+export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
   private _actions:ActionNode[] = [];
   private _objects:ObjectNode<any>[] = [];
   private _states:StateNode[] = [];
@@ -233,7 +233,7 @@ export default class ProvenanceGraph extends DataTypeBase {
   executeCurrentActionWithin = -1;
   private nextQueue:(()=>any)[] = [];
 
-  constructor(desc:IDataDescription, public backend:GraphBase) {
+  constructor(desc:IGraphDataDescription, public backend:GraphBase) {
     super(desc);
     this.propagate(this.backend, 'sync', 'add_edge', 'add_node', 'sync_node', 'sync_edge', 'sync_start');
 

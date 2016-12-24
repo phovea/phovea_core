@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {Range} from './range';
+import {Range, RangeLike} from './range';
 import {IDType} from './idtype';
 import {IDataType, IValueType, IValueTypeDesc, IDataDescription} from './datatype';
 import {IVector as IVVector} from './vector';
@@ -21,6 +21,7 @@ export interface IQueryArgs {
 export interface ITableColumn {
   name: string;
   value: IValueTypeDesc;
+  getter?(row: any): IValueType;
 }
 
 export interface ITableDataDescription extends IDataDescription {
@@ -42,7 +43,7 @@ export interface ITable extends IDataType {
    * returns the chosen columns
    * @param range optional subset
    */
-  cols(range?:Range) : IVector[];
+  cols(range?:RangeLike) : IVector[];
 
   /**
    * return the specific column
@@ -55,18 +56,18 @@ export interface ITable extends IDataType {
    * returns a promise for getting the row names of the matrix
    * @param range optional subset
    */
-  rows(range?:Range) : Promise<string[]>;
+  rows(range?:RangeLike) : Promise<string[]>;
   /**
    * returns the row ids
    * @param range optional subset
    */
-  rowIds(range?:Range) : Promise<Range>;
+  rowIds(range?:RangeLike) : Promise<Range>;
 
   /**
    * creates a new view on this matrix specified by the given range
    * @param range
    */
-  view(range?:Range) : ITable;
+  view(range?:RangeLike) : ITable;
 
   queryView(name: string, args: IQueryArgs): ITable;
 
@@ -88,13 +89,13 @@ export interface ITable extends IDataType {
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range?:Range) : Promise<IValueType[][]>;
+  data(range?:RangeLike) : Promise<IValueType[][]>;
 
   /**
    * returns a promise for getting the data as an array of objects
    * @param range
    */
-  objects(range?:Range) : Promise<any[]>;
+  objects(range?:RangeLike) : Promise<any[]>;
 }
 
 export default ITable;

@@ -4,6 +4,7 @@
 import * as graph from '../graph';
 import {provenanceGraphFactory, default as ProvenanceGraph} from './ProvenanceGraph';
 import StateNode from './StateNode';
+import {IGraphDataDescription} from "../graph/GraphBase";
 export {default as ActionNode, action, ActionMetaData, IAction, meta} from './ActionNode';
 export {default as ObjectNode, cat, IObjectRef,  op, ref} from './ObjectNode';
 export {default as SlideNode, DEFAULT_DURATION, DEFAULT_TRANSITION, IArrowStateAnnotation, IFrameStateAnnotation, IStateAnnotation, ITextStateAnnotation} from './SlideNode';
@@ -26,11 +27,12 @@ export function findLatestPath(state:StateNode) {
 }
 
 export function createDummy() {
-  const desc = {
+  const desc : IGraphDataDescription = {
     type: 'provenance_graph',
     id: 'dummy',
     name: 'dummy',
-    fqname: 'dummy'
+    fqname: 'dummy',
+    size: [0,0]
   };
   return new ProvenanceGraph(desc, new graph.MemoryGraph(desc, [], [], provenanceGraphFactory()));
 }

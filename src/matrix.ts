@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {Range} from './range';
+import {Range, RangeLike} from './range';
 import {IProductSelectAble, IDType} from './idtype';
 import {IDataType, IValueTypeDesc, IValueType, IDataDescription} from './datatype';
 import {IVector} from './vector';
@@ -21,10 +21,15 @@ export interface IHeatMapUrlOptions {
   format?: string;
   transpose?: boolean;
   range?: [number, number];
+  palette?: string;
 }
 
 export interface IMatrixDataDescription extends IDataDescription {
-
+  loadAtOnce?: boolean;
+  value: IValueTypeDesc;
+  rowtype: string;
+  coltype: string;
+  size: [number, number];
 }
 
 export interface IMatrix extends IDataType, IProductSelectAble {
@@ -60,7 +65,7 @@ export interface IMatrix extends IDataType, IProductSelectAble {
    * creates a new view on this matrix specified by the given range
    * @param range
    */
-  view(range?: Range): IMatrix;
+  view(range?: RangeLike): IMatrix;
 
   slice(col: number): IVector;
 
@@ -83,14 +88,16 @@ export interface IMatrix extends IDataType, IProductSelectAble {
    * @param range
    * @returns {IPromise<string[]>}
    */
-  cols(range?: Range): Promise<string[]>;
-  colIds(range?: Range): Promise<Range>;
+  cols(range?: RangeLike): Promise<string[]>;
+
+  colIds(range?: RangeLike): Promise<Range>;
   /**
    * returns a promise for getting the row names of the matrix
    * @param range
    */
-  rows(range?: Range): Promise<string[]>;
-  rowIds(range?: Range): Promise<Range>;
+  rows(range?: RangeLike): Promise<string[]>;
+
+  rowIds(range?: RangeLike): Promise<Range>;
 
   /**
    * returns a promise for getting one cell
@@ -102,14 +109,19 @@ export interface IMatrix extends IDataType, IProductSelectAble {
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range?: Range): Promise<IValueType[][]>;
+  data(range?: RangeLike): Promise<IValueType[][]>;
 
   stats(): Promise<IStatistics>;
 
-  hist(bins?: number, range?: Range, containedIds?: number): Promise<IHistogram>;
+  hist(bins?: number, range?: RangeLike, containedIds?: number): Promise<IHistogram>;
 
-
-  heatmapUrl(range?: Range, options?: IHeatMapUrlOptions): string;
+  /**
+   * generates a server url for creating a heatmap image of this matrix
+   * @param range
+   * @param options
+   * @returns the url or null if no url can be generated
+   */
+  heatmapUrl(range?: RangeLike, options?: IHeatMapUrlOptions): string;
 }
 
 export default IMatrix;

@@ -135,8 +135,6 @@ export class EventHandler implements IEventHandler {
    * @param events
    * @param handler
    */
-  on(events: string, handler: IEventListener): IEventHandler;
-  on(events: {[key: string]: IEventListener}): IEventHandler;
   on(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
     if (typeof events === 'string') {
       events.split(EventHandler.MULTI_EVENT_SEPARATOR).forEach((event) => {
@@ -159,8 +157,6 @@ export class EventHandler implements IEventHandler {
    * @param events
    * @param handler
    */
-  off(events: string, handler: IEventListener): IEventHandler;
-  off(events: {[key: string]: IEventListener}): IEventHandler;
   off(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
     if (typeof events === 'string') {
       events.split(EventHandler.MULTI_EVENT_SEPARATOR).forEach((event) => {

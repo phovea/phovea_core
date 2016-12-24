@@ -73,12 +73,10 @@ export class ALayoutElem {
 export interface IHTMLLayoutOptions extends ILayoutOptions {
   // px
   unit?: string;
-
-
 }
 
 class HTMLLayoutElem extends ALayoutElem implements ILayoutElem {
-  constructor(private node: HTMLElement, options: IHTMLLayoutOption = {}) {
+  constructor(private node: HTMLElement, options: IHTMLLayoutOptions = {}) {
     super(options);
   }
 
@@ -121,9 +119,6 @@ export interface IPadding {
 
 export function padding(v: number): IPadding {
   return {top: v, left: v, right: v, bottom: v};
-}
-export function padding(horizontal: number, vertical: number): IPadding {
-  return {top: vertical, left: horizontal, right: horizontal, bottom: vertical};
 }
 
 export const noPadding = padding(0);
@@ -238,7 +233,7 @@ export function distributeLayout(horizontal: boolean, defaultValue: number, padd
 
     // count statistics
     elems.forEach((elem) => {
-      const fix = elem.layoutOption(horizontal ? 'prefWidth' : 'prefHeight', Number.NaN);
+      let fix = elem.layoutOption(horizontal ? 'prefWidth' : 'prefHeight', Number.NaN);
       if (isDefault(fix)) {
         fix = defaultValue;
       }
@@ -287,7 +282,7 @@ export function distributeLayout(horizontal: boolean, defaultValue: number, padd
 //-------------
 //   bottom
 
-export function borderLayout(horizontal: boolean, gap: number, percentages: IPadding = padding(0.2), padding: IPadding = noPadding) {
+export function borderLayout(horizontal: boolean, gap: number, percentages: IPadding = {top: 0.2, left: 0.2, right: 0.2, bottom: 0.2}, padding: IPadding = noPadding) {
   function BorderLayout(elems: ILayoutElem[], w: number, h: number, parent: ILayoutElem) {
     w -= padding.left + padding.right;
     h -= padding.top + padding.bottom;
@@ -300,7 +295,7 @@ export function borderLayout(horizontal: boolean, gap: number, percentages: IPad
       bottom: []
     };
     elems.forEach((elem) => {
-      const border = elem.layoutOption('border', 'center');
+      let border = elem.layoutOption('border', 'center');
       if (!pos.hasOwnProperty(border)) {
         border = 'center'; //invalid one
       }

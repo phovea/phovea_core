@@ -944,7 +944,7 @@ export class Range {
    * @param other
    * @returns {RangeDim}
    */
-  without(without:Range, size:number[]) {
+  without(without:Range, size?:number[]) {
     if (this.isNone || without.isNone) {
       return this.clone();
     }

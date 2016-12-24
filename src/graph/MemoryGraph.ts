@@ -6,11 +6,11 @@
  */
 import {IPersistable} from '../index';
 import {IDataDescription} from '../datatype';
-import GraphBase, {defaultGraphFactory} from './GraphBase';
+import GraphBase, {defaultGraphFactory, IGraphDataDescription} from './GraphBase';
 import {GraphEdge, GraphNode} from './graph';
 
 export default class MemoryGraph extends GraphBase implements IPersistable {
-  constructor(desc:IDataDescription, _nodes:GraphNode[] = [], _edges:GraphEdge[] = [], private factory = defaultGraphFactory) {
+  constructor(desc:IGraphDataDescription, _nodes:GraphNode[] = [], _edges:GraphEdge[] = [], private factory = defaultGraphFactory) {
     super(desc, _nodes, _edges);
   }
   restore(persisted:any) {

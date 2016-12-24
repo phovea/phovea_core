@@ -9,7 +9,7 @@
 
 import {IPersistable, extendClass, mixin} from './index';
 import {ISelectAble, SelectAble} from './idtype';
-import {all, none, Range1D, Range1DGroup, composite, Range, CompositeRange1D} from './range';
+import {all, none, Range1D, RangeLike, Range1DGroup, composite, Range, CompositeRange1D} from './range';
 
 /**
  * basic description elements
@@ -51,7 +51,7 @@ export interface IDataType extends ISelectAble, IPersistable {
   readonly dim: number[];
 
 
-  idView(idRange?: Range) : Promise<IDataType>;
+  idView(idRange?: RangeLike) : Promise<IDataType>;
 }
 
 export const VALUE_TYPE_CATEGORICAL = 'categorical';
@@ -100,7 +100,7 @@ export declare type IValueType = number | string | any;
  * @return {any}
  */
 export function isDataType(v: IDataType) {
-  if (v instanceof DataTypeBase) {
+  if (v instanceof ADataType) {
     return true;
   }
   //sounds good
@@ -119,7 +119,7 @@ export function assignData(node: Element, data: IDataType) {
 /**
  * dummy data type just holding the description
  */
-export class DataTypeBase<T extends IDataDescription> extends SelectAble implements IDataType {
+export abstract class ADataType<T extends IDataDescription> extends SelectAble implements IDataType {
   constructor(public readonly desc: T) {
     super();
   }
@@ -128,11 +128,11 @@ export class DataTypeBase<T extends IDataDescription> extends SelectAble impleme
     return [];
   }
 
-  ids(range:Range = all()) : Promise<Range> {
+  ids(range:RangeLike = all()) : Promise<Range> {
     return Promise.resolve(none());
   }
 
-  idView(idRange?: Range) : Promise<DataTypeBase<T>> {
+  idView(idRange?: RangeLike) : Promise<ADataType<T>> {
     return Promise.resolve(this);
   }
 
@@ -151,6 +151,13 @@ export class DataTypeBase<T extends IDataDescription> extends SelectAble impleme
   toString() {
     return this.persist();
   }
+}
+
+export class DummyDataType extends ADataType<IDataDescription> {
+  constructor(desc: IDataDescription) {
+    super(desc);
+  }
+
 }
 
 /**
@@ -254,12 +261,12 @@ export function categorical2partitioning<T>(data: T[], categories: T[], options 
  */
 export function defineDataType(name: string, functions: any) {
   function DataType(desc: IDataDescription) {
-    DataTypeBase.call(this, desc);
+    ADataType.call(this, desc);
     if (typeof(this.init) === 'function') {
       this.init.apply(this, Array.from(arguments));
     }
   }
-  extendClass(DataType, DataTypeBase);
+  extendClass(DataType, ADataType);
   DataType.prototype.toString = () => name;
   DataType.prototype = mixin(DataType.prototype, functions);
 

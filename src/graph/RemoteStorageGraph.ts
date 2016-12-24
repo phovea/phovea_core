@@ -4,7 +4,7 @@
 import {sendAPI} from '../ajax';
 import {IDataDescription} from '../datatype';
 import {IEvent} from '../event';
-import GraphBase, {IGraphFactory} from './GraphBase';
+import GraphBase, {IGraphFactory, IGraphDataDescription} from './GraphBase';
 import {GraphEdge, GraphNode} from './graph';
 
 export default class RemoteStoreGraph extends GraphBase {
@@ -21,7 +21,7 @@ export default class RemoteStoreGraph extends GraphBase {
   private _wait_for_synced = 0;
 
 
-  constructor(desc:IDataDescription, _nodes: GraphNode[] = [], _edges:GraphEdge[] = []) {
+  constructor(desc:IGraphDataDescription, _nodes: GraphNode[] = [], _edges:GraphEdge[] = []) {
     super(desc, _nodes, _edges);
   }
 

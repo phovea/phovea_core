@@ -9,7 +9,7 @@
 import {offline as isOffline, fixId, randomId} from './index';
 import {getAPIJSON, sendAPI} from './ajax';
 import {list as listPlugins} from './plugin';
-import {IDataDescription, IDataType, DataTypeBase} from './datatype';
+import {IDataDescription, IDataType, DummyDataType} from './datatype';
 import {ITable} from './table';
 import {wrapObjects} from './table_impl';
 export {random_id, fixId} from './index';
@@ -23,7 +23,7 @@ const cacheByFQName = new Map<string, Promise<IDataType>>();
 
 export function clearCache(dataset?: IDataType | IDataDescription) {
   if (dataset) {
-    const desc: IDataDescription = (<IDataType>dataset).desc || dataset;
+    const desc: IDataDescription = (<IDataType>dataset).desc || <IDataDescription>dataset;
     cacheById.delete(desc.id);
     cacheByName.delete(desc.name);
     cacheByFQName.delete(desc.fqname);
@@ -54,8 +54,8 @@ function transformEntry(desc: IDataDescription): Promise<IDataType> {
   if (desc === undefined) {
     return null;
   }
-  desc.id = desc.id || fixId(desc.name + randomId(5));
-  desc.fqname = desc.fqname || desc.name;
+  (<any>desc).id = desc.id || fixId(desc.name + randomId(5));
+  (<any>desc).fqname = desc.fqname || desc.name;
 
   if (cacheById.has(desc.id)) {
     return cacheById.get(desc.id);
@@ -65,7 +65,7 @@ function transformEntry(desc: IDataDescription): Promise<IDataType> {
   const plugin = available.filter((p) => p.id === desc.type);
   //no type there create a dummy one
   if (plugin.length === 0) {
-    return cached(desc, Promise.resolve(new DataTypeBase(desc)));
+    return cached(desc, Promise.resolve(new DummyDataType(desc)));
   }
   //take the first matching one
   return cached(desc, plugin[0].load().then((p) => p.factory(desc)));
@@ -77,8 +77,8 @@ function transformEntry(desc: IDataDescription): Promise<IDataType> {
  * @returns {Promise<IDataType[]>}
  */
 export function list(filter?: ({[key: string]: string})|((d: IDataType) => boolean)): Promise<IDataType[]> {
-  const f = (typeof filter === 'function') ? <(d: IDataType) => boolean>query : null;
-  const q = (typeof filter !== 'undefined' && typeof filter !== 'function') ? <any>query : {};
+  const f = (typeof filter === 'function') ? <(d: IDataType) => boolean>filter : null;
+  const q = (typeof filter !== 'undefined' && typeof filter !== 'function') ? <any>filter : {};
 
   let r: Promise<IDataType[]>;
 
@@ -144,10 +144,11 @@ export function getFirst(query: {[key: string]: string} | string | RegExp): Prom
   if (typeof query === 'string' || query instanceof RegExp) {
     return getFirstByName(<string|RegExp>query);
   }
-  query.limit = 1;
-  return list(query).then<IDataType>((result) => {
+  const q = <any>query;
+  q.limit = 1;
+  return list(q).then<IDataType>((result) => {
     if (result.length === 0) {
-      return Promise.reject({error: 'nothing found, matching', args: query});
+      return Promise.reject({error: 'nothing found, matching', args: q});
     }
     return Promise.resolve(result[0]);
   });
@@ -165,8 +166,9 @@ export function getFirstByFQName(name: string | RegExp) {
 }
 
 function getFirstWithCache(name: string | RegExp, cache: Map<string, Promise<IDataType>>, attr: string) {
-  for (let [k, v] of cache.entries()) {
-    if (k.match(name) != null) {
+  const r = typeof name === 'string' ? new RegExp(<string>name): name;
+  for (let [k, v] of Array.from(cache.entries())) {
+    if (r.test(k)) {
       return v;
     }
   }
@@ -267,7 +269,7 @@ export function modify(entry: IDataType, desc: IDataDescription, file?: File): P
  * @returns {Promise<boolean>}
  */
 export function remove(entry: IDataType | IDataDescription): Promise<Boolean> {
-  const desc: IDataDescription = (<IDataType>entry).desc || entry;
+  const desc: IDataDescription = (<IDataType>entry).desc || <IDataDescription>entry;
   return sendAPI(`/dataset/${desc.id}`, {}, 'DELETE').then(() => {
     clearCache(desc);
     return true;

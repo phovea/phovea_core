@@ -149,7 +149,7 @@ export function isType(type:string|RegExp) {
   return (edge:GraphEdge) => type instanceof RegExp ? type.test(edge.type) : edge.type === type;
 }
 
-export class AGraph extends SelectAble {
+export abstract class AGraph extends SelectAble {
 
   get nodes() : GraphNode[] {
     return [];

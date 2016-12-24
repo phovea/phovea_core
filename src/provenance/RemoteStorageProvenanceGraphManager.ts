@@ -3,9 +3,8 @@
  */
 import {mixin} from '../index';
 import {get as getData, remove as removeData, upload, list as listData} from '../data';
-import {IDataDescription} from '../datatype';
 import ProvenanceGraph, {IProvenanceGraphManager, provenanceGraphFactory} from './ProvenanceGraph';
-import GraphBase from '../graph/GraphBase';
+import GraphBase, {IGraphDataDescription} from '../graph/GraphBase';
 import GraphProxy from '../graph/GraphProxy';
 import {retrieve} from '../session';
 
@@ -26,21 +25,21 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     return listData((d) => d.desc.type === 'graph' && (<any>d.desc).attrs.graphtype === 'provenance_graph' && (<any>d.desc).attrs.of === this.options.application).then((d) => d.map((di) => di.desc));
   }
 
-  getGraph(desc:IDataDescription):Promise<GraphBase> {
+  getGraph(desc:IGraphDataDescription):Promise<GraphBase> {
     return getData(desc.id)
       .then((graph:GraphProxy) => graph.impl(provenanceGraphFactory()));
   }
 
-  get(desc:IDataDescription):Promise<ProvenanceGraph> {
+  get(desc:IGraphDataDescription):Promise<ProvenanceGraph> {
     return this.getGraph(desc).then((impl:GraphBase) => new ProvenanceGraph(desc, impl));
   }
 
-  delete(desc:IDataDescription) {
+  delete(desc:IGraphDataDescription) {
     return removeData(desc);
   }
 
   import(json:any):Promise<ProvenanceGraph> {
-    const desc = {
+    const desc : any = {
       type: 'graph',
       attrs: {
         graphtype: 'provenance_graph',
@@ -60,7 +59,7 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
   }
 
   create() {
-    const desc = {
+    const desc : any= {
       type: 'graph',
       attrs: {
         graphtype: 'provenance_graph',

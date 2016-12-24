@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {Range, CompositeRange1D} from './range';
+import {RangeLike, CompositeRange1D} from './range';
 import {IDType, IDTypeLike} from './idtype';
 import {IDataType, IValueTypeDesc, IValueType, IDataDescription} from './datatype';
 import {IStratification} from './stratification';
@@ -38,12 +38,12 @@ export interface IVector extends IDataType {
    * return the associated ids of this vector
    * @param range optional subset
    */
-  names(range?: Range): Promise<string[]>;
+  names(range?: RangeLike): Promise<string[]>;
   /**
    * creates a new view on this matrix specified by the given range
    * @param range optional subset
    */
-  view(range?: Range): IVector;
+  view(range?: RangeLike): IVector;
   /**
    * returns a promise for getting one cell
    * @param i at a specific position
@@ -53,7 +53,7 @@ export interface IVector extends IDataType {
    * returns a promise for getting the data as two dimensional array
    * @param range optional subset
    */
-  data(range?: Range): Promise<IValueType[]>;
+  data(range?: RangeLike): Promise<IValueType[]>;
 
   /**
    * returns this vector statistics
@@ -66,7 +66,7 @@ export interface IVector extends IDataType {
    * @param bins number of bins by default guessed
    * @param range optional subset
    */
-  hist(bins?: number, range?: Range): Promise<IHistogram>;
+  hist(bins?: number, range?: RangeLike): Promise<IHistogram>;
 
 
   /**
@@ -96,13 +96,6 @@ export interface IVector extends IDataType {
    * @param thisArg  An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
    */
   forEach(callbackfn: (value: IValueType, index: number) => void, thisArg?: any): void;
-
-  /**
-   * Calls a defined callback function on each element of an array, and returns an array that contains the results.
-   * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
-   * @param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
-   */
-  map<U>(callbackfn: (value: IValueType, index: number) => U, thisArg?: any): Promise<IVector>;
 
   /**
    * Returns the elements of an array that meet the condition specified in a callback function.

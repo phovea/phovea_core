@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {Range, CompositeRange1D, all, list, Range1DGroup} from './range';
+import {Range, RangeLike, CompositeRange1D, all, list, Range1DGroup, parse} from './range';
 import {IDataType, IDataDescription} from './datatype';
 import {IDType, SelectAble} from './idtype';
 import {IVector} from './vector';
@@ -15,8 +15,8 @@ import {IHistogram, rangeHist} from './math';
 
 export interface IGroup {
   readonly name: string;
-  readonly size: number;
   readonly color: string;
+  readonly size: number;
 }
 
 export function guessColor(stratification: string, group: string) {
@@ -30,7 +30,8 @@ export function guessColor(stratification: string, group: string) {
 }
 
 export interface IStratificationDataDescription extends IDataDescription {
-  readonly size: number[];
+  readonly idtype: IDType;
+  readonly size: number;
   readonly groups: IGroup[];
   readonly ngroups: number;
   /**
@@ -46,12 +47,12 @@ export interface IStratification extends IDataType {
   vector(): Promise<IVector>;
 
   names();
-  names(range:Range);
+  names(range:RangeLike);
 
   ids(): Promise<Range>;
-  ids(range:Range): Promise<Range>;
+  ids(range:RangeLike): Promise<Range>;
 
-  hist(bins? : number, range?:Range): Promise<IHistogram>;
+  hist(bins? : number, range?:RangeLike): Promise<IHistogram>;
 
   readonly length: number;
   readonly ngroups: number;
@@ -98,8 +99,8 @@ export class StratificationGroup extends SelectAble implements IStratification {
     return this.root.idtype;
   }
 
-  hist(bins?:number, range = all()):Promise<IHistogram> {
-    //TODO
+  hist(bins?:number, range: RangeLike = all()):Promise<IHistogram> {
+    //FIXME
     return this.range().then((r) => {
       return rangeHist(r);
     });
@@ -132,21 +133,21 @@ export class StratificationGroup extends SelectAble implements IStratification {
     });
   }
 
-  names(range:Range = all()) {
+  names(range:RangeLike = all()) {
     return this.rangeGroup().then((g) => {
-      const r = list(g).preMultiply(range);
+      const r = list(g).preMultiply(parse(range));
       return this.root.names(r);
     });
   }
 
-  ids(range:Range = all()):Promise<Range> {
+  ids(range:RangeLike = all()):Promise<Range> {
     return this.rangeGroup().then((g) => {
-      const r = list(g).preMultiply(range);
+      const r = list(g).preMultiply(parse(range));
       return this.root.ids(r);
     });
   }
 
-  idView(idRange:Range = all()):Promise<any> {
+  idView(idRange:RangeLike = all()):Promise<any> {
     return Promise.reject('not implemented');
   }
 
