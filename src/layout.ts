@@ -127,11 +127,6 @@ export function padding(horizontal: number, vertical: number): IPadding {
 }
 
 export const noPadding = padding(0);
-/**
- * @deprecated
- * @type {{top: number; left: number; right: number; bottom: number}}
- */
-export const no_padding = noPadding;
 
 export interface ILayout {
   (elems: ILayoutElem[], w: number, h: number, parent: ILayoutElem): Promise<boolean>;
