@@ -20,6 +20,7 @@ export interface IQueryArgs {
 
 export interface ITableColumn {
   name: string;
+  description?: string;
   value: IValueTypeDesc;
   getter?(row: any): IValueType;
 }
@@ -31,6 +32,8 @@ export interface ITableDataDescription extends IDataDescription {
 }
 
 export interface ITable extends IDataType {
+  readonly desc: ITableDataDescription;
+
   readonly ncol: number;
   readonly nrow: number;
 

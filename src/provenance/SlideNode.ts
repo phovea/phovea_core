@@ -9,27 +9,27 @@ export const DEFAULT_TRANSITION = 0; //ms
 
 
 export interface IStateAnnotation {
-  type: string;
-  pos: [number, number] | {anchor: string, offset: [number, number]} ;
-  styles?: {[key: string]: string;};
+  readonly type: string;
+  readonly pos: [number, number] | {anchor: string, offset: [number, number]} ;
+  readonly styles?: {[key: string]: string;};
 
-  [key: string]: any;
+  readonly [key: string]: any;
 }
 
 export interface ITextStateAnnotation extends IStateAnnotation {
-  text: string;
-  size?: [number, number];
-  rotation?: number;
+  readonly text: string;
+  readonly size?: [number, number];
+  readonly rotation?: number;
 }
 
 export interface IArrowStateAnnotation extends IStateAnnotation {
-  at: [number, number];
+  readonly at: [number, number];
 }
 
 export interface IFrameStateAnnotation extends IStateAnnotation {
-  size?: [number, number];
-  pos2?: [number, number];
-  rotation?: number;
+  readonly size?: [number, number];
+  readonly pos2?: [number, number];
+  readonly rotation?: number;
 }
 
 
@@ -111,7 +111,7 @@ export default class SlideNode extends GraphNode {
   }
 
   setAnnotation(index: number, ann: IStateAnnotation) {
-    var old = this.annotations;
+    const old = this.annotations;
     old[index] = ann;
     this.setAttr('annotations', old);
   }
@@ -122,19 +122,19 @@ export default class SlideNode extends GraphNode {
   }
 
   removeAnnotation(index: number) {
-    var old = this.annotations;
+    const old = this.annotations;
     old.splice(index, 1);
     this.setAttr('annotations', old);
   }
 
   removeAnnotationElem(elem: IStateAnnotation) {
-    var old = this.annotations;
+    const old = this.annotations;
     old.splice(old.indexOf(elem), 1);
     this.setAttr('annotations', old);
   }
 
   pushAnnotation(ann: IStateAnnotation) {
-    var old = this.annotations;
+    const old = this.annotations;
     old.push(ann);
     this.setAttr('annotations', old);
     this.fire('push-annotations', ann, old);

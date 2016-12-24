@@ -2,7 +2,7 @@
  * Created by sam on 12.02.2015.
  */
 import {IDataDescription} from '../datatype';
-import ProvenanceGraph, {IProvenanceGraphManager} from './ProvenanceGraph';
+import ProvenanceGraph, {IProvenanceGraphManager, IProvenanceGraphDataDescription} from './ProvenanceGraph';
 import LocalStorageProvenanceGraphManager from './LocalStorageProvenanceGraphManager';
 import RemoteStorageProvenanceGraphManager from './RemoteStorageProvenanceGraphManager';
 import GraphBase from '../graph/GraphBase';
@@ -25,11 +25,11 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
     return this.local.list();
   }
 
-  list(): Promise<IGraphDataDescription[]> {
+  list(): Promise<IProvenanceGraphDataDescription[]> {
     return Promise.all([this.listLocal(), this.listRemote()]).then((arr) => arr[0].concat(arr[1]));
   }
 
-  delete(desc: IGraphDataDescription): Promise<boolean> {
+  delete(desc: IProvenanceGraphDataDescription): Promise<boolean> {
     if ((<any>desc).local) {
       return this.local.delete(desc);
     } else {
@@ -37,7 +37,7 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
     }
   }
 
-  get(desc: IGraphDataDescription): Promise<ProvenanceGraph> {
+  get(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
     if ((<any>desc).local) {
       return this.local.get(desc);
     } else {
@@ -45,15 +45,15 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
     }
   }
 
-  getGraph(desc: IGraphDataDescription): Promise<GraphBase> {
-    if ((<any>desc).local) {
+  getGraph(desc: IProvenanceGraphDataDescription): Promise<GraphBase> {
+    if (desc.local) {
       return this.local.getGraph(desc);
     } else {
       return this.remote.getGraph(desc);
     }
   }
 
-  cloneLocal(desc: IGraphDataDescription): Promise<ProvenanceGraph> {
+  cloneLocal(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
     return this.getGraph(desc).then(this.local.clone.bind(this.local));
   }
 

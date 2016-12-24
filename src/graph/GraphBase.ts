@@ -21,14 +21,19 @@ export interface IGraphDataDescription extends IDataDescription {
   /**
    * size: [number of nodes, number of edges]
    */
-  size: [number, number];
+  readonly size: [number, number];
 
   /**
    * where to store: memory, remote, local, session, given (requires instance)
    */
-  storage?: string;
+  readonly storage?: string;
 
-  graph?: AGraph;
+  /**
+   * in case of storage type 'given'
+   */
+  readonly graph?: AGraph;
+
+  readonly attrs: {[key: string]: any};
 }
 
 export default class GraphBase extends AGraph implements IGraph {

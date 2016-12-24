@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {IPersistable, argFilter, argSort} from './index';
+import {IPersistable, argFilter, argSort, fixId} from './index';
 import {getAPIJSON, getAPIData} from './ajax';
 import {Range, all, list as rlist, parse, range, RangeLike} from './range';
 import {SelectAble, resolve as idtypes_resolve, IDType} from './idtype';
@@ -433,11 +433,14 @@ export class TableVector extends AVector implements IVector {
     this.desc = {
       type: 'vector',
       id: table.desc.id + '_' + desc.name,
-      name: this.desc.name,
-      fqname: table.desc.fqname + '/' + this.desc.name,
+      name: desc.name,
+      description: desc.description || '',
+      fqname: table.desc.fqname + '/' + desc.name,
       idtype: table.idtype.id,
       size: table.nrow,
-      value: desc.value
+      value: desc.value,
+      creator: table.desc.creator,
+      ts: table.desc.ts
     };
   }
 
@@ -520,11 +523,14 @@ class MultITableVector extends AVector implements IVector {
     this.desc = {
       name: table.desc.name + '-p',
       fqname: table.desc.fqname + '-p',
+      description: f.toString(),
       type: 'vector',
-      id: table.desc.id + '-p',
-      idtype: _idtype.id,
+      id: fixId(table.desc.id + '-p'+f.toString()),
+      idtype: table.desc.idtype,
       size: table.nrow,
-      value: valuetype
+      value: valuetype,
+      creator: table.desc.creator,
+      ts: Date.now()
     };
     this.root = this;
   }

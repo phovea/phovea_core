@@ -16,7 +16,7 @@ function getCurrentUser() {
  * additional data about a performed action
  */
 export class ActionMetaData {
-  constructor(public category: string, public operation: string, public name: string, public timestamp: number = Date.now(), public user: string = getCurrentUser()) {
+  constructor(public readonly category: string, public readonly operation: string, public readonly name: string, public readonly timestamp: number = Date.now(), public readonly user: string = getCurrentUser()) {
 
   }
 
@@ -53,11 +53,11 @@ export function meta(name: string, category: string = cat.data, operation: strin
 }
 
 export interface IAction {
-  meta: ActionMetaData;
-  id: string;
-  f: ICmdFunction;
-  inputs?: IObjectRef<any>[];
-  parameter?: any;
+  readonly meta: ActionMetaData;
+  readonly id: string;
+  readonly f: ICmdFunction;
+  readonly inputs?: IObjectRef<any>[];
+  readonly parameter?: any;
 }
 
 /**
@@ -137,7 +137,7 @@ export default class ActionNode extends GraphNode {
   }
 
   static restore(r, factory: ICmdFunctionFactory) {
-    var a = new ActionNode(ActionMetaData.restore(r.attrs.meta), r.attrs.f_id, factory(r.attrs.f_id), r.attrs.parameter);
+    const a = new ActionNode(ActionMetaData.restore(r.attrs.meta), r.attrs.f_id, factory(r.attrs.f_id), r.attrs.parameter);
     return a.restore(r);
   }
 
@@ -146,7 +146,7 @@ export default class ActionNode extends GraphNode {
   }
 
   get inversedBy() {
-    var r = this.incoming.filter(isType('inverses'))[0];
+    const r = this.incoming.filter(isType('inverses'))[0];
     return r ? <ActionNode>r.source : null;
   }
 
@@ -155,7 +155,7 @@ export default class ActionNode extends GraphNode {
    * @returns {ActionNode}
    */
   get inverses() {
-    var r = this.outgoing.filter(isType('inverses'))[0];
+    const r = this.outgoing.filter(isType('inverses'))[0];
     return r ? <ActionNode>r.target : null;
   }
 
@@ -164,7 +164,7 @@ export default class ActionNode extends GraphNode {
   }
 
   getOrCreateInverse(graph: ProvenanceGraph) {
-    var i = this.inversedBy;
+    const i = this.inversedBy;
     if (i) {
       return i;
     }
@@ -176,9 +176,9 @@ export default class ActionNode extends GraphNode {
   }
 
   updateInverse(graph: ProvenanceGraph, inverter: IInverseActionCreator) {
-    var i = this.inversedBy;
+    const i = this.inversedBy;
     if (i) { //update with the actual values / parameter only
-      var c = inverter.call(this, this.requires, this.creates, this.removes);
+      const c = inverter.call(this, this.requires, this.creates, this.removes);
       i.parameter = c.parameter;
       this.inverter = null;
     } else if (!this.isInverse) {
@@ -191,7 +191,7 @@ export default class ActionNode extends GraphNode {
   }
 
   execute(graph: ProvenanceGraph, withinMilliseconds: number): Promise<ICmdResult> {
-    var r = this.f.call(this, this.requires, this.parameter, graph, <number>withinMilliseconds);
+    const r = this.f.call(this, this.requires, this.parameter, graph, <number>withinMilliseconds);
     return Promise.resolve(r);
   }
 
@@ -223,12 +223,12 @@ export default class ActionNode extends GraphNode {
   }
 
   get resultsIn(): StateNode {
-    var r = this.outgoing.filter(isType('resultsIn'))[0];
+    const r = this.outgoing.filter(isType('resultsIn'))[0];
     return r ? <StateNode>r.target : null;
   }
 
   get previous(): StateNode {
-    var r = this.incoming.filter(isType('next'))[0];
+    const r = this.incoming.filter(isType('next'))[0];
     return r ? <StateNode>r.source : null;
   }
 }

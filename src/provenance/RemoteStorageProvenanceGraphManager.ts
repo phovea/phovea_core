@@ -3,8 +3,8 @@
  */
 import {mixin} from '../index';
 import {get as getData, remove as removeData, upload, list as listData} from '../data';
-import ProvenanceGraph, {IProvenanceGraphManager, provenanceGraphFactory} from './ProvenanceGraph';
-import GraphBase, {IGraphDataDescription} from '../graph/GraphBase';
+import ProvenanceGraph, {IProvenanceGraphManager, provenanceGraphFactory, IProvenanceGraphDataDescription} from './ProvenanceGraph';
+import GraphBase from '../graph/GraphBase';
 import GraphProxy from '../graph/GraphProxy';
 import {retrieve} from '../session';
 
@@ -25,16 +25,16 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     return listData((d) => d.desc.type === 'graph' && (<any>d.desc).attrs.graphtype === 'provenance_graph' && (<any>d.desc).attrs.of === this.options.application).then((d) => d.map((di) => di.desc));
   }
 
-  getGraph(desc: IGraphDataDescription): Promise<GraphBase> {
+  getGraph(desc: IProvenanceGraphDataDescription): Promise<GraphBase> {
     return getData(desc.id)
       .then((graph: GraphProxy) => graph.impl(provenanceGraphFactory()));
   }
 
-  get(desc: IGraphDataDescription): Promise<ProvenanceGraph> {
+  get(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
     return this.getGraph(desc).then((impl: GraphBase) => new ProvenanceGraph(desc, impl));
   }
 
-  delete(desc: IGraphDataDescription) {
+  delete(desc: IProvenanceGraphDataDescription) {
     return removeData(desc);
   }
 
@@ -55,23 +55,26 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     };
     return upload(desc)
       .then((graph: GraphProxy) => graph.impl(provenanceGraphFactory()))
-      .then((impl: GraphBase) => new ProvenanceGraph(impl.desc, impl));
+      .then((impl: GraphBase) => new ProvenanceGraph(<IProvenanceGraphDataDescription>impl.desc, impl));
   }
 
   create() {
-    const desc: any = {
+    const desc: IProvenanceGraphDataDescription = {
+      id: undefined,
       type: 'graph',
       attrs: {
         graphtype: 'provenance_graph',
         of: this.options.application
       },
       name: 'Workspace for ' + this.options.application,
+      fqname: 'provenance_graphs/Workspace for ' + this.options.application,
       creator: getCurrentUser(),
+      size: [0,0],
       ts: Date.now(),
       description: ''
     };
     return upload(desc)
       .then((graph: GraphProxy) => graph.impl(provenanceGraphFactory()))
-      .then((impl: GraphBase) => new ProvenanceGraph(impl.desc, impl));
+      .then((impl: GraphBase) => new ProvenanceGraph(<IProvenanceGraphDataDescription>impl.desc, impl));
   }
 }

@@ -33,7 +33,7 @@ export default class StateNode extends GraphNode {
   }
 
   static restore(p) {
-    var r = new StateNode(p.attrs.name);
+    const r = new StateNode(p.attrs.name);
     return r.restore(p);
   }
 
@@ -87,12 +87,12 @@ export default class StateNode extends GraphNode {
   }
 
   get nextState(): StateNode {
-    var r = this.next[0];
+    const r = this.next[0];
     return r ? r.resultsIn : null;
   }
 
   get path(): StateNode[] {
-    var p = this.previousState,
+    const p = this.previousState,
       r: StateNode[] = [];
     r.unshift(this);
     if (p) {
@@ -102,7 +102,7 @@ export default class StateNode extends GraphNode {
   }
 
   private pathImpl(r: StateNode[]) {
-    var p = this.previousState;
+    const p = this.previousState;
     r.unshift(this);
     if (p && r.indexOf(p) < 0) { //no loop
       //console.log(p.toString() + ' path '+ r.join(','));

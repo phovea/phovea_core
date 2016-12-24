@@ -593,7 +593,10 @@ class SliceColVector extends AVector {
       type: 'vector',
       idtype: m.rowtype,
       size: this.dim[0],
-      value: this.valuetype
+      value: this.valuetype,
+      description: m.desc.description,
+      creator: m.desc.creator,
+      ts: m.desc.ts
     };
     this.root = this;
   }
@@ -701,7 +704,10 @@ class SliceRowVector extends AVector implements IVector {
       type: 'vector',
       idtype: m.coltype,
       size: this.dim[1],
-      value: this.valuetype
+      value: this.valuetype,
+      description: m.desc.description,
+      creator: m.desc.creator,
+      ts: m.desc.ts
     };
     this.root = this;
   }
@@ -796,7 +802,10 @@ class ProjectedVector extends AVector implements IVector {
       id: m.desc.id + '-p',
       size: this.dim[0],
       idtype: m.rowtype,
-      value: this.valuetype
+      value: this.valuetype,
+      description: m.desc.description,
+      creator: m.desc.creator,
+      ts: m.desc.ts
     };
     this.root = this;
   }

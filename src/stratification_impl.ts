@@ -98,7 +98,7 @@ export class Stratification extends ADataType<IStratificationDataDescription> im
 
   vector(): Promise<IVector> {
     if (!this._v) {
-      this._v = this.loader(this.desc).then((data) => new StratificationVector(this, data.range, this.desc));
+      this._v = this.loader(this.desc).then((data) => new StratificationVector(this, data.range));
     }
     return this._v;
   }
@@ -164,21 +164,25 @@ export class StratificationVector extends AVector implements IVector {
 
   private _cache: string[] = null;
 
-  constructor(private strat: Stratification, private range: CompositeRange1D, desc: IDataDescription) {
+  constructor(private strat: Stratification, private range: CompositeRange1D) {
     super(null);
     this.root = this;
     this.valuetype = {
       type: <any>VALUE_TYPE_CATEGORICAL,
       categories: range.groups.map((g) => ({name: g.name, label: g.name, color: g.color}))
     };
+    const d = strat.desc;
     this.desc = {
-      name: desc.name,
-      fqname: desc.fqname,
-      id: desc.id,
+      name: d.name,
+      fqname: d.fqname,
+      description: d.description,
+      id: d.id + '-v',
       type: 'vector',
-      size: strat.length,
-      idtype: strat.idtype,
-      value: this.valuetype
+      size: d.size,
+      idtype: d.idtype,
+      value: this.valuetype,
+      creator: d.creator,
+      ts: d.ts
     };
   }
 
@@ -287,10 +291,13 @@ export function wrapCategoricalVector(v: IVector) {
     type: 'stratification',
     name: v.desc.name + '-s',
     fqname: v.desc.fqname + '-s',
+    description: v.desc.description,
     idtype: v.idtype,
     ngroups: cats.length,
     groups: cats,
-    size: v.length
+    size: v.length,
+    creator: v.desc.creator,
+    ts: v.desc.ts
   };
 
   function loader() {

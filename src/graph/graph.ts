@@ -6,7 +6,7 @@
  */
 import {SelectOperation, resolve as idtypes_resolve, SelectAble} from '../idtype';
 import {all, parse, RangeLike, list} from '../range';
-import {mixin, IPersistable, flagId, uniqueId} from '../index';
+import {IPersistable, flagId, uniqueId} from '../index';
 import {EventHandler} from '../event';
 import {IDataType} from '../datatype';
 
@@ -16,46 +16,45 @@ export const DIM_EDGES = 1;
 export const IDTYPE_EDGES = '_edges';
 
 export class AttributeContainer extends EventHandler implements IPersistable {
-  // TODO convert to Map
-  private _attrs: {[key: string]: any} = {};
+  private attrMap = new Map<string, any>();
 
   persist(): any {
-    if (Object.keys(this._attrs).length > 0) {
-      return {
-        attrs: mixin({}, this._attrs) //copy
-      };
+    if (this.attrMap.size > 0) {
+      const attrs = {};
+      this.attrMap.forEach((v, k) => attrs[k] = v);
+      return {attrs};
     }
     return {};
   }
 
   setAttr(attr: string, value: any) {
-    const bak = this._attrs[attr];
+    const bak = this.attrs.get(attr);
     if (bak === value && !Array.isArray(bak)) {
       return;
     }
-    this._attrs[attr] = value;
+    this.attrs.set(attr, value);
     this.fire('attr-' + attr, value, bak);
     this.fire('setAttr', attr, value, bak);
   }
 
   hasAttr(attr: string) {
-    return attr in this._attrs;
+    return this.attrs.has(attr);
   }
 
   getAttr(attr: string, default_: any = null) {
-    if (attr in this._attrs) {
-      return this._attrs[attr];
+    if (this.attrs.has(attr)) {
+      return this.attrs.get(attr);
     }
     return default_;
   }
 
   get attrs() {
-    return Object.keys(this._attrs);
+    return Array.from(this.attrs.keys());
   }
 
   restore(persisted: any) {
     if (persisted.attrs) {
-      this._attrs = persisted.attrs;
+      Object.keys(persisted.attrs).forEach((k) => this.attrMap.set(k, persisted.attrs[k]));
     }
     return this;
   }
@@ -64,12 +63,12 @@ export class AttributeContainer extends EventHandler implements IPersistable {
  * a simple graph none
  */
 export class GraphNode extends AttributeContainer {
-  outgoing: GraphEdge[] = [];
-  incoming: GraphEdge[] = [];
+  readonly outgoing: GraphEdge[] = [];
+  readonly incoming: GraphEdge[] = [];
 
   private _id: number = NaN;
 
-  constructor(public type: string = 'node', id: number = NaN) {
+  constructor(public readonly type: string = 'node', id: number = NaN) {
     super();
     this._id = flagId('graph_node', id);
   }
@@ -90,7 +89,7 @@ export class GraphNode extends AttributeContainer {
 
   restore(persisted: any) {
     super.restore(persisted);
-    this.type = persisted.type;
+    (<any>this).type = persisted.type;
     this._id = flagId('graph_node', persisted.id);
     return this;
   }
@@ -100,7 +99,7 @@ export class GraphEdge extends AttributeContainer {
 
   private _id: number = NaN;
 
-  constructor(public type: string = 'edge', public source: GraphNode = null, public target: GraphNode = null, id: number = NaN) {
+  constructor(public readonly type: string = 'edge', public readonly source: GraphNode = null, public readonly target: GraphNode = null, id: number = NaN) {
     super();
     this._id = flagId('graph_edge', id);
     if (source && target) {
@@ -130,7 +129,7 @@ export class GraphEdge extends AttributeContainer {
   }
 
   toString() {
-    return this.source + ' ' + this.type + ' ' + this.target;
+    return `${this.source} ${this.type} ${this.target}`;
   }
 
   persist() {
@@ -144,10 +143,10 @@ export class GraphEdge extends AttributeContainer {
 
   restore(p: any, nodes?: (id: number) => GraphNode) {
     super.restore(p);
-    this.type = p.type;
+    (<any>this).type = p.type;
     this._id = flagId('graph_edge', p.id);
-    this.source = nodes(p.source);
-    this.target = nodes(p.target);
+    (<any>this).source = nodes(p.source);
+    (<any>this).target = nodes(p.target);
     this.init();
     return this;
   }
@@ -159,10 +158,10 @@ export function isType(type: string|RegExp) {
 
 
 export interface IGraph extends IDataType {
-  nodes: GraphNode[];
-  nnodes: number;
-  edges: GraphEdge[];
-  nedges: number;
+  readonly nodes: GraphNode[];
+  readonly nnodes: number;
+  readonly edges: GraphEdge[];
+  readonly nedges: number;
 
   addNode(n: GraphNode): this|Promise<this>;
   updateNode(n: GraphNode): this|Promise<this>;

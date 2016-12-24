@@ -367,6 +367,9 @@ export class StratificationVector extends ADataType<IStratificationDataDescripti
     super({
       id: v.desc.id + '-s',
       name: v.desc.name,
+      description: v.desc.description,
+      creator: v.desc.creator,
+      ts: v.desc.ts,
       fqname: v.desc.fqname,
       type: 'stratification',
       idtype: v.idtype,

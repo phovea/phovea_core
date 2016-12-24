@@ -38,25 +38,25 @@ export interface IObjectRef<T> {
   /**
    * name of the object
    */
-  name: string;
+  readonly name: string;
   /**
    * category one of categories
    */
-  category: string;
+  readonly category: string;
   /**
    * the value
    */
-  v: Promise<T>;
+  readonly v: Promise<T>;
 
   /**
    * maybe null if not defined
    */
-  value: T;
+  readonly value: T;
 
   /**
    * a hash for avoiding false duplicate detection
    */
-  hash: string;
+  readonly hash: string;
 }
 
 /**
@@ -186,7 +186,7 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
 
 
   persist() {
-    var r = super.persist();
+    const r = super.persist();
     if (!r.attrs) {
       r.attrs = {};
     }
@@ -202,17 +202,17 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
   }
 
   static restore(p) {
-    var r = new ObjectNode<any>(null, p.attrs.name, p.attrs.category, p.attrs.hash || p.attrs.name + '_' + p.attrs.category);
+    const r = new ObjectNode<any>(null, p.attrs.name, p.attrs.category, p.attrs.hash || p.attrs.name + '_' + p.attrs.category);
     return r.restore(p);
   }
 
   get createdBy() {
-    var r = this.incoming.filter(isType('creates'))[0];
+    const r = this.incoming.filter(isType('creates'))[0];
     return r ? <ActionNode>r.source : null;
   }
 
   get removedBy() {
-    var r = this.incoming.filter(isType('removes'))[0];
+    const r = this.incoming.filter(isType('removes'))[0];
     return r ? <ActionNode>r.source : null;
   }
 

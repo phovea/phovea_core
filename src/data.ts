@@ -56,6 +56,9 @@ function transformEntry(desc: IDataDescription): Promise<IDataType> {
   }
   (<any>desc).id = desc.id || fixId(desc.name + randomId(5));
   (<any>desc).fqname = desc.fqname || desc.name;
+  (<any>desc).description = desc.description || '';
+  (<any>desc).creator = desc.creator || 'Anonymous';
+  (<any>desc).ts = desc.ts || 0;
 
   if (cacheById.has(desc.id)) {
     return cacheById.get(desc.id);
@@ -283,9 +286,12 @@ export function remove(entry: IDataType | IDataDescription): Promise<Boolean> {
  */
 export function convertToTable(list: IDataType[]) {
   return wrapObjects({
-    id: '_data',
+    id: '_data'+randomId(5),
     name: 'data',
+    description: 'list of data types',
     fqname: 'custom/data',
+    creator: 'Anonymous',
+    ts: Date.now(),
     type: 'table',
     idtype: '_data',
     size: [list.length, 4],

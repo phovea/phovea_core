@@ -2,9 +2,8 @@
  * Created by sam on 12.02.2015.
  */
 import * as graph from '../graph';
-import {provenanceGraphFactory, default as ProvenanceGraph} from './ProvenanceGraph';
+import {provenanceGraphFactory, default as ProvenanceGraph, IProvenanceGraphDataDescription} from './ProvenanceGraph';
 import StateNode from './StateNode';
-import {IGraphDataDescription} from "../graph/GraphBase";
 export {default as ActionNode, action, ActionMetaData, IAction, meta} from './ActionNode';
 export {default as ObjectNode, cat, IObjectRef, op, ref} from './ObjectNode';
 export {
@@ -19,6 +18,7 @@ export {
 export {default as StateNode} from './StateNode';
 export {
   default as ProvenanceGraph,
+  IProvenanceGraphDataDescription,
   compress,
   IActionCompressor,
   ICmdFunction,
@@ -38,7 +38,7 @@ export {GraphEdge} from '../graph/graph';
 export const graphModule = graph;
 
 export function findLatestPath(state: StateNode) {
-  var path = state.path.slice();
+  const path = state.path.slice();
   //compute the first path to the end
   while ((state = state.nextState) != null && (path.indexOf(state) < 0)) {
     path.push(state);
@@ -47,12 +47,19 @@ export function findLatestPath(state: StateNode) {
 }
 
 export function createDummy() {
-  const desc: IGraphDataDescription = {
+  const desc: IProvenanceGraphDataDescription = {
     type: 'provenance_graph',
     id: 'dummy',
     name: 'dummy',
     fqname: 'dummy',
-    size: [0, 0]
+    description: '',
+    creator: 'Anonymous',
+    ts: Date.now(),
+    size: [0, 0],
+    attrs: {
+      graphtype: 'provenance_graph',
+      of: 'dummy'
+    }
   };
   return new ProvenanceGraph(desc, new graph.MemoryGraph(desc, [], [], provenanceGraphFactory()));
 }

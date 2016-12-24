@@ -28,12 +28,17 @@ export interface IDataDescription {
    * the name of the dataset
    */
   readonly name: string;
+
+  readonly description: string;
   /**
    * a fully qualified name, e.g. project_name/name
    */
   readonly fqname: string;
 
   readonly [extras: string]: any;
+
+  readonly creator: string;
+  readonly ts: number;
 }
 
 /**
