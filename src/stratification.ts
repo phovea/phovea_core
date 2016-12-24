@@ -20,11 +20,15 @@ export interface IGroup {
 }
 
 export function guessColor(stratification: string, group: string) {
-  switch(group.toLowerCase()) {
-    case 'male': return 'blue';
-    case 'female': return 'red';
-    case 'deceased': return '#e41a1b';
-    case 'living': return '#377eb8';
+  switch (group.toLowerCase()) {
+    case 'male':
+      return 'blue';
+    case 'female':
+      return 'red';
+    case 'deceased':
+      return '#e41a1b';
+    case 'living':
+      return '#377eb8';
   }
   return 'gray';
 }
@@ -42,17 +46,17 @@ export interface IStratificationDataDescription extends IDataDescription {
 
 export interface IStratification extends IDataType {
   readonly desc: IStratificationDataDescription;
-  range() : Promise<CompositeRange1D>;
+  range(): Promise<CompositeRange1D>;
   idRange(): Promise<CompositeRange1D>;
   vector(): Promise<IVector>;
 
   names();
-  names(range:RangeLike);
+  names(range: RangeLike);
 
   ids(): Promise<Range>;
-  ids(range:RangeLike): Promise<Range>;
+  ids(range: RangeLike): Promise<Range>;
 
-  hist(bins? : number, range?:RangeLike): Promise<IHistogram>;
+  hist(bins?: number, range?: RangeLike): Promise<IHistogram>;
 
   readonly length: number;
   readonly ngroups: number;
@@ -72,7 +76,7 @@ export default IStratification;
  * root matrix implementation holding the data
  */
 export class StratificationGroup extends SelectAble implements IStratification {
-  constructor(private root:IStratification, private groupIndex:number, private groupDesc:IGroup) {
+  constructor(private root: IStratification, private groupIndex: number, private groupDesc: IGroup) {
     super();
   }
 
@@ -88,7 +92,7 @@ export class StratificationGroup extends SelectAble implements IStratification {
     return 1;
   }
 
-  group(groupIndex:number): IStratification {
+  group(groupIndex: number): IStratification {
     if (groupIndex === 0) {
       return this;
     }
@@ -99,18 +103,18 @@ export class StratificationGroup extends SelectAble implements IStratification {
     return this.root.idtype;
   }
 
-  hist(bins?:number, range: RangeLike = all()):Promise<IHistogram> {
+  hist(bins?: number, range: RangeLike = all()): Promise<IHistogram> {
     //FIXME
     return this.range().then((r) => {
       return rangeHist(r);
     });
   }
 
-  vector():Promise<IVector> {
-    return Promise.all<any>([this.root.vector(), this.rangeGroup()]).then((arr:[IVector, Range1DGroup]) => arr[0].view(list(arr[1])));
+  vector(): Promise<IVector> {
+    return Promise.all<any>([this.root.vector(), this.rangeGroup()]).then((arr: [IVector, Range1DGroup]) => arr[0].view(list(arr[1])));
   }
 
-  origin():Promise<IDataType> {
+  origin(): Promise<IDataType> {
     return this.root.origin();
   }
 
@@ -133,21 +137,21 @@ export class StratificationGroup extends SelectAble implements IStratification {
     });
   }
 
-  names(range:RangeLike = all()) {
+  names(range: RangeLike = all()) {
     return this.rangeGroup().then((g) => {
       const r = list(g).preMultiply(parse(range));
       return this.root.names(r);
     });
   }
 
-  ids(range:RangeLike = all()):Promise<Range> {
+  ids(range: RangeLike = all()): Promise<Range> {
     return this.rangeGroup().then((g) => {
       const r = list(g).preMultiply(parse(range));
       return this.root.ids(r);
     });
   }
 
-  idView(idRange:RangeLike = all()):Promise<any> {
+  idView(idRange: RangeLike = all()): Promise<any> {
     return Promise.reject('not implemented');
   }
 
@@ -178,7 +182,7 @@ export class StratificationGroup extends SelectAble implements IStratification {
     };
   }
 
-  restore(persisted:any) {
+  restore(persisted: any) {
     return this;
   }
 }

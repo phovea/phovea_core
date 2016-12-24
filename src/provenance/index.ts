@@ -6,10 +6,30 @@ import {provenanceGraphFactory, default as ProvenanceGraph} from './ProvenanceGr
 import StateNode from './StateNode';
 import {IGraphDataDescription} from "../graph/GraphBase";
 export {default as ActionNode, action, ActionMetaData, IAction, meta} from './ActionNode';
-export {default as ObjectNode, cat, IObjectRef,  op, ref} from './ObjectNode';
-export {default as SlideNode, DEFAULT_DURATION, DEFAULT_TRANSITION, IArrowStateAnnotation, IFrameStateAnnotation, IStateAnnotation, ITextStateAnnotation} from './SlideNode';
+export {default as ObjectNode, cat, IObjectRef, op, ref} from './ObjectNode';
+export {
+  default as SlideNode,
+  DEFAULT_DURATION,
+  DEFAULT_TRANSITION,
+  IArrowStateAnnotation,
+  IFrameStateAnnotation,
+  IStateAnnotation,
+  ITextStateAnnotation
+} from './SlideNode';
 export {default as StateNode} from './StateNode';
-export {default as ProvenanceGraph, compress, IActionCompressor, ICmdFunction, ICmdFunctionFactory, ICmdResult, IInverseActionCreator, IProvenanceGraphManager, ProvenanceGraphDim, provenanceGraphFactory, toSlidePath} from './ProvenanceGraph';
+export {
+  default as ProvenanceGraph,
+  compress,
+  IActionCompressor,
+  ICmdFunction,
+  ICmdFunctionFactory,
+  ICmdResult,
+  IInverseActionCreator,
+  IProvenanceGraphManager,
+  ProvenanceGraphDim,
+  provenanceGraphFactory,
+  toSlidePath
+} from './ProvenanceGraph';
 export {default as LocalStorageProvenanceGraphManager} from './LocalStorageProvenanceGraphManager';
 export {default as RemoteStorageProvenanceGraphManager} from './RemoteStorageProvenanceGraphManager';
 export {default as MixedStorageProvenanceGraphManager} from './MixedStorageProvenanceGraphManager';
@@ -17,7 +37,7 @@ export {GraphEdge} from '../graph/graph';
 
 export const graphModule = graph;
 
-export function findLatestPath(state:StateNode) {
+export function findLatestPath(state: StateNode) {
   var path = state.path.slice();
   //compute the first path to the end
   while ((state = state.nextState) != null && (path.indexOf(state) < 0)) {
@@ -27,12 +47,12 @@ export function findLatestPath(state:StateNode) {
 }
 
 export function createDummy() {
-  const desc : IGraphDataDescription = {
+  const desc: IGraphDataDescription = {
     type: 'provenance_graph',
     id: 'dummy',
     name: 'dummy',
     fqname: 'dummy',
-    size: [0,0]
+    size: [0, 0]
   };
   return new ProvenanceGraph(desc, new graph.MemoryGraph(desc, [], [], provenanceGraphFactory()));
 }

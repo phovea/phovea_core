@@ -10,10 +10,10 @@ export const DEFAULT_TRANSITION = 0; //ms
 
 export interface IStateAnnotation {
   type: string;
-  pos: [number, number] | { anchor: string, offset: [number, number] } ;
-  styles?: { [key: string]: string; };
+  pos: [number, number] | {anchor: string, offset: [number, number]} ;
+  styles?: {[key: string]: string;};
 
-  [key: string] : any;
+  [key: string]: any;
 }
 
 export interface ITextStateAnnotation extends IStateAnnotation {
@@ -38,19 +38,19 @@ export default class SlideNode extends GraphNode {
     super('story');
   }
 
-  get name():string {
+  get name(): string {
     return super.getAttr('name', '');
   }
 
-  set name(value:string) {
+  set name(value: string) {
     super.setAttr('name', value);
   }
 
-  get description():string {
+  get description(): string {
     return super.getAttr('description', '');
   }
 
-  set description(value:string) {
+  set description(value: string) {
     super.setAttr('description', value);
   }
 
@@ -63,7 +63,7 @@ export default class SlideNode extends GraphNode {
     return edge ? <StateNode>edge.target : null;
   }
 
-  static restore(dump:any) {
+  static restore(dump: any) {
     return new SlideNode().restore(dump);
   }
 
@@ -90,7 +90,7 @@ export default class SlideNode extends GraphNode {
     return <number>this.getAttr('duration', DEFAULT_DURATION);
   }
 
-  set duration(value:number) {
+  set duration(value: number) {
     this.setAttr('duration', value);
   }
 
@@ -102,7 +102,7 @@ export default class SlideNode extends GraphNode {
     return <number>this.getAttr('transition', DEFAULT_TRANSITION);
   }
 
-  set transition(value:number) {
+  set transition(value: number) {
     this.setAttr('transition', value);
   }
 
@@ -110,30 +110,30 @@ export default class SlideNode extends GraphNode {
     return <IStateAnnotation[]>this.getAttr('annotations', []);
   }
 
-  setAnnotation(index:number, ann:IStateAnnotation) {
+  setAnnotation(index: number, ann: IStateAnnotation) {
     var old = this.annotations;
     old[index] = ann;
     this.setAttr('annotations', old);
   }
 
-  updateAnnotation(ann:IStateAnnotation) {
+  updateAnnotation(ann: IStateAnnotation) {
     //since it is a reference just updated
     this.setAttr('annotations', this.annotations);
   }
 
-  removeAnnotation(index:number) {
+  removeAnnotation(index: number) {
     var old = this.annotations;
     old.splice(index, 1);
     this.setAttr('annotations', old);
   }
 
-  removeAnnotationElem(elem:IStateAnnotation) {
+  removeAnnotationElem(elem: IStateAnnotation) {
     var old = this.annotations;
     old.splice(old.indexOf(elem), 1);
     this.setAttr('annotations', old);
   }
 
-  pushAnnotation(ann:IStateAnnotation) {
+  pushAnnotation(ann: IStateAnnotation) {
     var old = this.annotations;
     old.push(ann);
     this.setAttr('annotations', old);
@@ -144,7 +144,7 @@ export default class SlideNode extends GraphNode {
     return this.previous == null;
   }
 
-  static makeText(title?:string) {
+  static makeText(title?: string) {
     const s = new SlideNode();
     if (title) {
       s.pushAnnotation({

@@ -16,7 +16,7 @@ function getCurrentUser() {
  * additional data about a performed action
  */
 export class ActionMetaData {
-  constructor(public category:string, public operation:string, public name:string, public timestamp:number = Date.now(), public user:string = getCurrentUser()) {
+  constructor(public category: string, public operation: string, public name: string, public timestamp: number = Date.now(), public user: string = getCurrentUser()) {
 
   }
 
@@ -24,7 +24,7 @@ export class ActionMetaData {
     return new ActionMetaData(p.category, p.operation, p.name, p.timestamp, p.user);
   }
 
-  eq(that:ActionMetaData) {
+  eq(that: ActionMetaData) {
     return this.category === that.category && this.operation === that.operation && this.name === that.name;
   }
 
@@ -33,7 +33,7 @@ export class ActionMetaData {
    * @param that
    * @returns {boolean}
    */
-  inv(that:ActionMetaData) {
+  inv(that: ActionMetaData) {
     if (this.category !== that.category) {
       return false;
     }
@@ -48,14 +48,14 @@ export class ActionMetaData {
   }
 }
 
-export function meta(name:string, category:string = cat.data, operation:string = op.update, timestamp:number = Date.now(), user:string = getCurrentUser()) {
+export function meta(name: string, category: string = cat.data, operation: string = op.update, timestamp: number = Date.now(), user: string = getCurrentUser()) {
   return new ActionMetaData(category, operation, name, timestamp, user);
 }
 
 export interface IAction {
   meta: ActionMetaData;
-  id : string;
-  f : ICmdFunction;
+  id: string;
+  f: ICmdFunction;
   inputs?: IObjectRef<any>[];
   parameter?: any;
 }
@@ -69,7 +69,7 @@ export interface IAction {
  * @param parameter
  * @returns {{meta: ActionMetaData, id: string, f: (function(IObjectRef<any>[], any, ProvenanceGraph): ICmdResult), inputs: IObjectRef<any>[], parameter: any}}
  */
-export function action(meta:ActionMetaData, id:string, f:ICmdFunction, inputs:IObjectRef<any>[] = [], parameter:any = {}):IAction {
+export function action(meta: ActionMetaData, id: string, f: ICmdFunction, inputs: IObjectRef<any>[] = [], parameter: any = {}): IAction {
   return {
     meta: meta,
     id: id,
@@ -85,7 +85,7 @@ export function action(meta:ActionMetaData, id:string, f:ICmdFunction, inputs:IO
  * @param b
  * @returns {number}
  */
-function byIndex(a:AttributeContainer, b:AttributeContainer) {
+function byIndex(a: AttributeContainer, b: AttributeContainer) {
   const ai = +a.getAttr('index', 0);
   const bi = +b.getAttr('index', 0);
   return ai - bi;
@@ -93,9 +93,9 @@ function byIndex(a:AttributeContainer, b:AttributeContainer) {
 
 
 export default class ActionNode extends GraphNode {
-  private inverter:IInverseActionCreator;
+  private inverter: IInverseActionCreator;
 
-  constructor(meta:ActionMetaData, f_id:string, private f:ICmdFunction, parameter:any = {}) {
+  constructor(meta: ActionMetaData, f_id: string, private f: ICmdFunction, parameter: any = {}) {
     super('action');
     super.setAttr('meta', meta);
     super.setAttr('f_id', f_id);
@@ -110,33 +110,33 @@ export default class ActionNode extends GraphNode {
     return this.meta.name;
   }
 
-  get meta():ActionMetaData {
+  get meta(): ActionMetaData {
     return super.getAttr('meta');
   }
 
-  get f_id():string {
+  get f_id(): string {
     return super.getAttr('f_id');
   }
 
-  get parameter():any {
+  get parameter(): any {
     return super.getAttr('parameter');
   }
 
-  set parameter(value:any) {
+  set parameter(value: any) {
     super.setAttr('parameter', value);
   }
 
-  get onceExecuted():boolean {
+  get onceExecuted(): boolean {
     return super.getAttr('onceExecuted', false);
   }
 
-  set onceExecuted(value:boolean) {
+  set onceExecuted(value: boolean) {
     if (this.onceExecuted !== value) {
       super.setAttr('onceExecuted', value);
     }
   }
 
-  static restore(r, factory:ICmdFunctionFactory) {
+  static restore(r, factory: ICmdFunctionFactory) {
     var a = new ActionNode(ActionMetaData.restore(r.attrs.meta), r.attrs.f_id, factory(r.attrs.f_id), r.attrs.parameter);
     return a.restore(r);
   }
@@ -163,7 +163,7 @@ export default class ActionNode extends GraphNode {
     return this.outgoing.filter(isType('inverses'))[0] != null;
   }
 
-  getOrCreateInverse(graph:ProvenanceGraph) {
+  getOrCreateInverse(graph: ProvenanceGraph) {
     var i = this.inversedBy;
     if (i) {
       return i;
@@ -175,7 +175,7 @@ export default class ActionNode extends GraphNode {
     return null;
   }
 
-  updateInverse(graph:ProvenanceGraph, inverter:IInverseActionCreator) {
+  updateInverse(graph: ProvenanceGraph, inverter: IInverseActionCreator) {
     var i = this.inversedBy;
     if (i) { //update with the actual values / parameter only
       var c = inverter.call(this, this.requires, this.creates, this.removes);
@@ -190,12 +190,12 @@ export default class ActionNode extends GraphNode {
     }
   }
 
-  execute(graph:ProvenanceGraph, withinMilliseconds:number):Promise<ICmdResult> {
+  execute(graph: ProvenanceGraph, withinMilliseconds: number): Promise<ICmdResult> {
     var r = this.f.call(this, this.requires, this.parameter, graph, <number>withinMilliseconds);
     return Promise.resolve(r);
   }
 
-  equals(that:ActionNode):boolean {
+  equals(that: ActionNode): boolean {
     if (!(this.meta.category === that.meta.category && that.meta.operation === that.meta.operation)) {
       return false;
     }
@@ -206,28 +206,28 @@ export default class ActionNode extends GraphNode {
     return true;
   }
 
-  get uses():ObjectNode<any>[] {
+  get uses(): ObjectNode<any>[] {
     return this.outgoing.filter(isType(/(creates|removes|requires)/)).map((e) => <ObjectNode<any>>e.target);
   }
 
-  get creates():ObjectNode<any>[] {
+  get creates(): ObjectNode<any>[] {
     return this.outgoing.filter(isType('creates')).map((e) => <ObjectNode<any>>e.target);
   }
 
-  get removes():ObjectNode<any>[] {
+  get removes(): ObjectNode<any>[] {
     return this.outgoing.filter(isType('removes')).sort(byIndex).map((e) => <ObjectNode<any>>e.target);
   }
 
-  get requires():ObjectNode<any>[] {
+  get requires(): ObjectNode<any>[] {
     return this.outgoing.filter(isType('requires')).sort(byIndex).map((e) => <ObjectNode<any>>e.target);
   }
 
-  get resultsIn():StateNode {
+  get resultsIn(): StateNode {
     var r = this.outgoing.filter(isType('resultsIn'))[0];
     return r ? <StateNode>r.target : null;
   }
 
-  get previous():StateNode {
+  get previous(): StateNode {
     var r = this.incoming.filter(isType('next'))[0];
     return r ? <StateNode>r.source : null;
   }

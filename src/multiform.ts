@@ -496,7 +496,7 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
 
     //create content
     this.content = this.node;
-    const wrap = this.options.wrap || ((d)=>d);
+    const wrap = this.options.wrap || ((d) => d);
     //create groups for all grid elems
     //TODO how to layout as a grid
     if (this.dims.length === 1) {
@@ -689,7 +689,7 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
   }
 
 
-  gridSize(raw = false): { cols: number[]; rows: number[]; grid: number[][][]} {
+  gridSize(raw = false): {cols: number[]; rows: number[]; grid: number[][][]} {
     const sizes = this.grid.map(raw ? (elem) => elem.rawSize : (elem) => elem.size);
 
     if (this.dims.length === 1) {

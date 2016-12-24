@@ -31,15 +31,15 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
   }
 
 
-  getGraph(desc:IGraphDataDescription):Promise<LocalStorageGraph> {
+  getGraph(desc: IGraphDataDescription): Promise<LocalStorageGraph> {
     return Promise.resolve(LocalStorageGraph.load(desc, provenanceGraphFactory(), this.options.storage));
   }
 
-  get(desc:IGraphDataDescription):Promise<ProvenanceGraph> {
+  get(desc: IGraphDataDescription): Promise<ProvenanceGraph> {
     return this.getGraph(desc).then((impl) => new ProvenanceGraph(desc, impl));
   }
 
-  clone(graph:GraphBase) {
+  clone(graph: GraphBase) {
     const desc = this.createDesc();
     return this.getGraph(desc).then((new_) => {
       new_.restoreDump(graph.persist(), provenanceGraphFactory());
@@ -47,7 +47,7 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
     });
   }
 
-  import(json:any):Promise<ProvenanceGraph> {
+  import(json: any): Promise<ProvenanceGraph> {
     const desc = this.createDesc();
     return this.getGraph(desc).then((new_) => {
       new_.restoreDump(json, provenanceGraphFactory());
@@ -55,7 +55,7 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
     });
   }
 
-  delete(desc:IGraphDataDescription) {
+  delete(desc: IGraphDataDescription) {
     var lists = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
     lists.splice(lists.indexOf(desc.id), 1);
     LocalStorageGraph.delete(desc);
@@ -67,7 +67,7 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
   private createDesc() {
     const lists = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
     const id = this.options.prefix + (lists.length > 0 ? String(1 + Math.max(...lists.map((d) => parseInt(d.slice(this.options.prefix.length), 10)))) : '0');
-    const desc : IGraphDataDescription= {
+    const desc: IGraphDataDescription = {
       type: 'provenance_graph',
       name: 'Local Workspace#' + id,
       fqname: this.options.prefix + '.Provenance Graph #' + id,

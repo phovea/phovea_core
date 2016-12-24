@@ -9,8 +9,8 @@ import GraphBase from '../graph/GraphBase';
 import {IGraphDataDescription} from "../graph/GraphBase";
 
 export default class MixedStorageProvenanceGraphManager implements IProvenanceGraphManager {
-  private remote:RemoteStorageProvenanceGraphManager;
-  private local:LocalStorageProvenanceGraphManager;
+  private remote: RemoteStorageProvenanceGraphManager;
+  private local: LocalStorageProvenanceGraphManager;
 
   constructor(options = {}) {
     this.remote = new RemoteStorageProvenanceGraphManager(options);
@@ -25,11 +25,11 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
     return this.local.list();
   }
 
-  list():Promise<IGraphDataDescription[]> {
+  list(): Promise<IGraphDataDescription[]> {
     return Promise.all([this.listLocal(), this.listRemote()]).then((arr) => arr[0].concat(arr[1]));
   }
 
-  delete(desc:IGraphDataDescription):Promise<boolean> {
+  delete(desc: IGraphDataDescription): Promise<boolean> {
     if ((<any>desc).local) {
       return this.local.delete(desc);
     } else {
@@ -37,7 +37,7 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
     }
   }
 
-  get(desc:IGraphDataDescription):Promise<ProvenanceGraph> {
+  get(desc: IGraphDataDescription): Promise<ProvenanceGraph> {
     if ((<any>desc).local) {
       return this.local.get(desc);
     } else {
@@ -45,7 +45,7 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
     }
   }
 
-  getGraph(desc:IGraphDataDescription):Promise<GraphBase> {
+  getGraph(desc: IGraphDataDescription): Promise<GraphBase> {
     if ((<any>desc).local) {
       return this.local.getGraph(desc);
     } else {
@@ -53,19 +53,19 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
     }
   }
 
-  cloneLocal(desc:IGraphDataDescription):Promise<ProvenanceGraph> {
+  cloneLocal(desc: IGraphDataDescription): Promise<ProvenanceGraph> {
     return this.getGraph(desc).then(this.local.clone.bind(this.local));
   }
 
-  importLocal(json:any) {
+  importLocal(json: any) {
     return this.local.import(json);
   }
 
-  importRemote(json:any) {
+  importRemote(json: any) {
     return this.remote.import(json);
   }
 
-  import(json:any) {
+  import(json: any) {
     return this.importLocal(json);
   }
 

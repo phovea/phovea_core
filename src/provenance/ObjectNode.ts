@@ -42,11 +42,11 @@ export interface IObjectRef<T> {
   /**
    * category one of categories
    */
-  category : string;
+  category: string;
   /**
    * the value
    */
-  v : Promise<T>;
+  v: Promise<T>;
 
   /**
    * maybe null if not defined
@@ -67,7 +67,7 @@ export interface IObjectRef<T> {
  * @param hash
  * @returns {{v: T, name: string, category: string}}
  */
-export function ref<T>(v:T, name:string, category = cat.data, hash = name + '_' + category):IObjectRef<T> {
+export function ref<T>(v: T, name: string, category = cat.data, hash = name + '_' + category): IObjectRef<T> {
   return {
     v: Promise.resolve(v),
     value: v,
@@ -82,7 +82,7 @@ export function ref<T>(v:T, name:string, category = cat.data, hash = name + '_' 
  * @param v
  * @returns {any}
  */
-function persistData(v:any):any {
+function persistData(v: any): any {
   if (v instanceof Element) {
     let e = <Element>v,
       id = e.getAttribute('id');
@@ -98,7 +98,7 @@ function persistData(v:any):any {
   return null;
 }
 
-function restoreData(v:any):any {
+function restoreData(v: any): any {
   if (!v) {
     return null;
   }
@@ -123,10 +123,10 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
   /**
    * a promise of the value accessible via .v
    */
-  private _promise:Promise<T>;
-  private _persisted:any = null;
+  private _promise: Promise<T>;
+  private _persisted: any = null;
 
-  constructor(private _v:T, name:string, category = cat.data, hash = name + '_' + category, description = '') {
+  constructor(private _v: T, name: string, category = cat.data, hash = name + '_' + category, description = '') {
     super('object');
     if (_v != null) { //if the value is given, auto generate a promise for it
       this._promise = Promise.resolve(_v);
@@ -142,9 +142,9 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
     return this._v;
   }
 
-  set value(v:T) {
+  set value(v: T) {
     this._v = v;
-    this._promise = v== null ? null : Promise.resolve(v);
+    this._promise = v == null ? null : Promise.resolve(v);
     this._persisted = null;
   }
 
@@ -168,19 +168,19 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
     return this._promise;
   }
 
-  get name():string {
+  get name(): string {
     return super.getAttr('name', '');
   }
 
-  get category():string {
+  get category(): string {
     return super.getAttr('category', '');
   }
 
-  get hash():string {
+  get hash(): string {
     return super.getAttr('hash', '');
   }
 
-  get description():string {
+  get description(): string {
     return super.getAttr('description', '');
   }
 
@@ -194,7 +194,7 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
     return r;
   }
 
-  restore(p:any) {
+  restore(p: any) {
     this._persisted = p.attrs.v;
     delete p.attrs.v;
     super.restore(p);

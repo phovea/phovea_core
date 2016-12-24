@@ -282,7 +282,12 @@ export function distributeLayout(horizontal: boolean, defaultValue: number, padd
 //-------------
 //   bottom
 
-export function borderLayout(horizontal: boolean, gap: number, percentages: IPadding = {top: 0.2, left: 0.2, right: 0.2, bottom: 0.2}, padding: IPadding = noPadding) {
+export function borderLayout(horizontal: boolean, gap: number, percentages: IPadding = {
+  top: 0.2,
+  left: 0.2,
+  right: 0.2,
+  bottom: 0.2
+}, padding: IPadding = noPadding) {
   function BorderLayout(elems: ILayoutElem[], w: number, h: number, parent: ILayoutElem) {
     w -= padding.left + padding.right;
     h -= padding.top + padding.bottom;

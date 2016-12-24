@@ -29,24 +29,26 @@ export interface IViewDesc extends IPluginDesc {
 }
 
 export interface IView extends ILayoutElem, IEventHandler {
-  readonly data : IDataType[];
-  readonly idtypes : IDType[];
+  readonly data: IDataType[];
+  readonly idtypes: IDType[];
 }
 
 export abstract class AView extends EventHandler implements IView {
-  private _layoutOptions : any = {};
+  private _layoutOptions: any = {};
 
-  abstract setBounds(x:number, y:number, w:number, h:number);
+  abstract setBounds(x: number, y: number, w: number, h: number);
 
   abstract getBounds(): Rect;
+
   abstract get data(): IDataType[];
+
   abstract get idtypes(): IDType[];
 
   setLayoutOption(name: string, value: any) {
     this._layoutOptions[name] = value;
   }
 
-  layoutOption<T>(name: string, default_: T = null) : T {
+  layoutOption<T>(name: string, default_: T = null): T {
     if (this._layoutOptions.hasOwnProperty(name)) {
       return this._layoutOptions[name];
     }
@@ -54,7 +56,7 @@ export abstract class AView extends EventHandler implements IView {
   }
 }
 
-function convertDesc(desc: IPluginDesc) : IViewDesc {
+function convertDesc(desc: IPluginDesc): IViewDesc {
   const d = <any>desc;
   d.type = d.type || 'main';
   d.location = d.location || 'center';

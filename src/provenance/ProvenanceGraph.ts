@@ -14,22 +14,22 @@ import {isType, GraphEdge, GraphNode} from '../graph/graph';
 import GraphBase, {IGraphFactory, IGraphDataDescription} from '../graph/GraphBase';
 
 export interface IInverseActionCreator {
-  (inputs:IObjectRef<any>[], creates:IObjectRef<any>[], removes:IObjectRef<any>[]) : IAction;
+  (inputs: IObjectRef<any>[], creates: IObjectRef<any>[], removes: IObjectRef<any>[]): IAction;
 }
 
 export interface ICmdResult {
   /**
    * the command to revert this command
    */
-  inverse : IAction | IInverseActionCreator;
+  inverse: IAction | IInverseActionCreator;
   /**
    * the created references
    */
-  created? : IObjectRef<any>[];
+  created?: IObjectRef<any>[];
   /**
    * the removed references
    */
-  removed? : IObjectRef<any>[];
+  removed?: IObjectRef<any>[];
 
   /**
    * then number of actual milliseconds consumed
@@ -41,13 +41,13 @@ export interface ICmdResult {
  * abstract definition of a command
  */
 export interface ICmdFunction {
-  (inputs:IObjectRef<any>[], parameters:any, graph:ProvenanceGraph, within:number) : Promise<ICmdResult> | ICmdResult;
+  (inputs: IObjectRef<any>[], parameters: any, graph: ProvenanceGraph, within: number): Promise<ICmdResult> | ICmdResult;
 }
 /**
  * a factory to create from an id the corresponding command
  */
 export interface ICmdFunctionFactory {
-  (id:string): ICmdFunction;
+  (id: string): ICmdFunction;
 }
 
 
@@ -55,18 +55,18 @@ export interface ICmdFunctionFactory {
  * an action compressor is used to compress a series of action to fewer one, e.g. create and remove can be annihilated
  */
 export interface IActionCompressor {
-  (path:ActionNode[]) : ActionNode[];
+  (path: ActionNode[]): ActionNode[];
 }
 
 
-function removeNoops(path:ActionNode[]) {
+function removeNoops(path: ActionNode[]) {
   return path.filter((a) => a.f_id !== 'noop');
 }
 
-function compositeCompressor(cs:IActionCompressor[]) {
-  return (path:ActionNode[]) => {
+function compositeCompressor(cs: IActionCompressor[]) {
+  return (path: ActionNode[]) => {
     path = removeNoops(path);
-    let before:number;
+    let before: number;
     do {
       before = path.length;
       cs.forEach((c) => path = c(path));
@@ -74,8 +74,8 @@ function compositeCompressor(cs:IActionCompressor[]) {
     return path;
   };
 }
-function createCompressor(path:ActionNode[]) {
-  var toload = listPlugins('actionCompressor').filter((plugin:any) => {
+function createCompressor(path: ActionNode[]) {
+  var toload = listPlugins('actionCompressor').filter((plugin: any) => {
     return path.some((action) => action.f_id.match(plugin.matches) != null);
   });
   return loadPlugin(toload).then((loaded) => {
@@ -86,12 +86,12 @@ function createCompressor(path:ActionNode[]) {
  * returns a compressed version of the paths where just the last selection operation remains
  * @param path
  */
-export function compress(path:ActionNode[]) {
+export function compress(path: ActionNode[]) {
   //return Promise.resolve(path);
   //TODO find a strategy how to compress but also invert skipped actions
   return createCompressor(path).then((compressor) => {
     //return path;
-    let before:number;
+    let before: number;
     do {
       before = path.length;
       path = compressor(path);
@@ -107,7 +107,7 @@ export function compress(path:ActionNode[]) {
  * @param b
  * @returns {any}
  */
-function findCommon<T>(a:T[], b:T[]) {
+function findCommon<T>(a: T[], b: T[]) {
   var c = 0;
   while (c < a.length && c < b.length && a[c] === b[c]) { //go to next till a difference
     c++;
@@ -128,7 +128,7 @@ function asFunction(i: any) {
   return i;
 }
 
-function noop(inputs:IObjectRef<any>[], parameter:any):ICmdResult {
+function noop(inputs: IObjectRef<any>[], parameter: any): ICmdResult {
   return {
     inverse: createNoop()
   };
@@ -144,14 +144,14 @@ function createNoop() {
   };
 }
 
-function createLazyCmdFunctionFactory():ICmdFunctionFactory {
+function createLazyCmdFunctionFactory(): ICmdFunctionFactory {
   const facts = listPlugins('actionFactory');
 
   function resolveFun(id) {
     if (id === 'noop') {
       return Promise.resolve(noop);
     }
-    const factory = facts.filter((f:any) => id.match(f.creates) != null)[0];
+    const factory = facts.filter((f: any) => id.match(f.creates) != null)[0];
     if (factory == null) {
       return Promise.reject('no factory found for ' + id);
     }
@@ -160,7 +160,7 @@ function createLazyCmdFunctionFactory():ICmdFunctionFactory {
 
   const lazyFunction = (id) => {
     var _resolved = null;
-    return function (inputs:IObjectRef<any>[], parameters:any) {
+    return function (inputs: IObjectRef<any>[], parameters: any) {
       var that = this, args = Array.from(arguments);
       if (_resolved == null) {
         _resolved = resolveFun(id);
@@ -172,7 +172,7 @@ function createLazyCmdFunctionFactory():ICmdFunctionFactory {
 }
 
 
-export function provenanceGraphFactory():IGraphFactory {
+export function provenanceGraphFactory(): IGraphFactory {
   const factory = createLazyCmdFunctionFactory();
   var types = {
     action: ActionNode,
@@ -193,7 +193,7 @@ export enum ProvenanceGraphDim {
   Slide = 3
 }
 
-export function toSlidePath(s?:SlideNode) {
+export function toSlidePath(s?: SlideNode) {
   var r = [];
   while (s) {
     if (r.indexOf(s) >= 0) {
@@ -207,33 +207,33 @@ export function toSlidePath(s?:SlideNode) {
 
 export interface IProvenanceGraphManager {
   list(): Promise<IDataDescription[]>;
-  get(desc:IDataDescription): Promise<ProvenanceGraph>;
+  get(desc: IDataDescription): Promise<ProvenanceGraph>;
   create(): Promise<ProvenanceGraph>;
 
-  delete(desc:IDataDescription): Promise<boolean>;
+  delete(desc: IDataDescription): Promise<boolean>;
 
-  import(json:any): Promise<ProvenanceGraph>;
+  import(json: any): Promise<ProvenanceGraph>;
 }
 
-function findMetaObject<T>(find:IObjectRef<T>) {
-  return (obj:ObjectNode<any>) => find === obj || ((obj.value === null || obj.value === find.value) && (find.hash === obj.hash));
+function findMetaObject<T>(find: IObjectRef<T>) {
+  return (obj: ObjectNode<any>) => find === obj || ((obj.value === null || obj.value === find.value) && (find.hash === obj.hash));
 }
 
 export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
-  private _actions:ActionNode[] = [];
-  private _objects:ObjectNode<any>[] = [];
-  private _states:StateNode[] = [];
-  private _slides:SlideNode[] = [];
+  private _actions: ActionNode[] = [];
+  private _objects: ObjectNode<any>[] = [];
+  private _states: StateNode[] = [];
+  private _slides: SlideNode[] = [];
 
-  act:StateNode = null;
-  private lastAction:ActionNode = null;
+  act: StateNode = null;
+  private lastAction: ActionNode = null;
 
   //currently executing promise
   private currentlyRunning = false;
   executeCurrentActionWithin = -1;
-  private nextQueue:(()=>any)[] = [];
+  private nextQueue: (() => any)[] = [];
 
-  constructor(desc:IGraphDataDescription, public backend:GraphBase) {
+  constructor(desc: IGraphDataDescription, public backend: GraphBase) {
     super(desc);
     this.propagate(this.backend, 'sync', 'add_edge', 'add_node', 'sync_node', 'sync_edge', 'sync_start');
 
@@ -259,8 +259,8 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return [this._actions.length, this._objects.length, this._states.length, this._slides.length];
   }
 
-  ids(range:Range = all()) {
-    const to_id = (a:any) => a.id;
+  ids(range: Range = all()) {
+    const to_id = (a: any) => a.id;
     const actions = Range1D.from(this._actions.map(to_id));
     const objects = Range1D.from(this._objects.map(to_id));
     const states = Range1D.from(this._states.map(to_id));
@@ -268,22 +268,22 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return Promise.resolve(range.preMultiply(rlist(actions, objects, states, stories)));
   }
 
-  selectState(state:StateNode, op:SelectOperation = SelectOperation.SET, type = defaultSelectionType, extras = {}) {
+  selectState(state: StateNode, op: SelectOperation = SelectOperation.SET, type = defaultSelectionType, extras = {}) {
     this.fire('select_state,select_state_' + type, state, type, op, extras);
     this.select(ProvenanceGraphDim.State, type, state ? [this._states.indexOf(state)] : [], op);
   }
 
-  selectSlide(state:SlideNode, op:SelectOperation = SelectOperation.SET, type = defaultSelectionType, extras = {}) {
+  selectSlide(state: SlideNode, op: SelectOperation = SelectOperation.SET, type = defaultSelectionType, extras = {}) {
     this.fire('select_slide,select_slide_' + type, state, type, op, extras);
     this.select(ProvenanceGraphDim.Slide, type, state ? [this._slides.indexOf(state)] : [], op);
   }
 
-  selectAction(action:ActionNode, op:SelectOperation = SelectOperation.SET, type = defaultSelectionType) {
+  selectAction(action: ActionNode, op: SelectOperation = SelectOperation.SET, type = defaultSelectionType) {
     this.fire('select_action,select_action_' + type, action, type, op);
     this.select(ProvenanceGraphDim.Action, type, action ? [this._actions.indexOf(action)] : [], op);
   }
 
-  selectedStates(type = defaultSelectionType):StateNode[] {
+  selectedStates(type = defaultSelectionType): StateNode[] {
     const sel = this.idtypes[ProvenanceGraphDim.State].selections(type);
     if (sel.isNone) {
       return [];
@@ -301,7 +301,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
   }
 
 
-  selectedSlides(type = defaultSelectionType):SlideNode[] {
+  selectedSlides(type = defaultSelectionType): SlideNode[] {
     const sel = this.idtypes[ProvenanceGraphDim.Slide].selections(type);
     if (sel.isNone) {
       return [];
@@ -318,7 +318,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return nodes;
   }
 
-  get idtypes():IDType[] {
+  get idtypes(): IDType[] {
     return ['_provenance_actions', '_provenance_objects', '_provenance_states', '_provenance_stories'].map(resolveIDType);
   }
 
@@ -342,7 +342,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return this._states;
   }
 
-  getStateById(id:number) {
+  getStateById(id: number) {
     return this._states.find((s) => s.id === id);
   }
 
@@ -350,7 +350,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return this._actions;
   }
 
-  getActionById(id:number) {
+  getActionById(id: number) {
     return this._actions.find((s) => s.id === id);
   }
 
@@ -358,7 +358,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return this._objects;
   }
 
-  getObjectById(id:number) {
+  getObjectById(id: number) {
     return this._objects.find((s) => s.id === id);
   }
 
@@ -366,7 +366,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return this._slides;
   }
 
-  getSlideById(id:number) {
+  getSlideById(id: number) {
     return this._slides.find((s) => s.id === id);
   }
 
@@ -374,7 +374,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return this.stories.filter((n) => n.isStart);
   }
 
-  getSlides():SlideNode[][] {
+  getSlides(): SlideNode[][] {
     return this.getSlideChains().map(toSlidePath);
   }
 
@@ -382,19 +382,19 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return this.backend.edges;
   }
 
-  private addEdge(s:GraphNode, type:string, t:GraphNode, attrs = {}) {
+  private addEdge(s: GraphNode, type: string, t: GraphNode, attrs = {}) {
     var l = new GraphEdge(type, s, t);
     Object.keys(attrs).forEach((attr) => l.setAttr(attr, attrs[attr]));
     this.backend.addEdge(l);
     return l;
   }
 
-  private createAction(meta:ActionMetaData, f_id:string, f:ICmdFunction, inputs:IObjectRef<any>[] = [], parameter:any = {}) {
+  private createAction(meta: ActionMetaData, f_id: string, f: ICmdFunction, inputs: IObjectRef<any>[] = [], parameter: any = {}) {
     var r = new ActionNode(meta, f_id, f, parameter);
     return this.initAction(r, inputs);
   }
 
-  private initAction(r:ActionNode, inputs:IObjectRef<any>[] = []) {
+  private initAction(r: ActionNode, inputs: IObjectRef<any>[] = []) {
     var inobjects = inputs.map((i) => this.findInArray(this._objects, i));
     this._actions.push(r);
     this.backend.addNode(r);
@@ -405,7 +405,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return r;
   }
 
-  createInverse(action:ActionNode, inverter:IInverseActionCreator) {
+  createInverse(action: ActionNode, inverter: IInverseActionCreator) {
     const creates = action.creates,
       removes = action.removes;
     var i = inverter.call(action, action.requires, creates, removes);
@@ -428,9 +428,9 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return inverted;
   }
 
-  push(action:IAction);
-  push(meta:ActionMetaData, f_id:string, f:ICmdFunction, inputs:IObjectRef<any>[], parameter:any);
-  push(arg:any, f_id:string = '', f:ICmdFunction = null, inputs:IObjectRef<any>[] = [], parameter:any = {}) {
+  push(action: IAction);
+  push(meta: ActionMetaData, f_id: string, f: ICmdFunction, inputs: IObjectRef<any>[], parameter: any);
+  push(arg: any, f_id: string = '', f: ICmdFunction = null, inputs: IObjectRef<any>[] = [], parameter: any = {}) {
     return this.inOrder(() => {
       if (arg instanceof ActionMetaData) {
         return this.run(this.createAction(<ActionMetaData>arg, f_id, f, inputs, parameter), null);
@@ -441,14 +441,14 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     });
   }
 
-  pushWithResult(action:IAction, result: ICmdResult) {
+  pushWithResult(action: IAction, result: ICmdResult) {
     return this.inOrder(() => {
       const a = this.createAction(action.meta, action.id, action.f, action.inputs || [], action.parameter || {});
       return this.run(a, result);
     });
   }
 
-  findObject<T>(value:T) {
+  findObject<T>(value: T) {
     var r = this._objects.find((obj) => obj.value === value);
     if (r) {
       return r;
@@ -457,15 +457,15 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
   }
 
 
-  addObject<T>(value:T, name:string = value ? value.toString() : 'Null', category = cat.data, hash = name + '_' + category) {
+  addObject<T>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = name + '_' + category) {
     return this.addObjectImpl(value, name, category, hash, true);
   }
 
-  addJustObject<T>(value:T, name:string = value ? value.toString() : 'Null', category = cat.data, hash = name + '_' + category) {
+  addJustObject<T>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = name + '_' + category) {
     return this.addObjectImpl(value, name, category, hash, false);
   }
 
-  private addObjectImpl<T>(value:T, name:string = value ? value.toString() : 'Null', category = cat.data, hash = name + '_' + category, createEdge = false) {
+  private addObjectImpl<T>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = name + '_' + category, createEdge = false) {
     var r = new ObjectNode<T>(value, name, category, hash);
     this._objects.push(r);
     this.backend.addNode(r);
@@ -476,7 +476,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return r;
   }
 
-  private resolve(arr:IObjectRef<any>[]) {
+  private resolve(arr: IObjectRef<any>[]) {
     return arr.map((r) => {
       if (r instanceof ObjectNode) {
         return <ObjectNode<any>>r;
@@ -491,7 +491,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     });
   }
 
-  private findInArray(arr:ObjectNode<any>[], r:IObjectRef<any>) {
+  private findInArray(arr: ObjectNode<any>[], r: IObjectRef<any>) {
     if (r instanceof ObjectNode) {
       return <ObjectNode<any>>r;
     }
@@ -504,15 +504,15 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return result;
   }
 
-  findOrAddObject<T>(i:T|IObjectRef<T>, name?:string, type?:any):ObjectNode<T> {
+  findOrAddObject<T>(i: T|IObjectRef<T>, name?: string, type?: any): ObjectNode<T> {
     return this.findOrAddObjectImpl(i, name, type, true);
   }
 
-  findOrAddJustObject<T>(i:T|IObjectRef<T>, name?:string, type?:any):ObjectNode<T> {
+  findOrAddJustObject<T>(i: T|IObjectRef<T>, name?: string, type?: any): ObjectNode<T> {
     return this.findOrAddObjectImpl(i, name, type, false);
   }
 
-  private findOrAddObjectImpl<T>(i:T|IObjectRef<T>, name?:string, type?:any, createEdge = false):ObjectNode<T> {
+  private findOrAddObjectImpl<T>(i: T|IObjectRef<T>, name?: string, type?: any, createEdge = false): ObjectNode<T> {
     var r, j = <any>i;
     if (i instanceof ObjectNode) {
       return <ObjectNode<T>>i;
@@ -544,7 +544,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     }
   }
 
-  private inOrder(f:()=>Promise<any>):Promise<any> {
+  private inOrder(f: () => Promise<any>): Promise<any> {
     if (this.currentlyRunning) {
       var helper;
       var r = new Promise((resolve) => {
@@ -613,8 +613,8 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     };
   }
 
-  private run(action:ActionNode, result: ICmdResult, withinMilliseconds:number | (() => number) = -1) {
-    var next:StateNode = action.resultsIn,
+  private run(action: ActionNode, result: ICmdResult, withinMilliseconds: number | (() => number) = -1) {
+    var next: StateNode = action.resultsIn,
       newState = false;
     if (!next) { //create a new state
       newState = true;
@@ -647,8 +647,8 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return runningAction;
   }
 
-  private switchToImpl(action:ActionNode, state:StateNode) {
-    var bak:any = this.act;
+  private switchToImpl(action: ActionNode, state: StateNode) {
+    var bak: any = this.act;
     this.act = state;
     this.fire('switch_state', state, bak);
 
@@ -661,7 +661,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
    * execute a bunch of already executed actions
    * @param actions
    */
-  private runChain(actions:ActionNode[], withinMilliseconds = -1) {
+  private runChain(actions: ActionNode[], withinMilliseconds = -1) {
     if (actions.length === 0) {
       if (withinMilliseconds > 0) {
         return resolveIn(withinMilliseconds).then(() => []);
@@ -714,9 +714,9 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     }
   }
 
-  jumpTo(state:StateNode, withinMilliseconds = -1) {
+  jumpTo(state: StateNode, withinMilliseconds = -1) {
     return this.inOrder(() => {
-      var actions:ActionNode[] = [],
+      var actions: ActionNode[] = [],
         act = this.act;
       if (act === state) { //jump to myself
         return withinMilliseconds >= 0 ? resolveIn(withinMilliseconds).then(() => []) : Promise.resolve([]);
@@ -744,10 +744,10 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
    * @param objectReplacements mappings of object replacements
    * @returns {boolean}
    */
-  fork(action:ActionNode, target:StateNode, objectReplacements: {from:IObjectRef<any>, to: IObjectRef<any>}[] = []) {
+  fork(action: ActionNode, target: StateNode, objectReplacements: {from: IObjectRef<any>, to: IObjectRef<any>}[] = []) {
     //sanity check if target is a child of target ... bad
     //collect all states
-    const all:StateNode[] = [];
+    const all: StateNode[] = [];
     const queue = [action.resultsIn];
     while (queue.length > 0) {
       let next = queue.shift();
@@ -774,7 +774,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     //  this.addEdge(clone, 'resultsIn', action.resultsIn);
     //} else {
     const removedObjects = sourceObjects.filter((o) => targetObjects.indexOf(o) < 0);
-    const replacements :{[id: string]: IObjectRef<any>} = {};
+    const replacements: {[id: string]: IObjectRef<any>} = {};
     objectReplacements.forEach((d) => replacements[this.findOrAddObject(d.from).id] = d.to);
     //need to copy all the states and actions
     this.copyBranch(action, target, removedObjects, replacements);
@@ -784,7 +784,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return true;
   }
 
-  private copyAction(action:ActionNode, appendTo:StateNode, objectReplacements: {[id: string]: IObjectRef<any>}) {
+  private copyAction(action: ActionNode, appendTo: StateNode, objectReplacements: {[id: string]: IObjectRef<any>}) {
     const clone = this.initAction(action.clone(), action.requires.map(a => objectReplacements[String(a.id)] || a));
     this.addEdge(appendTo, 'next', clone);
     var s = this.makeState(action.resultsIn.name, action.resultsIn.description);
@@ -792,7 +792,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return s;
   }
 
-  private copyBranch(action:ActionNode, target:StateNode, removedObject:ObjectNode<any>[], objectReplacements: {[id: string]: IObjectRef<any>}) {
+  private copyBranch(action: ActionNode, target: StateNode, removedObject: ObjectNode<any>[], objectReplacements: {[id: string]: IObjectRef<any>}) {
     var queue = [{a: action, b: target}];
     while (queue.length > 0) {
       let next = queue.shift();
@@ -807,7 +807,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     }
   }
 
-  private makeState(name:string, description = '') {
+  private makeState(name: string, description = '') {
     var s = new StateNode(name, description);
     this._states.push(s);
     this.backend.addNode(s);
@@ -859,7 +859,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
    }*/
 
 
-  wrapAsSlide(state:StateNode) {
+  wrapAsSlide(state: StateNode) {
     const node = new SlideNode();
     node.name = state.name;
     this.addEdge(node, 'jumpTo', state);
@@ -869,7 +869,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return node;
   }
 
-  cloneSingleSlideNode(state:SlideNode) {
+  cloneSingleSlideNode(state: SlideNode) {
     const clone = state.state != null ? this.wrapAsSlide(state.state) : this.makeTextSlide();
     state.attrs.forEach((attr) => {
       if (attr !== 'annotations') {
@@ -884,14 +884,14 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
    * creates a new slide of the given StateNode by jumping to them
    * @param states
    */
-  extractSlide(states:StateNode[], addStartEnd = true):SlideNode {
-    const addSlide = (node:SlideNode) => {
+  extractSlide(states: StateNode[], addStartEnd = true): SlideNode {
+    const addSlide = (node: SlideNode) => {
       this._slides.push(node);
       this.backend.addNode(node);
       this.fire('add_slide', node);
       return node;
     };
-    var slide:SlideNode = addStartEnd ? addSlide(SlideNode.makeText('Unnamed Story')) : null,
+    var slide: SlideNode = addStartEnd ? addSlide(SlideNode.makeText('Unnamed Story')) : null,
       prev = slide;
     states.forEach((s, i) => {
       const node = addSlide(new SlideNode());
@@ -916,7 +916,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return slide;
   }
 
-  startNewSlide(title?:string, states:StateNode[] = []) {
+  startNewSlide(title?: string, states: StateNode[] = []) {
     const s = this.makeTextSlide(title);
     if (states.length > 0) {
       const s2 = this.extractSlide(states, false);
@@ -927,7 +927,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
   }
 
 
-  makeTextSlide(title?:string) {
+  makeTextSlide(title?: string) {
     const s = SlideNode.makeText(title);
     this._slides.push(s);
     this.backend.addNode(s);
@@ -935,16 +935,16 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     return s;
   }
 
-  insertIntoSlide(toInsert:SlideNode, slide:SlideNode, beforeIt:boolean = false) {
+  insertIntoSlide(toInsert: SlideNode, slide: SlideNode, beforeIt: boolean = false) {
     this.moveSlide(toInsert, slide, beforeIt);
   }
 
-  appendToSlide(slide:SlideNode, elem:SlideNode) {
+  appendToSlide(slide: SlideNode, elem: SlideNode) {
     const s = toSlidePath(slide);
     return this.moveSlide(elem, s[s.length - 1], false);
   }
 
-  moveSlide(node:SlideNode, to:SlideNode, beforeIt:boolean = false) {
+  moveSlide(node: SlideNode, to: SlideNode, beforeIt: boolean = false) {
     if ((beforeIt && node.next === to) || (!beforeIt && node.previous === to)) {
       return; //already matches
     }
@@ -987,7 +987,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     this.fire('move_slide', node, to, beforeIt);
   }
 
-  removeSlideNode(node:SlideNode) {
+  removeSlideNode(node: SlideNode) {
     const prev = node.previous;
     if (prev) {
       node.nexts.forEach((n) => {
@@ -1002,7 +1002,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     this.fire('remove_slide', node);
   }
 
-  removeFullSlide(node:SlideNode) {
+  removeFullSlide(node: SlideNode) {
     //go to the beginning
     while (node.previous) {
       node = node.previous;
@@ -1016,7 +1016,7 @@ export default class ProvenanceGraph extends ADataType<IGraphDataDescription> {
     this.fire('destroy_slide', bak);
   }
 
-  setSlideJumpToTarget(node:SlideNode, state:StateNode) {
+  setSlideJumpToTarget(node: SlideNode, state: StateNode) {
     const old = node.outgoing.filter(isType('jumpTo'))[0];
     if (old) {
       this.backend.removeEdge(old);

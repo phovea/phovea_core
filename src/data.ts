@@ -166,7 +166,7 @@ export function getFirstByFQName(name: string | RegExp) {
 }
 
 function getFirstWithCache(name: string | RegExp, cache: Map<string, Promise<IDataType>>, attr: string) {
-  const r = typeof name === 'string' ? new RegExp(<string>name): name;
+  const r = typeof name === 'string' ? new RegExp(<string>name) : name;
   for (let [k, v] of Array.from(cache.entries())) {
     if (r.test(k)) {
       return v;

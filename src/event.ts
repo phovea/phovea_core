@@ -181,8 +181,8 @@ export class EventHandler implements IEventHandler {
   /**
    * list all registered Events
    */
-  list(): { [key: string]: number } {
-    const r: { [key: string]: number } = {};
+  list(): {[key: string]: number} {
+    const r: {[key: string]: number} = {};
     this.handlers.forEach((handler, type) => {
       r[type] = handler.length;
     });

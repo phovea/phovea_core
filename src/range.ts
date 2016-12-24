@@ -11,20 +11,20 @@ import {argList} from './index';
 import {IIterator, Iterator, single, concat, forList, range as iRange} from './iterator';
 
 export interface IRangeElem {
-  isAll : boolean;
+  isAll: boolean;
   isUnbound: boolean;
-  isSingle : boolean;
-  size(size?:number):number;
-  clone() : IRangeElem;
-  invert(index:number, size?:number);
+  isSingle: boolean;
+  size(size?: number): number;
+  clone(): IRangeElem;
+  invert(index: number, size?: number);
   __iterator__: IIterator<number>;
-  iter(size?:number):IIterator<number>;
+  iter(size?: number): IIterator<number>;
   toString();
   from: number;
   step: number;
   to: number;
-  reverse() : IRangeElem;
-  contains(value:number, size?:number);
+  reverse(): IRangeElem;
+  contains(value: number, size?: number);
 }
 
 
@@ -34,15 +34,15 @@ export interface IRangeElem {
  * @param size
  * @returns {number}
  */
-function fix(v:number, size:number) {
+function fix(v: number, size: number) {
   return v < 0 ? (size + 1 + v) : v;
 }
 
 export class RangeElem implements IRangeElem {
-  constructor(public from:number, public to = -1, public step = 1) {
+  constructor(public from: number, public to = -1, public step = 1) {
     /*if (step !== 1 && step !== -1) {
-      throw new Error('currently just +1 and -1 are valid steps');
-    }*/
+     throw new Error('currently just +1 and -1 are valid steps');
+     }*/
   }
 
   get isAll() {
@@ -65,18 +65,18 @@ export class RangeElem implements IRangeElem {
     return new RangeElem(0, 0, 1);
   }
 
-  static single(val:number) {
+  static single(val: number) {
     return new SingleRangeElem(val);
   }
 
-  static range(from:number, to = -1, step = 1) {
+  static range(from: number, to = -1, step = 1) {
     if ((from + step) === to) {
       return RangeElem.single(from);
     }
     return new RangeElem(from, to, step);
   }
 
-  size(size?:number):number {
+  size(size?: number): number {
     const t = fix(this.to, size), f = fix(this.from, size);
     if (this.step === 1) {
       return Math.max(t - f, 0);
@@ -101,7 +101,7 @@ export class RangeElem implements IRangeElem {
     return new RangeElem(f, t, -this.step);
   }
 
-  invert(index:number, size?:number) {
+  invert(index: number, size?: number) {
     if (this.isAll) {
       return index;
     }
@@ -112,7 +112,7 @@ export class RangeElem implements IRangeElem {
    * creates an iterator of this range
    * @param size the underlying size for negative indices
    */
-  iter(size?:number):IIterator<number> {
+  iter(size?: number): IIterator<number> {
     return iRange(fix(this.from, size), fix(this.to, size), this.step);
   }
 
@@ -120,7 +120,7 @@ export class RangeElem implements IRangeElem {
     return this.iter();
   }
 
-  contains(value:number, size?:number) {
+  contains(value: number, size?: number) {
     const f = fix(this.from, size);
     const t = fix(this.to, size);
     if (this.step === -1) {
@@ -144,7 +144,7 @@ export class RangeElem implements IRangeElem {
     return r;
   }
 
-  static parse(code:string) {
+  static parse(code: string) {
     if (code.length === 0) {
       return RangeElem.all();
     }
@@ -159,7 +159,7 @@ export class RangeElem implements IRangeElem {
 }
 
 export class SingleRangeElem implements IRangeElem {
-  constructor(public from:number) {
+  constructor(public from: number) {
   }
 
   get step() {
@@ -182,7 +182,7 @@ export class SingleRangeElem implements IRangeElem {
     return false;
   }
 
-  size(size?:number):number {
+  size(size?: number): number {
     return 1;
   }
 
@@ -190,7 +190,7 @@ export class SingleRangeElem implements IRangeElem {
     return new SingleRangeElem(this.from);
   }
 
-  contains(value:number, size?:number) {
+  contains(value: number, size?: number) {
     return fix(this.from, size) === value;
   }
 
@@ -198,11 +198,11 @@ export class SingleRangeElem implements IRangeElem {
     return this.clone();
   }
 
-  invert(index:number, size?:number) {
+  invert(index: number, size?: number) {
     return fix(this.from, size) + index;
   }
 
-  iter(size?:number):IIterator<number> {
+  iter(size?: number): IIterator<number> {
     return single(fix(this.from, size));
   }
 
@@ -216,12 +216,12 @@ export class SingleRangeElem implements IRangeElem {
 }
 
 export class Range1D {
-  private arr:IRangeElem[];
+  private arr: IRangeElem[];
 
   constructor();
-  constructor(base:Range1D);
-  constructor(arr:IRangeElem[]);
-  constructor(arg?:any) {
+  constructor(base: Range1D);
+  constructor(arr: IRangeElem[]);
+  constructor(arg?: any) {
     if (arg instanceof Range1D) {
       this.arr = (<Range1D>arg).arr;
     } else if (Array.isArray(arg)) {
@@ -247,11 +247,11 @@ export class Range1D {
     return new Range1D();
   }
 
-  static from(indices:number[]) {
+  static from(indices: number[]) {
     return new Range1D(Range1D.compress(indices));
   }
 
-  private static compress(indices:number[]) {
+  private static compress(indices: number[]) {
     if (indices.length === 0) {
       return [];
     } else if (indices.length === 1) {
@@ -303,12 +303,12 @@ export class Range1D {
     return this.arr.every((d) => d.isSingle);
   }
 
-  push(...items:string[]):number;
+  push(...items: string[]): number;
 
-  push(...items:IRangeElem[]):number;
+  push(...items: IRangeElem[]): number;
 
-  push(...items:any[]):number {
-    function p(item:any) {
+  push(...items: any[]): number {
+    function p(item: any) {
       if (typeof item === 'string') {
         return RangeElem.parse(item.toString());
       } else if (typeof item === 'number') {
@@ -322,25 +322,25 @@ export class Range1D {
     return this.arr.push.apply(this.arr, items.map(p));
   }
 
-  pushSlice(from:number, to:number = -1, step:number = 1) {
+  pushSlice(from: number, to: number = -1, step: number = 1) {
     this.arr.push(new RangeElem(from, to, step));
   }
 
-  pushList(indices:number[]) {
+  pushList(indices: number[]) {
     this.arr.push.apply(this.arr, Range1D.compress(indices));
   }
 
-  setSlice(from:number, to:number = -1, step:number = 1) {
+  setSlice(from: number, to: number = -1, step: number = 1) {
     this.arr.length = 0;
     this.pushSlice(from, to, step);
   }
 
-  setList(indices:number[]) {
+  setList(indices: number[]) {
     this.arr.length = 0;
     this.pushList(indices);
   }
 
-  at(index:number):IRangeElem {
+  at(index: number): IRangeElem {
     if (index < 0) {
       index += this.length;
     }
@@ -350,7 +350,7 @@ export class Range1D {
     return this.arr[index];
   }
 
-  size(size?:number) {
+  size(size?: number) {
     const t = this.arr.map((d) => d.size(size));
     return t.reduce((a, b) => a + b, 0);
   }
@@ -369,7 +369,7 @@ export class Range1D {
     }
     const r = this.arr.slice();
     //push n times
-    for(let i = 1; i < ntimes; ++i) {
+    for (let i = 1; i < ntimes; ++i) {
       r.push.apply(r, this.arr);
     }
     return new Range1D(r);
@@ -381,7 +381,7 @@ export class Range1D {
    * @param other
    * @returns {*}
    */
-  preMultiply(sub:Range1D, size?:number):Range1D {
+  preMultiply(sub: Range1D, size?: number): Range1D {
     if (this.isAll) {
       return sub.clone();
     }
@@ -419,7 +419,7 @@ export class Range1D {
    * @param other
    * @returns {RangeDim}
    */
-  union(other:Range1D, size?:number):Range1D {
+  union(other: Range1D, size?: number): Range1D {
     if (this.isAll || other.isNone) {
       return this.clone();
     }
@@ -441,7 +441,7 @@ export class Range1D {
    * @param other
    * @returns {RangeDim}
    */
-  intersect(other:Range1D, size?:number) {
+  intersect(other: Range1D, size?: number) {
     if (this.isNone || other.isNone) {
       return Range1D.none();
     }
@@ -462,7 +462,7 @@ export class Range1D {
     return other.fromLike(r.sort());
   }
 
-  toSet(size?:number) {
+  toSet(size?: number) {
     return this.removeDuplicates(size);
   }
 
@@ -471,7 +471,7 @@ export class Range1D {
    * @param without
    * @returns {RangeDim}
    */
-  without(without:Range1D, size?:number) {
+  without(without: Range1D, size?: number) {
     if (this.isNone || without.isNone) {
       return this.clone();
     }
@@ -503,14 +503,14 @@ export class Range1D {
    * @param size the underlying size for negative indices
    * @returns {*}
    */
-  invert(index:number, size?:number) {
+  invert(index: number, size?: number) {
     if (this.isAll) {
       return index;
     }
     if (this.isNone) {
       return -1; //not mapped
     }
-    var act = 0, s = this.arr[0].size(size), total:number = s;
+    var act = 0, s = this.arr[0].size(size), total: number = s;
     while (total > index && act < this.length) {
       act++;
       s = this.arr[act].size(size);
@@ -522,23 +522,23 @@ export class Range1D {
     return this.arr[act - 1].invert(index - total + s, size);
   }
 
-  indexOf(indices:number[]):number[];
+  indexOf(indices: number[]): number[];
 
-  indexOf(index:number):number;
+  indexOf(index: number): number;
 
-  indexOf(...index:number[]):number[];
+  indexOf(...index: number[]): number[];
 
-  indexOf(r:Range1D, size?:number):Range1D;
+  indexOf(r: Range1D, size?: number): Range1D;
 
   /**
    * returns the index(ices) of the given elements
    * @return {*}
    */
-  indexOf():any {
+  indexOf(): any {
     if (arguments[0] instanceof Range) {
       return this.indexRangeOf(arguments[0], arguments[1]);
     }
-    var arr:number[];
+    var arr: number[];
     var base = this.iter().asList();
     if (arguments.length === 1) {
       if (typeof arguments[0] === 'number') {
@@ -560,7 +560,7 @@ export class Range1D {
    * @param size
    * @return {Range1D}
    */
-  indexRangeOf(r:Range1D, size?:number) {
+  indexRangeOf(r: Range1D, size?: number) {
     if (r.isNone || this.isNone) {
       return r.fromLike([]);
     }
@@ -604,7 +604,7 @@ export class Range1D {
    * @param size the total size for resolving negative indices
    * @returns {*}
    */
-  filter(data:any[], size?:number, transform:(any) => any = (d)=>d) {
+  filter(data: any[], size?: number, transform: (any) => any = (d) => d) {
     if (this.isAll) {
       return data.map(transform);
     }
@@ -629,11 +629,11 @@ export class Range1D {
    * creates an iterator of this range
    * @param size the underlying size for negative indices
    */
-  iter(size?:number):IIterator<number> {
+  iter(size?: number): IIterator<number> {
     if (this.isList) {
       return forList(this.arr.map((d) => (<any>d).from));
     }
-    const its : IIterator<number>[] = this.arr.map((d) => d.iter(size));
+    const its: IIterator<number>[] = this.arr.map((d) => d.iter(size));
     return concat.apply(null, its);
   }
 
@@ -641,7 +641,7 @@ export class Range1D {
     return this.iter();
   }
 
-  asList(size?:number):number[] {
+  asList(size?: number): number[] {
     return this.iter(size).asList();
   }
 
@@ -656,7 +656,7 @@ export class Range1D {
     if (this.isNone) {
       return null;
     }
-    return this.arr[this.arr.length-1].from;
+    return this.arr[this.arr.length - 1].from;
   }
 
   /**
@@ -664,11 +664,11 @@ export class Range1D {
    * @param callbackfn
    * @param thisArg
    */
-  forEach(callbackfn:(value:number, index: number) => void, thisArg?:any):void {
+  forEach(callbackfn: (value: number, index: number) => void, thisArg?: any): void {
     return this.iter().forEach(callbackfn, thisArg);
   }
 
-  contains(value:number, size?:number):boolean {
+  contains(value: number, size?: number): boolean {
     return this.arr.some((elem) => elem.contains(value, size));
   }
 
@@ -677,23 +677,23 @@ export class Range1D {
    * @param cmp
    * @return {Range1D}
    */
-  sort(cmp:(a:number, b:number) => number = (a,b) => a-b):Range1D {
+  sort(cmp: (a: number, b: number) => number = (a, b) => a - b): Range1D {
     var arr = this.iter().asList();
     var r = arr.sort(cmp);
     return this.fromLike(r);
   }
 
-  private removeDuplicates(size?:number): Range1D {
+  private removeDuplicates(size?: number): Range1D {
     var arr = this.iter().asList();
     arr = arr.sort();
-    arr = arr.filter((di, i) => di !== arr[i-1]); //same value as before, remove
+    arr = arr.filter((di, i) => di !== arr[i - 1]); //same value as before, remove
     return Range1D.from(arr);
   }
 
   /**
    * reverts the order of this range
    */
-  reverse():Range1D {
+  reverse(): Range1D {
     var a = this.arr.map((r) => r.reverse());
     a.reverse();
     return new Range1D(a);
@@ -709,7 +709,7 @@ export class Range1D {
     return '(' + this.arr.join(',') + ')';
   }
 
-  eq(other:Range1D) {
+  eq(other: Range1D) {
     if (this === other || (this.isAll && other.isAll) || (this.isNone && other.isNone)) {
       return true;
     }
@@ -723,31 +723,31 @@ export class Range1D {
 }
 
 export class Range1DGroup extends Range1D {
-  constructor(public name:string, public color:string, base?:Range1D) {
+  constructor(public name: string, public color: string, base?: Range1D) {
     super(base);
   }
 
-  preMultiply(sub:Range1D, size?:number):Range1DGroup {
+  preMultiply(sub: Range1D, size?: number): Range1DGroup {
     var r = super.preMultiply(sub, size);
     return new Range1DGroup(this.name, this.color, r);
   }
 
-  union(other:Range1D, size?:number):Range1DGroup {
+  union(other: Range1D, size?: number): Range1DGroup {
     var r = super.union(other, size);
     return new Range1DGroup(this.name, this.color, r);
   }
 
-  intersect(other:Range1D, size?:number):Range1DGroup {
+  intersect(other: Range1D, size?: number): Range1DGroup {
     var r = super.intersect(other, size);
     return new Range1DGroup(this.name, this.color, r);
   }
 
-  without(without:Range1D, size?:number):Range1DGroup {
+  without(without: Range1D, size?: number): Range1DGroup {
     var r = super.without(without, size);
     return new Range1DGroup(this.name, this.color, r);
   }
 
-  clone():Range1DGroup {
+  clone(): Range1DGroup {
     return new Range1DGroup(this.name, this.color, super.clone());
   }
 
@@ -755,7 +755,7 @@ export class Range1DGroup extends Range1D {
     return '"' + this.name + '""' + this.color + '"' + super.toString();
   }
 
-  toSet(size?:number): Range1DGroup {
+  toSet(size?: number): Range1DGroup {
     return new Range1DGroup(this.name, this.color, super.toSet(size));
   }
 
@@ -764,15 +764,15 @@ export class Range1DGroup extends Range1D {
   }
 }
 
-export function asUngrouped(range:Range1D) {
+export function asUngrouped(range: Range1D) {
   return new Range1DGroup('unnamed', 'gray', range);
 }
 
-export function composite(name:string, groups:Range1DGroup[]) {
+export function composite(name: string, groups: Range1DGroup[]) {
   return new CompositeRange1D(name, groups);
 }
 
-function toBase(groups:Range1DGroup[]) {
+function toBase(groups: Range1DGroup[]) {
   if (groups.length === 1) {
     return groups[0];
   }
@@ -788,26 +788,26 @@ function toBase(groups:Range1DGroup[]) {
 }
 
 export class CompositeRange1D extends Range1D {
-  constructor(public name:string, public groups:Range1DGroup[], base?:Range1D) {
+  constructor(public name: string, public groups: Range1DGroup[], base?: Range1D) {
     super(base ? base : toBase(groups));
   }
 
-  preMultiply(sub:Range1D, size?:number):Range1D {
+  preMultiply(sub: Range1D, size?: number): Range1D {
     var r = this.groups.length > 1 ? super.preMultiply(sub, size) : undefined;
     return new CompositeRange1D(this.name, this.groups.map((g) => <Range1DGroup>g.preMultiply(sub, size)), r);
   }
 
-  union(other:Range1D, size?:number) {
+  union(other: Range1D, size?: number) {
     var r = this.groups.length > 1 ? super.union(other, size) : undefined;
     return new CompositeRange1D(this.name, this.groups.map((g) => <Range1DGroup>g.union(other, size)), r);
   }
 
-  intersect(other:Range1D, size?:number) {
+  intersect(other: Range1D, size?: number) {
     var r = this.groups.length > 1 ? super.intersect(other, size) : undefined;
     return new CompositeRange1D(this.name, this.groups.map((g) => <Range1DGroup>g.intersect(other, size)), r);
   }
 
-  without(without:Range1D, size?:number) {
+  without(without: Range1D, size?: number) {
     var r = this.groups.length > 1 ? super.without(without, size) : undefined;
     return new CompositeRange1D(this.name, this.groups.map((g) => <Range1DGroup>g.without(without, size)), r);
   }
@@ -817,12 +817,12 @@ export class CompositeRange1D extends Range1D {
     return new CompositeRange1D(name, this.groups.map((g) => <Range1DGroup>g.clone()), r);
   }
 
-  sort(cmp?:(a:number, b:number) => number):Range1D {
+  sort(cmp?: (a: number, b: number) => number): Range1D {
     var r = this.groups.length > 1 ? super.sort(cmp) : undefined;
     return new CompositeRange1D(this.name, this.groups.map((g) => <Range1DGroup>g.sort(cmp)), r);
   }
 
-  toSet(size?:number): CompositeRange1D {
+  toSet(size?: number): CompositeRange1D {
     var r = this.groups.length > 1 ? super.toSet(size) : undefined;
     return new CompositeRange1D(this.name, this.groups.map((g) => <Range1DGroup>g.toSet(size)), r);
   }
@@ -875,7 +875,7 @@ export class Range {
     return this.dims.length;
   }
 
-  eq(other:Range) {
+  eq(other: Range) {
     if (this === other || (this.isAll && other.isAll) || (this.isNone && other.isNone)) {
       return true;
     }
@@ -889,7 +889,7 @@ export class Range {
    * @param other
    * @returns {*}
    */
-  preMultiply(other:Range, size?:number[]) {
+  preMultiply(other: Range, size?: number[]) {
     if (this.isAll) {
       return other.clone();
     }
@@ -903,7 +903,7 @@ export class Range {
     return r;
   }
 
-  union(other:Range, size?:number[]) {
+  union(other: Range, size?: number[]) {
     if (this.isAll || other.isNone) {
       return this.clone();
     }
@@ -922,7 +922,7 @@ export class Range {
    * @param other
    * @returns {RangeDim}
    */
-  intersect(other:Range, size?:number[]) {
+  intersect(other: Range, size?: number[]) {
     if (this.isNone || other.isNone) {
       return none();
     }
@@ -944,7 +944,7 @@ export class Range {
    * @param other
    * @returns {RangeDim}
    */
-  without(without:Range, size?:number[]) {
+  without(without: Range, size?: number[]) {
     if (this.isNone || without.isNone) {
       return this.clone();
     }
@@ -985,16 +985,16 @@ export class Range {
    * @param size the underlying size for negative indices
    * @returns {*}
    */
-  filter(data:any[], size?:number[]) {
+  filter(data: any[], size?: number[]) {
     if (this.isAll) {
       return data;
     }
     var ndim = this.ndim;
     var that = this;
     //recursive variant for just filtering the needed rows
-    function filterDim(i:number) {
+    function filterDim(i: number) {
       if (i >= ndim) { //out of range no filtering anymore
-        return (d)=>d;
+        return (d) => d;
       }
       var d = that.dim(i);
       var next = filterDim(i + 1); //compute next transform
@@ -1014,7 +1014,7 @@ export class Range {
    * @param dimension
    * @returns {r}
    */
-  dim(dimension:number):Range1D {
+  dim(dimension: number): Range1D {
     var r = this.dims[dimension];
     if (r) {
       return r;
@@ -1029,7 +1029,7 @@ export class Range {
    * @param indices
    * @param size the underlying size for negative indices
    */
-  invert(indices:number[], size?:number[]):number[] {
+  invert(indices: number[], size?: number[]): number[] {
     if (this.isAll) {
       return indices;
     }
@@ -1038,7 +1038,7 @@ export class Range {
     });
   }
 
-  indexRangeOf(r:Range, size?:number[]):Range {
+  indexRangeOf(r: Range, size?: number[]): Range {
     if (r.isNone || this.isNone) {
       return none();
     }
@@ -1048,19 +1048,19 @@ export class Range {
     return new Range(this.dims.map((d, i) => d.indexRangeOf(r.dim(i), size ? size[i] : undefined)));
   }
 
-  indexOf(indices:number[]):number[];
+  indexOf(indices: number[]): number[];
 
-  indexOf(index:number):number;
+  indexOf(index: number): number;
 
-  indexOf(...index:number[]):number[];
+  indexOf(...index: number[]): number[];
 
-  indexOf(r:Range, size?:number[]):Range;
+  indexOf(r: Range, size?: number[]): Range;
 
-  indexOf():any {
+  indexOf(): any {
     if (arguments[0] instanceof Range) {
       return this.indexRangeOf(arguments[0], arguments[1]);
     }
-    var arr:number[];
+    var arr: number[];
     if (arguments.length === 1) {
       if (typeof arguments[0] === 'number') {
         return this.dim(0).indexOf(<number>arguments[0]);
@@ -1080,7 +1080,7 @@ export class Range {
    * @param size the underlying size for negative indices
    * @returns {*}
    */
-  size(size?:number[]):number[] {
+  size(size?: number[]): number[] {
     if (this.isAll) {
       return size;
     }
@@ -1089,7 +1089,7 @@ export class Range {
     });
   }
 
-  split():Range[] {
+  split(): Range[] {
     return this.dims.map((dim) => {
       return new Range([dim]);
     });
@@ -1143,19 +1143,19 @@ export function none() {
 /**
  * test if the given object is a range
  */
-export function is(obj:any) {
+export function is(obj: any) {
   return obj instanceof Range;
 }
 
-export function range(from:number, to?:number, step?:number)
-export function range(...ranges:number[][]);
+export function range(from: number, to?: number, step?: number)
+export function range(...ranges: number[][]);
 export function range() {
   if (arguments.length === 0) {
     return all();
   }
   var r = new Range();
   if (Array.isArray(arguments[0])) { //array mode
-    argList(arguments).forEach((arr:number[], i) => {
+    argList(arguments).forEach((arr: number[], i) => {
       if (arr.length === 0) {
         return;
       }
@@ -1167,8 +1167,8 @@ export function range() {
   }
   return r;
 }
-export function join(ranges:Range[]);
-export function join(...ranges:Range[]);
+export function join(ranges: Range[]);
+export function join(...ranges: Range[]);
 export function join() {
   if (arguments.length === 0) {
     return all();
@@ -1182,9 +1182,9 @@ export function join() {
   return r;
 }
 
-export function list(...dims_indices_indexarray:(Range1D | number[] | number)[]):Range;
-export function list(dims:Range1D[]):Range;
-export function list():Range {
+export function list(...dims_indices_indexarray: (Range1D | number[] | number)[]): Range;
+export function list(dims: Range1D[]): Range;
+export function list(): Range {
   if (arguments.length === 0) {
     return all();
   }
@@ -1192,7 +1192,7 @@ export function list():Range {
   if (Array.isArray(arguments[0]) && arguments[0][0] instanceof Range1D) {
     r.dims = arguments[0];
   } else if (Array.isArray(arguments[0])) { //array mode
-    argList(arguments).forEach((arr:any, i) => {
+    argList(arguments).forEach((arr: any, i) => {
       if (arr instanceof Range1D) {
         r.dims[i] = arr;
       } else {
@@ -1224,8 +1224,8 @@ export function list():Range {
  * @param code
  * @returns {Range}
  */
-function parseRange(code:string) {
-  var act = 0, c:string;
+function parseRange(code: string) {
+  var act = 0, c: string;
   var dims = new Array<Range1D>(), t;
   code = code.trim();
   while (act < code.length) {
@@ -1251,14 +1251,14 @@ function parseRange(code:string) {
         break;
     }
   }
-  if (code.charAt(code.length-1) === ',') { //last is an empty one
+  if (code.charAt(code.length - 1) === ',') { //last is an empty one
     dims.push(Range1D.all());
   }
   var r = new Range(dims);
   return r;
 }
 
-function parseNamedRange1D(code:string, act:number):{ dim : Range1D; act: number} {
+function parseNamedRange1D(code: string, act: number): {dim: Range1D; act: number} {
   act += 1; //skip "
   var end = code.indexOf('"', act);
   var name = code.slice(act, end);
@@ -1291,7 +1291,7 @@ function parseNamedRange1D(code:string, act:number):{ dim : Range1D; act: number
   }
 }
 
-function parseRange1D(code:string, act:number) {
+function parseRange1D(code: string, act: number) {
   var next, r = new Range1D();
   switch (code.charAt(act)) {
     case ',':
@@ -1301,7 +1301,7 @@ function parseRange1D(code:string, act:number) {
       break;
     case '(':
       next = code.indexOf(')', act);
-      if (next > act+1) { //not ()
+      if (next > act + 1) { //not ()
         r.push.apply(r, code.slice(act + 1, next).split(',').map(RangeElem.parse));
       }
       next += 1; //skip )
@@ -1337,7 +1337,7 @@ export type RangeLike = Range | number[] | number[][] | string;
  * @param arange something like a range
  * @returns {Range}
  */
-export function parse(arange:RangeLike = null) {
+export function parse(arange: RangeLike = null) {
 
   if (arange === null) {
     return all();

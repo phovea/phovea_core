@@ -51,7 +51,7 @@ export interface IDataType extends ISelectAble, IPersistable {
   readonly dim: number[];
 
 
-  idView(idRange?: RangeLike) : Promise<IDataType>;
+  idView(idRange?: RangeLike): Promise<IDataType>;
 }
 
 export const VALUE_TYPE_CATEGORICAL = 'categorical';
@@ -128,11 +128,11 @@ export abstract class ADataType<T extends IDataDescription> extends SelectAble i
     return [];
   }
 
-  ids(range:RangeLike = all()) : Promise<Range> {
+  ids(range: RangeLike = all()): Promise<Range> {
     return Promise.resolve(none());
   }
 
-  idView(idRange?: RangeLike) : Promise<ADataType<T>> {
+  idView(idRange?: RangeLike): Promise<ADataType<T>> {
     return Promise.resolve(this);
   }
 
@@ -140,7 +140,7 @@ export abstract class ADataType<T extends IDataDescription> extends SelectAble i
     return [];
   }
 
-  persist() : any {
+  persist(): any {
     return this.desc.id;
   }
 
@@ -170,8 +170,8 @@ export function transpose(m: any[][]) {
     return [];
   }
   let r = m[0].map((i) => [i]);
-  for(let i = 1; i < m.length; ++i) {
-     m[i].forEach((v,i) => r[i].push(v));
+  for (let i = 1; i < m.length; ++i) {
+    m[i].forEach((v, i) => r[i].push(v));
   }
   return r;
 }
@@ -223,9 +223,9 @@ export interface ICategorical2PartitioningOptions {
  * @param options
  * @return {CompositeRange1D}
  */
-export function categorical2partitioning<T>(data: T[], categories: T[], options : ICategorical2PartitioningOptions = {}): CompositeRange1D {
+export function categorical2partitioning<T>(data: T[], categories: T[], options: ICategorical2PartitioningOptions = {}): CompositeRange1D {
   const m: ICategorical2PartitioningOptions = mixin({
-    skipEmptyCategories : true,
+    skipEmptyCategories: true,
     colors: ['gray'],
     labels: null,
     name: 'Partitioning'
@@ -234,13 +234,13 @@ export function categorical2partitioning<T>(data: T[], categories: T[], options 
   let groups = categories.map((d, i) => {
     return {
       name: m.labels ? m.labels[i] : d.toString(),
-      color: m.colors[Math.min(i,m.colors.length-1)],
+      color: m.colors[Math.min(i, m.colors.length - 1)],
       indices: []
     };
   });
   data.forEach((d, j) => {
     const i = categories.indexOf(d);
-    if (i>=0) {
+    if (i >= 0) {
       groups[i].indices.push(j);
     }
   });
@@ -266,6 +266,7 @@ export function defineDataType(name: string, functions: any) {
       this.init.apply(this, Array.from(arguments));
     }
   }
+
   extendClass(DataType, ADataType);
   DataType.prototype.toString = () => name;
   DataType.prototype = mixin(DataType.prototype, functions);

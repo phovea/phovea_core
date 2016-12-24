@@ -140,7 +140,7 @@ function viaAPI2Loader(): ITableLoader2 {
     cols: any = {},
     objs = null,
     data = null;
-  const r : ITableLoader2 = {
+  const r: ITableLoader2 = {
     rowIds: (desc: ITableDataDescription, range: Range) => {
       if (rowIds == null) {
         rowIds = getAPIJSON(`/dataset/table/${desc.id}/rowIds`).then(parse);

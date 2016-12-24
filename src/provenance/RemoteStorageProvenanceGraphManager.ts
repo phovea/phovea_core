@@ -25,21 +25,21 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     return listData((d) => d.desc.type === 'graph' && (<any>d.desc).attrs.graphtype === 'provenance_graph' && (<any>d.desc).attrs.of === this.options.application).then((d) => d.map((di) => di.desc));
   }
 
-  getGraph(desc:IGraphDataDescription):Promise<GraphBase> {
+  getGraph(desc: IGraphDataDescription): Promise<GraphBase> {
     return getData(desc.id)
-      .then((graph:GraphProxy) => graph.impl(provenanceGraphFactory()));
+      .then((graph: GraphProxy) => graph.impl(provenanceGraphFactory()));
   }
 
-  get(desc:IGraphDataDescription):Promise<ProvenanceGraph> {
-    return this.getGraph(desc).then((impl:GraphBase) => new ProvenanceGraph(desc, impl));
+  get(desc: IGraphDataDescription): Promise<ProvenanceGraph> {
+    return this.getGraph(desc).then((impl: GraphBase) => new ProvenanceGraph(desc, impl));
   }
 
-  delete(desc:IGraphDataDescription) {
+  delete(desc: IGraphDataDescription) {
     return removeData(desc);
   }
 
-  import(json:any):Promise<ProvenanceGraph> {
-    const desc : any = {
+  import(json: any): Promise<ProvenanceGraph> {
+    const desc: any = {
       type: 'graph',
       attrs: {
         graphtype: 'provenance_graph',
@@ -54,12 +54,12 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
       edges: json.edges
     };
     return upload(desc)
-      .then((graph:GraphProxy) => graph.impl(provenanceGraphFactory()))
-      .then((impl:GraphBase) => new ProvenanceGraph(impl.desc, impl));
+      .then((graph: GraphProxy) => graph.impl(provenanceGraphFactory()))
+      .then((impl: GraphBase) => new ProvenanceGraph(impl.desc, impl));
   }
 
   create() {
-    const desc : any= {
+    const desc: any = {
       type: 'graph',
       attrs: {
         graphtype: 'provenance_graph',
@@ -71,7 +71,7 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
       description: ''
     };
     return upload(desc)
-      .then((graph:GraphProxy) => graph.impl(provenanceGraphFactory()))
-      .then((impl:GraphBase) => new ProvenanceGraph(impl.desc, impl));
+      .then((graph: GraphProxy) => graph.impl(provenanceGraphFactory()))
+      .then((impl: GraphBase) => new ProvenanceGraph(impl.desc, impl));
   }
 }

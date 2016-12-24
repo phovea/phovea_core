@@ -17,7 +17,7 @@ export interface IIntersectionParam {
 }
 
 export interface IShape {
-  asIntersectionParams() : IIntersectionParam;
+  asIntersectionParams(): IIntersectionParam;
 }
 
 class IntersectionParams implements IIntersectionParam {
@@ -27,7 +27,7 @@ class IntersectionParams implements IIntersectionParam {
 }
 
 export class Intersection {
-  points : Vector2D[] = [];
+  points: Vector2D[] = [];
 
   /**
    *  'Outside',
@@ -858,11 +858,11 @@ export class Intersection {
   }
 }
 
-export function vec(x : number, y: number): Vector2D;
-export function vec(vec: { x: number; y: number}): Vector2D;
+export function vec(x: number, y: number): Vector2D;
+export function vec(vec: {x: number; y: number}): Vector2D;
 export function vec(x: any, y: number = Number.NaN): Vector2D {
   if (typeof x === 'number') {
-    return new Vector2D(<number>x,y);
+    return new Vector2D(<number>x, y);
   } else {
     return new Vector2D(x.x, x.y);
   }
@@ -873,17 +873,17 @@ export class Vector2D {
 
   }
 
-  add(that : Vector2D) {
+  add(that: Vector2D) {
     return new Vector2D(this.x + that.x, this.y + that.y);
   }
 
-  addEquals(that : Vector2D) {
+  addEquals(that: Vector2D) {
     this.x += that.x;
     this.y += that.y;
     return this;
   }
 
-  scalarAdd(scalar : number) {
+  scalarAdd(scalar: number) {
     return new Vector2D(this.x + scalar, this.y + scalar);
   }
 
@@ -893,11 +893,11 @@ export class Vector2D {
     return this;
   }
 
-  subtract(that : Vector2D) {
+  subtract(that: Vector2D) {
     return new Vector2D(this.x - that.x, this.y - that.y);
   }
 
-  subtractEquals(that : Vector2D) {
+  subtractEquals(that: Vector2D) {
     this.x -= that.x;
     this.y -= that.y;
     return this;
@@ -933,41 +933,41 @@ export class Vector2D {
     return this;
   }
 
-  eq(that : Vector2D) {
+  eq(that: Vector2D) {
     return (this.x === that.x && this.y === that.y);
   }
 
-  lt(that : Vector2D) {
+  lt(that: Vector2D) {
     return (this.x < that.x && this.y < that.y);
   }
 
-  lte(that : Vector2D) {
+  lte(that: Vector2D) {
     return (this.x <= that.x && this.y <= that.y);
   }
 
-  gt(that : Vector2D) {
+  gt(that: Vector2D) {
     return (this.x > that.x && this.y > that.y);
   }
 
-  gte(that : Vector2D) {
+  gte(that: Vector2D) {
     return (this.x >= that.x && this.y >= that.y);
   }
 
-  lerp(that : Vector2D, t: number) {
+  lerp(that: Vector2D, t: number) {
     return new Vector2D(this.x + (that.x - this.x) * t, this.y + (that.y - this.y) * t);
   }
 
-  distanceFrom(that : Vector2D) {
+  distanceFrom(that: Vector2D) {
     var dx = this.x - that.x;
     var dy = this.y - that.y;
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  min(that : Vector2D) {
+  min(that: Vector2D) {
     return new Vector2D(Math.min(this.x, that.x), Math.min(this.y, that.y));
   }
 
-  max(that : Vector2D) {
+  max(that: Vector2D) {
     return new Vector2D(Math.max(this.x, that.x), Math.max(this.y, that.y));
   }
 
@@ -980,12 +980,12 @@ export class Vector2D {
     this.y = y;
   }
 
-  setFromPoint(that : Vector2D) {
+  setFromPoint(that: Vector2D) {
     this.x = that.x;
     this.y = that.y;
   }
 
-  swap(that : Vector2D) {
+  swap(that: Vector2D) {
     var x = this.x;
     var y = this.y;
     this.x = that.x;
@@ -1002,16 +1002,19 @@ export class Vector2D {
     return this.x * that.x + this.y * that.y;
   }
 
-  cross(that : Vector2D) {
+  cross(that: Vector2D) {
     return this.x * that.y - this.y * that.x;
   }
+
   unit() {
     return this.divide(this.length());
   }
+
   unitEquals() {
     this.divideEquals(this.length());
     return this;
   }
+
   perp() {
     return new Vector2D(-this.y, this.x);
   }
@@ -1025,9 +1028,9 @@ class Polynomial {
   static TOLERANCE = 1e-6;
   static ACCURACY = 6;
 
-  coefs:any[] = [];
+  coefs: any[] = [];
 
-  constructor(...coefs:number[]) {
+  constructor(...coefs: number[]) {
     for (var i = coefs.length - 1; i >= 0; i--) {
       this.coefs.push(coefs[i]);
     }
@@ -1300,14 +1303,14 @@ class Polynomial {
       }
 
       var t2;
-      var d : number;
+      var d: number;
       if (discrim > 0) {
         var e = Math.sqrt(discrim);
         var t1 = 3 * c3 * c3 / 4 - e * e - 2 * c2;
         t2 = (4 * c3 * c2 - 8 * c1 - c3 * c3 * c3) / (4 * e);
         var plus = t1 + t2;
         var minus = t1 - t2;
-        var f : number;
+        var f: number;
         if (Math.abs(plus) <= Polynomial.TOLERANCE) {
           plus = 0;
         }
@@ -1387,9 +1390,9 @@ export class Path {
     z: []
   };
 
-  private segments:IPathSegment[];
+  private segments: IPathSegment[];
 
-  constructor(path:string) {
+  constructor(path: string) {
     this.segments = null;
     this.parseData(path);
   }
@@ -1544,9 +1547,9 @@ interface IPathSegment extends IShape {
 }
 
 class AbsolutePathSegment implements IPathSegment {
-  points:Vector2D[] = [];
+  points: Vector2D[] = [];
 
-  constructor(public command:string, params, public owner:Path, public previous:IPathSegment) {
+  constructor(public command: string, params, public owner: Path, public previous: IPathSegment) {
     var index = 0;
     while (index < params.length) {
       this.points.push(new Vector2D(parseFloat(params[index]), parseFloat(params[index + 1])));
@@ -1567,17 +1570,17 @@ class AbsolutePathSegment implements IPathSegment {
     return this.points[this.points.length - 1];
   }
 
-  asIntersectionParams():IIntersectionParam {
+  asIntersectionParams(): IIntersectionParam {
     return null;
   }
 }
 
 class AbsoluteArcPath extends AbsolutePathSegment {
-  rx:number;
-  ry:number;
-  angle:number;
-  arcFlag:number;
-  sweepFlag:number;
+  rx: number;
+  ry: number;
+  angle: number;
+  arcFlag: number;
+  sweepFlag: number;
 
   constructor(params, owner, previous) {
     super('A', params.slice(params.length - 2), owner, previous);
@@ -1615,7 +1618,7 @@ class AbsoluteArcPath extends AbsolutePathSegment {
     var x1px1p = x1p * x1p;
     var y1py1p = y1p * y1p;
     var lambda = (x1px1p / (rx * rx) ) + ( y1py1p / (ry * ry));
-    var factor : number;
+    var factor: number;
     if (lambda > 1) {
       factor = Math.sqrt(lambda);
       rx *= factor;
@@ -1754,9 +1757,9 @@ class AbsoluteSmoothCurveto3 extends AbsolutePathSegment {
 }
 
 class RelativePathSegment implements IPathSegment {
-  points:Vector2D[] = [];
+  points: Vector2D[] = [];
 
-  constructor(public command:string, params, public owner:Path, public previous:IPathSegment) {
+  constructor(public command: string, params, public owner: Path, public previous: IPathSegment) {
     var lastPoint = this.previous ? this.previous.lastPoint : new Vector2D(0, 0);
     var index = 0;
     while (index < params.length) {
@@ -1784,7 +1787,7 @@ class RelativePathSegment implements IPathSegment {
     return this.points[this.points.length - 1];
   }
 
-  asIntersectionParams():IIntersectionParam {
+  asIntersectionParams(): IIntersectionParam {
     return null;
   }
 }
@@ -1846,7 +1849,7 @@ class RelativeLineto extends RelativePathSegment {
     var lastPoint = this.previous ? this.previous.lastPoint : new Vector2D(0, 0);
     var point = this.points[0].subtract(lastPoint);
     var command = '';
-    if (this.previous.command !== this.command &&this.previous.command !== 'm') {
+    if (this.previous.command !== this.command && this.previous.command !== 'm') {
       command = this.command;
     }
     return command + point.toString();

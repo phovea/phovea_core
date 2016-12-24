@@ -10,25 +10,25 @@ import ObjectNode from './ObjectNode';
  * In addition, a state is characterized by the set of active object nodes
  */
 export default class StateNode extends GraphNode {
-  constructor(name:string, description = '') {
+  constructor(name: string, description = '') {
     super('state');
     super.setAttr('name', name);
     super.setAttr('description', description);
   }
 
-  get name():string {
+  get name(): string {
     return super.getAttr('name');
   }
 
-  set name(value:string) {
+  set name(value: string) {
     super.setAttr('name', value);
   }
 
-  get description():string {
+  get description(): string {
     return super.getAttr('description', '');
   }
 
-  set description(value:string) {
+  set description(value: string) {
     super.setAttr('description', value);
   }
 
@@ -41,7 +41,7 @@ export default class StateNode extends GraphNode {
    * this state consists of the following objects
    * @returns {ObjectNode<any>[]}
    */
-  get consistsOf():ObjectNode<any>[] {
+  get consistsOf(): ObjectNode<any>[] {
     return this.outgoing.filter(isType('consistsOf')).map((e) => <ObjectNode<any>>e.target);
   }
 
@@ -49,7 +49,7 @@ export default class StateNode extends GraphNode {
    * returns the actions leading to this state
    * @returns {ActionNode[]}
    */
-  get resultsFrom():ActionNode[] {
+  get resultsFrom(): ActionNode[] {
     return this.incoming.filter(isType('resultsIn')).map((e) => <ActionNode>e.source);
   }
 
@@ -66,11 +66,11 @@ export default class StateNode extends GraphNode {
     return from[0];
   }
 
-  get next():ActionNode[] {
+  get next(): ActionNode[] {
     return this.outgoing.filter(isType('next')).map((e) => <ActionNode>e.target).filter((s) => !s.isInverse);
   }
 
-  get previousState():StateNode {
+  get previousState(): StateNode {
     const a = this.creator;
     if (a) {
       return a.previous;
@@ -78,22 +78,22 @@ export default class StateNode extends GraphNode {
     return null;
   }
 
-  get previousStates():StateNode[] {
+  get previousStates(): StateNode[] {
     return this.resultsFrom.map((n) => n.previous);
   }
 
-  get nextStates():StateNode[] {
+  get nextStates(): StateNode[] {
     return this.next.map((n) => n.resultsIn);
   }
 
-  get nextState():StateNode {
+  get nextState(): StateNode {
     var r = this.next[0];
     return r ? r.resultsIn : null;
   }
 
-  get path():StateNode[] {
+  get path(): StateNode[] {
     var p = this.previousState,
-      r:StateNode[] = [];
+      r: StateNode[] = [];
     r.unshift(this);
     if (p) {
       p.pathImpl(r);
@@ -101,7 +101,7 @@ export default class StateNode extends GraphNode {
     return r;
   }
 
-  private pathImpl(r:StateNode[]) {
+  private pathImpl(r: StateNode[]) {
     var p = this.previousState;
     r.unshift(this);
     if (p && r.indexOf(p) < 0) { //no loop

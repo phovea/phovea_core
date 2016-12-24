@@ -251,7 +251,7 @@ export class AVisInstance extends EventHandler {
   }
 }
 
-function extrapolateFilter(r: { filter?: string|((data:IDataType)=>boolean)}) {
+function extrapolateFilter(r: {filter?: string|((data: IDataType) => boolean)}) {
   const v = r.filter;
   if (typeof v === 'undefined') {
     r.filter = () => true;
