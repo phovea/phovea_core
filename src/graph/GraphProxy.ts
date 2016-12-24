@@ -11,10 +11,10 @@ import MemoryGraph from './MemoryGraph';
 import LocalStorageGraph from './LocalStorageGraph';
 
 export default class GraphProxy extends ADataType<IGraphDataDescription> {
-  private _impl:Promise<AGraph> = null;
-  private _loaded:AGraph = null;
+  private _impl: Promise<AGraph> = null;
+  private _loaded: AGraph = null;
 
-  constructor(desc:IGraphDataDescription) {
+  constructor(desc: IGraphDataDescription) {
     super(desc);
   }
 
@@ -45,7 +45,7 @@ export default class GraphProxy extends ADataType<IGraphDataDescription> {
     const type = this.desc.storage || 'remote';
     if (type === 'memory') {
       //memory only
-      this._loaded = new MemoryGraph(this.desc, [],[], factory);
+      this._loaded = new MemoryGraph(this.desc, [], [], factory);
       this._impl = Promise.resolve(this._loaded);
     } else if (type === 'local') {
       this._loaded = LocalStorageGraph.load(this.desc, factory, localStorage);
@@ -62,7 +62,7 @@ export default class GraphProxy extends ADataType<IGraphDataDescription> {
     return this._impl;
   }
 
-  ids(range:Range = all()) {
+  ids(range: Range = all()) {
     if (this._impl) {
       return this._impl.then((i) => i.ids(range));
     }
@@ -79,6 +79,6 @@ export default class GraphProxy extends ADataType<IGraphDataDescription> {
  * @param desc
  * @returns {IMatrix}
  */
-export function create(desc:IGraphDataDescription):GraphProxy {
+export function create(desc: IGraphDataDescription): GraphProxy {
   return new GraphProxy(desc);
 }

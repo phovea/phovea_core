@@ -14,9 +14,9 @@ export interface IGraphFactory {
   makeEdge(p: any, lookup: (id: number) => GraphNode): GraphEdge;
 }
 
-export const defaultGraphFactory:IGraphFactory = {
-  makeNode: (p:any) => ((new GraphNode()).restore(p)),
-  makeEdge: (p:any, lookup) => ((new GraphEdge()).restore(p, lookup))
+export const defaultGraphFactory: IGraphFactory = {
+  makeNode: (p: any) => ((new GraphNode()).restore(p)),
+  makeEdge: (p: any, lookup) => ((new GraphEdge()).restore(p, lookup))
 };
 
 export interface IGraphDataDescription extends IDataDescription {
@@ -34,7 +34,7 @@ export interface IGraphDataDescription extends IDataDescription {
 }
 
 export default class GraphBase extends AGraph {
-  constructor(public desc:IGraphDataDescription, private _nodes: GraphNode[] = [], private _edges:GraphEdge[] = []) {
+  constructor(public desc: IGraphDataDescription, private _nodes: GraphNode[] = [], private _edges: GraphEdge[] = []) {
     super();
   }
 
@@ -46,7 +46,7 @@ export default class GraphBase extends AGraph {
     return this._edges;
   }
 
-  addNode(n:GraphNode): any {
+  addNode(n: GraphNode): any {
     this._nodes.push(n);
     this.fire('add_node', n);
     return this;
@@ -75,8 +75,8 @@ export default class GraphBase extends AGraph {
   }
 
   addEdge(e: GraphEdge): any;
-  addEdge(s:GraphNode, type:string, t:GraphNode): any;
-  addEdge(e_or_s: GraphEdge | GraphNode, type?:string, t?:GraphNode): any {
+  addEdge(s: GraphNode, type: string, t: GraphNode): any;
+  addEdge(e_or_s: GraphEdge | GraphNode, type?: string, t?: GraphNode): any {
     if (e_or_s instanceof GraphEdge) {
       let e = <GraphEdge>e_or_s;
       this._edges.push(e);
@@ -101,7 +101,7 @@ export default class GraphBase extends AGraph {
     return [this._nodes.length, this._edges.length];
   }
 
-  ids(range:Range = all()) {
+  ids(range: Range = all()) {
     return Promise.resolve(list(this._nodes.map((n) => n.id), this._edges.map((n) => n.id)));
   }
 
@@ -109,7 +109,7 @@ export default class GraphBase extends AGraph {
     this.select(0, [this._nodes.indexOf(node)], op);
   }
 
-  selectedNodes() : Promise<GraphNode[]> {
+  selectedNodes(): Promise<GraphNode[]> {
     return this.selections().then((r) => {
       let nodes = [];
       r.dim(0).forEach((index) => nodes.push(this._nodes[index]));
@@ -121,7 +121,7 @@ export default class GraphBase extends AGraph {
     this.select(1, [this._edges.indexOf(edge)], op);
   }
 
-  selectedEdges() : Promise<GraphEdge[]> {
+  selectedEdges(): Promise<GraphEdge[]> {
     return this.selections().then((r) => {
       let edges = [];
       r.dim(1).forEach((index) => edges.push(this._edges[index]));
@@ -133,14 +133,14 @@ export default class GraphBase extends AGraph {
     return ['_nodes', '_edges'].map(idtypes_resolve);
   }
 
-  clear() : any {
+  clear(): any {
     this._nodes = [];
     this._edges = [];
     return this;
   }
 
   persist() {
-    let r:any = {
+    let r: any = {
       root: this.desc.id
     };
     r.nodes = this.nodes.map((s) => s.persist());

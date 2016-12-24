@@ -21,7 +21,7 @@ export default class RemoteStoreGraph extends GraphBase {
   private _wait_for_synced = 0;
 
 
-  constructor(desc:IGraphDataDescription, _nodes: GraphNode[] = [], _edges:GraphEdge[] = []) {
+  constructor(desc: IGraphDataDescription, _nodes: GraphNode[] = [], _edges: GraphEdge[] = []) {
     super(desc, _nodes, _edges);
   }
 
@@ -59,7 +59,7 @@ export default class RemoteStoreGraph extends GraphBase {
     return this._wait_for_synced;
   }
 
-  addNode(n:GraphNode) {
+  addNode(n: GraphNode) {
     super.addNode(n);
     n.on('setAttr', this.updateHandler);
 
@@ -75,10 +75,10 @@ export default class RemoteStoreGraph extends GraphBase {
   updateNode(n: GraphNode): any {
     super.updateNode(n);
     this.fire('sync_start_node,sync_start', ++this._wait_for_synced, 'update_node', n);
-    return sendAPI('/dataset/graph/' + this.desc.id + '/node/'+n.id,{
+    return sendAPI('/dataset/graph/' + this.desc.id + '/node/' + n.id, {
       desc: JSON.stringify(n.persist())
     }, 'put').then((r) => {
-      this.fire('sync_node,sync', --this._wait_for_synced,n);
+      this.fire('sync_node,sync', --this._wait_for_synced, n);
       return this;
     });
   }
@@ -89,13 +89,13 @@ export default class RemoteStoreGraph extends GraphBase {
     }
     n.off('setAttr', this.updateHandler);
     this.fire('sync_start_node,sync_start', ++this._wait_for_synced, 'remove_node', n);
-    return sendAPI('/dataset/graph/' + this.desc.id + '/node/'+n.id, {}, 'delete').then((r) => {
+    return sendAPI('/dataset/graph/' + this.desc.id + '/node/' + n.id, {}, 'delete').then((r) => {
       this.fire('sync_node,sync', --this._wait_for_synced, n);
       return this;
     });
   }
 
-  addEdge(e_or_s: GraphEdge | GraphNode, type?:string, t?:GraphNode) {
+  addEdge(e_or_s: GraphEdge | GraphNode, type?: string, t?: GraphNode) {
     if (e_or_s instanceof GraphEdge) {
       super.addEdge(e_or_s);
       let e = <GraphEdge>e_or_s;
@@ -117,8 +117,8 @@ export default class RemoteStoreGraph extends GraphBase {
     }
     e.off('setAttr', this.updateHandler);
     this.fire('sync_start_edge,sync_start', ++this._wait_for_synced, 'remove_edge', e);
-    return sendAPI('/dataset/graph/' + this.desc.id + '/edge/'+e.id, {}, 'delete').then((r) => {
-      this.fire('sync_edge,sync', --this._wait_for_synced,e);
+    return sendAPI('/dataset/graph/' + this.desc.id + '/edge/' + e.id, {}, 'delete').then((r) => {
+      this.fire('sync_edge,sync', --this._wait_for_synced, e);
       return this;
     });
   }
@@ -126,10 +126,10 @@ export default class RemoteStoreGraph extends GraphBase {
   updateEdge(e: GraphEdge): any {
     super.updateEdge(e);
     this.fire('sync_start_edge,sync_start', ++this._wait_for_synced, 'update_edge', e);
-    return sendAPI('/dataset/graph/' + this.desc.id + '/edge/'+e.id, {
+    return sendAPI('/dataset/graph/' + this.desc.id + '/edge/' + e.id, {
       desc: JSON.stringify(e.persist())
     }, 'put').then((r) => {
-      this.fire('sync_edge,sync', --this._wait_for_synced,e);
+      this.fire('sync_edge,sync', --this._wait_for_synced, e);
       return this;
     });
   }
@@ -142,7 +142,7 @@ export default class RemoteStoreGraph extends GraphBase {
     this.edges.forEach((n) => n.off('setAttr', this.updateHandler));
     super.clear();
     this.fire('sync_start', ++this._wait_for_synced, 'clear');
-    return sendAPI('/dataset/graph/'+this.desc.id + '/node', {}, 'delete').then((r) => {
+    return sendAPI('/dataset/graph/' + this.desc.id + '/node', {}, 'delete').then((r) => {
       this.fire('sync');
       return this;
     });
