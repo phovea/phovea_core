@@ -6,9 +6,9 @@
  */
 import {IEvent} from '../event';
 import AGraph, {IGraphFactory, IGraphDataDescription} from './GraphBase';
-import {GraphEdge, GraphNode} from './graph';
+import {GraphEdge, GraphNode, IGraph} from './graph';
 
-export default class LocalStorageGraph extends AGraph {
+export default class LocalStorageGraph extends AGraph implements IGraph {
 
   private updateHandler = (event: IEvent) => {
     const s = event.target;
@@ -39,28 +39,27 @@ export default class LocalStorageGraph extends AGraph {
   }
 
   private get uid() {
-    return 'graph' + this.desc.id;
+    return `graph${this.desc.id}`;
   }
 
   private load(factory: IGraphFactory) {
     const uid = this.uid;
-    if (!this.storage.hasOwnProperty(uid + '.nodes')) {
+    if (!this.storage.hasOwnProperty(`${uid}.nodes`)) {
       return;
     }
-    const node_ids = JSON.parse(this.storage.getItem(uid + '.nodes'));
-    const lookup = {},
-      lookupFun = (id) => lookup[id];
+    const node_ids = JSON.parse(this.storage.getItem(`${uid}.nodes`));
+    const lookup = new Map<number, GraphNode>();
     node_ids.forEach((id) => {
-      let n = JSON.parse(this.storage.getItem(uid + '.node.' + id));
+      let n = JSON.parse(this.storage.getItem(`${uid}.node.${id}`));
       let nn = factory.makeNode(n);
-      lookup[nn.id] = nn;
+      lookup.set(nn.id, nn);
       nn.on('setAttr', this.updateHandler);
       super.addNode(nn);
     });
-    const edges_ids = JSON.parse(this.storage.getItem(uid + '.edges'));
+    const edges_ids = JSON.parse(this.storage.getItem(`${uid}.edges`));
     edges_ids.forEach((id) => {
-      let n = JSON.parse(this.storage.getItem(uid + '.edge.' + id));
-      let nn = factory.makeEdge(n, lookupFun);
+      let n = JSON.parse(this.storage.getItem(`${uid}.edge.${id}`));
+      let nn = factory.makeEdge(n, lookup.get.bind(lookup));
       nn.on('setAttr', this.updateHandler);
       super.addEdge(nn);
     });
@@ -68,15 +67,15 @@ export default class LocalStorageGraph extends AGraph {
   }
 
   static delete(desc: IGraphDataDescription, storage: Storage = sessionStorage) {
-    const uid = 'graph' + desc.id;
-    JSON.parse(storage.getItem(uid + '.nodes')).forEach((id) => {
-      storage.removeItem(uid + '.node.' + id);
+    const uid = `graph${desc.id}`;
+    JSON.parse(storage.getItem(`${uid}.nodes`)).forEach((id) => {
+      storage.removeItem(`${uid}.node.${id}`);
     });
-    storage.removeItem(uid + '.nodes');
-    JSON.parse(storage.getItem(uid + '.edges')).forEach((id) => {
-      storage.removeItem(uid + '.edge.' + id);
+    storage.removeItem(`${uid}.nodes`);
+    JSON.parse(storage.getItem(`${uid}.edges`)).forEach((id) => {
+      storage.removeItem(`${uid}.edge.${id}`);
     });
-    storage.removeItem(uid + '.edges');
+    storage.removeItem(`${uid}.edges`);
     return true;
   }
 
@@ -100,7 +99,7 @@ export default class LocalStorageGraph extends AGraph {
     super.addNode(n);
     const uid = this.uid;
     this.storage.setItem(uid + '.node.' + n.id, JSON.stringify(n.persist()));
-    this.storage.setItem(uid + '.nodes', JSON.stringify(this.nodes.map((d) => d.id)));
+    this.storage.setItem(`${uid}.nodes`, JSON.stringify(this.nodes.map((d) => d.id)));
     n.on('setAttr', this.updateHandler);
     return this;
   }
@@ -117,8 +116,8 @@ export default class LocalStorageGraph extends AGraph {
       return null;
     }
     const uid = this.uid;
-    this.storage.setItem(uid + '.nodes', JSON.stringify(this.nodes.map((d) => d.id)));
-    this.storage.removeItem(uid + '.node.' + n.id);
+    this.storage.setItem(`${uid}.nodes`, JSON.stringify(this.nodes.map((d) => d.id)));
+    this.storage.removeItem(`${uid}.node.${n.id}`);
     n.off('setAttr', this.updateHandler);
 
     return this;
@@ -129,8 +128,8 @@ export default class LocalStorageGraph extends AGraph {
       super.addEdge(e_or_s);
       let e = <GraphEdge>e_or_s;
       const uid = this.uid;
-      this.storage.setItem(uid + '.edges', JSON.stringify(this.edges.map((d) => d.id)));
-      this.storage.setItem(uid + '.edge.' + e.id, JSON.stringify(e.persist()));
+      this.storage.setItem(`${uid}.edges`, JSON.stringify(this.edges.map((d) => d.id)));
+      this.storage.setItem(`${uid}.edge.${e.id}`, JSON.stringify(e.persist()));
       e.on('setAttr', this.updateHandler);
       return this;
     }
@@ -143,8 +142,8 @@ export default class LocalStorageGraph extends AGraph {
     }
     //need to shift all
     const uid = this.uid;
-    this.storage.setItem(uid + '.edges', JSON.stringify(this.edges.map((d) => d.id)));
-    this.storage.removeItem(uid + '.edge.' + e.id);
+    this.storage.setItem(`${uid}.edges`, JSON.stringify(this.edges.map((d) => d.id)));
+    this.storage.removeItem(`${uid}.edge.${e.id}`);
     e.off('setAttr', this.updateHandler);
     return this;
   }
@@ -152,7 +151,7 @@ export default class LocalStorageGraph extends AGraph {
   updateEdge(e: GraphEdge): any {
     super.updateEdge(e);
     const uid = this.uid;
-    this.storage.setItem(uid + '.edge.' + e.id, JSON.stringify(e.persist()));
+    this.storage.setItem(`${uid}.edge.${e.id}`, JSON.stringify(e.persist()));
     return this;
   }
 
@@ -166,13 +165,13 @@ export default class LocalStorageGraph extends AGraph {
     super.clear();
     const uid = this.uid;
     JSON.parse(this.storage.getItem(uid + '.nodes')).forEach((id) => {
-      this.storage.removeItem(uid + '.node.' + id);
+      this.storage.removeItem(`${uid}.node.${id}`);
     });
-    this.storage.removeItem(uid + '.nodes');
+    this.storage.removeItem(`${uid}.nodes`);
     JSON.parse(this.storage.getItem(uid + '.edges')).forEach((id) => {
-      this.storage.removeItem(uid + '.edge.' + id);
+      this.storage.removeItem(`${uid}.edge.${id}`);
     });
-    this.storage.removeItem(uid + '.edges');
+    this.storage.removeItem(`${uid}.edges`);
   }
 
   persist() {

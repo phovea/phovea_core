@@ -4,9 +4,16 @@
 /**
  * Created by Samuel Gratzl on 22.10.2014.
  */
+import {SelectOperation, resolve as idtypes_resolve, SelectAble} from '../idtype';
+import {all, parse, RangeLike, list} from '../range';
 import {mixin, IPersistable, flagId, uniqueId} from '../index';
-import {SelectAble} from '../idtype';
 import {EventHandler} from '../event';
+import {IDataType} from '../datatype';
+
+export const DIM_NODES = 0;
+export const IDTYPE_NODES = '_nodes';
+export const DIM_EDGES = 1;
+export const IDTYPE_EDGES = '_edges';
 
 export class AttributeContainer extends EventHandler implements IPersistable {
   // TODO convert to Map
@@ -150,21 +157,77 @@ export function isType(type: string|RegExp) {
   return (edge: GraphEdge) => type instanceof RegExp ? type.test(edge.type) : edge.type === type;
 }
 
-export abstract class AGraph extends SelectAble {
 
-  get nodes(): GraphNode[] {
-    return [];
-  }
+export interface IGraph extends IDataType {
+  nodes: GraphNode[];
+  nnodes: number;
+  edges: GraphEdge[];
+  nedges: number;
+
+  addNode(n: GraphNode): this|Promise<this>;
+  updateNode(n: GraphNode): this|Promise<this>;
+  removeNode(n: GraphNode): this|Promise<this>;
+
+  addEdge(e: GraphEdge): this|Promise<this>;
+  addEdge(s: GraphNode, type: string, t: GraphNode): this|Promise<this>;
+
+  updateEdge(e: GraphEdge): this|Promise<this>;
+  removeEdge(e: GraphEdge): this|Promise<this>;
+}
+
+
+export abstract class AGraph extends SelectAble {
+  abstract get nodes(): GraphNode[];
 
   get nnodes() {
     return this.nodes.length;
   }
 
-  get edges(): GraphEdge[] {
-    return [];
-  }
+  abstract get edges(): GraphEdge[];
 
   get nedges() {
     return this.edges.length;
   }
+
+  get dim() {
+    return [this.nodes.length, this.edges.length];
+  }
+
+  ids(range: RangeLike = all()) {
+    const ids = (list(this.nodes.map((n) => n.id), this.edges.map((n) => n.id)));
+    return Promise.resolve(ids.preMultiply(parse(range)));
+  }
+
+  idView(idRange: RangeLike = all()): Promise<IGraph> {
+    throw Error('not implemented');
+  }
+
+  selectNode(node: GraphNode, op = SelectOperation.SET) {
+    this.select(DIM_NODES, [this.nodes.indexOf(node)], op);
+  }
+
+  selectedNodes(): Promise<GraphNode[]> {
+    return this.selections().then((r) => {
+      let nodes = [];
+      r.dim(DIM_NODES).forEach((index) => nodes.push(this.nodes[index]));
+      return nodes;
+    });
+  }
+
+  selectEdge(edge: GraphEdge, op = SelectOperation.SET) {
+    this.select(DIM_EDGES, [this.edges.indexOf(edge)], op);
+  }
+
+  selectedEdges(): Promise<GraphEdge[]> {
+    return this.selections().then((r) => {
+      let edges = [];
+      r.dim(DIM_EDGES).forEach((index) => edges.push(this.edges[index]));
+      return edges;
+    });
+  }
+
+  get idtypes() {
+    return [IDTYPE_NODES, IDTYPE_EDGES].map(idtypes_resolve);
+  }
+
 }

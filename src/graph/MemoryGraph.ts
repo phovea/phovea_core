@@ -10,21 +10,20 @@ import GraphBase, {defaultGraphFactory, IGraphDataDescription} from './GraphBase
 import {GraphEdge, GraphNode} from './graph';
 
 export default class MemoryGraph extends GraphBase implements IPersistable {
-  constructor(desc: IGraphDataDescription, _nodes: GraphNode[] = [], _edges: GraphEdge[] = [], private factory = defaultGraphFactory) {
-    super(desc, _nodes, _edges);
+  constructor(desc: IGraphDataDescription, nodes: GraphNode[] = [], edges: GraphEdge[] = [], private factory = defaultGraphFactory) {
+    super(desc, nodes, edges);
   }
 
   restore(persisted: any) {
-    var lookup = {},
-      lookupFun = (id) => lookup[id];
+    const lookup = new Map<number, GraphNode>();
     persisted.nodes.forEach((p) => {
-      var n = this.factory.makeNode(p);
-      lookup[n.id] = n;
+      const n = this.factory.makeNode(p);
+      lookup.set(n.id, n);
       this.addNode(n);
     });
 
     persisted.edges.forEach((p) => {
-      var n = this.factory.makeEdge(p, lookupFun);
+      const n = this.factory.makeEdge(p, lookup.get.bind(lookup));
       this.addEdge(n);
     });
     return this;
