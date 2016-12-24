@@ -40,6 +40,7 @@ export interface IStratificationDataDescription extends IDataDescription {
 }
 
 export interface IStratification extends IDataType {
+  readonly desc: IStratificationDataDescription;
   range() : Promise<CompositeRange1D>;
   idRange(): Promise<CompositeRange1D>;
   vector(): Promise<IVector>;

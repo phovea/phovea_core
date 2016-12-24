@@ -9,13 +9,24 @@
 
 import {Range} from './range';
 import {IDType} from './idtype';
-import {IDataType, IValueType, IValueTypeDesc} from './datatype';
+import {IDataType, IValueType, IValueTypeDesc, IDataDescription} from './datatype';
 import {IVector as IVVector} from './vector';
 
 export declare type IVector = IVVector;
 
 export interface IQueryArgs {
   [key: string]: number|string;
+}
+
+export interface ITableColumn {
+  name: string;
+  value: IValueTypeDesc;
+}
+
+export interface ITableDataDescription extends IDataDescription {
+  readonly idtype: string;
+  readonly size: number[];
+  readonly columns: ITableColumn[];
 }
 
 export interface ITable extends IDataType {
@@ -25,7 +36,7 @@ export interface ITable extends IDataType {
   /**
    * id type
    */
-  readonly rowtype:IDType;
+  readonly idtype:IDType;
 
   /**
    * returns the chosen columns

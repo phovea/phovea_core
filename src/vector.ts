@@ -20,6 +20,7 @@ export interface IVectorDataDescription extends IDataDescription {
 }
 
 export interface IVector extends IDataType {
+  readonly desc: IVectorDataDescription;
   /**
    * length of the vector
    */

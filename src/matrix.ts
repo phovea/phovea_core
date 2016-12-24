@@ -9,7 +9,7 @@
 
 import {Range} from './range';
 import {IProductSelectAble, IDType} from './idtype';
-import {IDataType, IValueTypeDesc, IValueType} from './datatype';
+import {IDataType, IValueTypeDesc, IValueType, IDataDescription} from './datatype';
 import {IVector} from './vector';
 import {IHistogram, IStatistics} from './math';
 
@@ -23,7 +23,12 @@ export interface IHeatMapUrlOptions {
   range?: [number, number];
 }
 
+export interface IMatrixDataDescription extends IDataDescription {
+
+}
+
 export interface IMatrix extends IDataType, IProductSelectAble {
+  readonly desc: IMatrixDataDescription;
   /**
    * nrow * ncol
    */
