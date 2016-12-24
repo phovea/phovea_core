@@ -12,43 +12,33 @@ import {list as listPlugins, IPluginDesc} from './plugin';
 import {IDataType} from './datatype';
 import {IDType} from './idtype';
 import {EventHandler, IEventHandler} from './event';
-import {Rect, rect} from './geom';
+import {Rect} from './geom';
 
 
 export interface IViewDesc extends IPluginDesc {
-  type: string; //support, main
-  location: string; //left, top, bottom, right, center
+  /**
+   * view type. support, main
+   * default: main
+   */
+  readonly type: string; //support, main
+  /**
+   * view location: left, top, bottom, right, center
+   * default: center
+   */
+  readonly location: string;
 }
 
 export interface IView extends ILayoutElem, IEventHandler {
-  data : IDataType[];
-  idtypes : IDType[];
-
+  readonly data : IDataType[];
+  readonly idtypes : IDType[];
 }
 
-export class AView extends EventHandler implements IView {
+export abstract class AView extends EventHandler implements IView {
   private _layoutOptions : any = {};
 
-  constructor() {
-    super();
-  }
+  abstract setBounds(x:number, y:number, w:number, h:number);
 
-  get data() {
-    return [];
-  }
-
-  get idtypes() {
-    return  [];
-  }
-
-  setBounds(x:number, y:number, w:number, h:number) {
-    //implement
-    return null;
-  }
-
-  getBounds(): Rect {
-    return rect(0,0,0,0);
-  }
+  abstract getBounds(): Rect;
 
   setLayoutOption(name: string, value: any) {
     this._layoutOptions[name] = value;
@@ -63,7 +53,7 @@ export class AView extends EventHandler implements IView {
 }
 
 function convertDesc(desc: IPluginDesc) : IViewDesc {
-  var d = <any>desc;
+  const d = <any>desc;
   d.type = d.type || 'main';
   d.location = d.location || 'center';
   return d;
