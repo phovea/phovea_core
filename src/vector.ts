@@ -14,9 +14,9 @@ import {IStratification} from './stratification';
 import {IStatistics, IHistogram} from './math';
 
 export interface IVectorDataDescription extends IDataDescription {
-  value: IValueTypeDesc;
-  idtype: IDTypeLike;
-  size: number;
+  readonly value: IValueTypeDesc;
+  readonly idtype: IDTypeLike;
+  readonly size: number;
 }
 
 export interface IVector extends IDataType {
