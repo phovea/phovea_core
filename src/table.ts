@@ -14,6 +14,10 @@ import {IVector as IVVector} from './vector';
 
 export declare type IVector = IVVector;
 
+export interface IQueryArgs {
+  [key: string]: number|string;
+}
+
 export interface ITable extends IDataType {
   readonly ncol : number;
   readonly nrow : number;
@@ -53,7 +57,7 @@ export interface ITable extends IDataType {
    */
   view(range?:Range) : ITable;
 
-  queryView(name: string, args: any): ITable;
+  queryView(name: string, args: IQueryArgs): ITable;
 
   /**
    * reduces the current matrix to a vector using the given reduce function
@@ -62,18 +66,18 @@ export interface ITable extends IDataType {
    * @param valuetype the new value type by default the same as matrix valuetype
    * @param idtype the new vlaue type by default the same as matrix rowtype
    */
-  reduce(f : (row : any[]) => any, this_f? : any, valuetype? : any, idtype? : IDType) : IVector;
+  reduce(f : (row : IValueType[]) => any, this_f? : any, valuetype? : IValueTypeDesc, idtype? : IDType) : IVector;
   /**
    * returns a promise for getting one cell
    * @param i
    * @param j
    */
-  at(i:number, j:number) : Promise<any>;
+  at(i:number, j:number) : Promise<IValueType>;
   /**
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range?:Range) : Promise<any[][]>;
+  data(range?:Range) : Promise<IValueType[][]>;
 
   /**
    * returns a promise for getting the data as an array of objects
@@ -81,3 +85,5 @@ export interface ITable extends IDataType {
    */
   objects(range?:Range) : Promise<any[]>;
 }
+
+export default ITable;

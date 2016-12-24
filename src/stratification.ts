@@ -14,9 +14,9 @@ import {IVector} from './vector';
 import {IHistogram, rangeHist} from './math';
 
 export interface IGroup {
-  name: string;
-  size: number;
-  color: string;
+  readonly name: string;
+  readonly size: number;
+  readonly color: string;
 }
 
 export function guessColor(stratification: string, group: string) {
@@ -30,8 +30,13 @@ export function guessColor(stratification: string, group: string) {
 }
 
 export interface IStratificationDataDescription extends IDataDescription {
-  size: number[];
-  ngroups: number;
+  readonly size: number[];
+  readonly groups: IGroup[];
+  readonly ngroups: number;
+  /**
+   * fqname of the origin dataset, e.g. vector, table
+   */
+  readonly origin?: string;
 }
 
 export interface IStratification extends IDataType {
@@ -47,17 +52,18 @@ export interface IStratification extends IDataType {
 
   hist(bins? : number, range?:Range): Promise<IHistogram>;
 
-  length: number;
-  ngroups: number;
+  readonly length: number;
+  readonly ngroups: number;
 
-  groups: IGroup[];
+  readonly groups: IGroup[];
 
-  idtype: IDType;
+  readonly idtype: IDType;
 
   group(group: number): IStratification;
 
   origin(): Promise<IDataType>;
 }
+export default IStratification;
 
 
 /**
@@ -127,14 +133,14 @@ export class StratificationGroup extends SelectAble implements IStratification {
 
   names(range:Range = all()) {
     return this.rangeGroup().then((g) => {
-      var r = list(g).preMultiply(range);
+      const r = list(g).preMultiply(range);
       return this.root.names(r);
     });
   }
 
   ids(range:Range = all()):Promise<Range> {
     return this.rangeGroup().then((g) => {
-      var r = list(g).preMultiply(range);
+      const r = list(g).preMultiply(range);
       return this.root.ids(r);
     });
   }
