@@ -7,18 +7,18 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {argSort, argFilter, IPersistable, mixin} from './index';
-import {getAPIJSON, api2absURL, getAPIData} from './ajax';
-import {list as rlist, Range, RangeLike, all, range, join, Range1D, parse} from './range';
-import {IDType, AProductSelectAble, resolve as resolveIDType, resolveProduct, ProductIDType, createLocalAssigner} from './idtype';
+import {argSort, argFilter, IPersistable, mixin} from '../index';
+import {getAPIJSON, api2absURL, getAPIData} from '../ajax';
+import {list as rlist, Range, RangeLike, all, range, join, Range1D, parse} from '../range';
+import {IDType, AProductSelectAble, resolve as resolveIDType, resolveProduct, ProductIDType, createLocalAssigner} from '../idtype';
 import {
   mask, transpose, VALUE_TYPE_CATEGORICAL, VALUE_TYPE_INT, VALUE_TYPE_REAL,
   ICategoricalValueTypeDesc, INumberValueTypeDesc, IValueTypeDesc, IValueType, createDefaultDataDesc, guessValueTypeDesc
-} from './datatype';
-import {IVector, IVectorDataDescription} from './vector';
-import {AVector} from './vector_impl';
-import {IStatistics, IHistogram, computeStats, hist, categoricalHist, wrapHist} from './math';
-import {IMatrix, IMatrixDataDescription, IHeatMapUrlOptions} from './matrix';
+} from '../datatype';
+import {IVector, IVectorDataDescription} from '../vector';
+import AVector from '../vector/AVector';
+import {IStatistics, IHistogram, computeStats, hist, categoricalHist, wrapHist} from '../math';
+import {IMatrix, IMatrixDataDescription, IHeatMapUrlOptions} from './IMatrix';
 
 function flatten<T>(arr: T[][], indices: Range, select: number = 0) {
   let r = [];

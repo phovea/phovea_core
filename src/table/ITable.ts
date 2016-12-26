@@ -7,12 +7,10 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {Range, RangeLike} from './range';
-import {IDType} from './idtype';
-import {IDataType, IValueType, IValueTypeDesc, IDataDescription} from './datatype';
-import {IVector as IVVector} from './vector';
-
-export declare type IVector = IVVector;
+import {Range, RangeLike} from '../range';
+import {IDType} from '../idtype';
+import {IDataType, IValueType, IValueTypeDesc, IDataDescription} from '../datatype';
+import {IVector} from '../vector';
 
 export interface IQueryArgs {
   [key: string]: number|string;

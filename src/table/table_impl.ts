@@ -7,17 +7,17 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {IPersistable, argFilter, argSort, fixId, mixin} from './index';
-import {getAPIJSON, getAPIData} from './ajax';
-import {Range, all, list as rlist, parse, range, RangeLike} from './range';
-import {SelectAble, resolve as idtypes_resolve, IDType, createLocalAssigner} from './idtype';
+import {IPersistable, argFilter, argSort, fixId, mixin} from '../index';
+import {getAPIJSON, getAPIData} from '../ajax';
+import {Range, all, list as rlist, parse, range, RangeLike} from '../range';
+import {SelectAble, resolve as idtypes_resolve, IDType, createLocalAssigner} from '../idtype';
 import {
   IDataDescription, mask, IValueType, IValueTypeDesc, INumberValueTypeDesc, VALUE_TYPE_INT,
   VALUE_TYPE_REAL, guessValueTypeDesc, createDefaultDataDesc
-} from './datatype';
-import {IVector, IVectorDataDescription} from './vector';
-import {AVector} from './vector_impl';
-import {ITable, IQueryArgs, ITableColumn, ITableDataDescription} from './table';
+} from '../datatype';
+import {IVector, IVectorDataDescription} from '../vector';
+import AVector from '../vector/AVector';
+import {ITable, IQueryArgs, ITableColumn, ITableDataDescription} from './ITable';
 /**
  * base class for different Table implementations, views, transposed,...
  */
@@ -525,7 +525,7 @@ class MultITableVector extends AVector implements IVector {
       fqname: table.desc.fqname + '-p',
       description: f.toString(),
       type: 'vector',
-      id: fixId(table.desc.id + '-p'+f.toString()),
+      id: fixId(table.desc.id + '-p' + f.toString()),
       idtype: table.desc.idtype,
       size: table.nrow,
       value: valuetype,
@@ -699,7 +699,6 @@ export class VectorTable extends ATable implements ITable {
     throw Error('not implemented');
   }
 }
-
 
 
 /**

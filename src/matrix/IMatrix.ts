@@ -7,11 +7,11 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {Range, RangeLike} from './range';
-import {IProductSelectAble, IDType} from './idtype';
-import {IHistAbleDataType, IValueTypeDesc, IValueType, IDataDescription} from './datatype';
-import {IVector} from './vector';
-import {IHistogram, IStatistics} from './math';
+import {Range, RangeLike} from '../range';
+import {IProductSelectAble, IDType} from '../idtype';
+import {IHistAbleDataType, IValueTypeDesc, IValueType, IDataDescription} from '../datatype';
+import {IVector} from '../vector';
+import {IHistogram, IStatistics} from '../math';
 
 export const IDTYPE_ROW = 0;
 export const IDTYPE_COLUMN = 1;
