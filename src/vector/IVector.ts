@@ -7,11 +7,11 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {RangeLike, CompositeRange1D} from './range';
-import {IDType, IDTypeLike} from './idtype';
-import {IHistAbleDataType, IValueTypeDesc, IValueType, IDataDescription} from './datatype';
-import {IStratification} from './stratification';
-import {IStatistics, IHistogram} from './math';
+import {RangeLike, CompositeRange1D} from '../range';
+import {IDType, IDTypeLike} from '../idtype';
+import {IHistAbleDataType, IValueTypeDesc, IValueType, IDataDescription} from '../datatype';
+import {IStratification} from '../stratification/IStratification';
+import {IStatistics, IHistogram} from '../math';
 
 export interface IVectorDataDescription extends IDataDescription {
   readonly value: IValueTypeDesc;

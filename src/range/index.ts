@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {IIterator, Iterator, single, concat, forList, range as iRange} from './iterator';
+import {IIterator, Iterator, single, concat, forList, range as iRange} from '../iterator';
 
 export interface IRangeElem {
   readonly isAll: boolean;
