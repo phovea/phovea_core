@@ -142,8 +142,14 @@ export interface IVector extends IDataType {
 
   /**
    * similar to groups() but returns a stratification
+   * @deprecated use asStratification instead
    */
   stratification(): Promise<IStratification>;
+
+  /**
+   * similar to groups() but returns a stratification
+   */
+  asStratification(): Promise<IStratification>;
 }
 
 export default IVector;

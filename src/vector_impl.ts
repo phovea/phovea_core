@@ -93,8 +93,12 @@ export abstract class AVector extends SelectAble {
   }
 
   stratification(): Promise<IStratification> {
+    return this.asStratification();
+  }
+
+  asStratification(): Promise<IStratification> {
     return this.groups().then((range) => {
-      return new StratificationVector(<IVector><any>this, range);
+      return new StratificationVector(this.root, range);
     });
   }
 
@@ -399,11 +403,15 @@ export class StratificationVector extends ADataType<IStratificationDataDescripti
   }
 
   vector() {
+    return this.asVector();
+  }
+
+  asVector() {
     return Promise.resolve(this.v);
   }
 
   origin(): Promise<IDataType> {
-    return this.vector();
+    return this.asVector();
   }
 
   range() {

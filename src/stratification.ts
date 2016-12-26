@@ -48,7 +48,11 @@ export interface IStratification extends IDataType {
   readonly desc: IStratificationDataDescription;
   range(): Promise<CompositeRange1D>;
   idRange(): Promise<CompositeRange1D>;
+  /**
+   * @deprecated use asVector instead
+   */
   vector(): Promise<IVector>;
+  asVector(): Promise<IVector>;
 
   names();
   names(range: RangeLike);
@@ -110,8 +114,12 @@ export class StratificationGroup extends SelectAble implements IStratification {
     });
   }
 
-  vector(): Promise<IVector> {
-    return Promise.all<any>([this.root.vector(), this.rangeGroup()]).then((arr: [IVector, Range1DGroup]) => arr[0].view(list(arr[1])));
+  vector() {
+    return this.asVector();
+  }
+
+  asVector(): Promise<IVector> {
+    return Promise.all<any>([this.root.asVector(), this.rangeGroup()]).then((arr: [IVector, Range1DGroup]) => arr[0].view(list(arr[1])));
   }
 
   origin(): Promise<IDataType> {

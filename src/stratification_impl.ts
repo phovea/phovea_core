@@ -96,7 +96,11 @@ export class Stratification extends ADataType<IStratificationDataDescription> im
     });
   }
 
-  vector(): Promise<IVector> {
+  vector() {
+    return this.asVector();
+  }
+
+  asVector(): Promise<IVector> {
     if (!this._v) {
       this._v = this.loader(this.desc).then((data) => new StratificationVector(this, data.range));
     }
