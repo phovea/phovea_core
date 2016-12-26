@@ -615,9 +615,9 @@ class MultITableVector extends AVector implements IVector {
  * @param desc
  * @returns {ITable}
  */
-export function create(desc: ITableDataDescription): ITable {
-  if (typeof((<any>desc).loader) === 'function') {
-    return new Table(desc, adapterOne2Two((<any>desc).loader));
+export function create(desc: ITableDataDescription, loader?: ITableLoader): ITable {
+  if (loader) {
+    return new Table(desc, adapterOne2Two(loader));
   }
   return new Table(desc, viaAPI2Loader());
 }

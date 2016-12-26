@@ -891,9 +891,9 @@ class ProjectedVector extends AVector implements IVector {
  * @param loader
  * @returns {IMatrix}
  */
-export function create(desc: IMatrixDataDescription, loader?: IMatrixLoader2): IMatrix {
-  if (typeof((<any>desc).loader) === 'function') {
-    return new Matrix(desc, adapterOne2Two((<any>desc).loader));
+export function create(desc: IMatrixDataDescription, loader?: IMatrixLoader2|IMatrixLoader): IMatrix {
+  if (typeof loader === 'function') {
+    return new Matrix(desc, adapterOne2Two(<IMatrixLoader>loader));
   }
   return new Matrix(desc, loader ? loader : viaAPI2Loader());
 }
