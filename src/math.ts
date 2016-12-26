@@ -349,3 +349,24 @@ class RangeHistogram implements ICatHistogram {
     return this.range_.groups.forEach((g, i) => callbackfn.call(thisArg, g.length, i));
   }
 }
+
+/**
+ * computes the extent [min, max] for the given array, in case of empty array [NaN, NaN] is returned
+ * @param arr the array
+ * @return {[number,number]} [min, max]
+ */
+export function extent(arr: IIterable<number>) : [number, number] {
+  let min = NaN, max = NaN;
+  arr.forEach((v) => {
+    if (isNaN(v)) {
+      return;
+    }
+    if (isNaN(min) || min > v) {
+      min = v;
+    }
+    if (isNaN(max) || min < v) {
+      max = v;
+    }
+  });
+  return [min, max];
+}
