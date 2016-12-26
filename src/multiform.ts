@@ -10,7 +10,7 @@
 import {IPersistable, mixin, offset} from './index';
 import {list as rlist, Range, all, Range1D, Range1DGroup, CompositeRange1D, asUngrouped} from './range';
 import {IDataType, assignData} from './datatype';
-import {IVisMetaData, IVisInstance, IVisPluginDesc, AVisInstance, assignVis, list as listVisses} from './vis';
+import {IVisMetaData, ITransform, IVisInstance, IVisPluginDesc, AVisInstance, assignVis, list as listVisses} from './vis';
 import {rect, AShape} from './geom';
 import {IPlugin} from './plugin';
 
@@ -240,7 +240,7 @@ export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm 
     });
   }
 
-  transform(scale?: number[], rotate?: number) {
+  transform(scale?: [number, number], rotate?: number) {
     if (this.actVis) {
       if (arguments.length === 0) {
         return this.actVis.transform();
@@ -260,7 +260,7 @@ export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm 
       return;
     }
     return {
-      scale: [1, 1],
+      scale: <[number, number]>[1, 1],
       rotate: 0
     };
   }
@@ -424,7 +424,7 @@ class GridElem implements IPersistable {
   }
 
 
-  transform(scale?: number[], rotate?: number) {
+  transform(scale?: [number, number], rotate?: number): ITransform {
     if (this.actVis) {
       if (arguments.length > 0) {
         return this.actVis.transform(scale, rotate);
@@ -603,7 +603,7 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
     super.destroy();
   }
 
-  transform(scale?: number[], rotate?: number) {
+  transform(scale?: [number, number], rotate?: number): ITransform {
     if (this.grid[0].hasOne) {
       const bak = this.grid[0].transform();
       if (arguments.length > 0) {

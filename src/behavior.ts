@@ -69,7 +69,7 @@ export class ZoomLogic extends EventHandler {
       return null;
     }
     const old = this.v.transform();
-    let s = [zoomX, zoomY];
+    let s : [number, number] = [zoomX, zoomY];
     switch ((this.meta ? this.meta.scaling : 'free')) {
       case 'width-only':
         s[1] = old.scale[1];
@@ -85,7 +85,7 @@ export class ZoomLogic extends EventHandler {
       s[1] = 0.001;
     }
     if ((this.meta && this.meta.scaling === 'aspect')) { //same aspect ratio use min scale
-      s[0] = s[1] = Math.min.apply(Math, s);
+      s[0] = s[1] = Math.min(...s);
     }
     this.fire('zoom', {
       scale: s,
