@@ -7,10 +7,9 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {mixin} from './index';
 import {Range, RangeLike} from './range';
 import {IProductSelectAble, IDType} from './idtype';
-import {IDataType, IValueTypeDesc, IValueType, IDataDescription} from './datatype';
+import {IHistAbleDataType, IValueTypeDesc, IValueType, IDataDescription} from './datatype';
 import {IVector} from './vector';
 import {IHistogram, IStatistics} from './math';
 
@@ -33,12 +32,8 @@ export interface IMatrixDataDescription extends IDataDescription {
   size: [number, number];
 }
 
-export interface IMatrix extends IDataType, IProductSelectAble {
+export interface IMatrix extends IHistAbleDataType, IProductSelectAble {
   readonly desc: IMatrixDataDescription;
-  /**
-   * nrow * ncol
-   */
-  readonly length: number;
   /**
    * number of rows
    */
@@ -47,10 +42,6 @@ export interface IMatrix extends IDataType, IProductSelectAble {
    * number of cols
    */
   readonly ncol: number;
-  /**
-   * type of the value - to be specified
-   */
-  readonly valuetype: IValueTypeDesc;
 
   /**
    * row id type

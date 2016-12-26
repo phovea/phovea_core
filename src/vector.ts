@@ -9,7 +9,7 @@
 
 import {RangeLike, CompositeRange1D} from './range';
 import {IDType, IDTypeLike} from './idtype';
-import {IDataType, IValueTypeDesc, IValueType, IDataDescription} from './datatype';
+import {IHistAbleDataType, IValueTypeDesc, IValueType, IDataDescription} from './datatype';
 import {IStratification} from './stratification';
 import {IStatistics, IHistogram} from './math';
 
@@ -19,16 +19,8 @@ export interface IVectorDataDescription extends IDataDescription {
   readonly size: number;
 }
 
-export interface IVector extends IDataType {
+export interface IVector extends IHistAbleDataType {
   readonly desc: IVectorDataDescription;
-  /**
-   * length of the vector
-   */
-  readonly length: number;
-  /**
-   * type of the value - to be specified
-   */
-  readonly valuetype: IValueTypeDesc;
   /**
    * id type
    */

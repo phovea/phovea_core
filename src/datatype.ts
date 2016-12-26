@@ -9,7 +9,7 @@
 
 import {IPersistable, extendClass, mixin, uniqueString} from './index';
 import {ISelectAble, SelectAble} from './idtype';
-import {extent} from './math';
+import {extent, IHistogram} from './math';
 import {all, none, Range1D, RangeLike, Range1DGroup, composite, Range, CompositeRange1D} from './range';
 
 /**
@@ -121,6 +121,14 @@ export function isDataType(v: IDataType) {
 export function assignData(node: Element, data: IDataType) {
   (<any>node).__data__ = data;
 }
+
+
+export interface IHistAbleDataType extends IDataType {
+  valuetype: IValueTypeDesc;
+  hist(nbins?:number): Promise<IHistogram>;
+  readonly length: number;
+}
+
 
 /**
  * dummy data type just holding the description
