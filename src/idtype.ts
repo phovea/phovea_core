@@ -976,6 +976,8 @@ export abstract class AProductSelectAble extends SelectAble {
   }
 }
 
+export const EVENT_REGISTER_IDTYPE = 'register.idtype';
+
 function fillUpData(entries) {
   entries.forEach(function (row) {
     let entry = cache.get(row.id);
@@ -991,7 +993,7 @@ function fillUpData(entries) {
     }
     cache.set(row.id, entry);
     if (new_) {
-      global_fire('register.idtype', entry);
+      global_fire(EVENT_REGISTER_IDTYPE, entry);
     }
   });
 }
