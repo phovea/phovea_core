@@ -10,7 +10,7 @@
 import {argSort, argFilter} from './index';
 import {getAPIJSON} from './ajax';
 import {all, Range, RangeLike, range, CompositeRange1D, list as rlist, asUngrouped, composite, parse} from './range';
-import {SelectAble, resolve, IDType} from './idtype';
+import {SelectAble, resolve} from './idtype';
 import {
   categorical2partitioning,
   IValueType,
@@ -23,7 +23,7 @@ import {
   INumberValueTypeDesc,
   VALUE_TYPE_CATEGORICAL,
   VALUE_TYPE_INT,
-  VALUE_TYPE_REAL, IValueTypeDesc
+  VALUE_TYPE_REAL
 } from './datatype';
 import {computeStats, IStatistics, IHistogram, categoricalHist, hist, rangeHist} from './math';
 import {IVector, IVectorDataDescription} from './vector';

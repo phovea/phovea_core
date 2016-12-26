@@ -12,7 +12,7 @@ import {getAPIJSON} from './ajax';
 import {parse, Range1DGroup, RangeLike, composite, Range, list as rlist, CompositeRange1D, all} from './range';
 import {resolve as resolveIDType} from './idtype';
 import {
-  IDataDescription, ADataType, IDataType, ICategoricalValueTypeDesc,
+  ADataType, IDataType, ICategoricalValueTypeDesc,
   VALUE_TYPE_CATEGORICAL, IValueType, ICategory
 } from './datatype';
 import {getFirstByFQName} from './data';

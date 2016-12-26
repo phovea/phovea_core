@@ -12,7 +12,7 @@ import {list as rlist, Range, all, Range1D, Range1DGroup, CompositeRange1D, asUn
 import {IDataType, assignData} from './datatype';
 import {IVisMetaData, IVisInstance, IVisPluginDesc, AVisInstance, assignVis, list as listVisses} from './vis';
 import {rect, AShape} from './geom';
-import {IPlugin} from "./plugin";
+import {IPlugin} from './plugin';
 
 class ProxyMetaData implements IVisMetaData {
   constructor(private proxy: () => IVisMetaData) {
