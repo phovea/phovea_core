@@ -22,7 +22,8 @@ export let offline = false;
  * server prefix ofr api calls
  * @type {string}
  */
-export let server_url: string = '/api';
+declare const __APP_CONTEXT__;
+export let server_url: string = (__APP_CONTEXT__ || '/') + 'api';
 /**
  * server suffix for api calls
  * @type {string}
