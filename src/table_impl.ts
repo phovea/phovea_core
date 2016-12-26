@@ -7,13 +7,13 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {IPersistable, argFilter, argSort, fixId} from './index';
+import {IPersistable, argFilter, argSort, fixId, mixin} from './index';
 import {getAPIJSON, getAPIData} from './ajax';
 import {Range, all, list as rlist, parse, range, RangeLike} from './range';
-import {SelectAble, resolve as idtypes_resolve, IDType} from './idtype';
+import {SelectAble, resolve as idtypes_resolve, IDType, createLocalAssigner} from './idtype';
 import {
   IDataDescription, mask, IValueType, IValueTypeDesc, INumberValueTypeDesc, VALUE_TYPE_INT,
-  VALUE_TYPE_REAL
+  VALUE_TYPE_REAL, guessValueTypeDesc, createDefaultDataDesc
 } from './datatype';
 import {IVector, IVectorDataDescription} from './vector';
 import {AVector} from './vector_impl';
@@ -610,21 +610,6 @@ class MultITableVector extends AVector implements IVector {
   }
 }
 
-/**
- * module entry point for creating a datatype
- * @param desc
- * @returns {ITable}
- */
-export function create(desc: ITableDataDescription, loader?: ITableLoader): ITable {
-  if (loader) {
-    return new Table(desc, adapterOne2Two(loader));
-  }
-  return new Table(desc, viaAPI2Loader());
-}
-
-export function wrapObjects(desc: ITableDataDescription, data: any[], nameProperty: string|((obj: any) => string)) {
-  return new Table(desc, adapterOne2Two(viaDataLoader(data, nameProperty)));
-}
 
 export class VectorTable extends ATable implements ITable {
   readonly idtype: IDType;
@@ -715,6 +700,107 @@ export class VectorTable extends ATable implements ITable {
   }
 }
 
+
+
+/**
+ * module entry point for creating a datatype
+ * @param desc
+ * @returns {ITable}
+ */
+export function create(desc: ITableDataDescription, loader?: ITableLoader): ITable {
+  if (loader) {
+    return new Table(desc, adapterOne2Two(loader));
+  }
+  return new Table(desc, viaAPI2Loader());
+}
+
+export function wrapObjects(desc: ITableDataDescription, data: any[], nameProperty: string|((obj: any) => string)) {
+  return new Table(desc, adapterOne2Two(viaDataLoader(data, nameProperty)));
+}
+
 export function fromVectors(desc: IDataDescription, vecs: IVector[]) {
   return new VectorTable(desc, vecs);
+}
+
+
+function toObjects(data: any[][], cols: string[]) {
+  return data.map((row) => {
+    const r: any = {};
+    cols.forEach((col, i) => r[col] = row[i]);
+    return r;
+  });
+}
+function toList(objs: any[], cols: string[]) {
+  return objs.map((obj) => cols.map((c) => obj[c]));
+}
+
+export interface IAsTableOptions {
+  name?: string;
+  idtype?: string;
+  rowassigner?(ids: string[]): Range;
+  keyProperty?: string;
+}
+
+
+function createDefaultTableDesc(): ITableDataDescription {
+  return <ITableDataDescription>mixin(createDefaultDataDesc(), {
+    idtype: '_rows',
+    columns: [],
+    size: [0, 0]
+  });
+}
+
+
+function asTableImpl(columns: ITableColumn[], rows: string[], objs: any[], data: IValueType[][], options: IAsTableOptions = {}) {
+  const desc = mixin(createDefaultTableDesc(), {
+    columns: columns,
+    size: [rows.length, columns.length]
+  }, options);
+
+  const rowAssigner = options.rowassigner || createLocalAssigner();
+  const loader: ITableLoader = () => {
+    const r = {
+      rowIds: rowAssigner(rows),
+      rows: rows,
+      objs: objs,
+      data: data
+    };
+    return Promise.resolve(r);
+  };
+  return new Table(desc, adapterOne2Two(loader));
+}
+
+export function asTableFromArray(data: any[][], options: IAsTableOptions = {}): ITable {
+  const rows = data.map((r) => r[0]);
+  const cols = data[0].slice(1);
+  const tableData = data.slice(1).map((r) => r.slice(1));
+
+  const columns = cols.map((col, i) => {
+    return {
+      name: col,
+      value: guessValueTypeDesc(tableData.map((row) => row[i]))
+    };
+  });
+
+  const realData = tableData.map((row) => columns.map((col, i) => (col.value.type === VALUE_TYPE_REAL || col.value.type === VALUE_TYPE_INT) ? parseFloat(row[i]) : row[i]));
+  const objs = toObjects(realData, cols);
+
+  return asTableImpl(columns, rows, objs, realData, options);
+}
+
+export function asTable(data: any[], options: IAsTableOptions = {}): ITable {
+  const keyProperty = options.keyProperty || '_id';
+
+  const rows = data.map((r, i) => String(r[keyProperty]) || String(i));
+  const cols = Object.keys(data[0]);
+  const objs = data;
+  const realData = toList(objs, cols);
+
+  const columns = cols.map((col, i) => {
+    return {
+      name: col,
+      value: guessValueTypeDesc(realData.map((row) => row[i]))
+    };
+  });
+  return asTableImpl(columns, rows, objs, realData, options);
 }

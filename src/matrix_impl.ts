@@ -7,13 +7,13 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {argSort, argFilter, IPersistable} from './index';
+import {argSort, argFilter, IPersistable, mixin} from './index';
 import {getAPIJSON, api2absURL, getAPIData} from './ajax';
 import {list as rlist, Range, RangeLike, all, range, join, Range1D, parse} from './range';
-import {IDType, AProductSelectAble, resolve as resolveIDType, resolveProduct, ProductIDType} from './idtype';
+import {IDType, AProductSelectAble, resolve as resolveIDType, resolveProduct, ProductIDType, createLocalAssigner} from './idtype';
 import {
   mask, transpose, VALUE_TYPE_CATEGORICAL, VALUE_TYPE_INT, VALUE_TYPE_REAL,
-  ICategoricalValueTypeDesc, INumberValueTypeDesc, IValueTypeDesc, IValueType
+  ICategoricalValueTypeDesc, INumberValueTypeDesc, IValueTypeDesc, IValueType, createDefaultDataDesc, guessValueTypeDesc
 } from './datatype';
 import {IVector, IVectorDataDescription} from './vector';
 import {AVector} from './vector_impl';
@@ -896,4 +896,75 @@ export function create(desc: IMatrixDataDescription, loader?: IMatrixLoader2|IMa
     return new Matrix(desc, adapterOne2Two(<IMatrixLoader>loader));
   }
   return new Matrix(desc, loader ? loader : viaAPI2Loader());
+}
+
+
+export interface IAsMatrixOptions {
+  name?: string;
+  rowtype?: string;
+  coltype?: string;
+  rowassigner?(ids: string[]): Range;
+  colassigner?(ids: string[]): Range;
+}
+
+function createDefaultMatrixDesc(): IMatrixDataDescription {
+  return <IMatrixDataDescription>mixin(createDefaultDataDesc(), {
+    rowtype: '_rows',
+    coltype: '_cols',
+    size: [0, 0]
+  });
+}
+
+export function asMatrix(data: IValueType[][]): IMatrix;
+export function asMatrix(data: IValueType[][], options?: IAsMatrixOptions): IMatrix;
+export function asMatrix(data: IValueType[][], rows: string[], cols: string[]): IMatrix;
+export function asMatrix(data: IValueType[][], rows: string[], cols: string[], options?: IAsMatrixOptions): IMatrix;
+
+/**
+ * parses a given dataset and convert is to a matrix
+ * @param data the data array
+ * @param rows_or_options see options or the row ids of this matrix
+ * @param cols_def the optional column ids
+ * @param options options for defining the dataset description
+ * @returns {IMatrix}
+ */
+export function asMatrix(data: IValueType[][], rows_or_options?: any, cols_def?: string[], options: IAsMatrixOptions = {}): IMatrix {
+  const cols = cols_def ? cols_def : data.slice().shift().slice(1);
+  const rows = Array.isArray(rows_or_options) ? <string[]>rows_or_options : data.map((r) => r[0]).slice(1);
+  if (typeof rows_or_options === 'object') {
+    options = rows_or_options;
+  }
+  options = options || {};
+
+  let realData = Array.isArray(rows_or_options) ? data : data.map((r) => r.slice(1)).slice(1);
+
+  const valueType = guessValueTypeDesc([].concat.apply([], realData));
+
+  if (valueType.type === VALUE_TYPE_REAL) {
+    realData = realData.map((row) => row.map(parseFloat));
+  } else if (valueType.type === VALUE_TYPE_REAL) {
+    realData = realData.map((row) => row.map(parseInt));
+  }
+
+  const desc = mixin(createDefaultMatrixDesc(), {
+    size: [rows.length, cols.length],
+    value: valueType
+  }, options);
+
+  const rowAssigner = options.rowassigner || createLocalAssigner();
+  const colAssigner = options.rowassigner || createLocalAssigner();
+  const loader: IMatrixLoader2 = {
+    rowIds: (desc: IMatrixDataDescription, range: Range) => Promise.resolve(rowAssigner(range.filter(rows))),
+    colIds: (desc: IMatrixDataDescription, range: Range) => Promise.resolve(colAssigner(range.filter(cols))),
+    ids: (desc: IMatrixDataDescription, range: Range) => {
+      const rc = rowAssigner(range.dim(0).filter(rows));
+      const cc = colAssigner(range.dim(1).filter(cols));
+      return Promise.resolve(join(rc, cc));
+    },
+    at: (desc: IMatrixDataDescription, i, j) => Promise.resolve(realData[i][j]),
+    rows: (desc: IMatrixDataDescription, range: Range) => Promise.resolve(range.filter(rows)),
+    cols: (desc: IMatrixDataDescription, range: Range) => Promise.resolve(range.filter(cols)),
+    data: (desc: IMatrixDataDescription, range: Range) => Promise.resolve(range.filter(realData))
+  };
+  return new Matrix(desc, loader);
 }

@@ -7,6 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
+import {mixin} from './index';
 import {Range, RangeLike} from './range';
 import {IProductSelectAble, IDType} from './idtype';
 import {IDataType, IValueTypeDesc, IValueType, IDataDescription} from './datatype';

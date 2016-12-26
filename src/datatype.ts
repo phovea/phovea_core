@@ -7,8 +7,9 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {IPersistable, extendClass, mixin} from './index';
+import {IPersistable, extendClass, mixin, uniqueString} from './index';
 import {ISelectAble, SelectAble} from './idtype';
+import {extent} from './math';
 import {all, none, Range1D, RangeLike, Range1DGroup, composite, Range, CompositeRange1D} from './range';
 
 /**
@@ -279,3 +280,47 @@ export function defineDataType(name: string, functions: any) {
   return DataType;
 }
 
+
+function isNumeric(obj) {
+  return (obj - parseFloat(obj) + 1) >= 0;
+}
+
+
+/**
+ * guesses the type of the given value array returning its description
+ * @param arr
+ * @return {any}
+ */
+export function guessValueTypeDesc(arr: IValueType[]): IValueTypeDesc {
+  if (arr.length === 0) {
+    return {type: 'string'}; //doesn't matter
+  }
+  const test = arr[0];
+  if (typeof test === 'number' || isNumeric(test)) {
+    return {type: VALUE_TYPE_REAL, range: extent(arr.map(parseFloat))};
+  }
+  const values = new Set(<string[]>arr);
+  if (values.size < arr.length * 0.2 || values.size < 8) {
+    //guess as categorical
+    return {type: 'categorical', categories: Array.from(values.values())};
+  }
+  return {type: 'string'};
+}
+
+
+/**
+ * creates a default data description
+ * @return {{type: string, id: string, name: string, fqname: string, description: string, creator: string, ts: number}}
+ */
+export function createDefaultDataDesc(namespace = 'localData'): IDataDescription {
+  const id = uniqueString(namespace);
+  return {
+    type: 'table',
+    id: id,
+    name: id,
+    fqname: id,
+    description: '',
+    creator: 'Anonymous',
+    ts: Date.now()
+  };
+}
