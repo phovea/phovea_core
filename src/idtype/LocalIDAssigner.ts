@@ -11,7 +11,7 @@ import {IdPool} from '../index';
 import {Range, list as rlist} from '../range';
 
 
-export class LocalIDAssigner {
+export default class LocalIDAssigner {
   private readonly pool = new IdPool();
   private readonly lookup = new Map<string, number>();
 
