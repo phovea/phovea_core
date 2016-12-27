@@ -6,8 +6,8 @@ import {IPersistable} from '../../index';
 import {all, parse, RangeLike} from '../../range';
 import IDType from '../../idtype/IDType';
 import {IDataDescription} from '../../datatype';
-import {ITable, ITableDataDescription, IQueryArgs} from '..//ITable';
-import ATable from '..//ATable';
+import {ITable, ITableDataDescription, IQueryArgs} from '../ITable';
+import ATable from '../ATable';
 import {IVector} from '../../vector/IVector';
 
 
@@ -50,6 +50,10 @@ export default class VectorTable extends ATable implements ITable {
       arr.slice(1).forEach((ai) => ai.forEach((d, i) => r[i].push(d)));
       return r;
     });
+  }
+
+  colData(column: string, range: RangeLike = all()) {
+    return this.vectors.find((d) => d.desc.name === column).data(range);
   }
 
   objects(range: RangeLike = all()) {

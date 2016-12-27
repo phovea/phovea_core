@@ -6,8 +6,7 @@ import {argFilter, argSort} from '../../index';
 import {all, parse, RangeLike, list as rlist} from '../../range';
 import {IValueType} from '../../datatype';
 import {IVector, IVectorDataDescription} from '../../vector';
-import {ITableColumn} from '../ITable';
-import Table from '../Table';
+import {ITable, ITableColumn} from '../ITable';
 import AVector from '../../vector/AVector';
 
 /**
@@ -17,7 +16,7 @@ export default class TableVector extends AVector implements IVector {
   readonly desc: IVectorDataDescription;
   readonly column: string;
 
-  constructor(private table: Table, private index: number, desc: ITableColumn) {
+  constructor(private table: ITable, private index: number, desc: ITableColumn) {
     super(null);
     this.column = desc.name;
     this.root = this;

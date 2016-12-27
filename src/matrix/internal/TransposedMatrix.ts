@@ -10,10 +10,8 @@
 import {RangeLike, all, parse} from '../../range';
 import {IValueType, transpose} from '../../datatype';
 import {IMatrix, IHeatMapUrlOptions} from '../IMatrix';
-import AMatrix from '../AMatrix';
-import Matrix from '../Matrix';
+import AMatrix, {MatrixView} from '../AMatrix';
 import SliceRowVector from './SliceRowVector';
-import MatrixView from './MatrixView';
 import {IVector} from '../../vector';
 import {IHistogram} from '../../math';
 
@@ -25,7 +23,7 @@ import {IHistogram} from '../../math';
 export default class TransposedMatrix extends AMatrix {
   readonly t: IMatrix;
 
-  constructor(base: Matrix) {
+  constructor(base: IMatrix) {
     super(base);
     this.t = base;
   }

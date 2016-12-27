@@ -5,7 +5,12 @@
 import {IRangeElem} from './internal';
 import RangeElem from './internal/RangeElem';
 import {IIterator, Iterator, forList, concat} from '../iterator';
-import CompositeRange1D from './CompositeRange1D';
+import Range1DGroup from './Range1DGroup';
+
+export interface ICompositeRange1D extends Range1D {
+  groups: Range1DGroup[];
+  fromLikeComposite(groups: Range1DGroup[]): Range1D;
+}
 
 export default class Range1D {
   private readonly arr: IRangeElem[];
@@ -180,7 +185,7 @@ export default class Range1D {
     }
     //TODO optimize
     const l = this.iter(size).asList();
-    const mapImpl = (sub) => {
+    const mapImpl = (sub: Range1D) => {
       const s = sub.iter(l.length);
       const r = [];
       s.forEach((i) => {
@@ -190,9 +195,9 @@ export default class Range1D {
       });
       return sub.fromLike(r);
     };
-
-    if (sub instanceof CompositeRange1D) {
-      return new CompositeRange1D(sub.name, sub.groups.map(mapImpl));
+    if (typeof (<ICompositeRange1D>sub).fromLikeComposite === 'function') {
+      const csub = <ICompositeRange1D>sub;
+      return csub.fromLikeComposite(<any>csub.groups.map(mapImpl));
     } else {
       return mapImpl(sub);
     }
@@ -370,8 +375,9 @@ export default class Range1D {
         }
       };
     }
-    if (r instanceof CompositeRange1D) {
-      return new CompositeRange1D(r.name, r.groups.map((g) => {
+    if (typeof (<ICompositeRange1D>r).fromLikeComposite === 'function') {
+      const csub = <ICompositeRange1D>r;
+      return csub.fromLikeComposite(csub.groups.map((g) => {
         const result = [];
         g.forEach((d) => mapImpl(d, result));
         return g.fromLike(result);
