@@ -7,9 +7,10 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
+import {mixin} from '../index';
 import {RangeLike, CompositeRange1D} from '../range';
 import {IDType, IDTypeLike} from '../idtype';
-import {IHistAbleDataType, IValueTypeDesc, IValueType, IDataDescription} from '../datatype';
+import {IHistAbleDataType, IValueTypeDesc, IValueType, IDataDescription, createDefaultDataDesc} from '../datatype';
 import {IStratification} from '../stratification/IStratification';
 import {IStatistics, IHistogram} from '../math';
 
@@ -145,3 +146,11 @@ export interface IVector extends IHistAbleDataType {
 }
 
 export default IVector;
+
+export function createDefaultVectorDesc(): IVectorDataDescription {
+  return <IVectorDataDescription>mixin(createDefaultDataDesc(), {
+    type: 'vector',
+    idtype: '_rows',
+    size: 0
+  });
+}

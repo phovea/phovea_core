@@ -7,8 +7,9 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
+import {mixin} from '../index';
 import {Range, RangeLike, CompositeRange1D} from '../range';
-import {IDataType, IDataDescription} from '../datatype';
+import {IDataType, IDataDescription, createDefaultDataDesc} from '../datatype';
 import {IVector} from '../vector';
 import {IDType} from '../idtype';
 import {IHistogram} from '../math';
@@ -74,3 +75,14 @@ export interface IStratification extends IDataType {
   origin(): Promise<IDataType>;
 }
 export default IStratification;
+
+
+export function createDefaultStratificationDesc(): IStratificationDataDescription {
+  return <IStratificationDataDescription>mixin(createDefaultDataDesc(), {
+    type: 'stratification',
+    idtype: '_rows',
+    size: 0,
+    groups: [],
+    ngroups: 0
+  });
+}

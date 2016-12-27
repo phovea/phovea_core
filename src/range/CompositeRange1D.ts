@@ -22,7 +22,7 @@ function toBase(groups: Range1DGroup[]) {
 
 
 export default class CompositeRange1D extends Range1D {
-  constructor(public name: string, public groups: Range1DGroup[], base?: Range1D) {
+  constructor(public readonly name: string, public readonly groups: Range1DGroup[], base?: Range1D) {
     super(base ? base : toBase(groups));
   }
 
