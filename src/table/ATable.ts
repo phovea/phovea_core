@@ -8,7 +8,7 @@ import {SelectAble, resolve as idtypes_resolve, IDType} from '../idtype';
 import {IVector} from '../vector';
 import {ITable, IQueryArgs} from './ITable';
 import TableView from './internal/TableView';
-import MultITableVector from './internal/MultITableVector';
+import MultiTableVector from './internal/MultiTableVector';
 import {IValueType, IValueTypeDesc} from '../datatype';
 
 /**
@@ -44,7 +44,7 @@ export abstract class ATable extends SelectAble {
   }
 
   reduce(f: (row: IValueType[]) => IValueType, this_f?: any, valuetype?: IValueTypeDesc, idtype?: IDType): IVector {
-    return new MultITableVector(this.root, f, this_f, valuetype, idtype);
+    return new MultiTableVector(this.root, f, this_f, valuetype, idtype);
   }
 
   restore(persisted: any): IPersistable {
