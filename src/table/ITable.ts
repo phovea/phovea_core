@@ -7,9 +7,10 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
+import {mixin} from '../index';
 import {Range, RangeLike} from '../range';
 import {IDType} from '../idtype';
-import {IDataType, IValueType, IValueTypeDesc, IDataDescription} from '../datatype';
+import {IDataType, IValueType, IValueTypeDesc, IDataDescription, createDefaultDataDesc} from '../datatype';
 import {IVector} from '../vector';
 
 export interface IQueryArgs {
@@ -79,7 +80,7 @@ export interface ITable extends IDataType {
    * @param valuetype the new value type by default the same as matrix valuetype
    * @param idtype the new vlaue type by default the same as matrix rowtype
    */
-  reduce(f: (row: IValueType[]) => any, this_f?: any, valuetype?: IValueTypeDesc, idtype?: IDType): IVector;
+  reduce(f: (row: IValueType[]) => IValueType, this_f?: any, valuetype?: IValueTypeDesc, idtype?: IDType): IVector;
   /**
    * returns a promise for getting one cell
    * @param i
@@ -100,3 +101,13 @@ export interface ITable extends IDataType {
 }
 
 export default ITable;
+
+
+export function createDefaultTableDesc(): ITableDataDescription {
+  return <ITableDataDescription>mixin(createDefaultDataDesc(), {
+    type: 'table',
+    idtype: '_rows',
+    columns: [],
+    size: [0, 0]
+  });
+}

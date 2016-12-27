@@ -11,7 +11,7 @@ import {getAPIJSON, sendAPI} from './ajax';
 import {list as listPlugins} from './plugin';
 import {IDataDescription, IDataType, DummyDataType} from './datatype';
 import {ITable} from './table';
-import {wrapObjects} from './table/table_impl';
+import {wrapObjects} from './table/Table';
 export {random_id, fixId} from './index';
 
 //find all datatype plugins

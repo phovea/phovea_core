@@ -7,11 +7,11 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {argSort, argFilter} from '../index';
-import {all, Range, RangeLike, list as rlist, parse} from '../range';
-import {IValueType} from '../datatype';
-import {IVector} from './IVector';
-import AVector from './AVector';
+import {argSort, argFilter} from '../../index';
+import {all, Range, RangeLike, list as rlist, parse} from '../../range';
+import {IValueType} from '../../datatype';
+import {IVector} from '../IVector';
+import AVector from '../AVector';
 
 
 /**

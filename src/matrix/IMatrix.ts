@@ -129,6 +129,7 @@ export default IMatrix;
 
 export function createDefaultMatrixDesc(): IMatrixDataDescription {
   return <IMatrixDataDescription>mixin(createDefaultBaseDesc(), {
+    type: 'matrix',
     rowtype: '_rows',
     coltype: '_cols',
     size: [0, 0]

@@ -23,8 +23,8 @@ import {
 import {computeStats, IStatistics, IHistogram, categoricalHist, hist} from '../math';
 import {IVector} from './IVector';
 import {IStratification} from '../stratification';
-import VectorView from './VectorView';
-import StratificationVector from './StratificationVector';
+import VectorView from './internal/VectorView';
+import StratificationVector from './internal/StratificationVector';
 /**
  * base class for different Vector implementations, views, transposed,...
  */
