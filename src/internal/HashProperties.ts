@@ -13,8 +13,10 @@ export default class HashProperties extends PropertyHandler {
 
   constructor() {
     super();
-    this.map = history.state;
-    if (!this.map) {
+    const bak = history.state;
+    if (bak) {
+      Object.keys(bak).forEach((k) => this.map.set(k, bak[k]));
+    } else {
       this.parse(location.hash);
     }
     window.addEventListener('hashchange', this.updated, false);
@@ -47,9 +49,15 @@ export default class HashProperties extends PropertyHandler {
     return false;
   }
 
+  private toObject() {
+    const r: any = {};
+    this.map.forEach((v, k) => r[k] = v);
+    return r;
+  }
+
   private update() {
     window.removeEventListener('hashchange', this.updated, false);
-    history.pushState(this.map, 'State ' + Date.now(), '#' + this.toString());
+    history.pushState(this.toObject(), 'State ' + Date.now(), '#' + this.toString());
     window.addEventListener('hashchange', this.updated, false);
   }
 }
