@@ -66,7 +66,7 @@ export default class Rect extends AShape {
     this.h = val - this.y;
   }
 
-  shiftImpl(x, y) {
+  protected shiftImpl(x, y) {
     this.x += x;
     this.y += y;
   }
@@ -76,7 +76,7 @@ export default class Rect extends AShape {
   }
 
   bs(): Circle {
-    return new Circle(this.cx, this.cy, Math.sqrt(this.w * 2 + this.h * 2));
+    return new Circle(this.cx, this.cy, Math.sqrt(this.w * 2 + this.h * 2) / 2);
   }
 
   transform(scale: number[], rotate: number) {

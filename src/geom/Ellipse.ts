@@ -20,7 +20,7 @@ export default class Ellipse extends AShape {
     return `Ellipse(x=${this.x},y=${this.y},radiusX=${this.radiusX},radiusY=${this.radiusY})`;
   }
 
-  shiftImpl(x, y) {
+  protected shiftImpl(x, y) {
     this.x += x;
     this.y += y;
   }
@@ -35,7 +35,7 @@ export default class Ellipse extends AShape {
 
   transform(scale: number[], rotate: number) {
     //TODO rotate
-    return new Ellipse(this.x * scale[0], this.y * scale[1], this.radiusX * scale[0], this.radiusX * scale[1]);
+    return new Ellipse(this.x * scale[0], this.y * scale[1], this.radiusX * scale[0], this.radiusY * scale[1]);
   }
 
   asIntersectionParams(): IIntersectionParam {

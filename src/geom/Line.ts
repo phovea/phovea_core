@@ -28,7 +28,7 @@ export default class Line extends AShape {
     return `Line(x1=${this.x1},y1=${this.y1},x2=${this.x2},y2=${this.y2})`;
   }
 
-  shiftImpl(x, y) {
+  protected shiftImpl(x, y) {
     this.x1 += x;
     this.y1 += y;
     this.x2 += x;
@@ -42,7 +42,9 @@ export default class Line extends AShape {
   bs(): Circle {
     const x = 0.5 * (this.x1 + this.x2);
     const y = 0.5 * (this.y1 + this.y2);
-    return new Circle(x, y, Math.max(Math.abs(this.x1 - this.x2), Math.abs(this.y1 - this.y2)) / 2);
+    const dx = (this.x1 - this.x2);
+    const dy = (this.y1 - this.y2);
+    return new Circle(x, y, Math.sqrt(dx * dx + dy * dy) / 2);
   }
 
   transform(scale: number[], rotate: number) {

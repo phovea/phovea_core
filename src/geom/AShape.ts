@@ -84,7 +84,7 @@ export abstract class AShape implements IShape {
    */
   abstract bs(): Circle;
 
-  abstract shiftImpl(x: number, y: number);
+  protected abstract shiftImpl(x: number, y: number);
 
   abstract asIntersectionParams(): IIntersectionParam;
 

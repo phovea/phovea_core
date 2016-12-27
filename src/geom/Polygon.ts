@@ -25,7 +25,7 @@ export default class Polygon extends AShape {
     return `Polygon(${this.points.join(',')})`;
   }
 
-  shiftImpl(x, y) {
+  protected shiftImpl(x, y) {
     this.points.forEach((p) => {
       p.x += x;
       p.y += y;
@@ -56,24 +56,17 @@ export default class Polygon extends AShape {
   }
 
   bs(): Circle {
-    let mean_x = 0, mean_y = 0;
+    const centroid = this.centroid;
+    let radius2 = 0;
     this.points.forEach((p) => {
-      mean_x += p.x;
-      mean_y += p.y;
-    });
-    mean_x /= this.length;
-    mean_y /= this.length;
-    //TODO better polygon center
-    let radius = 0;
-    this.points.forEach((p) => {
-      let dx = p.x - mean_x;
-      let dy = p.y - mean_y;
+      let dx = p.x - centroid.x;
+      let dy = p.y - centroid.x;
       let d = dx * dx + dy * dy;
-      if (d > radius) {
-        radius = d;
+      if (d > radius2) {
+        radius2 = d;
       }
     });
-    return new Circle(mean_x, mean_y, Math.sqrt(radius));
+    return new Circle(centroid.x, centroid.y, Math.sqrt(radius2));
   }
 
   transform(scale: number[], rotate: number) {
