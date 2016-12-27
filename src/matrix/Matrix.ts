@@ -147,14 +147,16 @@ export function asMatrix(data: IValueType[][], rows: string[], cols: string[], o
  * @returns {IMatrix}
  */
 export function asMatrix(data: IValueType[][], rows_or_options?: any, cols_def?: string[], options: IAsMatrixOptions = {}): IMatrix {
-  const cols = cols_def ? cols_def : data.slice().shift().slice(1);
+  // first column if not defined, excluding 0,0
   const rows = Array.isArray(rows_or_options) ? <string[]>rows_or_options : data.map((r) => r[0]).slice(1);
+  // first row if not defined, excluding 0,0
+  const cols = cols_def ? cols_def : data[0].slice(1);
   if (typeof rows_or_options === 'object') {
     options = rows_or_options;
   }
   options = options || {};
 
-  let realData = Array.isArray(rows_or_options) ? data : data.map((r) => r.slice(1)).slice(1);
+  let realData = Array.isArray(rows_or_options) ? data : data.slice(1).map((r) => r.slice(1));
 
   const valueType = guessValueTypeDesc([].concat.apply([], realData));
 
