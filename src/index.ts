@@ -7,6 +7,13 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
+export {argFilter, argList, argSort, indexOf, search} from './internal/array';
+export {copyDnD, hasDnDType, updateDropEffect} from './internal/dnd';
+export {flagId, uniqueId, uniqueString} from './internal/unique';
+export {default as IdPool} from './internal/IdPool';
+import HashProperties from './internal/HashProperties';
+import PropertyHandler from './internal/PropertyHandler';
+
 /**
  * version of the core
  */
@@ -214,7 +221,7 @@ export function callable(obj: any, f: string) {
     let that;
 
     function CallAble() {
-      that[f].apply(that, argList(arguments));
+      that[f].apply(that, Array.from(arguments));
     }
 
     that = CallAble;
@@ -223,94 +230,6 @@ export function callable(obj: any, f: string) {
   }
 
   return CallAbleFactory;
-}
-
-/**
- * search item in array by function
- * @param arr
- * @param f
- * @deprecated use Array.prototype.find
- * @return {T}
- */
-export function search<T>(arr: T[], f: (v: T) => boolean): T {
-  let r: T = undefined;
-  arr.some((v) => {
-    if (f(v)) {
-      r = v;
-      return true;
-    }
-    return false;
-  });
-  return r;
-}
-
-/**
- *
- * @deprecated use Array.prototype.findIndex
- * @param arr
- * @param f
- * @return {number}
- */
-export function indexOf<T>(arr: T[], f: (v: T) => boolean): number {
-  let r = -1;
-  arr.some((v, i) => {
-    if (f(v)) {
-      r = i;
-      return true;
-    }
-    return false;
-  });
-  return r;
-}
-
-/**
- * converts the given arguments object into an array
- * @param args
- * @deprecated use Array.from(arguments) instead
- * @returns {*|Array}
- */
-export function argList(args: IArguments) {
-  if (arguments.length > 1) {
-    return Array.prototype.slice.call(arguments);
-  } else {
-    return Array.prototype.slice.call(args);
-  }
-}
-
-/**
- * array with indices of 0...n-1
- * @param n
- * @returns {any[]}
- */
-function indexRange(n: number) {
-  //http://stackoverflow.com/questions/3746725/create-a-javascript-array-containing-1-n
-  return Array.apply(null, {length: n}).map(Number.call, Number);
-}
-
-/**
- * returns the sorted indices of this array, when sorting by the given function
- * @param arr
- * @param compareFn
- * @param thisArg
- */
-export function argSort<T>(arr: T[], compareFn?: (a: T, b: T) => number, thisArg?: any): number[] {
-  const indices = indexRange(arr.length);
-  return indices.sort((a, b) => {
-    return compareFn.call(thisArg, arr[a], arr[b]);
-  });
-}
-
-/**
- * returns the indices, which remain when filtering the given array
- * @param arr
- * @param callbackfn
- * @param thisArg
- */
-export function argFilter<T>(arr: T[], callbackfn: (value: T, index: number) => boolean, thisArg?: any): number[] {
-  const indices = indexRange(arr.length);
-  return indices.filter((value, index) => {
-    return callbackfn.call(thisArg, arr[value], index);
-  });
 }
 
 /**
@@ -373,47 +292,6 @@ export function onDOMNodeRemoved(node: Element|Element[], callback: () => void, 
   });
 }
 
-// TODO convert to Map
-/**
- * unique id container
- * @type {{}}
- */
-const idCounter = new Map<string, number>();
-/**
- * returns a unique id for the given domain
- * @param domain
- * @return {number}
- */
-export function uniqueId(domain: string = '_default') {
-  if (!idCounter.has(domain)) {
-    idCounter.set(domain, 0);
-  }
-  const v = idCounter.get(domain);
-  idCounter.set(domain, v + 1);
-  return v;
-}
-
-export function flagId(domain: string, id: number) {
-  if (isNaN(id) || id < 0) {
-    return id;
-  }
-  if (!idCounter.has(domain)) {
-    idCounter.set(domain, id + 1);
-  } else {
-    idCounter.set(domain, Math.max(idCounter.get(domain), id + 1)); //use the next one afterwards
-  }
-  return id;
-}
-
-/**
- * returns a string, which is a unique id for the given domain
- * @param domain
- * @return {string}
- */
-export function uniqueString(domain: string = '_default') {
-  return domain + uniqueId(domain);
-}
-
 /**
  * extends class copied from TypeScript compiler
  * @param subClass
@@ -435,57 +313,6 @@ export function extendClass(subClass, baseClass) {
   /* tslint:enable:no-unused-variable */
 }
 
-/**
- * utility class for handling a bunch of reuseable ids
- */
-export class IdPool {
-  private counter = 0;
-  private free: number[] = [];
-
-  /**
-   * check out a new id
-   * @return {*}
-   */
-  checkOut() {
-    if (this.free.length === 0) { //no more cached
-      return this.counter++;
-    } else {
-      return this.free.shift();
-    }
-  }
-
-  /**
-   * returns an id again
-   * @param id
-   */
-  checkIn(id: number) {
-    //returned the last one, can decrease the counter
-    if (id === this.counter - 1) {
-      this.counter--;
-    } else {
-      this.free.push(id);
-    }
-  }
-
-  /**
-   * whether the given id is used
-   * @param id
-   * @return {boolean}
-   */
-  isCheckedOut(id: number) {
-    //smaller than counter and not a free one
-    return id < this.counter && this.free.indexOf(id) < 0;
-  }
-
-  /**
-   * return the number of checked out ids
-   * @return {number}
-   */
-  get size() {
-    return this.counter - this.free.length;
-  }
-}
-
 
 export interface IPersistable {
   /**
@@ -500,173 +327,6 @@ export interface IPersistable {
   restore(persisted: any): IPersistable|Promise<IPersistable>;
 }
 
-class PropertyHandler {
-  protected map = new Map<string, any>();
-
-  constructor(code?: string) {
-    if (code) {
-      this.parse(code);
-    }
-  }
-
-  /**
-   * returns the contained keys of this property handler
-   * @returns {string[]}
-   */
-  keys() {
-    return Array.from(this.map.keys());
-  }
-
-  /**
-   * iterate over each entry in the map
-   * @param f
-   */
-  forEach(f: (key: string, value: any) => void) {
-    this.map.forEach((v, k) => f(k, v));
-  }
-
-  /**
-   * whether the given name is defined i.e., not null
-   * @deprecated use has(name)
-   * @param name
-   * @returns {boolean}
-   */
-  is(name: string) {
-    return this.has(name);
-  }
-
-  has(name: string) {
-    return this.getProp(name, null) != null;
-  }
-
-  /**
-   * returns the given value with optional default value
-   * @param name
-   * @param default_
-   * @returns {any}
-   */
-  getProp(name: string, default_: string = null) {
-    if (this.map.has(name)) {
-      const v = this.map.get(name);
-      return v === null ? null : v.toString();
-    }
-    return default_;
-  }
-
-  /**
-   * returns the given integer value with optinal default, the value itself might be encoded to safe space
-   * @param name
-   * @param default_
-   * @returns {number}
-   */
-  getInt(name: string, default_: number = NaN) {
-    let l: string = this.getProp(name, null);
-    if (l === null) {
-      return default_;
-    }
-    if (l.match(/[0-9-.]/) != null) {
-      return parseInt(l, 10);
-    }
-    return parseInt(l, 36);
-  }
-
-  /**
-   * removes the property from the map
-   * @param name
-   * @returns {boolean}
-   */
-  removeProp(name: string) {
-    if (this.map.has(name)) {
-      this.map.delete(name);
-      return true;
-    }
-    return false;
-  }
-
-  toString() {
-    let r = [];
-    this.map.forEach((v, key) => {
-      r.push(encodeURIComponent(key) + '=' + encodeURIComponent(v));
-    });
-    return r.join('&');
-  }
-
-  protected parse(code: string = '') {
-    //if available use https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
-    this.map.clear();
-    if (code.length <= 1) { //just the starting character ? or #
-      return;
-    }
-    //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript/21152762#21152762
-    code.substr(1).split('&').forEach((item) => {
-      const s = item.split('='),
-        k = decodeURIComponent(s[0]),
-        v = s[1] && decodeURIComponent(s[1]);
-      if (this.map.has(k)) {
-        let old = this.map.get(k);
-        if (!Array.isArray(old)) {
-          this.map.set(k, [old, v]);
-        } else {
-          this.map.get(k).push(v);
-        }
-      } else {
-        this.map.set(k, v);
-      }
-    });
-  }
-}
-
-
-/**
- * manages the hash location property helper
- */
-class HashProperties extends PropertyHandler {
-  private updated = () => {
-    this.parse(location.hash);
-  };
-
-  constructor() {
-    super();
-    this.map = history.state;
-    if (!this.map) {
-      this.parse(location.hash);
-    }
-    window.addEventListener('hashchange', this.updated, false);
-  }
-
-  setInt(name: string, value: number, update = true) {
-    let v = String(value);
-    if (value > 100) {
-      //idea encode the the using a different radix
-      v = value.toString(36);
-    }
-    this.setProp(name, String(value), update);
-  }
-
-  setProp(name: string, value: string, update = true) {
-    this.map.set(name, value);
-    if (update) {
-      this.update();
-    }
-  }
-
-  removeProp(name: string, update = true) {
-    if (this.map.has(name)) {
-      this.map.delete(name);
-      if (update) {
-        this.update();
-      }
-      return true;
-    }
-    return false;
-  }
-
-  private update() {
-    window.removeEventListener('hashchange', this.updated, false);
-    history.pushState(this.map, 'State ' + Date.now(), '#' + this.toString());
-    window.addEventListener('hashchange', this.updated, false);
-  }
-}
 
 /**
  * access to hash parameters and set them, too
@@ -734,54 +394,6 @@ export function bounds(element: Element) {
     w: obj.width,
     h: obj.height
   };
-}
-
-/**
- * utility for drag-n-drop support
- * @param e
- * @param type
- * @returns {any}
- */
-export function hasDnDType(e, type) {
-  const types = e.dataTransfer.types;
-
-  /*
-   * In Chrome datatransfer.types is an Array,
-   * while in Firefox it is a DOMStringList
-   * that only implements a contains-method!
-   */
-  if (typeof(types.indexOf) === 'function') {
-    return types.indexOf(type) >= 0;
-  }
-  if (typeof(types.includes) === 'function') {
-    return types.includes(type);
-  }
-  if (typeof(types.contains) === 'function') {
-    return types.contains(type);
-  }
-  return false;
-}
-
-/**
- * checks whether it is a copy operation
- * @param e
- * @returns {boolean|RegExpMatchArray}
- */
-export function copyDnD(e) {
-  const dT = e.dataTransfer;
-  return (e.ctrlKey && dT.effectAllowed.match(/copy/gi)) || (!dT.effectAllowed.match(/move/gi));
-}
-/**
- * updates the drop effect accoriding to the current copyDnD state
- * @param e
- */
-export function updateDropEffect(e) {
-  const dT = e.dataTransfer;
-  if (copyDnD(e)) {
-    dT.dropEffect = 'copy';
-  } else {
-    dT.dropEffect = 'move';
-  }
 }
 
 /**
