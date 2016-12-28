@@ -10,7 +10,7 @@
 import {IPersistable, mixin} from '../index';
 import {Range, all, list as rlist, parse, RangeLike} from '../range';
 import {resolve as idtypes_resolve, createLocalAssigner} from '../idtype';
-import {IValueType, VALUE_TYPE_INT, VALUE_TYPE_REAL, guessValueTypeDesc} from '../datatype';
+import {IValueType, VALUE_TYPE_INT, VALUE_TYPE_REAL, guessValueTypeDesc, IValueTypeDesc} from '../datatype';
 import {ITable, ITableColumn, ITableDataDescription, createDefaultTableDesc} from './ITable';
 import ATable from './ATable';
 import TableVector from './internal/TableVector';
@@ -20,7 +20,7 @@ import {ITableLoader, ITableLoader2, adapterOne2Two, viaAPI2Loader, viaDataLoade
  * root matrix implementation holding the data
  */
 export default class Table extends ATable implements ITable {
-  private vectors: TableVector[];
+  private vectors: TableVector<any, IValueTypeDesc>[];
 
   constructor(public readonly desc: ITableDataDescription, private loader: ITableLoader2) {
     super(null);
@@ -138,7 +138,7 @@ export interface IAsTableOptions {
 }
 
 
-function asTableImpl(columns: ITableColumn[], rows: string[], objs: any[], data: IValueType[][], options: IAsTableOptions = {}) {
+function asTableImpl(columns: ITableColumn<any>[], rows: string[], objs: any[], data: IValueType[][], options: IAsTableOptions = {}) {
   const desc = mixin(createDefaultTableDesc(), {
     columns: columns,
     size: [rows.length, columns.length]

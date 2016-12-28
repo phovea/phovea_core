@@ -9,7 +9,10 @@
 
 import {Range, RangeLike} from '../range';
 import {IProductSelectAble, IDType} from '../idtype';
-import {IHistAbleDataType, IValueTypeDesc, IValueType, IDataDescription, createDefaultDataDesc as createDefaultBaseDesc} from '../datatype';
+import {
+  IHistAbleDataType, IValueTypeDesc, IDataDescription, createDefaultDataDesc as createDefaultBaseDesc,
+  INumberValueTypeDesc, ICategoricalValueTypeDesc
+} from '../datatype';
 import {IVector} from '../vector';
 import {IHistogram, IStatistics} from '../math';
 import {mixin} from '../index';
@@ -28,9 +31,9 @@ export interface IHeatMapUrlOptions {
   palette?: string;
 }
 
-export interface IMatrixDataDescription extends IDataDescription {
+export interface IMatrixDataDescription<D extends IValueTypeDesc> extends IDataDescription {
   loadAtOnce?: boolean;
-  value: IValueTypeDesc;
+  value: D;
   rowtype: string;
   coltype: string;
   /**
@@ -39,8 +42,8 @@ export interface IMatrixDataDescription extends IDataDescription {
   size: [number, number];
 }
 
-export interface IMatrix extends IHistAbleDataType, IProductSelectAble {
-  readonly desc: IMatrixDataDescription;
+export interface IMatrix<T, D extends IValueTypeDesc> extends IHistAbleDataType<D>, IProductSelectAble {
+  readonly desc: IMatrixDataDescription<D>;
   /**
    * number of rows
    */
@@ -64,9 +67,9 @@ export interface IMatrix extends IHistAbleDataType, IProductSelectAble {
    * creates a new view on this matrix specified by the given range
    * @param range
    */
-  view(range?: RangeLike): IMatrix;
+  view(range?: RangeLike): IMatrix<T,D>;
 
-  slice(col: number): IVector;
+  slice(col: number): IVector<T,D>;
 
   //view(filter: string): Promise<IMatrix>;
 
@@ -77,11 +80,11 @@ export interface IMatrix extends IHistAbleDataType, IProductSelectAble {
    * @param valuetype the new value type by default the same as matrix valuetype
    * @param idtype the new vlaue type by default the same as matrix rowtype
    */
-  reduce(f: (row: IValueType[]) => any, this_f?: any, valuetype?: IValueTypeDesc, idtype?: IDType): IVector;
+  reduce<U, UD extends IValueTypeDesc>(f: (row: T[]) => U, this_f?: any, valuetype?: UD, idtype?: IDType): IVector<U, UD>;
   /**
    * transposed version of this matrix
    */
-  readonly t: IMatrix;
+  readonly t: IMatrix<T,D>;
   /**
    * returns a promise for getting the col names of the matrix
    * @param range
@@ -103,12 +106,12 @@ export interface IMatrix extends IHistAbleDataType, IProductSelectAble {
    * @param i
    * @param j
    */
-  at(i: number, j: number): Promise<IValueType>;
+  at(i: number, j: number): Promise<T>;
   /**
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range?: RangeLike): Promise<IValueType[][]>;
+  data(range?: RangeLike): Promise<T[][]>;
 
   stats(): Promise<IStatistics>;
 
@@ -124,11 +127,13 @@ export interface IMatrix extends IHistAbleDataType, IProductSelectAble {
 }
 
 export default IMatrix;
+export declare type INumericalMatrix = IMatrix<number, INumberValueTypeDesc>;
+export declare type ICategoricalMatrix = IMatrix<number, ICategoricalValueTypeDesc>;
+export declare type IAnyMatrix = IMatrix<any, IValueTypeDesc>;
 
 
-
-export function createDefaultMatrixDesc(): IMatrixDataDescription {
-  return <IMatrixDataDescription>mixin(createDefaultBaseDesc(), {
+export function createDefaultMatrixDesc(): IMatrixDataDescription<IValueTypeDesc> {
+  return <IMatrixDataDescription<IValueTypeDesc>>mixin(createDefaultBaseDesc(), {
     type: 'matrix',
     rowtype: '_rows',
     coltype: '_cols',

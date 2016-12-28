@@ -3,5 +3,5 @@
  */
 
 
-export {IVector, IVectorDataDescription} from './IVector';
+export {IVector, IVectorDataDescription, ICategoricalVector, INumericalVector, IAnyVector} from './IVector';
 export {asVector, IAsVectorOptions} from './Vector';

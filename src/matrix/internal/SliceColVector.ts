@@ -9,7 +9,7 @@
 
 import {argSort, argFilter} from '../../index';
 import {list as rlist, RangeLike, Range, all, parse, Range1D} from '../../range';
-import {IValueType} from '../../datatype';
+import {IValueTypeDesc} from '../../datatype';
 import {IVector, IVectorDataDescription} from '../../vector';
 import AVector from '../../vector/AVector';
 import {IMatrix} from '../IMatrix';
@@ -17,11 +17,11 @@ import {IMatrix} from '../IMatrix';
 /**
  * a simple projection of a matrix columns to a vector
  */
-export default class SliceColVector extends AVector implements IVector {
-  readonly desc: IVectorDataDescription;
+export default class SliceColVector<T, D extends IValueTypeDesc> extends AVector<T, D> implements IVector<T, D> {
+  readonly desc: IVectorDataDescription<D>;
   private colRange: Range1D;
 
-  constructor(private m: IMatrix, private col: number) {
+  constructor(private m: IMatrix<T, D>, private col: number) {
     super(null);
     this.colRange = Range1D.from([this.col]);
     this.desc = {
@@ -30,8 +30,8 @@ export default class SliceColVector extends AVector implements IVector {
       id: m.desc.id + '-c' + col,
       type: 'vector',
       idtype: m.rowtype,
-      size: this.dim[0],
-      value: this.valuetype,
+      size: m.nrow,
+      value: m.valuetype,
       description: m.desc.description,
       creator: m.desc.creator,
       ts: m.desc.ts
@@ -47,7 +47,7 @@ export default class SliceColVector extends AVector implements IVector {
   }
 
   restore(persisted: any) {
-    let r: IVector = this;
+    let r: IVector<T, D> = this;
     if (persisted && persisted.range) { //some view onto it
       r = r.view(parse(persisted.range));
     }
@@ -85,7 +85,7 @@ export default class SliceColVector extends AVector implements IVector {
    * returns a promise for getting one cell
    * @param i
    */
-  at(i: number): Promise<IValueType> {
+  at(i: number): Promise<T> {
     return this.m.at(i, this.col);
   }
 
@@ -93,7 +93,7 @@ export default class SliceColVector extends AVector implements IVector {
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range: RangeLike = all()): Promise<IValueType[]> {
+  data(range: RangeLike = all()): Promise<T[]> {
     const rr = parse(range);
     const r = rlist(rr.dim(0), this.colRange);
     return this.m.data(r).then((d) => {
@@ -104,14 +104,14 @@ export default class SliceColVector extends AVector implements IVector {
     });
   }
 
-  sort(compareFn?: (a: IValueType, b: IValueType) => number, thisArg?: any): Promise<IVector> {
+  sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T, D>> {
     return this.data().then((d) => {
       const indices = argSort(d, compareFn, thisArg);
       return this.view(rlist(indices));
     });
   }
 
-  filter(callbackfn: (value: IValueType, index: number) => boolean, thisArg?: any): Promise<IVector> {
+  filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T, D>> {
     return this.data().then((d) => {
       const indices = argFilter(d, callbackfn, thisArg);
       return this.view(rlist(indices));

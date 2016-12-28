@@ -8,14 +8,14 @@ import IDType from '../../idtype/IDType';
 import {IDataDescription} from '../../datatype';
 import {ITable, ITableDataDescription, IQueryArgs} from '../ITable';
 import ATable from '../ATable';
-import {IVector} from '../../vector/IVector';
+import {IVector, IAnyVector} from '../../vector/IVector';
 
 
 export default class VectorTable extends ATable implements ITable {
   readonly idtype: IDType;
   readonly desc: ITableDataDescription;
 
-  constructor(desc: IDataDescription, private vectors: IVector[]) {
+  constructor(desc: IDataDescription, private vectors: IAnyVector[]) {
     super(null);
     this.root = this;
     const ref = vectors[0].desc;

@@ -4,7 +4,7 @@
 
 import {argFilter, argSort} from '../../index';
 import {all, parse, RangeLike, list as rlist} from '../../range';
-import {IValueType} from '../../datatype';
+import {IValueType, IValueTypeDesc} from '../../datatype';
 import {IVector, IVectorDataDescription} from '../../vector';
 import {ITable, ITableColumn} from '../ITable';
 import AVector from '../../vector/AVector';
@@ -12,11 +12,11 @@ import AVector from '../../vector/AVector';
 /**
  * root matrix implementation holding the data
  */
-export default class TableVector extends AVector implements IVector {
-  readonly desc: IVectorDataDescription;
+export default class TableVector<T,D extends IValueTypeDesc> extends AVector<T,D> implements IVector<T,D> {
+  readonly desc: IVectorDataDescription<D>;
   readonly column: string;
 
-  constructor(private table: ITable, private index: number, desc: ITableColumn) {
+  constructor(private table: ITable, private index: number, desc: ITableColumn<D>) {
     super(null);
     this.column = desc.name;
     this.root = this;
@@ -54,7 +54,7 @@ export default class TableVector extends AVector implements IVector {
   }
 
   restore(persisted: any) {
-    let r: IVector = this;
+    let r: IVector<T,D> = this;
     if (persisted && persisted.range) { //some view onto it
       r = r.view(parse(persisted.range));
     }
@@ -86,14 +86,14 @@ export default class TableVector extends AVector implements IVector {
     return this.table.nrow;
   }
 
-  sort(compareFn?: (a: IValueType, b: IValueType) => number, thisArg?: any): Promise<IVector> {
+  sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
     return this.data().then((d) => {
       let indices = argSort(d, compareFn, thisArg);
       return this.view(rlist(indices));
     });
   }
 
-  filter(callbackfn: (value: IValueType, index: number) => boolean, thisArg?: any): Promise<IVector> {
+  filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
     return this.data().then((d) => {
       let indices = argFilter(d, callbackfn, thisArg);
       return this.view(rlist(indices));

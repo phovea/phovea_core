@@ -2,7 +2,7 @@
  * Created by sam on 26.12.2016.
  */
 
-import {IVector} from '../vector';
+import {IAnyVector} from '../vector';
 import VectorTable from './internal/VectorTable';
 import {IDataDescription} from '../datatype';
 
@@ -10,6 +10,6 @@ import {IDataDescription} from '../datatype';
 export {ITable, IQueryArgs, ITableColumn, ITableDataDescription} from './ITable';
 export {asTable, asTableFromArray, IAsTableOptions} from './Table';
 
-export function fromVectors(desc: IDataDescription, vecs: IVector[]) {
+export function fromVectors(desc: IDataDescription, vecs: IAnyVector[]) {
   return new VectorTable(desc, vecs);
 }

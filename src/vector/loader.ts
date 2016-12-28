@@ -12,12 +12,14 @@ import {Range, parse} from '../range';
 import {IValueType} from '../datatype';
 import {IVectorDataDescription} from './IVector';
 
-export interface IVectorLoader {
-  (desc: IVectorDataDescription): Promise<{
-    readonly rowIds: Range;
-    readonly rows: string[];
-    readonly data: IValueType[];
-  }>;
+export interface IVectorLoaderResult<T> {
+  readonly rowIds: Range;
+  readonly rows: string[];
+  readonly data: T[];
+}
+
+export interface IVectorLoader<T> {
+  (desc: IVectorDataDescription<any>): Promise<IVectorLoaderResult<T>>;
 }
 
 

@@ -10,7 +10,10 @@
 import {IPersistable} from '../index';
 import {Range, RangeLike, all, range, parse} from '../range';
 import {AProductSelectAble, resolve as resolveIDType, IDType} from '../idtype';
-import {VALUE_TYPE_CATEGORICAL, VALUE_TYPE_INT, VALUE_TYPE_REAL, ICategoricalValueTypeDesc, INumberValueTypeDesc, IValueType} from '../datatype';
+import {
+  VALUE_TYPE_CATEGORICAL, VALUE_TYPE_INT, VALUE_TYPE_REAL, ICategoricalValueTypeDesc, INumberValueTypeDesc,
+  IValueTypeDesc
+} from '../datatype';
 import {IVector} from '../vector';
 import {IStatistics, IHistogram, computeStats, hist, categoricalHist} from '../math';
 import {IMatrix, IHeatMapUrlOptions} from './IMatrix';
@@ -39,16 +42,16 @@ function flatten<T>(arr: T[][], indices: Range, select: number = 0) {
 /**
  * base class for different Matrix implementations, views, transposed,...
  */
-export abstract class AMatrix extends AProductSelectAble {
-  constructor(protected root: IMatrix) {
+export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelectAble {
+  constructor(protected root: IMatrix<T, D>) {
     super();
   }
 
   abstract size(): number[];
 
-  abstract data(range?: RangeLike): Promise<IValueType[][]>;
+  abstract data(range?: RangeLike): Promise<T[][]>;
 
-  abstract t: IMatrix;
+  abstract t: IMatrix<T, D>;
 
   get dim() {
     return this.size();
@@ -70,7 +73,7 @@ export abstract class AMatrix extends AProductSelectAble {
     return range([0, this.nrow], [0, this.ncol]);
   }
 
-  view(range: RangeLike = all()): IMatrix {
+  view(range: RangeLike = all()): IMatrix<T, D> {
     const r = parse(range);
     if (r.isAll) {
       return this.root;
@@ -78,12 +81,16 @@ export abstract class AMatrix extends AProductSelectAble {
     return new MatrixView(this.root, r);
   }
 
-  slice(col: number): IVector {
+  slice(col: number): IVector<T, D> {
     return new SliceColVector(this.root, col);
   }
 
   stats(): Promise<IStatistics> {
-    return this.data().then((d) => computeStats(...d));
+    const v = this.root.valuetype;
+    if (v.type === VALUE_TYPE_INT || v.type === VALUE_TYPE_REAL) {
+      return this.data().then((d) => computeStats(...<any>d));
+    }
+    return Promise.reject('invalid value type: '+v.type);
   }
 
   hist(bins?: number, range: RangeLike = all(), containedIds = 0): Promise<IHistogram> {
@@ -92,13 +99,13 @@ export abstract class AMatrix extends AProductSelectAble {
       const flat = flatten(d, this.indices, containedIds);
       switch (v.type) {
         case VALUE_TYPE_CATEGORICAL:
-          const vc = <ICategoricalValueTypeDesc>v;
+          const vc = <ICategoricalValueTypeDesc><any>v;
           return categoricalHist(flat.data, flat.indices, flat.data.length, vc.categories.map((d) => typeof d === 'string' ? d : d.name),
             vc.categories.map((d) => typeof d === 'string' ? d : d.name || d.label),
             vc.categories.map((d) => typeof d === 'string' ? 'gray' : d.color || 'gray'));
         case VALUE_TYPE_INT:
         case VALUE_TYPE_REAL:
-          const vn = <INumberValueTypeDesc>v;
+          const vn = <INumberValueTypeDesc><any>v;
           return hist(flat.data, flat.indices, flat.data.length, bins ? bins : Math.round(Math.sqrt(this.length)), vn.range);
         default:
           return Promise.reject<IHistogram>('invalid value type: ' + v.type); //cant create hist for unique objects or other ones
@@ -106,7 +113,7 @@ export abstract class AMatrix extends AProductSelectAble {
     });
   }
 
-  idView(idRange: RangeLike = all()): Promise<IMatrix> {
+  idView(idRange: RangeLike = all()): Promise<IMatrix<T, D>> {
     const r = parse(idRange);
     if (r.isAll) {
       return Promise.resolve(this.root);
@@ -114,7 +121,7 @@ export abstract class AMatrix extends AProductSelectAble {
     return this.ids().then((ids) => this.view(ids.indexOf(r)));
   }
 
-  reduce(f: (row: any[]) => any, this_f?: any, valuetype?: any, idtype?: IDType): IVector {
+  reduce<U, UD extends IValueTypeDesc>(f: (row: T[]) => U, this_f?: any, valuetype?: UD, idtype?: IDType): IVector<U,UD> {
     return new ProjectedVector(this.root, f, this_f, valuetype, idtype);
   }
 
@@ -126,7 +133,7 @@ export abstract class AMatrix extends AProductSelectAble {
     } else if (persisted && persisted.range) { //some view onto it
       return this.view(parse(persisted.range));
     } else if (persisted && persisted.transposed) {
-      return (<IMatrix>(<any>this)).t;
+      return (<IMatrix<T, D>>(<any>this)).t;
     } else if (persisted && persisted.col) {
       return this.slice(+persisted.col);
     } else if (persisted && persisted.row) {
@@ -147,8 +154,8 @@ export default AMatrix;
  * @param t optional its transposed version
  * @constructor
  */
-export class MatrixView extends AMatrix {
-  constructor(root: IMatrix, private range: Range, public readonly t: IMatrix = null) {
+export class MatrixView<T, D extends IValueTypeDesc> extends AMatrix<T, D> {
+  constructor(root: IMatrix<T, D>, private range: Range, public readonly t: IMatrix<T, D> = null) {
     super(root);
     this.range = range;
     //ensure that there are two dimensions

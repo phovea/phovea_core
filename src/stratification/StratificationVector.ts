@@ -9,8 +9,8 @@
 
 import {argFilter, argSort} from '../index';
 import {parse, RangeLike, list as rlist, CompositeRange1D, all} from '../range';
-import {ICategoricalValueTypeDesc, VALUE_TYPE_CATEGORICAL, IValueType} from '../datatype';
-import {IVector, IVectorDataDescription} from '../vector';
+import {ICategoricalValueTypeDesc, VALUE_TYPE_CATEGORICAL} from '../datatype';
+import {ICategoricalVector, IVectorDataDescription} from '../vector';
 import AVector from '../vector/AVector';
 import Stratification from './Stratification';
 
@@ -18,9 +18,9 @@ import Stratification from './Stratification';
 /**
  * root matrix implementation holding the data
  */
-export default class StratificationVector extends AVector implements IVector {
+export default class StratificationVector extends AVector<string, ICategoricalValueTypeDesc> implements ICategoricalVector {
   readonly valuetype: ICategoricalValueTypeDesc;
-  readonly desc: IVectorDataDescription;
+  readonly desc: IVectorDataDescription<ICategoricalValueTypeDesc>;
 
   private _cache: string[] = null;
 
@@ -61,7 +61,7 @@ export default class StratificationVector extends AVector implements IVector {
   }
 
   restore(persisted: any) {
-    let r: IVector = this;
+    let r: ICategoricalVector = this;
     if (persisted && persisted.range) { //some view onto it
       r = r.view(parse(persisted.range));
     }
@@ -105,14 +105,14 @@ export default class StratificationVector extends AVector implements IVector {
     return this.strat.size();
   }
 
-  sort(compareFn?: (a: IValueType, b: IValueType) => number, thisArg?: any): Promise<IVector> {
+  sort(compareFn?: (a: string, b: string) => number, thisArg?: any): Promise<ICategoricalVector> {
     return this.data().then((d) => {
       const indices = argSort(d, compareFn, thisArg);
       return this.view(rlist(indices));
     });
   }
 
-  filter(callbackfn: (value: IValueType, index: number) => boolean, thisArg?: any): Promise<IVector> {
+  filter(callbackfn: (value: string, index: number) => boolean, thisArg?: any): Promise<ICategoricalVector> {
     return this.data().then((d) => {
       const indices = argFilter(d, callbackfn, thisArg);
       return this.view(rlist(indices));

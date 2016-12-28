@@ -8,7 +8,7 @@
  */
 
 import {all, Range, RangeLike, CompositeRange1D} from '../../range';
-import {IDataType, ADataType,} from '../../datatype';
+import {IDataType, ADataType, IValueTypeDesc,} from '../../datatype';
 import {IHistogram, rangeHist} from '../../math';
 import {IVector} from '../IVector';
 import {IStratification, IStratificationDataDescription} from '../../stratification';
@@ -19,7 +19,7 @@ import StratificationGroup from '../../stratification/StratificationGroup';
  */
 export default class StratificationVector extends ADataType<IStratificationDataDescription> implements IStratification {
 
-  constructor(private v: IVector, private r: CompositeRange1D) {
+  constructor(private v: IVector<any, IValueTypeDesc>, private r: CompositeRange1D) {
     super({
       id: v.desc.id + '-s',
       name: v.desc.name,

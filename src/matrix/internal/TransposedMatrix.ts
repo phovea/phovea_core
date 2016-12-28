@@ -8,7 +8,7 @@
  */
 
 import {RangeLike, all, parse} from '../../range';
-import {IValueType, transpose} from '../../datatype';
+import {IValueTypeDesc, transpose} from '../../datatype';
 import {IMatrix, IHeatMapUrlOptions} from '../IMatrix';
 import AMatrix, {MatrixView} from '../AMatrix';
 import SliceRowVector from './SliceRowVector';
@@ -20,10 +20,10 @@ import {IHistogram} from '../../math';
  * @param base
  * @constructor
  */
-export default class TransposedMatrix extends AMatrix {
-  readonly t: IMatrix;
+export default class TransposedMatrix<T, D extends IValueTypeDesc> extends AMatrix<T,D> {
+  readonly t: IMatrix<T,D>;
 
-  constructor(base: IMatrix) {
+  constructor(base: IMatrix<T,D>) {
     super(base);
     this.t = base;
   }
@@ -79,7 +79,7 @@ export default class TransposedMatrix extends AMatrix {
     return this.t.colIds(range ? parse(range).swap() : undefined);
   }
 
-  view(range: RangeLike = all()): IMatrix {
+  view(range: RangeLike = all()): IMatrix<T,D> {
     const r = parse(range);
     if (r.isAll) {
       return this;
@@ -87,7 +87,7 @@ export default class TransposedMatrix extends AMatrix {
     return new MatrixView(this.root, r.swap()).t;
   }
 
-  slice(col: number): IVector {
+  slice(col: number): IVector<T,D> {
     return new SliceRowVector(this.root, col);
   }
 
@@ -101,7 +101,7 @@ export default class TransposedMatrix extends AMatrix {
   }
 
   data(range: RangeLike = all()) {
-    return this.t.data(range ? parse(range).swap() : undefined).then((data: IValueType[][]) => transpose(data));
+    return this.t.data(range ? parse(range).swap() : undefined).then((data: T[][]) => transpose(data));
   }
 
   hist(bins?: number, range: RangeLike = all(), containedIds = 0): Promise<IHistogram> {
