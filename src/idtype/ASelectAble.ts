@@ -108,23 +108,7 @@ export abstract class ASelectAble extends EventHandler implements ISelectAble {
 
     this.selectionCache = [];
     this.accumulateEvents = -1; //reset
-
-    this.ids().then((ids: Range) => {
-      //filter to the right ids and convert to indices format
-      act = ids.indexOf(act);
-      added = ids.indexOf(added);
-      removed = ids.indexOf(removed);
-      if (act.isNone && added.isNone && removed.isNone) {
-        return;
-      }
-      //ensure the right number of dimensions
-      fillWithNone(act, ids.ndim);
-      fillWithNone(added, ids.ndim);
-      fillWithNone(removed, ids.ndim);
-
-      this.fire(ASelectAble.EVENT_SELECT, type, act, added, removed);
-      this.fire(`${ASelectAble.EVENT_SELECT}-${type}`, act, added, removed);
-    });
+    this.singleSelectionListener(null, type, act, added, removed);
   }
 
   on(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
