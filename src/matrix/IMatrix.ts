@@ -9,13 +9,17 @@
 
 import {Range, RangeLike} from '../range';
 import {IProductSelectAble, IDType} from '../idtype';
-import {IHistAbleDataType, IValueTypeDesc, IValueType, IDataDescription} from '../datatype';
+import {IHistAbleDataType, IValueTypeDesc, IValueType, IDataDescription, createDefaultDataDesc as createDefaultBaseDesc} from '../datatype';
 import {IVector} from '../vector';
 import {IHistogram, IStatistics} from '../math';
+import {mixin} from '../index';
 
 export const IDTYPE_ROW = 0;
 export const IDTYPE_COLUMN = 1;
 export const IDTYPE_CELL = 2;
+
+export const DIM_ROW = 0;
+export const DIM_COL = 1;
 
 export interface IHeatMapUrlOptions {
   format?: string;
@@ -29,6 +33,9 @@ export interface IMatrixDataDescription extends IDataDescription {
   value: IValueTypeDesc;
   rowtype: string;
   coltype: string;
+  /**
+   * nrow, ncol
+   */
   size: [number, number];
 }
 
@@ -78,7 +85,7 @@ export interface IMatrix extends IHistAbleDataType, IProductSelectAble {
   /**
    * returns a promise for getting the col names of the matrix
    * @param range
-   * @returns {IPromise<string[]>}
+   * @returns {Promise<string[]>}
    */
   cols(range?: RangeLike): Promise<string[]>;
 
@@ -117,3 +124,14 @@ export interface IMatrix extends IHistAbleDataType, IProductSelectAble {
 }
 
 export default IMatrix;
+
+
+
+export function createDefaultMatrixDesc(): IMatrixDataDescription {
+  return <IMatrixDataDescription>mixin(createDefaultBaseDesc(), {
+    type: 'matrix',
+    rowtype: '_rows',
+    coltype: '_cols',
+    size: [0, 0]
+  });
+}

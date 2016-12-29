@@ -7,17 +7,13 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
+
+import {mixin} from '../index';
 import {argSort, argFilter} from '../index';
 import {all, Range, RangeLike, list as rlist, parse} from '../range';
-import {resolve} from '../idtype';
-import {
-  IValueType,
-  mask,
-  INumberValueTypeDesc,
-  VALUE_TYPE_INT,
-  VALUE_TYPE_REAL
-} from '../datatype';
-import {IVector, IVectorDataDescription} from './IVector';
+import {resolve, createLocalAssigner} from '../idtype';
+import {IValueType, mask, INumberValueTypeDesc, VALUE_TYPE_INT, VALUE_TYPE_REAL, guessValueTypeDesc} from '../datatype';
+import {IVector, IVectorDataDescription, createDefaultVectorDesc} from './IVector';
 import AVector from './AVector';
 import {IVectorLoader, viaAPILoader, viaDataLoader} from './loader';
 /**
@@ -117,4 +113,21 @@ export function create(desc: IVectorDataDescription): IVector {
 
 export function wrap(desc: IVectorDataDescription, rows: string[], rowIds: number[], data: IValueType[]) {
   return new Vector(desc, viaDataLoader(rows, rowIds, data));
+}
+
+
+export interface IAsVectorOptions {
+  name?: string;
+  idtype?: string;
+  rowassigner?(ids: string[]): Range;
+}
+
+export function asVector(rows: string[], data: IValueType[], options: IAsVectorOptions = {}) {
+  const desc = mixin(createDefaultVectorDesc(), {
+    size: data.length,
+    value: guessValueTypeDesc(data)
+  }, options);
+
+  const rowAssigner = options.rowassigner || createLocalAssigner();
+  return new Vector(desc, viaDataLoader(rows, rowAssigner(rows), data));
 }

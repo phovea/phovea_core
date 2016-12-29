@@ -7,12 +7,12 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {all, Range, RangeLike, CompositeRange1D} from '../range';
-import {IDataType, ADataType,} from '../datatype';
-import {IHistogram, rangeHist} from '../math';
-import {IVector} from './IVector';
-import {IStratification, IGroup, IStratificationDataDescription} from '../stratification';
-import StratificationGroup from '../stratification/StratificationGroup';
+import {all, Range, RangeLike, CompositeRange1D} from '../../range';
+import {IDataType, ADataType,} from '../../datatype';
+import {IHistogram, rangeHist} from '../../math';
+import {IVector} from '../IVector';
+import {IStratification, IStratificationDataDescription} from '../../stratification';
+import StratificationGroup from '../../stratification/StratificationGroup';
 
 /**
  * root matrix implementation holding the data
@@ -40,7 +40,7 @@ export default class StratificationVector extends ADataType<IStratificationDataD
   }
 
   get groups() {
-    return <IGroup[]>(<any>this.desc).groups;
+    return this.desc.groups;
   }
 
   group(group: number): IStratification {

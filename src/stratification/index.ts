@@ -4,3 +4,4 @@
 
 
 export {IStratification, guessColor, IGroup, IStratificationDataDescription} from './IStratification';
+export {asStratification, IAsStratifcationOptions} from './Stratification';

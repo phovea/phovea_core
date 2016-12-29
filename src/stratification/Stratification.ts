@@ -7,16 +7,14 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
+import {mixin} from '../index';
 import {parse, RangeLike, Range, CompositeRange1D, all} from '../range';
-import {resolve as resolveIDType} from '../idtype';
-import {
-  ADataType, IDataType, ICategoricalValueTypeDesc,
-  VALUE_TYPE_CATEGORICAL, ICategory
-} from '../datatype';
+import {resolve as resolveIDType, createLocalAssigner} from '../idtype';
+import {ADataType, IDataType, ICategoricalValueTypeDesc, VALUE_TYPE_CATEGORICAL, ICategory} from '../datatype';
 import {getFirstByFQName} from '../data';
 import {IVector} from '../vector';
 import {rangeHist, IHistogram} from '../math';
-import {IStratification, IStratificationDataDescription} from './IStratification';
+import {IStratification, IStratificationDataDescription, createDefaultStratificationDesc} from './IStratification';
 import StratificationGroup from './StratificationGroup';
 import {IStratificationLoader, viaAPILoader, viaDataLoader} from './loader';
 import StratificationVector from './StratificationVector';
@@ -125,6 +123,22 @@ export function wrap(desc: IStratificationDataDescription, rows: string[], rowId
   return new Stratification(desc, viaDataLoader(rows, rowIds, range));
 }
 
+export interface IAsStratifcationOptions {
+  name?: string;
+  idtype?: string;
+  rowassigner?(ids: string[]): Range;
+}
+
+export function asStratification(rows: string[], range: CompositeRange1D, options: IAsStratifcationOptions = {}) {
+  const desc = mixin(createDefaultStratificationDesc(), {
+    size: 0,
+    groups: range.groups.map((r) => ({name: r.name, color: r.color, size: r.length})),
+    ngroups: range.groups.length
+  }, options);
+
+  const rowAssigner = options.rowassigner || createLocalAssigner();
+  return new Stratification(desc, viaDataLoader(rows, rowAssigner(rows), range));
+}
 
 export function wrapCategoricalVector(v: IVector) {
   if (v.valuetype.type !== VALUE_TYPE_CATEGORICAL) {

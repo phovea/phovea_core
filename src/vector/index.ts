@@ -4,3 +4,4 @@
 
 
 export {IVector, IVectorDataDescription} from './IVector';
+export {asVector, IAsVectorOptions} from './Vector';

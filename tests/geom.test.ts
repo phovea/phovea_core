@@ -2,9 +2,9 @@ import {Circle, Rect, Ellipse, Polygon, Line, CORNER} from '../src/geom';
 import {Vector2D} from '../src/2D';
 
 describe('Circle', () => {
-  var circle = new Circle(1,1,1);
+  const circle = new Circle(1,1,1);
   describe('aabb', () => {
-    var aabb = circle.aabb();
+    const aabb = circle.aabb();
     it('x', () => expect(aabb.x).toEqual(0));
     it('x2', () => expect(aabb.x2).toEqual(2));
     it('y', () => expect(aabb.y).toEqual(0));
@@ -15,7 +15,7 @@ describe('Circle', () => {
   });
 
   describe('asIntersectionParams', () => {
-    var params = circle.asIntersectionParams();
+    const params = circle.asIntersectionParams();
     it('name', () => expect(params.name).toEqual('Circle'));
     it('x', () => expect(params.params[0].x).toEqual(1));
     it('y', () => expect(params.params[0].y).toEqual(1));
@@ -63,9 +63,9 @@ describe('Circle', () => {
 });
 
 describe('Rect', () => {
-  var rect = new Rect(0,0,2,2);
+  const rect = new Rect(0,0,2,2);
   describe('aabb', () => {
-    var aabb = rect.aabb();
+    const aabb = rect.aabb();
     it('x', () => expect(aabb.x).toEqual(0));
     it('x2', () => expect(aabb.x2).toEqual(2));
     it('y', () => expect(aabb.y).toEqual(0));
@@ -76,7 +76,7 @@ describe('Rect', () => {
   });
 
   describe('asIntersectionParams', () => {
-    var params = rect.asIntersectionParams();
+    const params = rect.asIntersectionParams();
     it('name', () => expect(params.name).toEqual('Rectangle'));
     it('x', () => expect(params.params[0].x).toEqual(0));
     it('y', () => expect(params.params[0].y).toEqual(0));
@@ -111,7 +111,7 @@ describe('Rect', () => {
   it('y', () => expect(rect.y).toEqual(0));
   it('xy', () => expect(rect.xy.toString()).toEqual('0,0'));
   // "bounding sphere"
-  it('bs', () => expect(rect.bs().toString()).toMatch(/Circle.x=1,y=1,radius=2.828/)); // TODO: radius twice what it should be?
+  it('bs', () => expect(rect.bs().toString()).toMatch(/Circle.x=1,y=1,radius=1.414/));
   it('center', () => expect(rect.center.toString()).toEqual('1,1'));
 
   it('transform', () => expect(rect.transform([2,1],0).toString()).toEqual('Rect(x=0,y=0,w=4,h=2)'));
@@ -122,9 +122,9 @@ describe('Rect', () => {
 });
 
 describe('Ellipse', () => {
-  var ellipse = new Ellipse(1,2,1,2);
+  const ellipse = new Ellipse(1,2,1,2);
   describe('aabb', () => {
-    var aabb = ellipse.aabb();
+    const aabb = ellipse.aabb();
     it('x', () => expect(aabb.x).toEqual(0));
     it('x2', () => expect(aabb.x2).toEqual(2));
     it('y', () => expect(aabb.y).toEqual(0));
@@ -135,7 +135,7 @@ describe('Ellipse', () => {
   });
 
   describe('asIntersectionParams', () => {
-    var params = ellipse.asIntersectionParams();
+    const params = ellipse.asIntersectionParams();
     it('name', () => expect(params.name).toEqual('Ellipse'));
     it('x', () => expect(params.params[0].x).toEqual(1));
     it('y', () => expect(params.params[0].y).toEqual(2));
@@ -165,15 +165,15 @@ describe('Ellipse', () => {
     it('overlap', () => expect(ellipse.intersects(new Rect(-1,-1,2,2))));
   });
 
-  it('toString', () => expect(ellipse.toString()).toEqual('Ellipse(x=1,y=2,radiusX=1NaN2)')); // TODO: NaN is bad
+  it('toString', () => expect(ellipse.toString()).toEqual('Ellipse(x=1,y=2,radiusX=1,radiusY=2)'));
   it('x', () => expect(ellipse.x).toEqual(1));
   it('y', () => expect(ellipse.y).toEqual(2));
   it('xy', () => expect(ellipse.xy.toString()).toEqual('1,2'));
   // "bounding sphere"
-  it('bs', () => expect(ellipse.bs().toString()).toMatch(/Circle.x=1,y=2,radius=2/)); // TODO: radius twice what it should be?
+  it('bs', () => expect(ellipse.bs().toString()).toMatch(/Circle.x=1,y=2,radius=2/));
   it('center', () => expect(ellipse.center.toString()).toEqual('1,2'));
 
-  it('transform', () => expect(ellipse.transform([2,1],0).toString()).toEqual('Ellipse(x=2,y=2,radiusX=2NaN1)'));
+  it('transform', () => expect(ellipse.transform([2,1],0).toString()).toEqual('Ellipse(x=2,y=2,radiusX=2,radiusY=2)'));
 
   it('radiusX', () => expect(ellipse.radiusX).toEqual(1));
   it('radiusY', () => expect(ellipse.radiusY).toEqual(2));
@@ -184,10 +184,10 @@ describe('Ellipse', () => {
 });
 
 describe('Polygon', () => {
-  var poly = new Polygon([new Vector2D(0,0), new Vector2D(2,0), new Vector2D(0,2)]);
+  const poly = new Polygon([new Vector2D(0,0), new Vector2D(2,0), new Vector2D(0,2)]);
 
   describe('aabb', () => {
-    var aabb = poly.aabb();
+    const aabb = poly.aabb();
     it('x', () => expect(aabb.x).toEqual(0));
     it('x2', () => expect(aabb.x2).toEqual(2));
     it('y', () => expect(aabb.y).toEqual(0));
@@ -200,7 +200,7 @@ describe('Polygon', () => {
   it('area', () => expect(poly.area).toEqual(2));
 
   describe('asIntersectionParams', () => {
-    var params = poly.asIntersectionParams();
+    const params = poly.asIntersectionParams();
     it('name', () => expect(params.name).toEqual('Polygon'));
     // TODO
   });
@@ -249,9 +249,9 @@ describe('Polygon', () => {
 });
 
 describe('Line', () => {
-  var line = new Line(0,0,2,2);
+  const line = new Line(0,0,2,2);
   describe('aabb', () => {
-    var aabb = line.aabb();
+    const aabb = line.aabb();
     it('x', () => expect(aabb.x).toEqual(0));
     it('x2', () => expect(aabb.x2).toEqual(2));
     it('y', () => expect(aabb.y).toEqual(0));
@@ -262,7 +262,7 @@ describe('Line', () => {
   });
 
   describe('asIntersectionParams', () => {
-    var params = line.asIntersectionParams();
+    const params = line.asIntersectionParams();
     it('name', () => expect(params.name).toEqual('Line'));
     it('x', () => expect(params.params[0].x).toEqual(0));
     it('y', () => expect(params.params[0].y).toEqual(0));
@@ -292,12 +292,12 @@ describe('Line', () => {
     it('overlap', () => expect(line.intersects(new Rect(-1,-1,2,2))));
   });
 
-  it('toString', () => expect(line.toString()).toEqual('Line(x1=0,y1=0,x2=2NaN2)'));
+  it('toString', () => expect(line.toString()).toEqual('Line(x1=0,y1=0,x2=2,y2=2)'));
   it('xy', () => expect(line.xy.toString()).toEqual('0,0'));
   // "bounding sphere"
-  it('bs', () => expect(line.bs().toString()).toEqual('Circle(x=1,y=1,radius=1)')); // TODO: radius twice what it should be?
+  it('bs', () => expect(line.bs().toString()).toEqual('Circle(x=1,y=1,radius=1.4142135623730951)'));
   it('center', () => expect(line.center.toString()).toEqual('1,1'));
 
-  it('transform', () => expect(line.transform([2,1],0).toString()).toEqual('Line(x1=0,y1=0,x2=4NaN2)'));
+  it('transform', () => expect(line.transform([2,1],0).toString()).toEqual('Line(x1=0,y1=0,x2=4,y2=2)'));
 
 });

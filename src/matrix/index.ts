@@ -3,3 +3,5 @@
  */
 
 export {IMatrix, IDTYPE_CELL, IDTYPE_COLUMN, IDTYPE_ROW, IHeatMapUrlOptions, IMatrixDataDescription} from './IMatrix';
+
+export {asMatrix, IAsMatrixOptions} from './Matrix';
