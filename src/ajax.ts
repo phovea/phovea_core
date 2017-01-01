@@ -11,7 +11,7 @@ import {offline as isOffline, server_url, server_json_suffix} from '.';
 class AjaxError extends Error {
   constructor(public readonly response: Response, message?: string) {
     super(message ? message : response.statusText);
-    // Set the prototype explicitly.
+    // Set the prototype explicitly. needed for Typescript 2.1
     Object.setPrototypeOf(this, AjaxError.prototype);
   }
 }
@@ -170,6 +170,12 @@ function defaultOfflineGenerator() {
   return Promise.reject('offline');
 }
 
+/**
+ * handler in case phovea is set to be in offline mode
+ * @param generator
+ * @param data
+ * @returns {Promise<OfflineGenerator>}
+ */
 function offline(generator: OfflineGenerator, data: any = {}) {
   return Promise.resolve(typeof generator === 'function' ? generator(data) : generator);
 }
