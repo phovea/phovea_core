@@ -8,7 +8,7 @@
  */
 
 import {Range, RangeLike, all, parse, join} from '../range';
-import {IValueTypeDesc, IValueType, VALUE_TYPE_REAL, VALUE_TYPE_INT, guessValueTypeDesc} from '../datatype';
+import {IValueTypeDesc, VALUE_TYPE_REAL, VALUE_TYPE_INT, guessValueTypeDesc} from '../datatype';
 import {IHistogram} from '../math';
 import {mixin} from '../index';
 import {IDType, ProductIDType, resolve as resolveIDType, resolveProduct, createLocalAssigner} from '../idtype';
@@ -19,14 +19,14 @@ import {IMatrixLoader, IMatrixLoader2, viaAPI2Loader, adapterOne2Two} from './lo
 /**
  * root matrix implementation holding the data
  */
-export default class Matrix extends AMatrix {
-  readonly t: IMatrix;
-  readonly valuetype: IValueTypeDesc;
+export default class Matrix<T, D extends IValueTypeDesc> extends AMatrix<T, D> {
+  readonly t: IMatrix<T, D>;
+  readonly valuetype: D;
   readonly rowtype: IDType;
   readonly coltype: IDType;
   private producttype_: ProductIDType;
 
-  constructor(public readonly desc: IMatrixDataDescription, private loader: IMatrixLoader2) {
+  constructor(public readonly desc: IMatrixDataDescription<D>, private loader: IMatrixLoader2<T>) {
     super(null);
     this.root = this;
     this.valuetype = desc.value;
@@ -117,9 +117,9 @@ export default class Matrix extends AMatrix {
  * @param loader
  * @returns {IMatrix}
  */
-export function create(desc: IMatrixDataDescription, loader?: IMatrixLoader2|IMatrixLoader): IMatrix {
+export function create<T, D extends IValueTypeDesc>(desc: IMatrixDataDescription<D>, loader?: IMatrixLoader2<T>|IMatrixLoader<T>): IMatrix<T,D> {
   if (typeof loader === 'function') {
-    return new Matrix(desc, adapterOne2Two(<IMatrixLoader>loader));
+    return new Matrix(desc, adapterOne2Two(<IMatrixLoader<T>>loader));
   }
   return new Matrix(desc, loader ? loader : viaAPI2Loader());
 }
@@ -133,10 +133,9 @@ export interface IAsMatrixOptions {
   colassigner?(ids: string[]): Range;
 }
 
-export function asMatrix(data: IValueType[][]): IMatrix;
-export function asMatrix(data: IValueType[][], options?: IAsMatrixOptions): IMatrix;
-export function asMatrix(data: IValueType[][], rows: string[], cols: string[]): IMatrix;
-export function asMatrix(data: IValueType[][], rows: string[], cols: string[], options?: IAsMatrixOptions): IMatrix;
+export function asMatrix<T>(data: T[][], options?: IAsMatrixOptions): IMatrix<T,IValueTypeDesc>;
+export function asMatrix<T>(data: T[][], rows: string[], cols: string[]): IMatrix<T,IValueTypeDesc>;
+export function asMatrix<T>(data: T[][], rows: string[], cols: string[], options?: IAsMatrixOptions): IMatrix<T,IValueTypeDesc>;
 
 /**
  * parses a given dataset and convert is to a matrix
@@ -146,7 +145,7 @@ export function asMatrix(data: IValueType[][], rows: string[], cols: string[], o
  * @param options options for defining the dataset description
  * @returns {IMatrix}
  */
-export function asMatrix(data: IValueType[][], rows_or_options?: any, cols_def?: string[], options: IAsMatrixOptions = {}): IMatrix {
+export function asMatrix<T>(data: T[][], rows_or_options?: any, cols_def?: string[], options: IAsMatrixOptions = {}): IMatrix<T,IValueTypeDesc> {
   // first column if not defined, excluding 0,0
   const rows = Array.isArray(rows_or_options) ? <string[]>rows_or_options : data.map((r) => r[0]).slice(1);
   // first row if not defined, excluding 0,0
@@ -156,14 +155,14 @@ export function asMatrix(data: IValueType[][], rows_or_options?: any, cols_def?:
   }
   options = options || {};
 
-  let realData = Array.isArray(rows_or_options) ? data : data.slice(1).map((r) => r.slice(1));
+  let realData: any[] = Array.isArray(rows_or_options) ? data : data.slice(1).map((r) => r.slice(1));
 
   const valueType = guessValueTypeDesc([].concat.apply([], realData));
 
   if (valueType.type === VALUE_TYPE_REAL) {
-    realData = realData.map((row) => row.map(parseFloat));
+    realData = realData.map((row) => row.map(<any>parseFloat));
   } else if (valueType.type === VALUE_TYPE_REAL) {
-    realData = realData.map((row) => row.map(parseInt));
+    realData = realData.map((row) => row.map(<any>parseInt));
   }
 
   const desc = mixin(createDefaultMatrixDesc(), {
@@ -173,18 +172,18 @@ export function asMatrix(data: IValueType[][], rows_or_options?: any, cols_def?:
 
   const rowAssigner = options.rowassigner || createLocalAssigner();
   const colAssigner = options.rowassigner || createLocalAssigner();
-  const loader: IMatrixLoader2 = {
-    rowIds: (desc: IMatrixDataDescription, range: Range) => Promise.resolve(rowAssigner(range.filter(rows))),
-    colIds: (desc: IMatrixDataDescription, range: Range) => Promise.resolve(colAssigner(range.filter(cols))),
-    ids: (desc: IMatrixDataDescription, range: Range) => {
+  const loader: IMatrixLoader2<any> = {
+    rowIds: (desc: IMatrixDataDescription<any>, range: Range) => Promise.resolve(rowAssigner(range.filter(rows))),
+    colIds: (desc: IMatrixDataDescription<any>, range: Range) => Promise.resolve(colAssigner(range.filter(cols))),
+    ids: (desc: IMatrixDataDescription<any>, range: Range) => {
       const rc = rowAssigner(range.dim(0).filter(rows));
       const cc = colAssigner(range.dim(1).filter(cols));
       return Promise.resolve(join(rc, cc));
     },
-    at: (desc: IMatrixDataDescription, i, j) => Promise.resolve(realData[i][j]),
-    rows: (desc: IMatrixDataDescription, range: Range) => Promise.resolve(range.filter(rows)),
-    cols: (desc: IMatrixDataDescription, range: Range) => Promise.resolve(range.filter(cols)),
-    data: (desc: IMatrixDataDescription, range: Range) => Promise.resolve(range.filter(realData))
+    at: (desc: IMatrixDataDescription<any>, i, j) => Promise.resolve(realData[i][j]),
+    rows: (desc: IMatrixDataDescription<any>, range: Range) => Promise.resolve(range.filter(rows)),
+    cols: (desc: IMatrixDataDescription<any>, range: Range) => Promise.resolve(range.filter(cols)),
+    data: (desc: IMatrixDataDescription<any>, range: Range) => Promise.resolve(range.filter(realData))
   };
   return new Matrix(desc, loader);
 }

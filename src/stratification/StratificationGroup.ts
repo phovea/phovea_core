@@ -6,7 +6,7 @@
 import {Range, RangeLike, CompositeRange1D, all, list, Range1DGroup, parse} from '../range';
 import {IDataType} from '../datatype';
 import {SelectAble} from '../idtype';
-import {IVector} from '../vector';
+import {ICategoricalVector} from '../vector';
 import {IHistogram, rangeHist} from '../math';
 import {IStratification, IGroup} from './IStratification';
 
@@ -52,8 +52,8 @@ export default class StratificationGroup extends SelectAble implements IStratifi
     return this.asVector();
   }
 
-  asVector(): Promise<IVector> {
-    return Promise.all<any>([this.root.asVector(), this.rangeGroup()]).then((arr: [IVector, Range1DGroup]) => arr[0].view(list(arr[1])));
+  asVector(): Promise<ICategoricalVector> {
+    return Promise.all<any>([this.root.asVector(), this.rangeGroup()]).then((arr: [ICategoricalVector, Range1DGroup]) => arr[0].view(list(arr[1])));
   }
 
   origin(): Promise<IDataType> {

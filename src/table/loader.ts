@@ -54,10 +54,10 @@ export function viaAPIViewLoader(name: string, args: IQueryArgs): ITableLoader {
   };
 }
 
-function maskCol(arr: IValueType[], col: ITableColumn): IValueType[] {
+function maskCol<T>(arr: T[], col: ITableColumn<any>): T[] {
   //mask data
   if (col.value && 'missing' in col.value && (col.value.type === VALUE_TYPE_INT || col.value.type === VALUE_TYPE_REAL)) {
-    return <IValueType[]>mask(arr, <INumberValueTypeDesc>col.value);
+    return <any>mask(<any>arr, <INumberValueTypeDesc><any>col.value);
   }
   return arr;
 }
@@ -142,7 +142,7 @@ export function viaAPI2Loader(): ITableLoader2 {
   return r;
 }
 
-function toFlat(data: any[][], vecs: ITableColumn[]) {
+function toFlat(data: any[][], vecs: ITableColumn<any>[]) {
   return data.map((row) => vecs.map((col) => row[col.name]));
 }
 

@@ -12,22 +12,25 @@ import {Range, RangeLike} from '../range';
 import {IDType} from '../idtype';
 import {IDataType, IValueType, IValueTypeDesc, IDataDescription, createDefaultDataDesc} from '../datatype';
 import {IVector} from '../vector';
+import {IAnyVector} from "../vector/IVector";
 
 export interface IQueryArgs {
   [key: string]: number|string;
 }
 
-export interface ITableColumn {
+export interface ITableColumn<D extends IValueTypeDesc> {
   name: string;
   description?: string;
-  value: IValueTypeDesc;
-  getter?(row: any): IValueType;
+  value: D;
+  getter?(row: any): any;
 }
+
+export declare type IAnyTableColumn = ITableColumn<any>;
 
 export interface ITableDataDescription extends IDataDescription {
   readonly idtype: string;
   readonly size: number[];
-  readonly columns: ITableColumn[];
+  readonly columns: IAnyTableColumn[];
 }
 
 export interface ITable extends IDataType {
@@ -45,13 +48,13 @@ export interface ITable extends IDataType {
    * returns the chosen columns
    * @param range optional subset
    */
-  cols(range?: RangeLike): IVector[];
+  cols(range?: RangeLike): IAnyVector[];
 
   /**
    * return the specific column
    * @param i
    */
-  col(i: number): IVector;
+  col<T, D extends IValueTypeDesc>(i: number): IVector<T, D>;
 
   /**
    * returns the row names
@@ -80,7 +83,7 @@ export interface ITable extends IDataType {
    * @param valuetype the new value type by default the same as matrix valuetype
    * @param idtype the new vlaue type by default the same as matrix rowtype
    */
-  reduce(f: (row: IValueType[]) => IValueType, this_f?: any, valuetype?: IValueTypeDesc, idtype?: IDType): IVector;
+  reduce<T, D extends IValueTypeDesc>(f: (row: any[]) => T, this_f?: any, valuetype?: D, idtype?: IDType): IVector<T, D>;
   /**
    * returns a promise for getting one cell
    * @param i
@@ -93,7 +96,7 @@ export interface ITable extends IDataType {
    */
   data(range?: RangeLike): Promise<IValueType[][]>;
 
-  colData(column: string, range?: RangeLike): Promise<IValueType[]>;
+  colData<T>(column: string, range?: RangeLike): Promise<T[]>;
 
   /**
    * returns a promise for getting the data as an array of objects

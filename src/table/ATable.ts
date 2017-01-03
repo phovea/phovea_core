@@ -44,7 +44,7 @@ export abstract class ATable extends SelectAble {
     return this.ids().then((ids) => this.view(ids.indexOf(parse(idRange))));
   }
 
-  reduce(f: (row: IValueType[]) => IValueType, this_f?: any, valuetype?: IValueTypeDesc, idtype?: IDType): IVector {
+  reduce<T, D extends IValueTypeDesc>(f: (row: IValueType[]) => T, this_f?: any, valuetype?: D, idtype?: IDType): IVector<T,D> {
     return new MultiTableVector(this.root, f, this_f, valuetype, idtype);
   }
 

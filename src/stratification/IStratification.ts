@@ -13,6 +13,7 @@ import {IDataType, IDataDescription, createDefaultDataDesc} from '../datatype';
 import {IVector} from '../vector';
 import {IDType} from '../idtype';
 import {IHistogram} from '../math';
+import {ICategoricalVector} from "../vector/IVector";
 
 export interface IGroup {
   readonly name: string;
@@ -52,8 +53,8 @@ export interface IStratification extends IDataType {
   /**
    * @deprecated use asVector instead
    */
-  vector(): Promise<IVector>;
-  asVector(): Promise<IVector>;
+  vector(): Promise<ICategoricalVector>;
+  asVector(): Promise<ICategoricalVector>;
 
   names();
   names(range: RangeLike);

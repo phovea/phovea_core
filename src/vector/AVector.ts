@@ -12,14 +12,13 @@ import {argSort, argFilter} from '../index';
 import {SelectAble} from '../idtype';
 import {
   categorical2partitioning,
-  IValueType,
   ICategorical2PartitioningOptions,
   ICategory,
   ICategoricalValueTypeDesc,
   INumberValueTypeDesc,
   VALUE_TYPE_CATEGORICAL,
   VALUE_TYPE_INT,
-  VALUE_TYPE_REAL
+  VALUE_TYPE_REAL, IValueTypeDesc
 } from '../datatype';
 import {computeStats, IStatistics, IHistogram, categoricalHist, hist} from '../math';
 import {IVector} from './IVector';
@@ -28,8 +27,8 @@ import StratificationVector from './internal/StratificationVector';
 /**
  * base class for different Vector implementations, views, transposed,...
  */
-export abstract class AVector extends SelectAble {
-  constructor(protected root: IVector) {
+export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
+  constructor(protected root: IVector<T,D>) {
     super();
   }
 
@@ -45,11 +44,11 @@ export abstract class AVector extends SelectAble {
     return this.size();
   }
 
-  view(range: RangeLike = all()): IVector {
+  view(range: RangeLike = all()): IVector<T,D> {
     return new VectorView(this.root, parse(range));
   }
 
-  idView(idRange: RangeLike = all()): Promise<IVector> {
+  idView(idRange: RangeLike = all()): Promise<IVector<T,D>> {
     return this.ids().then((ids) => this.view(ids.indexOf(parse(idRange))));
   }
 
@@ -67,7 +66,7 @@ export abstract class AVector extends SelectAble {
   groups(): Promise<CompositeRange1D> {
     const v = this.root.valuetype;
     if (v.type === VALUE_TYPE_CATEGORICAL) {
-      const vc = <ICategoricalValueTypeDesc>v;
+      const vc = <ICategoricalValueTypeDesc><any>v;
       return this.data().then((d) => {
         const options: ICategorical2PartitioningOptions = {
           name: this.root.desc.id
@@ -103,13 +102,13 @@ export abstract class AVector extends SelectAble {
     return this.data(range).then((d) => {
       switch (v.type) {
         case VALUE_TYPE_CATEGORICAL:
-          const vc = <ICategoricalValueTypeDesc>v;
+          const vc = <ICategoricalValueTypeDesc><any>v;
           return categoricalHist(d, this.indices.dim(0), d.length, vc.categories.map((d) => typeof d === 'string' ? d : d.name),
             vc.categories.map((d) => typeof d === 'string' ? d : d.name || d.label),
             vc.categories.map((d) => typeof d === 'string' ? 'gray' : d.color || 'gray'));
         case VALUE_TYPE_REAL:
         case VALUE_TYPE_INT:
-          const vn = <INumberValueTypeDesc>v;
+          const vn = <INumberValueTypeDesc><any>v;
           return hist(d, this.indices.dim(0), d.length, bins ? bins : Math.round(Math.sqrt(this.length)), vn.range);
         default:
           return null; //cant create hist for unique objects or other ones
@@ -117,19 +116,19 @@ export abstract class AVector extends SelectAble {
     });
   }
 
-  every(callbackfn: (value: IValueType, index: number) => boolean, thisArg?: any): Promise<boolean> {
+  every(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<boolean> {
     return this.data().then((d) => d.every(callbackfn, thisArg));
   }
 
-  some(callbackfn: (value: IValueType, index: number) => boolean, thisArg?: any): Promise<boolean> {
+  some(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<boolean> {
     return this.data().then((d) => d.some(callbackfn, thisArg));
   }
 
-  forEach(callbackfn: (value: IValueType, index: number) => void, thisArg?: any): void {
+  forEach(callbackfn: (value: T, index: number) => void, thisArg?: any): void {
     this.data().then((d) => d.forEach(callbackfn, thisArg));
   }
 
-  reduce<T,U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U> {
+  reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U> {
     function helper() {
       return callbackfn.apply(thisArg, Array.from(arguments));
     }
@@ -137,7 +136,7 @@ export abstract class AVector extends SelectAble {
     return this.data().then((d) => d.reduce(helper, initialValue));
   }
 
-  reduceRight<T,U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U> {
+  reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U> {
     function helper() {
       return callbackfn.apply(thisArg, Array.from(arguments));
     }
@@ -146,7 +145,7 @@ export abstract class AVector extends SelectAble {
   }
 
   restore(persisted: any) {
-    let r: IVector = <IVector>(<any>this);
+    let r: IVector<T,D> = <IVector<T,D>>(<any>this);
     if (persisted && persisted.range) { //some view onto it
       r = r.view(parse(persisted.range));
     }
@@ -164,8 +163,8 @@ export default AVector;
  * @param t optional its transposed version
  * @constructor
  */
-export class VectorView extends AVector {
-  constructor(root: IVector, private range: Range) {
+export class VectorView<T,D extends IValueTypeDesc> extends AVector<T,D> {
+  constructor(root: IVector<T,D>, private range: Range) {
     super(root);
   }
 
@@ -225,14 +224,14 @@ export class VectorView extends AVector {
    return this.range;
    }*/
 
-  sort(compareFn?: (a: IValueType, b: IValueType) => number, thisArg?: any): Promise<IVector> {
+  sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
     return this.data().then((d) => {
       const indices = argSort(d, compareFn, thisArg);
       return this.view(this.range.preMultiply(rlist(indices)));
     });
   }
 
-  filter(callbackfn: (value: IValueType, index: number) => boolean, thisArg?: any): Promise<IVector> {
+  filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
     return this.data().then((d) => {
       const indices = argFilter(d, callbackfn, thisArg);
       return this.view(this.range.preMultiply(rlist(indices)));

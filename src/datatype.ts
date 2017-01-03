@@ -65,7 +65,11 @@ export const VALUE_TYPE_STRING = 'string';
 export const VALUE_TYPE_REAL = 'real';
 export const VALUE_TYPE_INT = 'int';
 
-export interface INumberValueTypeDesc {
+export interface IValueTypeDesc {
+  type: string;
+}
+
+export interface INumberValueTypeDesc extends IValueTypeDesc {
   readonly type: 'int'|'real';
   /**
    * min, max
@@ -83,21 +87,15 @@ export interface ICategory {
   readonly label?: string;
 }
 
-export interface ICategoricalValueTypeDesc {
+export interface ICategoricalValueTypeDesc extends IValueTypeDesc {
   readonly type: 'categorical';
   readonly categories: (ICategory|string)[];
 }
 
-export interface IStringValueTypeDesc {
+export interface IStringValueTypeDesc extends IValueTypeDesc {
   readonly type: 'string';
 }
 
-export interface IUnknownValueTypeDesc {
-  readonly type: string;
-  readonly [extras: string]: any;
-}
-
-export declare type IValueTypeDesc = INumberValueTypeDesc | IStringValueTypeDesc | ICategoricalValueTypeDesc | IUnknownValueTypeDesc;
 export declare type IValueType = number | string | any;
 
 /**
@@ -123,8 +121,8 @@ export function assignData(node: Element, data: IDataType) {
 }
 
 
-export interface IHistAbleDataType extends IDataType {
-  valuetype: IValueTypeDesc;
+export interface IHistAbleDataType<D extends IValueTypeDesc> extends IDataType {
+  valuetype: D;
   hist(nbins?:number): Promise<IHistogram>;
   readonly length: number;
 }
@@ -305,14 +303,14 @@ export function guessValueTypeDesc(arr: IValueType[]): IValueTypeDesc {
   }
   const test = arr[0];
   if (typeof test === 'number' || isNumeric(test)) {
-    return {type: VALUE_TYPE_REAL, range: extent(arr.map(parseFloat))};
+    return <INumberValueTypeDesc>{type: VALUE_TYPE_REAL, range: extent(arr.map(parseFloat))};
   }
   const values = new Set(<string[]>arr);
   if (values.size < arr.length * 0.2 || values.size < 8) {
     //guess as categorical
-    return {type: 'categorical', categories: Array.from(values.values())};
+    return <ICategoricalValueTypeDesc>{type: 'categorical', categories: Array.from(values.values())};
   }
-  return {type: 'string'};
+  return <IStringValueTypeDesc>{type: 'string'};
 }
 
 

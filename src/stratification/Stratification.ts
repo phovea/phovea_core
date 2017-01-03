@@ -10,9 +10,9 @@
 import {mixin} from '../index';
 import {parse, RangeLike, Range, CompositeRange1D, all} from '../range';
 import {resolve as resolveIDType, createLocalAssigner} from '../idtype';
-import {ADataType, IDataType, ICategoricalValueTypeDesc, VALUE_TYPE_CATEGORICAL, ICategory} from '../datatype';
+import {ADataType, IDataType, VALUE_TYPE_CATEGORICAL, ICategory} from '../datatype';
 import {getFirstByFQName} from '../data';
-import {IVector} from '../vector';
+import {ICategoricalVector} from '../vector';
 import {rangeHist, IHistogram} from '../math';
 import {IStratification, IStratificationDataDescription, createDefaultStratificationDesc} from './IStratification';
 import StratificationGroup from './StratificationGroup';
@@ -22,7 +22,7 @@ import StratificationVector from './StratificationVector';
  * root matrix implementation holding the data
  */
 export default class Stratification extends ADataType<IStratificationDataDescription> implements IStratification {
-  private _v: Promise<IVector>;
+  private _v: Promise<ICategoricalVector>;
 
   constructor(desc: IStratificationDataDescription, private loader: IStratificationLoader) {
     super(desc);
@@ -51,7 +51,7 @@ export default class Stratification extends ADataType<IStratificationDataDescrip
     return this.asVector();
   }
 
-  asVector(): Promise<IVector> {
+  asVector(): Promise<ICategoricalVector> {
     if (!this._v) {
       this._v = this.loader(this.desc).then((data) => new StratificationVector(this, data.range));
     }
@@ -140,7 +140,7 @@ export function asStratification(rows: string[], range: CompositeRange1D, option
   return new Stratification(desc, viaDataLoader(rows, rowAssigner(rows), range));
 }
 
-export function wrapCategoricalVector(v: IVector) {
+export function wrapCategoricalVector(v: ICategoricalVector) {
   if (v.valuetype.type !== VALUE_TYPE_CATEGORICAL) {
     throw new Error('invalid vector value type: ' + v.valuetype.type);
   }
@@ -151,7 +151,7 @@ export function wrapCategoricalVector(v: IVector) {
     const cat = <ICategory>g;
     return {name: cat.name, color: cat.color || 'gray', size: NaN};
   };
-  const cats = (<ICategoricalValueTypeDesc>v.desc.value).categories.map(toGroup);
+  const cats = v.desc.value.categories.map(toGroup);
   const desc: IStratificationDataDescription = {
     id: v.desc.id + '-s',
     type: 'stratification',
