@@ -10,26 +10,26 @@ export const DEFAULT_TRANSITION = 0; //ms
 
 export interface IStateAnnotation {
   readonly type: string;
-  readonly pos: [number, number] | {anchor: string, offset: [number, number]} ;
+  pos: [number, number] | {anchor: string, offset: [number, number]} ;
   readonly styles?: {[key: string]: string;};
 
   readonly [key: string]: any;
 }
 
 export interface ITextStateAnnotation extends IStateAnnotation {
-  readonly text: string;
-  readonly size?: [number, number];
-  readonly rotation?: number;
+  text: string;
+  size?: [number, number];
+  rotation?: number;
 }
 
 export interface IArrowStateAnnotation extends IStateAnnotation {
-  readonly at: [number, number];
+  at: [number, number];
 }
 
 export interface IFrameStateAnnotation extends IStateAnnotation {
-  readonly size?: [number, number];
-  readonly pos2?: [number, number];
-  readonly rotation?: number;
+  size?: [number, number];
+  pos2?: [number, number];
+  rotation?: number;
 }
 
 
