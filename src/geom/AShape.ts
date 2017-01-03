@@ -25,7 +25,7 @@ export abstract class AShape implements IShape {
    * @param y
    */
   shift(x: number, y: number): AShape;
-  shift(xy: Vector2D): AShape;
+  shift(xy: {x: number, y: number}): AShape;
   shift(xy: [number, number]): AShape;
   shift() {
     if (typeof arguments[0] === 'number') {
