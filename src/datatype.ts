@@ -323,7 +323,7 @@ export function guessValueTypeDesc(arr: IValueType[]): IValueTypeDesc {
 export function createDefaultDataDesc(namespace = 'localData'): IDataDescription {
   const id = uniqueString(namespace);
   return {
-    type: 'table',
+    type: 'default',
     id: id,
     name: id,
     fqname: id,

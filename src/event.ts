@@ -28,7 +28,13 @@ export interface IEvent {
   readonly currentTarget: IEventHandler;
   readonly target: IEventHandler;
   readonly delegateTarget: IEventHandler;
+  /**
+   * creation date
+   */
   readonly timeStamp: Date;
+  /**
+   * additional arguments given to the event
+   */
   readonly args: any[];
 
   isPropagationStopped();
@@ -124,7 +130,7 @@ export interface IEventListener {
   (event: IEvent, ...args: any[]): any;
 }
 /**
- * EventHandler base class, in the backend JQuery is used
+ * EventHandler base class
  */
 export class EventHandler implements IEventHandler {
   static readonly MULTI_EVENT_SEPARATOR = ',';
@@ -132,8 +138,8 @@ export class EventHandler implements IEventHandler {
 
   /**
    * register a global event handler
-   * @param events
-   * @param handler
+   * @param events either one event string (multiple are supported using , as separator) or a map of event handlers
+   * @param handler the handler in case of a given string
    */
   on(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
     if (typeof events === 'string') {
@@ -179,7 +185,7 @@ export class EventHandler implements IEventHandler {
 
 
   /**
-   * list all registered Events
+   * list for each registered event the number of listeners
    */
   list(): {[key: string]: number} {
     const r: {[key: string]: number} = {};
@@ -192,8 +198,8 @@ export class EventHandler implements IEventHandler {
 
   /**
    * fires an event
-   * @param events
-   * @param args
+   * @param events name(s) of the event
+   * @param args additional arguments
    */
   fire(events: string, ...args: any[]) {
     events.split(EventHandler.MULTI_EVENT_SEPARATOR).forEach((event) => {

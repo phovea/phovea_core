@@ -1,85 +1,19 @@
-/* *****************************************************************************
- * Caleydo - Visualization for Molecular Biology - http://caleydo.org
- * Copyright (c) The Caleydo Team. All rights reserved.
- * Licensed under the new BSD license, available at http://caleydo.org/license
- **************************************************************************** */
 /**
- * Created by Samuel Gratzl on 04.08.2014.
+ * Created by sam on 26.12.2016.
  */
 
-import {Range, RangeLike, CompositeRange1D, all, list, Range1DGroup, parse} from './range';
-import {IDataType, IDataDescription} from './datatype';
-import {IDType, SelectAble} from './idtype';
-import {IVector} from './vector';
-import {IHistogram, rangeHist} from './math';
 
-export interface IGroup {
-  readonly name: string;
-  readonly color: string;
-  readonly size: number;
-}
-
-export function guessColor(stratification: string, group: string) {
-  switch (group.toLowerCase()) {
-    case 'male':
-      return 'blue';
-    case 'female':
-      return 'red';
-    case 'deceased':
-      return '#e41a1b';
-    case 'living':
-      return '#377eb8';
-  }
-  return 'gray';
-}
-
-export interface IStratificationDataDescription extends IDataDescription {
-  readonly idtype: IDType;
-  readonly size: number;
-  readonly groups: IGroup[];
-  readonly ngroups: number;
-  /**
-   * fqname of the origin dataset, e.g. vector, table
-   */
-  readonly origin?: string;
-}
-
-export interface IStratification extends IDataType {
-  readonly desc: IStratificationDataDescription;
-  range(): Promise<CompositeRange1D>;
-  idRange(): Promise<CompositeRange1D>;
-  /**
-   * @deprecated use asVector instead
-   */
-  vector(): Promise<IVector>;
-  asVector(): Promise<IVector>;
-
-  names();
-  names(range: RangeLike);
-
-  ids(): Promise<Range>;
-  ids(range: RangeLike): Promise<Range>;
-
-  hist(bins?: number, range?: RangeLike): Promise<IHistogram>;
-
-  readonly length: number;
-  readonly ngroups: number;
-
-  readonly groups: IGroup[];
-
-  readonly idtype: IDType;
-
-  group(group: number): IStratification;
-
-  origin(): Promise<IDataType>;
-}
-export default IStratification;
-
+import {Range, RangeLike, CompositeRange1D, all, list, Range1DGroup, parse} from '../range';
+import {IDataType} from '../datatype';
+import {SelectAble} from '../idtype';
+import {IVector} from '../vector';
+import {IHistogram, rangeHist} from '../math';
+import {IStratification, IGroup} from './IStratification';
 
 /**
  * root matrix implementation holding the data
  */
-export class StratificationGroup extends SelectAble implements IStratification {
+export default class StratificationGroup extends SelectAble implements IStratification {
   constructor(private root: IStratification, private groupIndex: number, private groupDesc: IGroup) {
     super();
   }
