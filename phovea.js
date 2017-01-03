@@ -15,6 +15,6 @@ module.exports = function(registry) {
 
   registry.push('datatype', 'stratification', function() { return System.import('./src/stratification_impl'); }, {});
 
-  registry.push('datatype', 'graph', function() { return System.import('./src/graph'); }, {});
+  registry.push('datatype', 'graph', function() { return System.import('./src/graph/GraphProxy'); }, {});
 };
 

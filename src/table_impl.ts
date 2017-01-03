@@ -7,19 +7,22 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {IPersistable, argFilter, argSort, isFunction, search, getter} from './index';
+import {IPersistable, argFilter, argSort, fixId, mixin} from './index';
 import {getAPIJSON, getAPIData} from './ajax';
-import {Range, all, list as rlist, parse, range} from './range';
-import {SelectAble, resolve as idtypes_resolve, IDType} from './idtype';
-import {IDataDescription, mask} from './datatype';
-import {IVector} from './vector';
-import {VectorBase} from './vector_impl';
-import {ITable} from './table';
+import {Range, all, list as rlist, parse, range, RangeLike} from './range';
+import {SelectAble, resolve as idtypes_resolve, IDType, createLocalAssigner} from './idtype';
+import {
+  IDataDescription, mask, IValueType, IValueTypeDesc, INumberValueTypeDesc, VALUE_TYPE_INT,
+  VALUE_TYPE_REAL, guessValueTypeDesc, createDefaultDataDesc
+} from './datatype';
+import {IVector, IVectorDataDescription} from './vector';
+import {AVector} from './vector_impl';
+import {ITable, IQueryArgs, ITableColumn, ITableDataDescription} from './table';
 /**
  * base class for different Table implementations, views, transposed,...
  */
-export class TableBase extends SelectAble {
-  constructor(public _root:ITable) {
+export abstract class ATable extends SelectAble {
+  constructor(protected root: ITable) {
     super();
   }
 
@@ -35,27 +38,23 @@ export class TableBase extends SelectAble {
     return this.dim[1];
   }
 
-  size():number[] {
-    throw new Error('not implemented');
+  abstract size(): number[];
+
+  view(range: RangeLike = all()): ITable {
+    return new TableView(this.root, parse(range));
   }
 
-  view(range:Range = all()):ITable {
-    return new TableView(this._root, range);
+  abstract queryView(name: string, args: IQueryArgs): ITable;
+
+  idView(idRange: RangeLike = all()): Promise<ITable> {
+    return this.ids().then((ids) => this.view(ids.indexOf(parse(idRange))));
   }
 
-  queryView(name: string, args: any): ITable {
-    throw new Error('not implemented');
+  reduce(f: (row: any[]) => any, this_f?: any, valuetype?: any, idtype?: IDType): IVector {
+    return new MultITableVector(this.root, f, this_f, valuetype, idtype);
   }
 
-  idView(idRange:Range = all()) : Promise<ITable> {
-    return this.ids().then((ids) => this.view(ids.indexOf(idRange)));
-  }
-
-  reduce(f : (row : any[]) => any, this_f? : any, valuetype? : any, idtype? : IDType) : IVector {
-    return new MultITableVector(<ITable>(<any>this), f, this_f, valuetype, idtype);
-  }
-
-  restore(persisted: any) : IPersistable {
+  restore(persisted: any): IPersistable {
     if (persisted && persisted.f) {
       /* tslint:disable:no-eval */
       return this.reduce(eval(persisted.f), this, persisted.valuetype, persisted.idtype ? idtypes_resolve(persisted.idtype) : undefined);
@@ -69,63 +68,66 @@ export class TableBase extends SelectAble {
 }
 
 export interface ITableLoader {
-  (desc: IDataDescription) : Promise<{
-    rowIds : Range;
+  (desc: ITableDataDescription): Promise<{
+    rowIds: Range;
     rows: string[];
-    objs : any[];
+    objs: any[];
   }>;
 }
 
 
 export interface ITableLoader2 {
-  rowIds(desc: IDataDescription, range: Range) : Promise<Range>;
-  rows(desc: IDataDescription, range: Range) : Promise<string[]>;
-  col(desc: IDataDescription, column: string, range: Range): Promise<any[]>;
-  objs(desc: IDataDescription, range: Range) : Promise<any[]>;
-  data(desc: IDataDescription, range: Range) : Promise<any[][]>;
-  view(desc: IDataDescription, name: string, args: any) : ITableLoader;
+  rowIds(desc: ITableDataDescription, range: Range): Promise<Range>;
+  rows(desc: ITableDataDescription, range: Range): Promise<string[]>;
+  col(desc: ITableDataDescription, column: string, range: Range): Promise<IValueType[]>;
+  objs(desc: ITableDataDescription, range: Range): Promise<any[]>;
+  data(desc: ITableDataDescription, range: Range): Promise<IValueType[][]>;
+  view(desc: ITableDataDescription, name: string, args: any): ITableLoader;
 }
 
 function adapterOne2Two(loader: ITableLoader): ITableLoader2 {
   return {
-    rowIds: (desc: IDataDescription, range: Range) => loader(desc).then((d) => range.preMultiply(d.rowIds, (<any>desc).size)),
-    rows: (desc: IDataDescription, range: Range) => loader(desc).then((d) => range.dim(0).filter(d.rows, (<any>desc).size[0])),
-    col: (desc: IDataDescription, column: string, range: Range) => loader(desc).then((d) => range.filter(d.objs.map((d) => d[column]), (<any>desc).size)),
-    objs: (desc: IDataDescription, range: Range) => loader(desc).then((d) => range.filter(d.objs, (<any>desc).size)),
-    data: (desc: IDataDescription ,range: Range) => loader(desc).then((d) => range.filter(toFlat(d.objs, (<any>desc).columns), (<any>desc).size)),
-    view: (desc: IDataDescription, name: string, args: any) => null
-  };
-}
-
-
-function viaAPIViewLoader(name: string, args: any) {
-  var _loader = undefined;
-  return (desc) => {
-    if (_loader) { //in the cache
-      return _loader;
+    rowIds: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => range.preMultiply(d.rowIds, desc.size)),
+    rows: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => range.dim(0).filter(d.rows, desc.size[0])),
+    col: (desc: ITableDataDescription, column: string, range: Range) => loader(desc).then((d) => range.filter(d.objs.map((d) => d[column]), desc.size)),
+    objs: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => range.filter(d.objs, desc.size)),
+    data: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => range.filter(toFlat(d.objs, desc.columns), desc.size)),
+    view: (desc: ITableDataDescription, name: string, args: any) => {
+      throw new Error('not implemented');
     }
-    return _loader = getAPIJSON('/dataset/table/'+desc.id+'/view/'+name, args).then(function (data) {
-      data.rowIds = parse(data.rowIds);
-      data.objs = maskObjects(data.data, desc);
-      //mask the data
-      return data;
-    });
   };
 }
 
-function maskCol(arr : any[], col) {
+
+function viaAPIViewLoader(name: string, args: IQueryArgs): ITableLoader {
+  let _loader = undefined;
+  return (desc) => {
+    if (!_loader) { //in the cache
+      _loader = getAPIJSON(`/dataset/table/${desc.id}/view/${name}`, args).then((data) => {
+        data.rowIds = parse(data.rowIds);
+        data.objs = maskObjects(data.data, desc);
+        //mask the data
+        return data;
+      });
+    }
+    return _loader;
+  };
+}
+
+function maskCol(arr: IValueType[], col: ITableColumn): IValueType[] {
   //mask data
-  if (col.value && 'missing' in col.value) {
-    return mask(arr, col.value);
+  if (col.value && 'missing' in col.value && (col.value.type === VALUE_TYPE_INT || col.value.type === VALUE_TYPE_REAL)) {
+    return <IValueType[]>mask(arr, <INumberValueTypeDesc>col.value);
   }
   return arr;
 }
 
-function maskObjects(arr : any[], desc) {
+function maskObjects(arr: IValueType[], desc: ITableDataDescription) {
   //mask data
-  if (desc.columns.some((col) => col.value && 'missing' in col.value)) {
+  const maskAble = desc.columns.filter((col) => col.value && 'missing' in col.value && (col.value.type === VALUE_TYPE_INT || col.value.type === VALUE_TYPE_REAL));
+  if (maskAble.length > 0) {
     arr.forEach((row) => {
-      desc.columns.forEach((col) => row[col.name] = mask(row[col.name], col.value));
+      maskAble.forEach((col) => row[col.name] = mask(row[col.name], <INumberValueTypeDesc>col.value));
     });
   }
   return arr;
@@ -133,62 +135,56 @@ function maskObjects(arr : any[], desc) {
 
 
 function viaAPI2Loader(): ITableLoader2 {
-  var rowIds = null,
+  let rowIds = null,
     rows = null,
-    cols : any = {},
+    cols: any = {},
     objs = null,
     data = null;
-  var r = {
-    rowIds: (desc:IDataDescription, range:Range) => {
+  const r: ITableLoader2 = {
+    rowIds: (desc: ITableDataDescription, range: Range) => {
       if (rowIds == null) {
-        rowIds = getAPIJSON('/dataset/table/'+desc.id+'/rowIds').then((ids) => {
-          return parse(ids);
-        });
+        rowIds = getAPIJSON(`/dataset/table/${desc.id}/rowIds`).then(parse);
       }
-      return rowIds.then((d) => {
-        return d.preMultiply(range, (<any>desc).size);
-      });
+      return rowIds.then((d) => d.preMultiply(range, desc.size));
     },
-    rows: (desc:IDataDescription, range:Range) => {
+    rows: (desc: ITableDataDescription, range: Range) => {
       if (rows == null) {
-        rows = getAPIJSON('/dataset/table/' + desc.id + '/rows');
+        rows = getAPIJSON(`/dataset/table/${desc.id}/rows`);
       }
-      return rows.then((d) => range.dim(0).filter(d, (<any>desc).size[0]));
+      return rows.then((d) => range.dim(0).filter(d, desc.size[0]));
     },
-    objs: (desc:IDataDescription, range:Range) => {
+    objs: (desc: ITableDataDescription, range: Range) => {
       if (range.isAll) {
         if (objs == null) {
-          objs = getAPIJSON('/dataset/table/' + desc.id + '/raw').then((data) => maskObjects(data, desc));
+          objs = getAPIJSON(`/dataset/table/${desc.id}/raw`).then((data) => maskObjects(data, desc));
         }
         return objs;
       }
       if (objs != null) { //already loading all
-        return objs.then((d) => range.filter(d, (<any>desc).size));
+        return objs.then((d) => range.filter(d, desc.size));
       }
       //server side slicing
-      return getAPIData('/dataset/table/'+desc.id+'/raw', {
-        range: range.toString()
-      }).then((data) => maskObjects(data, desc));
+      return getAPIData(`/dataset/table/${desc.id}/raw`, {range: range.toString()}).then((data) => maskObjects(data, desc));
     },
-    data: (desc:IDataDescription, range:Range) => {
+    data: (desc: ITableDataDescription, range: Range) => {
       if (range.isAll) {
         if (data == null) {
-          data = r.objs(desc, range).then((objs) => toFlat(objs, (<any>desc).columns));
+          data = r.objs(desc, range).then((objs) => toFlat(objs, desc.columns));
         }
         return data;
       }
       if (data != null) { //already loading all
-        return data.then((d) => range.filter(d, (<any>desc).size));
+        return data.then((d) => range.filter(d, desc.size));
       }
       //server side slicing
-      return r.objs(desc, range).then((objs) => toFlat(objs, (<any>desc).columns));
+      return r.objs(desc, range).then((objs) => toFlat(objs, desc.columns));
     },
-    col: (desc: IDataDescription, column: string, range: Range) => {
-      const colDesc = search((<any>desc).columns, (c : any) => c.name === column);
+    col: (desc: ITableDataDescription, column: string, range: Range) => {
+      const colDesc = (<any>desc).columns.find((c: any) => c.name === column);
       if (range.isAll) {
         if (cols[column] == null) {
           if (objs === null) {
-            cols[column] = getAPIJSON('/dataset/table/'+desc.id+'/col/'+column).then((data) => mask(data, colDesc));
+            cols[column] = getAPIJSON(`/dataset/table/${desc.id}/col/${column}`).then((data) => mask(data, colDesc));
           } else {
             cols[column] = objs.then((objs) => objs.map((row) => row[column]));
           }
@@ -199,47 +195,47 @@ function viaAPI2Loader(): ITableLoader2 {
         return cols[column].then((d) => range.filter(d, (<any>desc).size));
       }
       //server side slicing
-      return getAPIData('/dataset/table/'+desc.id+'/col/'+column, {
-        range: range.toString()
-      }).then((data) => maskCol(data, colDesc));
+      return getAPIData(`/dataset/table/${desc.id}/col/${column}`, {range: range.toString()}).then((data) => maskCol(data, colDesc));
     },
-    view: (desc:IDataDescription, name: string, args: any) => viaAPIViewLoader(name, args)
+    view: (desc: ITableDataDescription, name: string, args: IQueryArgs) => viaAPIViewLoader(name, args)
   };
   return r;
 }
 
-function toFlat(data: any[][], vecs) {
+function toFlat(data: any[][], vecs: ITableColumn[]) {
   return data.map((row) => vecs.map((col) => row[col.name]));
 }
 
-
+// TODO
 function viaDataLoader(data: any[], nameProperty: any) {
-  var _data : any = undefined;
+  let _data: any = undefined;
   return (desc) => {
     if (_data) { //in the cache
       return Promise.resolve(_data);
     }
-    var name : (any) => string = isFunction(nameProperty)? nameProperty : getter(nameProperty.toString());
+    const name: (any) => string = typeof(nameProperty) === 'function' ? nameProperty : (d) => d[nameProperty.toString()];
+
     function toGetter(col) {
       if (col.getter) {
         return col.getter;
       }
       return (d) => d[col.column || col.name];
     }
-    var getters = desc.columns.map(toGetter);
-    var objs = data.map((row) => {
-      var r = { _ : row };
+
+    const getters = desc.columns.map(toGetter);
+    const objs = data.map((row) => {
+      const r = {_: row};
       desc.columns.forEach((col, i) => {
-        r[col.name] =  getters[i](row);
+        r[col.name] = getters[i](row);
       });
       return r;
     });
     const rows = data.map(name);
     _data = {
-      rowIds : desc.rowassigner ? desc.rowassigner.map(rows) : range(0,data.length),
-      rows : rows,
-      objs : objs,
-      data : getters.map((getter) => data.map(getter))
+      rowIds: desc.rowassigner ? desc.rowassigner.map(rows) : range(0, data.length),
+      rows: rows,
+      objs: objs,
+      data: getters.map((getter) => data.map(getter))
     };
     return Promise.resolve(_data);
   };
@@ -248,28 +244,29 @@ function viaDataLoader(data: any[], nameProperty: any) {
 /**
  * root matrix implementation holding the data
  */
-export class Table extends TableBase implements ITable {
-  rowtype:IDType;
-  private vectors : TableVector[];
+export class Table extends ATable implements ITable {
+  private vectors: TableVector[];
 
-  constructor(public desc:IDataDescription, private loader : ITableLoader2) {
+  constructor(public readonly desc: ITableDataDescription, private loader: ITableLoader2) {
     super(null);
-    this._root = this;
-    var d = <any>desc;
-    this.rowtype = idtypes_resolve(d.idtype || d.rowtype);
-    this.vectors = d.columns.map((cdesc, i) => new TableVector(this, i, cdesc));
+    this.root = this;
+    this.vectors = desc.columns.map((cdesc, i) => new TableVector(this, i, cdesc));
+  }
+
+  get idtype() {
+    return idtypes_resolve(this.desc.idtype || (<any>this.desc).rowtype);
   }
 
   get idtypes() {
-    return [this.rowtype];
+    return [this.idtype];
   }
 
   col(i: number) {
     return this.vectors[i];
   }
 
-  cols(range:Range = all()) {
-    return range.filter(this.vectors, [this.ncol]);
+  cols(range: RangeLike = all()) {
+    return parse(range).filter(this.vectors, [this.ncol]);
   }
 
   /**
@@ -278,7 +275,7 @@ export class Table extends TableBase implements ITable {
    * @param j
    * @returns {*}
    */
-  at(i, j) {
+  at(i: number, j: number) {
     return this.colData(this.col(j).column, rlist(i)).then((arr) => arr[0]);
   }
 
@@ -286,41 +283,43 @@ export class Table extends TableBase implements ITable {
     return new Table(this.desc, adapterOne2Two(this.loader.view(this.desc, name, args)));
   }
 
-  data(range:Range = all()) {
-    return this.loader.data(this.desc, range);
+  data(range: RangeLike = all()) {
+    return this.loader.data(this.desc, parse(range));
   }
 
-  colData(column: string, range:Range = all()) {
-    return this.loader.col(this.desc, column, range);
+  colData(column: string, range: RangeLike = all()) {
+    return this.loader.col(this.desc, column, parse(range));
   }
 
-  objects(range:Range = all()) {
-    return this.loader.objs(this.desc, range);
+  objects(range: RangeLike = all()) {
+    return this.loader.objs(this.desc, parse(range));
   }
 
   /**
    * return the row ids of the matrix
    * @returns {*}
    */
-  rows(range:Range = all()):Promise<string[]> {
-    return this.loader.rows(this.desc, range);
+  rows(range: RangeLike = all()): Promise<string[]> {
+    return this.loader.rows(this.desc, parse(range));
   }
-  rowIds(range:Range = all()) {
-    return this.loader.rowIds(this.desc, range);
+
+  rowIds(range: RangeLike = all()) {
+    return this.loader.rowIds(this.desc, parse(range));
   }
-  ids(range:Range = all()) {
+
+  ids(range: RangeLike = all()) {
     return this.rowIds(range);
   }
 
   size() {
-    return (<any>this.desc).size;
+    return this.desc.size;
   }
 
   persist() {
     return this.desc.id;
   }
 
-  restore(persisted: any) : IPersistable {
+  restore(persisted: any): IPersistable {
     if (persisted && typeof persisted.col === 'number') {
       return this.col(persisted.col);
     }
@@ -336,25 +335,25 @@ export class Table extends TableBase implements ITable {
  * @param t optional its transposed version
  * @constructor
  */
-class TableView extends TableBase implements ITable {
-  constructor(root:ITable, private range:Range) {
+class TableView extends ATable implements ITable {
+  constructor(root: ITable, private range: Range) {
     super(root);
     this.range = range;
   }
 
   get desc() {
-    return this._root.desc;
+    return this.root.desc;
   }
 
   persist() {
     return {
-      root: this._root.persist(),
+      root: this.root.persist(),
       range: this.range.toString()
     };
   }
 
   restore(persisted: any) {
-    var r : ITable = this;
+    let r: ITable = this;
     if (persisted && persisted.range) { //some view onto it
       r = r.view(parse(persisted.range));
     }
@@ -362,77 +361,95 @@ class TableView extends TableBase implements ITable {
   }
 
   size() {
-    return this.range.size(this._root.dim);
+    return this.range.size(this.root.dim);
   }
 
-  at(i:number, j:number) {
-    var inverted = this.range.invert([i, j], this._root.dim);
-    return this._root.at(inverted[0],inverted[1]);
+  at(i: number, j: number) {
+    let inverted = this.range.invert([i, j], this.root.dim);
+    return this.root.at(inverted[0], inverted[1]);
   }
 
   col(i: number) {
-    var inverted = this.range.invert([0,i], this._root.dim);
-    return this._root.col(inverted[1]);
+    let inverted = this.range.invert([0, i], this.root.dim);
+    return this.root.col(inverted[1]);
   }
 
-  cols(range:Range = all()) {
-    return this._root.cols(this.range.swap().preMultiply(range, this._root.dim));
+  cols(range: RangeLike = all()) {
+    return this.root.cols(this.range.swap().preMultiply(parse(range), this.root.dim));
   }
 
-  data(range:Range = all()) {
-    return this._root.data(this.range.preMultiply(range, this._root.dim));
+  data(range: RangeLike = all()) {
+    return this.root.data(this.range.preMultiply(parse(range), this.root.dim));
   }
 
-  objects(range:Range = all()) {
-    return this._root.objects(this.range.preMultiply(range, this._root.dim));
+  objects(range: RangeLike = all()) {
+    return this.root.objects(this.range.preMultiply(parse(range), this.root.dim));
   }
 
-  rows(range: Range = all()) {
-    return this._root.rows(this.range.preMultiply(range, this._root.dim));
+  rows(range: RangeLike = all()) {
+    return this.root.rows(this.range.preMultiply(parse(range), this.root.dim));
   }
-  rowIds(range:Range = all()) {
-    return this._root.rowIds(this.range.preMultiply(range, this._root.dim));
+
+  rowIds(range: RangeLike = all()) {
+    return this.root.rowIds(this.range.preMultiply(parse(range), this.root.dim));
   }
-  ids(range:Range = all()) {
+
+  ids(range: RangeLike = all()) {
     return this.rowIds(range);
   }
 
-  view(range:Range = all()) {
-    if (range.isAll) {
+  view(range: RangeLike = all()) {
+    const r = parse(range);
+    if (r.isAll) {
       return this;
     }
-    return new TableView(this._root, this.range.preMultiply(range, this.dim));
+    return new TableView(this.root, this.range.preMultiply(r, this.dim));
   }
 
-  get rowtype() {
-    return this._root.rowtype;
+  get idtype() {
+    return this.root.idtype;
   }
 
   get idtypes() {
-    return [this.rowtype];
+    return [this.idtype];
+  }
+
+  queryView(name: string, args: any): ITable {
+    throw new Error('not implemented');
   }
 }
 
 /**
  * root matrix implementation holding the data
  */
-export class TableVector extends VectorBase implements IVector {
-  valuetype:any;
+export class TableVector extends AVector implements IVector {
+  readonly desc: IVectorDataDescription;
+  readonly column: string;
 
-  constructor(private table: Table, private index: number, public desc:IDataDescription) {
+  constructor(private table: Table, private index: number, desc: ITableColumn) {
     super(null);
-    this._root = this;
-    this.valuetype = (<any>desc).value;
-    this.desc.fqname=table.desc.fqname+'/'+this.desc.name;
-    this.desc.type = 'vector';
+    this.column = desc.name;
+    this.root = this;
+    this.desc = {
+      type: 'vector',
+      id: table.desc.id + '_' + desc.name,
+      name: desc.name,
+      description: desc.description || '',
+      fqname: table.desc.fqname + '/' + desc.name,
+      idtype: table.idtype.id,
+      size: table.nrow,
+      value: desc.value,
+      creator: table.desc.creator,
+      ts: table.desc.ts
+    };
   }
 
-  get column(): string {
-    return (<any>this.desc).name;
+  get valuetype() {
+    return this.desc.value;
   }
 
   get idtype() {
-    return this.table.rowtype;
+    return this.table.idtype;
   }
 
   get idtypes() {
@@ -447,7 +464,7 @@ export class TableVector extends VectorBase implements IVector {
   }
 
   restore(persisted: any) {
-    var r : IVector = this;
+    let r: IVector = this;
     if (persisted && persisted.range) { //some view onto it
       r = r.view(parse(persisted.range));
     }
@@ -457,21 +474,21 @@ export class TableVector extends VectorBase implements IVector {
   /**
    * access at a specific position
    * @param i
-   * @param j
    * @returns {*}
    */
-  at(i) {
+  at(i: number) {
     return this.table.at(i, this.index);
   }
 
-  data(range:Range = all()) {
+  data(range: RangeLike = all()) {
     return this.table.colData(this.column, range);
   }
 
-  names(range:Range = all()) {
+  names(range: RangeLike = all()) {
     return this.table.rows(range);
   }
-  ids(range:Range = all()) {
+
+  ids(range: RangeLike = all()) {
     return this.table.rowIds(range);
   }
 
@@ -479,21 +496,16 @@ export class TableVector extends VectorBase implements IVector {
     return this.table.nrow;
   }
 
-  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): Promise<IVector> {
+  sort(compareFn?: (a: IValueType, b: IValueType) => number, thisArg?: any): Promise<IVector> {
     return this.data().then((d) => {
-      var indices = argSort(d, compareFn, thisArg);
+      let indices = argSort(d, compareFn, thisArg);
       return this.view(rlist(indices));
     });
   }
 
-  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): Promise<IVector> {
-    //FIXME
-    return null;
-  }
-
-  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<IVector> {
+  filter(callbackfn: (value: IValueType, index: number) => boolean, thisArg?: any): Promise<IVector> {
     return this.data().then((d) => {
-      var indices = argFilter(d, callbackfn, thisArg);
+      let indices = argFilter(d, callbackfn, thisArg);
       return this.view(rlist(indices));
     });
   }
@@ -503,18 +515,24 @@ export class TableVector extends VectorBase implements IVector {
 /**
  * a simple projection of a matrix columns to a vector
  */
-class MultITableVector extends VectorBase implements IVector {
-  desc : IDataDescription;
+class MultITableVector extends AVector implements IVector {
+  readonly desc: IVectorDataDescription;
 
-  constructor(private table : ITable, private f : (row : any[]) => any, private this_f = table, public valuetype = null, private _idtype = table.rowtype) {
+  constructor(private table: ITable, private f: (row: any[]) => any, private this_f = table, public readonly valuetype: IValueTypeDesc = null, private _idtype = table.idtype) {
     super(null);
     this.desc = {
-      name : table.desc.name+'-p',
-      fqname: table.desc.fqname+'-p',
-      type : 'vector',
-      id : table.desc.id+'-p'
+      name: table.desc.name + '-p',
+      fqname: table.desc.fqname + '-p',
+      description: f.toString(),
+      type: 'vector',
+      id: fixId(table.desc.id + '-p'+f.toString()),
+      idtype: table.desc.idtype,
+      size: table.nrow,
+      value: valuetype,
+      creator: table.desc.creator,
+      ts: Date.now()
     };
-    this._root = this;
+    this.root = this;
   }
 
   get idtype() {
@@ -530,12 +548,12 @@ class MultITableVector extends VectorBase implements IVector {
       root: this.table.persist(),
       f: this.f.toString(),
       valuetype: this.valuetype ? this.valuetype : undefined,
-      idtype: this.idtype === this.table.rowtype ? undefined: this.idtype.name
+      idtype: this.idtype === this.table.idtype ? undefined : this.idtype.name
     };
   }
 
   restore(persisted: any) {
-    var r : IVector = this;
+    let r: IVector = this;
     if (persisted && persisted.range) { //some view onto it
       r = r.view(parse(persisted.range));
     }
@@ -545,117 +563,102 @@ class MultITableVector extends VectorBase implements IVector {
   size() {
     return this.table.nrow;
   }
+
   /**
    * return the associated ids of this vector
    */
-  names(range?:Range) : Promise<string[]> {
+  names(range?: RangeLike): Promise<string[]> {
     return this.table.rows(range);
   }
-  ids(range?:Range) {
+
+  ids(range?: RangeLike) {
     return this.table.rowIds(range);
   }
 
   /**
    * returns a promise for getting one cell
    * @param i
-   * @param j
    */
-  at(i:number) : Promise<any> {
-    return this.table.data(rlist(i)).then((d)=> {
+  at(i: number): Promise<any> {
+    return this.table.data(rlist(i)).then((d) => {
       return this.f.call(this.this_f, d[0]);
     });
   }
+
   /**
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range?:Range) : Promise<any[]> {
-    return this.table.data(range).then((d)=> {
+  data(range?: RangeLike): Promise<any[]> {
+    return this.table.data(range).then((d) => {
       return d.map(this.f, this.this_f);
     });
   }
 
   sort(compareFn?: (a: any, b: any) => number, thisArg?: any): Promise<IVector> {
     return this.data().then((d) => {
-      var indices = argSort(d, compareFn, thisArg);
+      let indices = argSort(d, compareFn, thisArg);
       return this.view(rlist(indices));
     });
-  }
-
-  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): Promise<IVector> {
-    //FIXME
-    return null;
   }
 
   filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<IVector> {
     return this.data().then((d) => {
-      var indices = argFilter(d, callbackfn, thisArg);
+      let indices = argFilter(d, callbackfn, thisArg);
       return this.view(rlist(indices));
     });
   }
 }
 
-/**
- * module entry point for creating a datatype
- * @param desc
- * @returns {ITable}
- */
-export function create(desc: IDataDescription): ITable {
-  if (isFunction((<any>desc).loader)) {
-    return new Table(desc, adapterOne2Two((<any>desc).loader));
-  }
-  return new Table(desc, viaAPI2Loader());
-}
 
-export function wrapObjects(desc: IDataDescription, data: any[], nameProperty: string|((obj: any) => string)) {
-  return new Table(desc, adapterOne2Two(viaDataLoader(data, nameProperty)));
-}
+export class VectorTable extends ATable implements ITable {
+  readonly idtype: IDType;
+  readonly desc: ITableDataDescription;
 
-export class VectorTable extends TableBase implements ITable {
-  rowtype:IDType;
-
-  constructor(public desc:IDataDescription, private vectors: IVector[]) {
+  constructor(desc: IDataDescription, private vectors: IVector[]) {
     super(null);
-    this._root = this;
-    var d = <any>desc;
-    const ref = <any>(vectors[0].desc);
+    this.root = this;
+    const ref = vectors[0].desc;
+    // generate the description extras
+    const d = <any>desc;
     d.idtype = ref.idtype;
     d.size = [vectors[0].length, vectors.length];
     d.columns = vectors.map((v) => v.desc);
-    this.rowtype = vectors[0].idtype;
+    this.desc = d;
+    this.idtype = vectors[0].idtype;
   }
 
   get idtypes() {
-    return [this.rowtype];
+    return [this.idtype];
   }
 
   col(i: number) {
     return this.vectors[i];
   }
 
-  cols(range:Range = all()) {
-    return range.filter(this.vectors, [this.ncol]);
+  cols(range: RangeLike = all()) {
+    return parse(range).filter(this.vectors, [this.ncol]);
   }
 
   at(i, j) {
     return this.col(i).at(j);
   }
 
-  data(range:Range = all()) {
+  data(range: RangeLike = all()) {
     return Promise.all(this.vectors.map((v) => v.data(range))).then((arr: any[][]) => {
-      const r = arr[0].map((i) =>([i]));
-      arr.slice(1).forEach((ai) => ai.forEach((d,i) => r[i].push(d)));
+      const r = arr[0].map((i) => ([i]));
+      arr.slice(1).forEach((ai) => ai.forEach((d, i) => r[i].push(d)));
       return r;
     });
   }
 
-  objects(range:Range = all()) {
+  objects(range: RangeLike = all()) {
     return Promise.all(this.vectors.map((v) => v.data(range))).then((arr: any[][]) => {
       const names = this.vectors.map((d) => d.desc.name);
-      const r = arr[0].map((i) =>( { [ names[0]] : i }));
-      arr.slice(1).forEach((ai,j) => {
-        const name = names[j+1];
-        ai.forEach((d,i) => r[i][name] = d);
+      const r = arr[0].map((i) => ( {[ names[0]]: i}));
+      arr.slice(1).forEach((ai, j) => {
+        const name = names[j + 1];
+        ai.forEach((d, i) => r[i][name] = d);
       });
       return r;
     });
@@ -665,32 +668,139 @@ export class VectorTable extends TableBase implements ITable {
    * return the row ids of the matrix
    * @returns {*}
    */
-  rows(range:Range = all()):Promise<string[]> {
+  rows(range: RangeLike = all()): Promise<string[]> {
     return this.col(0).names(range);
   }
-  rowIds(range:Range = all()) {
+
+  rowIds(range: RangeLike = all()) {
     return this.col(0).ids(range);
   }
-  ids(range:Range = all()) {
+
+  ids(range: RangeLike = all()) {
     return this.rowIds(range);
   }
 
   size() {
-    return [ this.col(0).length, this.vectors.length ];
+    return [this.col(0).length, this.vectors.length];
   }
 
   persist() {
     return this.desc.id;
   }
 
-  restore(persisted: any) : IPersistable {
+  restore(persisted: any): IPersistable {
     if (persisted && typeof persisted.col === 'number') {
       return this.col(persisted.col);
     }
     return super.restore(persisted);
   }
+
+  queryView(name: string, args: IQueryArgs): ITable {
+    throw Error('not implemented');
+  }
+}
+
+
+
+/**
+ * module entry point for creating a datatype
+ * @param desc
+ * @returns {ITable}
+ */
+export function create(desc: ITableDataDescription, loader?: ITableLoader): ITable {
+  if (loader) {
+    return new Table(desc, adapterOne2Two(loader));
+  }
+  return new Table(desc, viaAPI2Loader());
+}
+
+export function wrapObjects(desc: ITableDataDescription, data: any[], nameProperty: string|((obj: any) => string)) {
+  return new Table(desc, adapterOne2Two(viaDataLoader(data, nameProperty)));
 }
 
 export function fromVectors(desc: IDataDescription, vecs: IVector[]) {
   return new VectorTable(desc, vecs);
+}
+
+
+function toObjects(data: any[][], cols: string[]) {
+  return data.map((row) => {
+    const r: any = {};
+    cols.forEach((col, i) => r[col] = row[i]);
+    return r;
+  });
+}
+function toList(objs: any[], cols: string[]) {
+  return objs.map((obj) => cols.map((c) => obj[c]));
+}
+
+export interface IAsTableOptions {
+  name?: string;
+  idtype?: string;
+  rowassigner?(ids: string[]): Range;
+  keyProperty?: string;
+}
+
+
+function createDefaultTableDesc(): ITableDataDescription {
+  return <ITableDataDescription>mixin(createDefaultDataDesc(), {
+    idtype: '_rows',
+    columns: [],
+    size: [0, 0]
+  });
+}
+
+
+function asTableImpl(columns: ITableColumn[], rows: string[], objs: any[], data: IValueType[][], options: IAsTableOptions = {}) {
+  const desc = mixin(createDefaultTableDesc(), {
+    columns: columns,
+    size: [rows.length, columns.length]
+  }, options);
+
+  const rowAssigner = options.rowassigner || createLocalAssigner();
+  const loader: ITableLoader = () => {
+    const r = {
+      rowIds: rowAssigner(rows),
+      rows: rows,
+      objs: objs,
+      data: data
+    };
+    return Promise.resolve(r);
+  };
+  return new Table(desc, adapterOne2Two(loader));
+}
+
+export function asTableFromArray(data: any[][], options: IAsTableOptions = {}): ITable {
+  const rows = data.map((r) => r[0]);
+  const cols = data[0].slice(1);
+  const tableData = data.slice(1).map((r) => r.slice(1));
+
+  const columns = cols.map((col, i) => {
+    return {
+      name: col,
+      value: guessValueTypeDesc(tableData.map((row) => row[i]))
+    };
+  });
+
+  const realData = tableData.map((row) => columns.map((col, i) => (col.value.type === VALUE_TYPE_REAL || col.value.type === VALUE_TYPE_INT) ? parseFloat(row[i]) : row[i]));
+  const objs = toObjects(realData, cols);
+
+  return asTableImpl(columns, rows, objs, realData, options);
+}
+
+export function asTable(data: any[], options: IAsTableOptions = {}): ITable {
+  const keyProperty = options.keyProperty || '_id';
+
+  const rows = data.map((r, i) => String(r[keyProperty]) || String(i));
+  const cols = Object.keys(data[0]);
+  const objs = data;
+  const realData = toList(objs, cols);
+
+  const columns = cols.map((col, i) => {
+    return {
+      name: col,
+      value: guessValueTypeDesc(realData.map((row) => row[i]))
+    };
+  });
+  return asTableImpl(columns, rows, objs, realData, options);
 }

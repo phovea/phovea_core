@@ -6,7 +6,7 @@
 /**
  * Created by Samuel Gratzl on 05.08.2014.
  */
-import {IPersistable, uniqueId, isFunction, constantTrue} from './index';
+import {IPersistable, uniqueId} from './index';
 import {IPluginDesc, list as listPlugins} from './plugin';
 import {IDataType} from './datatype';
 import {Range} from './range';
@@ -20,12 +20,12 @@ export interface ITransform {
   /**
    * scale factors (width, height)
    */
-  scale: number[];
+  readonly scale: [number, number];
 
   /**
    * rotation
    */
-  rotate: number;
+  readonly rotate: number;
 }
 
 /**
@@ -44,7 +44,7 @@ export interface ILocateAble {
    */
   locate(...range: Range[]): Promise<any>;
 
-  locateById(... range: Range[]): Promise<any>;
+  locateById(...range: Range[]): Promise<any>;
 }
 
 /**
@@ -59,7 +59,7 @@ export interface IVisMetaData {
    * - width-only - only the width can be scaled
    * - height-only - only the height can be scaled
    */
-  scaling: string; //'free' (default) | 'aspect' | 'width-only' | 'height-only'
+  readonly scaling: string; //'free' (default) | 'aspect' | 'width-only' | 'height-only'
 
   /**
    * defines the rotation change angles
@@ -69,12 +69,12 @@ export interface IVisMetaData {
    * - swap / 180 ... 180 degree
    * - <number> any degree
    */
-  rotation: number;
+  readonly rotation: number;
 
   /**
    * indicator, whether the size of this vis depends on the dimensions of the data, i.e. an axis no, a heatmap yes
    */
-  sizeDependsOnDataDimension : boolean[];
+  readonly sizeDependsOnDataDimension: boolean[];
 }
 
 /**
@@ -85,13 +85,18 @@ export interface IVisPluginDesc extends IPluginDesc, IVisMetaData {
    * determines whether the given data can be represented using this visualization technique
    * @param data
    */
-  filter(data: IDataType) : boolean;
+  filter(data: IDataType): boolean;
 
   /**
    * add all icon information of this vis to the given html element
    * @param node
    */
   iconify(node: HTMLElement);
+}
+
+export interface IVisInstanceOptions {
+  rotate?: number;
+  scale?: [number, number];
 }
 
 /**
@@ -101,28 +106,28 @@ export interface IVisInstance extends IPersistable, IEventHandler, ILocateAble {
   /**
    * the unique id of this vis instance
    */
-  id: number;
+  readonly id: number;
 
   /**
    * the base element of this vis
    */
-  node: Element;
+  readonly node: Element;
 
   /**
    * the represented data
    */
-  data: IDataType;
+  readonly data: IDataType;
 
   /**
    * current size of this vis
    * @returns [width, height]
    */
-  size: [number, number];
+  readonly size: [number, number];
 
   /**
    * the size without transformation applied
    */
-  rawSize: [number, number];
+  readonly rawSize: [number, number];
 
   /**
    * returns the current transformation
@@ -134,20 +139,20 @@ export interface IVisInstance extends IPersistable, IEventHandler, ILocateAble {
    * @param scale [w,h]
    * @param rotate
    */
-  transform(scale: number[], rotate: number) : ITransform;
+  transform(scale: [number, number], rotate: number): ITransform;
 
   /**
    * option getter
    * @param name
    */
-  option(name: string) : any;
+  option(name: string): any;
 
   /**
    * option setter
    * @param name
    * @param value
    */
-  option(name: string, value: any) : any;
+  option(name: string, value: any): any;
 
   /**
    * updates this vis
@@ -168,7 +173,7 @@ export function assignVis(node: Element, vis: IVisInstance) {
  * base class for an visualization
  */
 export class AVisInstance extends EventHandler {
-  id = uniqueId('vis');
+  readonly id = uniqueId('vis');
   private _built = false;
 
   option(name: string, value?: any) {
@@ -194,14 +199,14 @@ export class AVisInstance extends EventHandler {
     }
   }
 
-  locate(...range:Range[]) {
+  locate(...range: Range[]) {
     if (range.length === 1) {
       return this.locateImpl(range[0]);
     }
     return Promise.all(range.map(this.locateImpl, this));
   }
 
-  locateById(...range:Range[]) {
+  locateById(...range: Range[]) {
     return (<any>this).data.ids().then((ids) => {
       if (range.length === 1) {
         return this.locateImpl(ids.indexOf(range[0]));
@@ -232,9 +237,9 @@ export class AVisInstance extends EventHandler {
     this.fire('destroyed');
   }
 
-  transform() {
+  transform(): ITransform {
     return {
-      scale: [1,1],
+      scale: [1, 1],
       rotate: 0
     };
   }
@@ -251,24 +256,24 @@ export class AVisInstance extends EventHandler {
   }
 }
 
-function extrapolateFilter(r: any) {
+function extrapolateFilter(r: {filter?: string|((data: IDataType) => boolean)}) {
   const v = r.filter;
   if (typeof v === 'undefined') {
-    r.filter = constantTrue;
+    r.filter = () => true;
   } else if (typeof v === 'string') {
-    r.filter = (data) => data && data.desc.type && data.desc.type.match(v);
+    r.filter = (data) => data && data.desc.type && data.desc.type.match(v) != null;
   } else if (Array.isArray(v)) {
-    r.filter = (data) => data && data && (data.desc.type && data.desc.type.match(v[0])) && (!data.desc.value || data.desc.value.type.match(v[1]));
+    r.filter = (data) => data && data && (data.desc.type && data.desc.type.match(v[0])) && ((<any>data.desc).value === undefined || (<any>data.desc).value.type.match(v[1]));
   }
 }
 
-function extrapolateIconify(r: any) {
-  if (isFunction(r.iconify)) {
+function extrapolateIconify(r: {iconify?(node: HTMLElement): void}) {
+  if (typeof r.iconify === 'function') {
     return;
   }
   r.iconify = function iconfiy(node: HTMLElement) {
     node.title = this.name;
-    if(this.iconcss) {
+    if (this.iconcss) {
       node.classList.add('phovea-vis-icon');
       node.classList.add(this.iconcss);
     } else if (this.icon) {
@@ -288,7 +293,7 @@ function extrapolateIconify(r: any) {
     }
   };
 }
-function extrapolateSize(r : any) {
+function extrapolateSize(r: {scaling?: string, sizeDependsOnDataDimension: boolean|[boolean, boolean]}) {
   r.scaling = r.scaling || 'free';
 
   if (Array.isArray(r.sizeDependsOnDataDimension) && typeof r.sizeDependsOnDataDimension[0] === 'boolean') {
@@ -300,17 +305,17 @@ function extrapolateSize(r : any) {
   }
 }
 
-function extrapolateRotation(r : any) {
+function extrapolateRotation(r: {rotation: string|number|null}) {
   const m = { //string to text mappings
-    free : NaN,
-    no : 0,
+    free: NaN,
+    no: 0,
     transpose: 90,
     swap: 180
   };
   if (typeof r.rotation === 'string' && r.rotation in m) {
     r.rotation = m[r.rotation];
   } else if (typeof r.rotation === 'number') {
-    r.rotation = + r.rotation;
+    r.rotation = +r.rotation;
   } else if (r.rotation === null) {
     r.rotation = NaN;
   } else {
@@ -318,8 +323,8 @@ function extrapolateRotation(r : any) {
   }
 }
 
-function toVisPlugin(plugin : IPluginDesc) : IVisPluginDesc {
-  const r : any = plugin;
+function toVisPlugin(plugin: IPluginDesc): IVisPluginDesc {
+  const r: any = plugin;
   extrapolateFilter(r);
   extrapolateIconify(r);
   extrapolateSize(r);
@@ -332,7 +337,7 @@ function toVisPlugin(plugin : IPluginDesc) : IVisPluginDesc {
  * @param data the data type to visualize
  * @returns {IPluginDesc[]}
  */
-export function list(data:IDataType): IVisPluginDesc[] {
+export function list(data: IDataType): IVisPluginDesc[] {
   //filter additionally with the filter attribute, which can be a function or the expected data type
   return listPlugins('vis').map(toVisPlugin).filter((desc) => desc.filter(data));
 }

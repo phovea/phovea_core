@@ -7,11 +7,12 @@
  * Created by Samuel Gratzl on 27.08.2014.
  */
 
-import {isFunction, IPersistable, indexOf, mixin, offset, search, identity, argList} from './index';
+import {IPersistable, mixin, offset} from './index';
 import {list as rlist, Range, all, Range1D, Range1DGroup, CompositeRange1D, asUngrouped} from './range';
-import {IDataType} from './datatype';
-import {IVisMetaData, IVisInstance, IVisPluginDesc, AVisInstance, assignVis, list as listVisses} from './vis';
+import {IDataType, assignData} from './datatype';
+import {IVisMetaData, ITransform, IVisInstance, IVisPluginDesc, AVisInstance, assignVis, list as listVisses} from './vis';
 import {rect, AShape} from './geom';
+import {IPlugin} from './plugin';
 
 class ProxyMetaData implements IVisMetaData {
   constructor(private proxy: () => IVisMetaData) {
@@ -19,7 +20,7 @@ class ProxyMetaData implements IVisMetaData {
   }
 
   get scaling() {
-    var p = this.proxy();
+    const p = this.proxy();
     return p ? p.scaling : 'free';
   }
 
@@ -35,25 +36,80 @@ class ProxyMetaData implements IVisMetaData {
 }
 
 export interface IMultiForm extends IVisInstance {
-  act: IVisPluginDesc;
-  actLoader: Promise<IVisInstance>;
-  visses: IVisPluginDesc[];
-  switchTo(id: string): Promise<any>;
-  switchTo(index: number): Promise<any>;
-  switchTo(vis: IVisPluginDesc): Promise<any>;
+  readonly act: IVisPluginDesc;
+  readonly actLoader: Promise<IVisInstance>;
+  readonly visses: IVisPluginDesc[];
+  switchTo(id: string): Promise<IVisInstance|IVisInstance[]>;
+  switchTo(index: number): Promise<IVisInstance|IVisInstance[]>;
+  switchTo(vis: IVisPluginDesc): Promise<IVisInstance|IVisInstance[]>;
+
+  addIconVisChooser(toolbar: Element);
+  addSelectVisChooser(toolbar: Element);
 }
 
 
-function selectVis(initial: any, visses: IVisPluginDesc[]) {
+function selectVis(initial: number|string|IVisPluginDesc, visses: IVisPluginDesc[]) {
   switch (typeof initial) {
     case 'number':
-      return visses[Math.max(0, Math.min(initial, visses.length - 1))];
+      return visses[Math.max(0, Math.min(<number>initial, visses.length - 1))];
     case 'string':
-      return visses[Math.max(0, indexOf(visses, (v) => v.id === initial))];
+      return visses[Math.max(0, visses.findIndex((v) => v.id === <string>initial))];
     default:
-      return visses[Math.max(0, visses.indexOf(initial))];
+      return visses[Math.max(0, visses.indexOf(<IVisPluginDesc>initial))];
   }
 }
+
+
+/**
+ * computes the selectable vis techniques for a given set of multi form objects
+ * @param forms
+ * @return {*}
+ */
+export function toAvailableVisses(forms: IMultiForm[]) {
+  if (forms.length === 0) {
+    return [];
+  }
+  if (forms.length === 1) {
+    return forms[0].visses;
+  }
+  //intersection of all
+  return forms[0].visses.filter((vis) => forms.every((f) => f.visses.indexOf(vis) >= 0));
+}
+
+export function addIconVisChooser(toolbar: HTMLElement, ...forms: IMultiForm[]) {
+  const s = toolbar.ownerDocument.createElement('div');
+  toolbar.insertBefore(s, toolbar.firstChild);
+  const visses = toAvailableVisses(forms);
+
+  visses.forEach((v) => {
+    let child = createNode(s, 'i');
+    v.iconify(child);
+    child.onclick = () => forms.forEach((f) => f.switchTo(v));
+  });
+}
+
+export function addSelectVisChooser(toolbar: HTMLElement, ...forms: IMultiForm[]) {
+  const s = toolbar.ownerDocument.createElement('select');
+  toolbar.insertBefore(s, toolbar.firstChild);
+  const visses = toAvailableVisses(forms);
+
+  visses.forEach((v, i) => {
+    let child = createNode(s, 'option');
+    child.setAttribute('value', String(i));
+    child.textContent = v.name;
+  });
+  // use only the current selection of the first form
+  if (forms[0]) {
+    s.selectedIndex = visses.indexOf(forms[0].act);
+  }
+  s.onchange = () => forms.forEach((f) => f.switchTo(visses[s.selectedIndex]));
+}
+
+const choosers = {
+  icon: addIconVisChooser,
+  select: addSelectVisChooser
+};
+
 
 function clearNode(parent: Element) {
   let node = parent.firstChild;
@@ -62,8 +118,8 @@ function clearNode(parent: Element) {
   }
 }
 
-function createNode(parent: Element, type: string = 'div', clazz?: string) {
-  let node = document.createElement(type);
+function createNode(parent: HTMLElement, type: string = 'div', clazz?: string) {
+  let node = parent.ownerDocument.createElement(type);
   if (clazz) {
     clazz.split(' ').forEach((c) => node.classList.add(c));
   }
@@ -71,11 +127,17 @@ function createNode(parent: Element, type: string = 'div', clazz?: string) {
   return node;
 }
 
+export interface IMultiFormOptions {
+  initialVis?: string|number|IVisPluginDesc;
+  all?: any;
+  [visPluginId: string]: any;
+}
+
 /**
  * a simple multi form class using a select to switch
  */
 export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm {
-  node: HTMLElement;
+  readonly node: HTMLElement;
   /**
    * list of all possibles vis techniques
    */
@@ -89,7 +151,7 @@ export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm 
 
   private metaData_: IVisMetaData = new ProxyMetaData(() => this.actDesc);
 
-  constructor(public data: IDataType, parent: Element, private options: any = {}) {
+  constructor(public readonly data: IDataType, parent: HTMLElement, private options: IMultiFormOptions = {}) {
     super();
     this.options = mixin({
       initialVis: 0,
@@ -98,7 +160,7 @@ export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm 
       }
     }, options);
     this.node = createNode(parent, 'div', 'multiform');
-    (<any>parent).__data__ = data;
+    assignData(parent, data);
     assignVis(this.node, this);
     //find all suitable plugins
     this.visses = listVisses(data);
@@ -125,7 +187,7 @@ export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm 
   }
 
   destroy() {
-    if (this.actVis && isFunction(this.actVis.destroy)) {
+    if (this.actVis && typeof(this.actVis.destroy) === 'function') {
       this.actVis.destroy();
     }
     super.destroy();
@@ -134,17 +196,17 @@ export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm 
   persist(): any {
     return {
       id: this.actDesc ? this.actDesc.id : null,
-      content: this.actVis && isFunction(this.actVis.persist) ? this.actVis.persist() : null
+      content: this.actVis && typeof(this.actVis.persist) === 'function' ? this.actVis.persist() : null
     };
   }
 
   restore(persisted: any): Promise<MultiForm> {
     const that = this;
     if (persisted.id) {
-      const selected = search(this.visses, (e) => e.id === persisted.id);
+      const selected = this.visses.find((e) => e.id === persisted.id);
       if (selected) {
         return this.switchTo(selected).then((vis) => {
-          if (vis && persisted.content && isFunction(vis.restore)) {
+          if (vis && persisted.content && typeof(vis.restore) === 'function') {
             return Promise.resolve(vis.restore(persisted.content)).then(() => that);
           }
           return that;
@@ -158,7 +220,7 @@ export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm 
     const p = this.actVisPromise || Promise.resolve(null);
     return p.then((...aa) => {
       const vis = aa.length > 0 ? aa[0] : undefined;
-      if (vis && isFunction(vis.locate)) {
+      if (vis && typeof(vis.locate) === 'function') {
         return vis.locate.apply(vis, args);
       } else {
         return Promise.resolve((aa.length === 1 ? undefined : new Array(args.length)));
@@ -170,7 +232,7 @@ export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm 
     const p = this.actVisPromise || Promise.resolve(null);
     return p.then((...aa) => {
       const vis = aa.length > 0 ? aa[0] : undefined;
-      if (vis && isFunction(vis.locateById)) {
+      if (vis && typeof(vis.locateById) === 'function') {
         return vis.locateById.apply(vis, args);
       } else {
         return Promise.resolve((aa.length === 1 ? undefined : new Array(args.length)));
@@ -178,7 +240,7 @@ export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm 
     });
   }
 
-  transform(scale?: number[], rotate?: number) {
+  transform(scale?: [number, number], rotate?: number) {
     if (this.actVis) {
       if (arguments.length === 0) {
         return this.actVis.transform();
@@ -198,7 +260,7 @@ export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm 
       return;
     }
     return {
-      scale: [1, 1],
+      scale: <[number, number]>[1, 1],
       rotate: 0
     };
   }
@@ -231,12 +293,9 @@ export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm 
 
   /**
    * switch to the desired vis technique given by index
-   * @param index
+   * @param param
    */
-  switchTo(index: number): Promise<any>;
-  switchTo(vis: IVisPluginDesc): Promise<any>;
-  switchTo(id: string): Promise<any>;
-  switchTo(param: any): Promise<any> {
+  switchTo(param: number|string|IVisPluginDesc): Promise<IVisInstance> {
     const vis: IVisPluginDesc = selectVis(param, this.visses);
 
     if (vis === this.actDesc) {
@@ -274,22 +333,30 @@ export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm 
       return Promise.resolve(null);
     }
   }
+
+  addIconVisChooser(toolbar: HTMLElement) {
+    return choosers.icon(toolbar, this);
+  }
+
+  addSelectVisChooser(toolbar: HTMLElement) {
+    return choosers.select(toolbar);
+  }
 }
 
 class GridElem implements IPersistable {
   private actVis: IVisInstance;
   content: HTMLElement;
 
-  constructor(public range: Range, public pos: number[], public data: IDataType) {
+  constructor(public readonly range: Range, public readonly pos: number[], public readonly data: IDataType) {
   }
 
   setContent(c: HTMLElement) {
     this.content = c;
-    (<any>this.content).__data__ = this.data;
+    assignData(this.content, this.data);
   }
 
   subrange(r: Range) {
-    var ri = this.range.intersect(r);
+    const ri = this.range.intersect(r);
     return this.range.indexOf(ri);
   }
 
@@ -298,7 +365,7 @@ class GridElem implements IPersistable {
   }
 
   destroy() {
-    if (this.actVis && isFunction(this.actVis.destroy)) {
+    if (this.actVis && typeof(this.actVis.destroy) === 'function') {
       this.actVis.destroy();
     }
   }
@@ -314,7 +381,7 @@ class GridElem implements IPersistable {
   persist() {
     return {
       range: this.range.toString(),
-      content: this.actVis && isFunction(this.actVis.persist) ? this.actVis.persist() : null
+      content: this.actVis && typeof(this.actVis.persist) === 'function' ? this.actVis.persist() : null
     };
   }
 
@@ -336,13 +403,13 @@ class GridElem implements IPersistable {
   switchDestroy() {
     //remove content dom side
     clearNode(this.content);
-    if (this.actVis && isFunction(this.actVis.destroy)) {
+    if (this.actVis && typeof(this.actVis.destroy) === 'function') {
       this.actVis.destroy();
     }
     this.actVis = null;
   }
 
-  build(plugin: any, options: any) {
+  build(plugin: IPlugin, options: any) {
     this.actVis = plugin.factory(this.data, this.content, options);
     assignVis(this.content, this.actVis);
     return this.actVis;
@@ -357,7 +424,7 @@ class GridElem implements IPersistable {
   }
 
 
-  transform(scale?: number[], rotate?: number) {
+  transform(scale?: [number, number], rotate?: number): ITransform {
     if (this.actVis) {
       if (arguments.length > 0) {
         return this.actVis.transform(scale, rotate);
@@ -387,15 +454,20 @@ export interface IViewFactory {
   (data: IDataType, range: Range, pos: number[]): IDataType;
 }
 
+export interface IMultiFormGridOptions extends IMultiFormOptions {
+  singleRowOptimization?: boolean;
+  wrap?(cell: HTMLElement, data: IDataType, range: Range, pos: number[]): HTMLElement;
+}
+
 /**
  * a simple multi form class using a select to switch
  */
 export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiForm {
-  node: HTMLElement;
+  readonly node: HTMLElement;
   /**
    * list of all possibles vis techniques
    */
-  visses: IVisPluginDesc[];
+  readonly visses: IVisPluginDesc[];
 
   private actDesc: IVisPluginDesc;
 
@@ -408,14 +480,14 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
 
   private metaData_: IVisMetaData = new ProxyMetaData(() => this.actDesc);
 
-  constructor(public data: IDataType, public range: Range, parent: Element, viewFactory: IViewFactory, private options: any = {}) {
+  constructor(public readonly data: IDataType, public readonly range: Range, parent: HTMLElement, viewFactory: IViewFactory, private options: IMultiFormGridOptions = {}) {
     super();
     this.options = mixin({
       initialVis: 0,
       singleRowOptimization: true
     }, options);
     this.node = createNode(parent, 'div', 'multiformgrid');
-    (<any>parent).__data__ = data;
+    assignData(parent, data);
     assignVis(this.node, this);
     //find all suitable plugins
     this.visses = listVisses(data);
@@ -434,7 +506,7 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
 
     function product(level: number, range: Range1D[], pos: number[]) {
       if (level === dims.length) {
-        var r = range.length === 0 ? all() : rlist(range.slice()); //work on a copy for safety reason
+        const r = range.length === 0 ? all() : rlist(range.slice()); //work on a copy for safety reason
         grid.push(new GridElem(r, pos.slice(), viewFactory(data, r, pos.slice())));
       } else {
         dims[level].forEach((group, i) => {
@@ -496,7 +568,7 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
 
     //create content
     this.content = this.node;
-    const wrap = this.options.wrap || identity;
+    const wrap = this.options.wrap || ((d) => d);
     //create groups for all grid elems
     //TODO how to layout as a grid
     if (this.dims.length === 1) {
@@ -523,17 +595,15 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
       }
     }
     //switch to first
-    this.switchTo(<any>this.options.initialVis);
+    this.switchTo(this.options.initialVis);
   }
 
   destroy() {
-    this.grid.forEach((elem) => {
-      elem.destroy();
-    });
+    this.grid.forEach((elem) => elem.destroy());
     super.destroy();
   }
 
-  transform(scale?: number[], rotate?: number) {
+  transform(scale?: [number, number], rotate?: number): ITransform {
     if (this.grid[0].hasOne) {
       const bak = this.grid[0].transform();
       if (arguments.length > 0) {
@@ -561,12 +631,12 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
   restore(persisted: any): Promise<MultiFormGrid> {
     const that = this;
     if (persisted.id) {
-      const selected = search(this.visses, (e) => e.id === persisted.id);
+      const selected = this.visses.find((e) => e.id === persisted.id);
       if (selected) {
         return this.switchTo(selected).then((vis) => {
           //FIXME
-          if (vis && persisted.content && isFunction(vis.restore)) {
-            return Promise.resolve(vis.restore(persisted.content)).then(() => that);
+          if (vis && persisted.content && typeof((<any>vis).restore) === 'function') {
+            return Promise.resolve((<any>vis).restore(persisted.content)).then(() => that);
           }
           return Promise.resolve(that);
         });
@@ -591,7 +661,7 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
     }
 
     function filterTo() {
-      var inElems = [], i: number, matched, g: GridElem;
+      let inElems = [], i: number, matched, g: GridElem;
 
       for (i = 0; i < this.grid.length; ++i) {
         g = this.grid[i];
@@ -608,7 +678,7 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
       return inElems;
     }
 
-    var inElems = filterTo.call(this);
+    const inElems = filterTo.call(this);
 
     if (inElems.length === 1) {
       return inElems[0].g.actVis.locate(inElems[0].r).then((loc) => {
@@ -619,10 +689,10 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
       //shift the locations according to grid position
       locations = locations.map((loc, i) => loc ? loc.shift(inElems[i].pos) : loc).filter((loc) => loc != null);
       //merge into a single one
-      var base = locations[0].aabb(),
-        x = base.x, y = base.y, x2 = base.x2, y2 = base.y2;
+      let base = locations[0].aabb();
+      let x = base.x, y = base.y, x2 = base.x2, y2 = base.y2;
       locations.forEach((loc) => {
-        var aab = loc.aabb();
+        const aab = loc.aabb();
         x = Math.min(x, aab.x);
         y = Math.min(y, aab.y);
         x2 = Math.min(x2, aab.x2);
@@ -639,7 +709,7 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
   }
 
   locate() {
-    const p = this.actVisPromise || Promise.resolve(null), args = argList(arguments);
+    const p = this.actVisPromise || Promise.resolve(null), args = Array.from(arguments);
     return p.then(function (visses) {
       if (!visses) {
         return Promise.resolve((arguments.length === 1 ? undefined : new Array(args.length)));
@@ -658,7 +728,7 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
   }
 
   locateById(...range: Range[]) {
-    const p = this.actVisPromise || Promise.resolve(null), args = argList(arguments);
+    const p = this.actVisPromise || Promise.resolve(null), args = Array.from(arguments);
     return p.then(function (visses) {
       if (!visses) {
         return Promise.resolve((arguments.length === 1 ? undefined : new Array(args.length)));
@@ -689,7 +759,7 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
   }
 
 
-  gridSize(raw = false): { cols: number[]; rows: number[]; grid: number[][][]} {
+  gridSize(raw = false): {cols: number[]; rows: number[]; grid: number[][][]} {
     const sizes = this.grid.map(raw ? (elem) => elem.rawSize : (elem) => elem.size);
 
     if (this.dims.length === 1) {
@@ -722,12 +792,9 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
 
   /**
    * switch to the desired vis technique given by index
-   * @param index
+   * @param param
    */
-  switchTo(index: number): Promise<any>;
-  switchTo(vis: IVisPluginDesc): Promise<any>;
-  switchTo(id: string): Promise<any>;
-  switchTo(param: any): Promise<any> {
+  switchTo(param: string|number|IVisPluginDesc): Promise<IVisInstance[]> {
     const vis: IVisPluginDesc = selectVis(param, this.visses);
 
     if (vis === this.actDesc) {
@@ -751,10 +818,8 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
           return null;
         }
         const options = mixin({}, this.options.all, this.options[vis.id] || {});
-        const r = this.grid.map((elem) => {
-          return elem.build(plugin, options);
-        });
-        var c = r.length;
+        const r = this.grid.map((elem) => elem.build(plugin, options));
+        let c = r.length;
         r.forEach((ri) => {
           ri.on('ready', () => {
             c--;
@@ -770,60 +835,21 @@ export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiF
       return Promise.resolve([]);
     }
   }
-}
 
-/**
- * computes the selectable vis techniques for a given set of multi form objects
- * @param forms
- * @return {*}
- */
-export function toAvailableVisses(forms: IMultiForm[]) {
-  if (forms.length === 0) {
-    return [];
+  addIconVisChooser(toolbar: HTMLElement) {
+    return choosers.icon(toolbar, this);
   }
-  if (forms.length === 1) {
-    return forms[0].visses;
+
+  addSelectVisChooser(toolbar: HTMLElement) {
+    return choosers.select(toolbar);
   }
-  //intersection of all
-  return forms[0].visses.filter((vis) => forms.every((f) => f.visses.indexOf(vis) >= 0));
 }
 
-export function addIconVisChooser(toolbar: Element, ...forms: IMultiForm[]) {
-  const s = document.createElement('div');
-  toolbar.insertBefore(s, toolbar.firstChild);
-  const visses = toAvailableVisses(forms);
-
-  visses.forEach((v) => {
-    let child = createNode(s, 'i');
-    v.iconify(child);
-    (<any>child).__data__ = v;
-    child.onclick = () => forms.forEach((f) => f.switchTo(v));
-  });
-}
-
-export function addSelectVisChooser(toolbar: Element, ...forms: IMultiForm[]) {
-  const s = <HTMLSelectElement>document.createElement('select');
-  toolbar.insertBefore(s, toolbar.firstChild);
-  const visses = toAvailableVisses(forms);
-
-  visses.forEach((v, i) => {
-    let child = createNode(s, 'option');
-    (<any>child).__data__ = v;
-    child.setAttribute('value', String(i));
-    child.textContent = v.name;
-  });
-  // use only the current selection of the first form
-  if (forms[0]) {
-    s.selectedIndex = visses.indexOf(forms[0].act);
-  }
-  s.onchange = () => forms.forEach((f) => f.switchTo(visses[s.selectedIndex]));
-}
-
-export function create(data: IDataType, parent: Element, options?) {
+export function create(data: IDataType, parent: HTMLElement, options: IMultiFormOptions) {
   return new MultiForm(data, parent, options);
 }
 
-export function createGrid(data: IDataType, range: Range, parent: Element,
-                           viewFactory: IViewFactory, options?) {
+export function createGrid(data: IDataType, range: Range, parent: HTMLElement,
+                           viewFactory: IViewFactory, options: IMultiFormGridOptions) {
   return new MultiFormGrid(data, range, parent, viewFactory, options);
 }

@@ -7,20 +7,33 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {isFunction, argList, argSort, argFilter} from './index';
+import {argSort, argFilter} from './index';
 import {getAPIJSON} from './ajax';
-import {all, Range, range, CompositeRange1D, list as rlist, asUngrouped, composite, parse} from './range';
-import {SelectAble, resolve, IDType} from './idtype';
-import {IDataDescription, categorical2partitioning, IDataType, mask, DataTypeBase} from './datatype';
+import {all, Range, RangeLike, range, CompositeRange1D, list as rlist, asUngrouped, composite, parse} from './range';
+import {SelectAble, resolve} from './idtype';
+import {
+  categorical2partitioning,
+  IValueType,
+  ICategorical2PartitioningOptions,
+  ICategory,
+  IDataType,
+  mask,
+  ADataType,
+  ICategoricalValueTypeDesc,
+  INumberValueTypeDesc,
+  VALUE_TYPE_CATEGORICAL,
+  VALUE_TYPE_INT,
+  VALUE_TYPE_REAL
+} from './datatype';
 import {computeStats, IStatistics, IHistogram, categoricalHist, hist, rangeHist} from './math';
-import {IVector} from './vector';
-import {IStratification,IGroup, StratificationGroup} from './stratification';
+import {IVector, IVectorDataDescription} from './vector';
+import {IStratification, IGroup, StratificationGroup, IStratificationDataDescription} from './stratification';
 
 /**
  * base class for different Vector implementations, views, transposed,...
  */
-export class VectorBase extends SelectAble {
-  constructor(public _root:IVector) {
+export abstract class AVector extends SelectAble {
+  constructor(protected root: IVector) {
     super();
   }
 
@@ -28,31 +41,27 @@ export class VectorBase extends SelectAble {
     return [this.length];
   }
 
-  data(range?:Range) : Promise<any[]> {
-    throw new Error('not implemented');
-  }
+  abstract data(range?: RangeLike): Promise<any[]>;
 
-  size():number {
-    throw new Error('not implemented');
-  }
+  abstract size(): number;
 
   get length() {
     return this.size();
   }
 
-  view(range:Range = all()):IVector {
-    return new VectorView(this._root, range);
+  view(range: RangeLike = all()): IVector {
+    return new VectorView(this.root, parse(range));
   }
 
-  idView(idRange:Range = all()) : Promise<IVector> {
-    return this.ids().then((ids) => this.view(ids.indexOf(idRange)));
+  idView(idRange: RangeLike = all()): Promise<IVector> {
+    return this.ids().then((ids) => this.view(ids.indexOf(parse(idRange))));
   }
 
-  stats() : Promise<IStatistics> {
+  stats(): Promise<IStatistics> {
     return this.data().then((d) => computeStats(d));
   }
 
-  get indices() : Range {
+  get indices(): Range {
     return range(0, this.length);
   }
 
@@ -60,76 +69,88 @@ export class VectorBase extends SelectAble {
    * return the range of this vector as a grouped range, depending on the type this might be a single group or multiple ones
    */
   groups(): Promise<CompositeRange1D> {
-    var v = this._root.valuetype;
-    if (v.type === 'categorical') {
+    const v = this.root.valuetype;
+    if (v.type === VALUE_TYPE_CATEGORICAL) {
+      const vc = <ICategoricalValueTypeDesc>v;
       return this.data().then((d) => {
-        var options: any = {
-          name: this._root.desc.id
+        const options: ICategorical2PartitioningOptions = {
+          name: this.root.desc.id
         };
-        if (v.categories[0].color) {
-          options.colors = v.categories.map((d) => d.color);
+        if (typeof vc.categories[0] !== 'string') {
+          const vcc = <ICategory[]>vc.categories;
+          if (vcc[0].color) {
+            options.colors = vcc.map((d) => d.color);
+          }
+          if (vcc[0].label) {
+            options.labels = vcc.map((d) => d.label);
+          }
         }
-        if (v.categories[0].label) {
-          options.labels = v.categories.map((d) => d.label);
-        }
-        return categorical2partitioning(d, v.categories.map((d) => typeof d === 'string' ? d : d.name), options);
+        return categorical2partitioning(d, vc.categories.map((d) => typeof d === 'string' ? d : d.name), options);
       });
     } else {
-      return Promise.resolve(composite(this._root.desc.id, [ asUngrouped(this.indices.dim(0))]));
+      return Promise.resolve(composite(this.root.desc.id, [asUngrouped(this.indices.dim(0))]));
     }
   }
 
   stratification(): Promise<IStratification> {
+    return this.asStratification();
+  }
+
+  asStratification(): Promise<IStratification> {
     return this.groups().then((range) => {
-      return new StratificationVector(<IVector><any>this, range);
+      return new StratificationVector(this.root, range);
     });
   }
 
-  hist(bins? : number, range = all()) : Promise<IHistogram> {
-    var v = this._root.valuetype;
+  hist(bins?: number, range: RangeLike = all()): Promise<IHistogram> {
+    const v = this.root.valuetype;
     return this.data(range).then((d) => {
-      switch(v.type) {
-      case 'categorical':
-          return categoricalHist(d, this.indices.dim(0), d.length, v.categories.map((d) => typeof d === 'string' ? d : d.name),
-          v.categories.map((d) => typeof d === 'string' ? d : d.name || d.label),
-          v.categories.map((d) => typeof d === 'string' ? 'gray' : d.color || 'gray'));
-      case 'real':
-      case 'int':
-        return hist(d, this.indices.dim(0), d.length, bins ? bins : Math.round(Math.sqrt(this.length)), v.range);
-      default:
+      switch (v.type) {
+        case VALUE_TYPE_CATEGORICAL:
+          const vc = <ICategoricalValueTypeDesc>v;
+          return categoricalHist(d, this.indices.dim(0), d.length, vc.categories.map((d) => typeof d === 'string' ? d : d.name),
+            vc.categories.map((d) => typeof d === 'string' ? d : d.name || d.label),
+            vc.categories.map((d) => typeof d === 'string' ? 'gray' : d.color || 'gray'));
+        case VALUE_TYPE_REAL:
+        case VALUE_TYPE_INT:
+          const vn = <INumberValueTypeDesc>v;
+          return hist(d, this.indices.dim(0), d.length, bins ? bins : Math.round(Math.sqrt(this.length)), vn.range);
+        default:
           return null; //cant create hist for unique objects or other ones
       }
     });
   }
 
-  every(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<boolean> {
+  every(callbackfn: (value: IValueType, index: number) => boolean, thisArg?: any): Promise<boolean> {
     return this.data().then((d) => d.every(callbackfn, thisArg));
   }
 
-  some(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<boolean> {
+  some(callbackfn: (value: IValueType, index: number) => boolean, thisArg?: any): Promise<boolean> {
     return this.data().then((d) => d.some(callbackfn, thisArg));
   }
 
-  forEach(callbackfn: (value: any, index: number) => void, thisArg?: any): void {
+  forEach(callbackfn: (value: IValueType, index: number) => void, thisArg?: any): void {
     this.data().then((d) => d.forEach(callbackfn, thisArg));
   }
 
   reduce<T,U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U> {
     function helper() {
-      return callbackfn.apply(thisArg, argList(arguments));
+      return callbackfn.apply(thisArg, Array.from(arguments));
     }
+
     return this.data().then((d) => d.reduce(helper, initialValue));
   }
 
   reduceRight<T,U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U> {
     function helper() {
-      return callbackfn.apply(thisArg, argList(arguments));
+      return callbackfn.apply(thisArg, Array.from(arguments));
     }
+
     return this.data().then((d) => d.reduceRight(helper, initialValue));
   }
 
   restore(persisted: any) {
-    var r : IVector = <IVector>(<any>this);
+    let r: IVector = <IVector>(<any>this);
     if (persisted && persisted.range) { //some view onto it
       r = r.view(parse(persisted.range));
     }
@@ -138,35 +159,35 @@ export class VectorBase extends SelectAble {
 }
 
 export interface IVectorLoader {
-  (desc: IDataDescription) : Promise<{
-    rowIds : Range;
-    rows : string[];
-    data : any[];
+  (desc: IVectorDataDescription): Promise<{
+    readonly rowIds: Range;
+    readonly rows: string[];
+    readonly data: IValueType[];
   }>;
 }
 
 
 function viaAPILoader() {
-  var _loader = undefined;
+  let _loader = undefined;
   return (desc) => {
     if (_loader) { //in the cache
       return _loader;
     }
-    return _loader = getAPIJSON('/dataset/'+desc.id).then(function (data) {
+    return _loader = getAPIJSON('/dataset/' + desc.id).then((data) => {
       data.rowIds = parse(data.rowIds);
       return data;
     });
   };
 }
 
-function viaDataLoader(rows: string[], rowIds: number[], data: any[]) {
-  var _data = undefined;
-  return (desc) => {
+function viaDataLoader(rows: string[], rowIds: number[], data: IValueType[]) {
+  let _data = undefined;
+  return () => {
     if (_data) { //in the cache
       return Promise.resolve(_data);
     }
     _data = {
-      rowIds : parse(rowIds),
+      rowIds: parse(rowIds),
       rows: rows,
       data: data
     };
@@ -177,20 +198,19 @@ function viaDataLoader(rows: string[], rowIds: number[], data: any[]) {
 /**
  * root matrix implementation holding the data
  */
-export class Vector extends VectorBase implements IVector {
-  valuetype:any;
-  _idtype:IDType;
+export class Vector extends AVector {
 
-  constructor(public desc:IDataDescription, private loader : IVectorLoader) {
+  constructor(public readonly desc: IVectorDataDescription, private loader: IVectorLoader) {
     super(null);
-    this._root = this;
-    var d = <any>desc;
-    this.valuetype = d.value;
-    this._idtype = resolve(d.idtype);
+    this.root = this;
+  }
+
+  get valuetype() {
+    return this.desc.value;
   }
 
   get idtype() {
-    return this._idtype;
+    return resolve(this.desc.idtype);
   }
 
   /**
@@ -198,40 +218,37 @@ export class Vector extends VectorBase implements IVector {
    * TODO: load just needed data and not everything given by the requested range
    * @returns {*}
    */
-  load() : Promise<any> {
+  private load(): Promise<any> {
     return this.loader(this.desc);
   }
 
   /**
    * access at a specific position
    * @param i
-   * @param j
    * @returns {*}
    */
-  at(i) {
-    return this.load().then(function (d) {
-      return d.data[i];
+  at(i: number) {
+    return this.load().then((d) => d.data[i]);
+  }
+
+  data(range: RangeLike = all()) {
+    return this.load().then((data) => {
+      const d = parse(range).filter(data.data, this.dim);
+      if (this.valuetype.type === VALUE_TYPE_REAL || this.valuetype.type === VALUE_TYPE_INT) {
+        return mask(d, <INumberValueTypeDesc>this.valuetype);
+      }
+      return d;
     });
   }
 
-  data(range:Range = all()) {
-    var that = this;
-    return this.load().then(function (data) {
-      return mask(range.filter(data.data, that.dim), that.valuetype);
+  names(range: RangeLike = all()) {
+    return this.load().then((data) => {
+      return parse(range).filter(data.rows, this.dim);
     });
   }
 
-  names(range:Range = all()) {
-    var that = this;
-    return this.load().then(function (data) {
-      return range.filter(data.rows, that.dim);
-    });
-  }
-  ids(range:Range = all()): Promise<Range> {
-    var that = this;
-    return this.load().then(function (data) {
-      return data.rowIds.preMultiply(range, that.dim);
-    });
+  ids(range: RangeLike = all()): Promise<Range> {
+    return this.load().then((data) => data.rowIds.preMultiply(parse(range), this.dim));
   }
 
   get idtypes() {
@@ -239,24 +256,19 @@ export class Vector extends VectorBase implements IVector {
   }
 
   size() {
-    return (<any>this.desc).size;
+    return this.desc.size;
   }
 
-  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): Promise<IVector> {
+  sort(compareFn?: (a: IValueType, b: IValueType) => number, thisArg?: any): Promise<IVector> {
     return this.data().then((d) => {
-      var indices = argSort(d, compareFn, thisArg);
+      const indices = argSort(d, compareFn, thisArg);
       return this.view(rlist(indices));
     });
   }
 
-  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): Promise<IVector> {
-    //FIXME
-    return null;
-  }
-
-  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<IVector> {
+  filter(callbackfn: (value: IValueType, index: number) => boolean, thisArg?: any): Promise<IVector> {
     return this.data().then((d) => {
-      var indices = argFilter(d, callbackfn, thisArg);
+      const indices = argFilter(d, callbackfn, thisArg);
       return this.view(rlist(indices));
     });
   }
@@ -273,55 +285,57 @@ export class Vector extends VectorBase implements IVector {
  * @param t optional its transposed version
  * @constructor
  */
-class VectorView extends VectorBase implements IVector {
-  constructor(root:IVector, private range:Range) {
+class VectorView extends AVector {
+  constructor(root: IVector, private range: Range) {
     super(root);
   }
 
   get desc() {
-    return this._root.desc;
+    return this.root.desc;
   }
 
   persist() {
     return {
-      root: this._root.persist(),
+      root: this.root.persist(),
       range: this.range.toString()
     };
   }
 
   size() {
-    return this.range.size(this._root.dim)[0];
+    return this.range.size(this.root.dim)[0];
   }
 
-  at(i:number) {
-    var inverted = this.range.invert([i], this._root.dim);
-    return this._root.at(inverted[0]);
+  at(i: number) {
+    const inverted = this.range.invert([i], this.root.dim);
+    return this.root.at(inverted[0]);
   }
 
-  data(range:Range = all()) {
-    return this._root.data(this.range.preMultiply(range, this._root.dim));
+  data(range: RangeLike = all()) {
+    return this.root.data(this.range.preMultiply(parse(range), this.root.dim));
   }
 
-  names(range:Range = all()) {
-    return this._root.names(this.range.preMultiply(range, this._root.dim));
-  }
-  ids(range:Range = all()) {
-    return this._root.ids(this.range.preMultiply(range, this._root.dim));
+  names(range: RangeLike = all()) {
+    return this.root.names(this.range.preMultiply(parse(range), this.root.dim));
   }
 
-  view(range:Range = all()) {
-    if (range.isAll) {
+  ids(range: RangeLike = all()) {
+    return this.root.ids(this.range.preMultiply(parse(range), this.root.dim));
+  }
+
+  view(range: RangeLike = all()) {
+    const r = parse(range);
+    if (r.isAll) {
       return this;
     }
-    return new VectorView(this._root, this.range.preMultiply(range, this.dim));
+    return new VectorView(this.root, this.range.preMultiply(r, this.dim));
   }
 
   get valuetype() {
-    return this._root.valuetype;
+    return this.root.valuetype;
   }
 
   get idtype() {
-    return this._root.idtype;
+    return this.root.idtype;
   }
 
   get idtypes() {
@@ -329,24 +343,19 @@ class VectorView extends VectorBase implements IVector {
   }
 
   /*get indices() {
-    return this.range;
-  }*/
+   return this.range;
+   }*/
 
-  sort(compareFn?: (a: any, b: any) => number, thisArg?: any): Promise<IVector> {
+  sort(compareFn?: (a: IValueType, b: IValueType) => number, thisArg?: any): Promise<IVector> {
     return this.data().then((d) => {
-      var indices = argSort(d, compareFn, thisArg);
+      const indices = argSort(d, compareFn, thisArg);
       return this.view(this.range.preMultiply(rlist(indices)));
     });
   }
 
-  map<U>(callbackfn: (value: any, index: number) => U, thisArg?: any): Promise<IVector> {
-    //FIXME
-    return null;
-  }
-
-  filter(callbackfn: (value: any, index: number) => boolean, thisArg?: any): Promise<IVector> {
+  filter(callbackfn: (value: IValueType, index: number) => boolean, thisArg?: any): Promise<IVector> {
     return this.data().then((d) => {
-      var indices = argFilter(d, callbackfn, thisArg);
+      const indices = argFilter(d, callbackfn, thisArg);
       return this.view(this.range.preMultiply(rlist(indices)));
     });
   }
@@ -356,17 +365,21 @@ class VectorView extends VectorBase implements IVector {
 /**
  * root matrix implementation holding the data
  */
-export class StratificationVector extends DataTypeBase implements IStratification {
+export class StratificationVector extends ADataType<IStratificationDataDescription> implements IStratification {
 
   constructor(private v: IVector, private r: CompositeRange1D) {
     super({
-      id: v.desc.id+'-s',
+      id: v.desc.id + '-s',
       name: v.desc.name,
+      description: v.desc.description,
+      creator: v.desc.creator,
+      ts: v.desc.ts,
       fqname: v.desc.fqname,
       type: 'stratification',
-      size: v.dim,
+      idtype: v.idtype,
+      size: v.length,
       ngroups: r.groups.length,
-      groups : r.groups.map((ri) => ({ name: ri.name, color: ri.color, size: ri.length }))
+      groups: r.groups.map((ri) => ({name: ri.name, color: ri.color, size: ri.length}))
     });
   }
 
@@ -378,22 +391,27 @@ export class StratificationVector extends DataTypeBase implements IStratificatio
     return <IGroup[]>(<any>this.desc).groups;
   }
 
-  group(group:number):IStratification {
+  group(group: number): IStratification {
     return new StratificationGroup(this, group, this.groups[group]);
   }
 
-  hist(bins?:number, range=all()):Promise<IHistogram> {
+  hist(bins?: number, range: RangeLike = all()): Promise<IHistogram> {
+    // FIXME unused parameter
     return this.range().then((r) => {
       return rangeHist(r);
     });
   }
 
   vector() {
+    return this.asVector();
+  }
+
+  asVector() {
     return Promise.resolve(this.v);
   }
 
-  origin():Promise<IDataType> {
-    return this.vector();
+  origin(): Promise<IDataType> {
+    return this.asVector();
   }
 
   range() {
@@ -401,18 +419,16 @@ export class StratificationVector extends DataTypeBase implements IStratificatio
   }
 
   idRange() {
-    var that = this;
     return this.ids().then((ids) => {
-      const range = this.r;
-      return ids.dim(0).preMultiply(range, that.dim[0]);
+      return ids.dim(0).preMultiply(this.r, this.dim[0]);
     });
   }
 
-  names(range:Range = all()) {
+  names(range: RangeLike = all()) {
     return this.v.names(range);
   }
 
-  ids(range:Range = all()):Promise<Range> {
+  ids(range: RangeLike = all()): Promise<Range> {
     return this.v.ids(range);
   }
 
@@ -421,19 +437,19 @@ export class StratificationVector extends DataTypeBase implements IStratificatio
   }
 
   size() {
-    return (<any>this.desc).size;
+    return this.desc.size;
   }
 
   get length() {
-    return this.size()[0];
+    return this.size();
   }
 
   get ngroups() {
-    return (<any>this.desc).ngroups;
+    return this.ngroups;
   }
 
   get dim() {
-    return this.size();
+    return [this.size()];
   }
 
   persist() {
@@ -450,13 +466,13 @@ export class StratificationVector extends DataTypeBase implements IStratificatio
  * @param desc
  * @returns {IVector}
  */
-export function create(desc: IDataDescription): IVector {
-  if (isFunction((<any>desc).loader)) {
-    return new Vector(desc, (<any>desc).loader);
+export function create(desc: IVectorDataDescription): IVector {
+  if (typeof((<any>desc).loader) === 'function') {
+    return new Vector(desc, <IVectorLoader>(<any>desc).loader);
   }
   return new Vector(desc, viaAPILoader());
 }
 
-export function wrap(desc: IDataDescription, rows: string[], rowIds: number[], data: any[]) {
+export function wrap(desc: IVectorDataDescription, rows: string[], rowIds: number[], data: IValueType[]) {
   return new Vector(desc, viaDataLoader(rows, rowIds, data));
 }

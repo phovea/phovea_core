@@ -10,34 +10,34 @@
 /**
  * version of the core
  */
-declare var __VERSION__;
+declare const __VERSION__;
 export const version = __VERSION__;
 
 /**
  * whether the standard api calls should be prevented
  * @type {boolean}
  */
-export var offline = false;
+export let offline = false;
 /**
  * server prefix ofr api calls
  * @type {string}
  */
-export var server_url:string = '/api';
+export let server_url: string = '/api';
 /**
  * server suffix for api calls
  * @type {string}
  */
-export var server_json_suffix:string = '';
+export let server_json_suffix: string = '';
 
 /**
  * initializes certain properties of the core
  * @param config
  */
-export function init(config : { offline?: boolean, server_url?: string, server_json_suffix?: string} = {}) {
+export function init(config: {offline?: boolean, server_url?: string, server_json_suffix?: string} = {}) {
   config = mixin({
     offline: offline,
     server_url: server_url,
-    server_json_suffix : server_json_suffix
+    server_json_suffix: server_json_suffix
   }, config);
   offline = config.offline;
   server_url = config.server_url;
@@ -49,18 +49,19 @@ export function init(config : { offline?: boolean, server_url?: string, server_j
  * @private
  */
 function _init() {
-  function find(name: string, camelCaseName = name.slice(0,1).toUpperCase()+name.slice(1)) {
-    const node : HTMLElement = <HTMLElement>document.currentScript || <HTMLElement>document.querySelector(`script[data-phovea-${name}]`);
+  function find(name: string, camelCaseName = name.slice(0, 1).toUpperCase() + name.slice(1)) {
+    const node: HTMLElement = <HTMLElement>document.currentScript || <HTMLElement>document.querySelector(`script[data-phovea-${name}]`);
     if (!node) {
       return undefined;
     }
-    return node.dataset['phovea'+camelCaseName];
+    return node.dataset['phovea' + camelCaseName];
   }
-  const config : any = {};
+
+  const config: any = {};
   if ('true' === find('offline')) {
     config.offline = true;
   }
-  var v;
+  let v;
   if ((v = find('server-url', 'ServerUrl')) !== undefined) {
     config.server_url = v;
   }
@@ -75,21 +76,22 @@ _init();
 /**
  * integrate b into a and override all duplicates
  * @param {Object} a
- * @param {Object} b
+ * @param {Object} bs
  * @returns {Object} a with extended b
  */
-export function mixin<T>(a: T, ...bs : any[]): T {
+export function mixin<T>(a: T, ...bs: any[]): T {
   function extend(r, b) {
     Object.keys(b).forEach((key) => {
-      var v = b[key];
+      let v = b[key];
       if (Object.prototype.toString.call(v) === '[object Object]') {
         r[key] = (r[key] != null) ? extend(r[key], v) : v;
-			} else {
-				r[key] = v;
-			}
+      } else {
+        r[key] = v;
+      }
     });
     return r;
   }
+
   bs.forEach((b) => {
     if (b) {
       a = extend(a, b);
@@ -103,7 +105,7 @@ export function mixin<T>(a: T, ...bs : any[]): T {
  * @param obj
  * @return {boolean}
  */
-export function isUndefined(obj:any) {
+export function isUndefined(obj: any) {
   return typeof obj === 'undefined';
 }
 
@@ -120,7 +122,7 @@ export function mod(n: number, m: number) {
  * @param thisArg
  * @returns {function(): any}
  */
-export function bind(f : () => any, thisArg : any, ...args: any[]) {
+export function bind(f: () => any, thisArg: any, ...args: any[]) {
   return (...largs) => {
     return f.apply(thisArg ? thisArg : this, args.concat(largs));
   };
@@ -153,7 +155,7 @@ export function isFunction(f: any) {
  * @deprecated use `(d) => d`
  * identity function
  */
-export function identity(d:any) {
+export function identity(d: any) {
   return d;
 }
 
@@ -205,10 +207,10 @@ export function constantFalse() {
  * @param f
  * @deprecated
  */
-export function callable(obj:any, f:string) {
+export function callable(obj: any, f: string) {
   //assert this.isPlainObject(obj);
   function CallAbleFactory() {
-    var that;
+    let that;
 
     function CallAble() {
       that[f].apply(that, argList(arguments));
@@ -229,8 +231,8 @@ export function callable(obj:any, f:string) {
  * @deprecated use Array.prototype.find
  * @return {T}
  */
-export function search<T>(arr: T[], f : (v: T) => boolean) : T {
-  var r : T = undefined;
+export function search<T>(arr: T[], f: (v: T) => boolean): T {
+  let r: T = undefined;
   arr.some((v) => {
     if (f(v)) {
       r = v;
@@ -248,9 +250,9 @@ export function search<T>(arr: T[], f : (v: T) => boolean) : T {
  * @param f
  * @return {number}
  */
-export function indexOf<T>(arr: T[], f : (v: T) => boolean) : number {
-  var r = -1;
-  arr.some((v,i) => {
+export function indexOf<T>(arr: T[], f: (v: T) => boolean): number {
+  let r = -1;
+  arr.some((v, i) => {
     if (f(v)) {
       r = i;
       return true;
@@ -266,7 +268,7 @@ export function indexOf<T>(arr: T[], f : (v: T) => boolean) : number {
  * @deprecated use Array.from(arguments) instead
  * @returns {*|Array}
  */
-export function argList(args:IArguments) {
+export function argList(args: IArguments) {
   if (arguments.length > 1) {
     return Array.prototype.slice.call(arguments);
   } else {
@@ -279,7 +281,7 @@ export function argList(args:IArguments) {
  * @param n
  * @returns {any[]}
  */
-function indexRange(n:number) {
+function indexRange(n: number) {
   //http://stackoverflow.com/questions/3746725/create-a-javascript-array-containing-1-n
   return Array.apply(null, {length: n}).map(Number.call, Number);
 }
@@ -290,7 +292,7 @@ function indexRange(n:number) {
  * @param compareFn
  * @param thisArg
  */
-export function argSort<T>(arr:T[], compareFn?:(a:T, b:T) => number, thisArg?:any):number[] {
+export function argSort<T>(arr: T[], compareFn?: (a: T, b: T) => number, thisArg?: any): number[] {
   const indices = indexRange(arr.length);
   return indices.sort((a, b) => {
     return compareFn.call(thisArg, arr[a], arr[b]);
@@ -303,7 +305,7 @@ export function argSort<T>(arr:T[], compareFn?:(a:T, b:T) => number, thisArg?:an
  * @param callbackfn
  * @param thisArg
  */
-export function argFilter<T>(arr:T[], callbackfn:(value:T, index:number) => boolean, thisArg?:any):number[] {
+export function argFilter<T>(arr: T[], callbackfn: (value: T, index: number) => boolean, thisArg?: any): number[] {
   const indices = indexRange(arr.length);
   return indices.filter((value, index) => {
     return callbackfn.call(thisArg, arr[value], index);
@@ -316,7 +318,7 @@ export function argFilter<T>(arr:T[], callbackfn:(value:T, index:number) => bool
  * @returns {string}
  */
 export function randomId(length = 8) {
-  var id = '';
+  let id = '';
   while (id.length < length) {
     id += Math.random().toString(36).slice(-8);
   }
@@ -330,8 +332,8 @@ export const random_id = randomId;
  * @return {string}
  */
 export function fixId(name: string) {
-  var clean = name.replace(/[\s!#$%&'()*+,.\/:;<=>?@\[\\\]\^`{|}~_-]/g,' ');
-  var words = clean.trim().split(/\s+/); //remove heading and trailing spaces and combine multiple one during split
+  const clean = name.replace(/[\s!#$%&'()*+,.\/:;<=>?@\[\\\]\^`{|}~_-]/g, ' ');
+  const words = clean.trim().split(/\s+/); //remove heading and trailing spaces and combine multiple one during split
   return words.map((w, i) => (i === 0 ? w[0].toLowerCase() : w[0].toUpperCase()) + w.slice(1)).join('');
 }
 export const fix_id = fixId;
@@ -341,8 +343,8 @@ export const fix_id = fixId;
  * @param node
  * @param callback
  */
-export function onDOMNodeRemoved(node:Element|Element[], callback:() => void, thisArg?:any) {
-  var arr:any[];
+export function onDOMNodeRemoved(node: Element|Element[], callback: () => void, thisArg?: any) {
+  let arr: any[];
   const body = document.getElementsByTagName('body')[0];
   if (!Array.isArray(node)) {
     arr = [node];
@@ -352,7 +354,7 @@ export function onDOMNodeRemoved(node:Element|Element[], callback:() => void, th
   arr.forEach((n) => {
     function l(evt) {
       //since this event bubbles check if it the right node
-      var act = n;
+      let act = n;
       while (act) { //check if node or its parent are removed
         if (evt.target === act) {
           node = null;
@@ -375,27 +377,29 @@ export function onDOMNodeRemoved(node:Element|Element[], callback:() => void, th
  * unique id container
  * @type {{}}
  */
-const idCounter = {};
+const idCounter = new Map<string, number>();
 /**
  * returns a unique id for the given domain
  * @param domain
  * @return {number}
  */
-export function uniqueId(domain : string = '_default') {
-  if (!idCounter.hasOwnProperty(domain)) {
-    idCounter[domain] = 0;
+export function uniqueId(domain: string = '_default') {
+  if (!idCounter.has(domain)) {
+    idCounter.set(domain, 0);
   }
-  return idCounter[domain]++;
+  const v = idCounter.get(domain);
+  idCounter.set(domain, v + 1);
+  return v;
 }
 
 export function flagId(domain: string, id: number) {
   if (isNaN(id) || id < 0) {
     return id;
   }
-  if (!idCounter.hasOwnProperty(domain)) {
-    idCounter[domain] = id+1;
+  if (!idCounter.has(domain)) {
+    idCounter.set(domain, id + 1);
   } else {
-    idCounter[domain] = Math.max(idCounter[domain], id+1); //use the next one afterwars
+    idCounter.set(domain, Math.max(idCounter.get(domain), id + 1)); //use the next one afterwards
   }
   return id;
 }
@@ -405,7 +409,7 @@ export function flagId(domain: string, id: number) {
  * @param domain
  * @return {string}
  */
-export function uniqueString(domain : string = '_default') {
+export function uniqueString(domain: string = '_default') {
   return domain + uniqueId(domain);
 }
 
@@ -415,7 +419,7 @@ export function uniqueString(domain : string = '_default') {
  * @param baseClass
  */
 export function extendClass(subClass, baseClass) {
-  for (var p in baseClass) {
+  for (let p in baseClass) {
     if (baseClass.hasOwnProperty(p)) {
       subClass[p] = baseClass[p];
     }
@@ -424,6 +428,7 @@ export function extendClass(subClass, baseClass) {
   function __() {
     this.constructor = subClass;
   }
+
   __.prototype = baseClass.prototype;
   subClass.prototype = new __();
   /* tslint:enable:no-unused-variable */
@@ -434,7 +439,7 @@ export function extendClass(subClass, baseClass) {
  */
 export class IdPool {
   private counter = 0;
-  private free : number[] = [];
+  private free: number[] = [];
 
   /**
    * check out a new id
@@ -491,14 +496,13 @@ export interface IPersistable {
    * @param persisted a result of a previous persist call
    * @return the restored view or null if it could be in place restored
    */
-  restore(persisted:any) : IPersistable|Promise<IPersistable>;
+  restore(persisted: any): IPersistable|Promise<IPersistable>;
 }
 
 class PropertyHandler {
-  // TODO convert to Map
-  protected map: any = {};
+  protected map = new Map<string, any>();
 
-  constructor(code?:string) {
+  constructor(code?: string) {
     if (code) {
       this.parse(code);
     }
@@ -509,23 +513,28 @@ class PropertyHandler {
    * @returns {string[]}
    */
   keys() {
-    return Object.keys(this.map);
+    return Array.from(this.map.keys());
   }
 
   /**
    * iterate over each entry in the map
    * @param f
    */
-  forEach(f : (key: string, value: any) => void) {
-    return Object.keys(this.map).forEach((k) => f(k, this.map[k]));
+  forEach(f: (key: string, value: any) => void) {
+    this.map.forEach((v, k) => f(k, v));
   }
 
   /**
    * whether the given name is defined i.e., not null
+   * @deprecated use has(name)
    * @param name
    * @returns {boolean}
    */
-  is(name:string) {
+  is(name: string) {
+    return this.has(name);
+  }
+
+  has(name: string) {
     return this.getProp(name, null) != null;
   }
 
@@ -535,9 +544,10 @@ class PropertyHandler {
    * @param default_
    * @returns {any}
    */
-  getProp(name: string, default_ : string = null) {
-    if (this.map.hasOwnProperty(name)) {
-      return this.map[name];
+  getProp(name: string, default_: string = null) {
+    if (this.map.has(name)) {
+      const v = this.map.get(name);
+      return v === null ? null : v.toString();
     }
     return default_;
   }
@@ -548,7 +558,7 @@ class PropertyHandler {
    * @param default_
    * @returns {number}
    */
-  getInt(name: string, default_ : number = NaN) {
+  getInt(name: string, default_: number = NaN) {
     let l: string = this.getProp(name, null);
     if (l === null) {
       return default_;
@@ -565,24 +575,24 @@ class PropertyHandler {
    * @returns {boolean}
    */
   removeProp(name: string) {
-    if (this.map.hasOwnProperty(name)) {
-      delete this.map[name];
+    if (this.map.has(name)) {
+      this.map.delete(name);
       return true;
     }
     return false;
   }
 
   toString() {
-    var r = [];
-    Object.keys(this.map).forEach((key) => {
-      r.push(encodeURIComponent(key)+'='+encodeURIComponent(this.map[key]));
+    let r = [];
+    this.map.forEach((v, key) => {
+      r.push(encodeURIComponent(key) + '=' + encodeURIComponent(v));
     });
     return r.join('&');
   }
 
   protected parse(code: string = '') {
     //if available use https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
-    this.map = {};
+    this.map.clear();
     if (code.length <= 1) { //just the starting character ? or #
       return;
     }
@@ -591,15 +601,15 @@ class PropertyHandler {
       const s = item.split('='),
         k = decodeURIComponent(s[0]),
         v = s[1] && decodeURIComponent(s[1]);
-      if (k in this.map) {
-        let old = this.map[k];
+      if (this.map.has(k)) {
+        let old = this.map.get(k);
         if (!Array.isArray(old)) {
-          this.map[k] = [old, v];
+          this.map.set(k, [old, v]);
         } else {
-          this.map[k].push(v);
+          this.map.get(k).push(v);
         }
       } else {
-        this.map[k] = v;
+        this.map.set(k, v);
       }
     });
   }
@@ -623,8 +633,8 @@ class HashProperties extends PropertyHandler {
     window.addEventListener('hashchange', this.updated, false);
   }
 
-  setInt(name:string, value: number, update= true) {
-    var v = String(value);
+  setInt(name: string, value: number, update = true) {
+    let v = String(value);
     if (value > 100) {
       //idea encode the the using a different radix
       v = value.toString(36);
@@ -633,15 +643,15 @@ class HashProperties extends PropertyHandler {
   }
 
   setProp(name: string, value: string, update = true) {
-    this.map[name] = value;
+    this.map.set(name, value);
     if (update) {
       this.update();
     }
   }
 
   removeProp(name: string, update = true) {
-    if (this.map.hasOwnProperty(name)) {
-      delete this.map[name];
+    if (this.map.has(name)) {
+      this.map.delete(name);
       if (update) {
         this.update();
       }
@@ -652,7 +662,7 @@ class HashProperties extends PropertyHandler {
 
   private update() {
     window.removeEventListener('hashchange', this.updated, false);
-    history.pushState(this.map, 'State '+Date.now(), '#'+this.toString());
+    history.pushState(this.map, 'State ' + Date.now(), '#' + this.toString());
     window.addEventListener('hashchange', this.updated, false);
   }
 }
@@ -676,9 +686,9 @@ export const param = new PropertyHandler(location.search);
  * @param timeToDelay
  * @return {function(...[any]): undefined}
  */
-export function delayedCall(callback:() => void, timeToDelay = 100, thisCallback = this) {
-  var tm = -1;
-  return (...args:any[]) => {
+export function delayedCall(callback: () => void, timeToDelay = 100, thisCallback = this) {
+  let tm = -1;
+  return (...args: any[]) => {
     if (tm >= 0) {
       clearTimeout(tm);
       tm = -1;
@@ -694,7 +704,7 @@ export function delayedCall(callback:() => void, timeToDelay = 100, thisCallback
  * @param element
  * @return {{left: number, top: number, width: number, height: number}}
  */
-export function offset(element:Element) {
+export function offset(element: Element) {
   if (!element) {
     return {left: 0, top: 0, width: 0, height: 0};
   }
@@ -712,7 +722,7 @@ export function offset(element:Element) {
  * @param element
  * @returns {{x: number, y: number, w: number, h: number}}
  */
-export function bounds(element:Element) {
+export function bounds(element: Element) {
   if (!element) {
     return {x: 0, y: 0, w: 0, h: 0};
   }
@@ -732,20 +742,20 @@ export function bounds(element:Element) {
  * @returns {any}
  */
 export function hasDnDType(e, type) {
-  var types = e.dataTransfer.types;
+  const types = e.dataTransfer.types;
 
   /*
    * In Chrome datatransfer.types is an Array,
    * while in Firefox it is a DOMStringList
    * that only implements a contains-method!
    */
-  if (isFunction(types.indexOf)) {
+  if (typeof(types.indexOf) === 'function') {
     return types.indexOf(type) >= 0;
   }
-  if (isFunction(types.includes)) {
+  if (typeof(types.includes) === 'function') {
     return types.includes(type);
   }
-  if (isFunction(types.contains)) {
+  if (typeof(types.contains) === 'function') {
     return types.contains(type);
   }
   return false;
@@ -757,7 +767,7 @@ export function hasDnDType(e, type) {
  * @returns {boolean|RegExpMatchArray}
  */
 export function copyDnD(e) {
-  var dT = e.dataTransfer;
+  const dT = e.dataTransfer;
   return (e.ctrlKey && dT.effectAllowed.match(/copy/gi)) || (!dT.effectAllowed.match(/move/gi));
 }
 /**
@@ -765,7 +775,7 @@ export function copyDnD(e) {
  * @param e
  */
 export function updateDropEffect(e) {
-  var dT = e.dataTransfer;
+  const dT = e.dataTransfer;
   if (copyDnD(e)) {
     dT.dropEffect = 'copy';
   } else {
@@ -777,7 +787,7 @@ export function updateDropEffect(e) {
  * returns a promise that resolves in the given number of milliseconds
  * @param milliseconds the number of milliseconds to resolve
  */
-export function resolveIn(milliseconds: number) : Promise<void> {
+export function resolveIn(milliseconds: number): Promise<void> {
   if (milliseconds <= 0) {
     return Promise.resolve<void>(null);
   }
