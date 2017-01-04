@@ -1,4 +1,26 @@
 {
+  "name": "phovea_core",
+  "version": "0.1.0-SNAPSHOT",
+  "homepage": "https://phovea.caleydo.org",
+  "description": "Phovea Core including plugin registry, data definition (+ common types: tables, matrix, vector, stratification), ajax, selections",
+  "author": {
+    "name": "The Caleydo Team",
+    "email": "contact@caleydo.org",
+    "url": "https://caleydo.org"
+  },
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/phovea/phovea_core/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/phovea/phovea_core.git"
+  },
+  "engines": {
+    "npm": ">= 3",
+    "node": ">= 6",
+    "iojs": ">= 3"
+  },
   "main": "build/phovea_core.js",
   "files": [
     "src",
@@ -7,11 +29,6 @@
     "phovea_registry.js",
     "build"
   ],
-  "engines": {
-    "npm": ">= 3",
-    "node": ">= 6",
-    "iojs": ">= 3"
-  },
   "scripts": {
     "compile": "tsc",
     "lint": "tslint -c tslint.json src/**.ts tests/**.ts",
@@ -31,6 +48,9 @@
     "release:patch": "npm version patch && npm publish && git push --follow-tags",
     "predist": "npm run build",
     "dist": "mkdirp dist && cd build && tar cvzf ../dist/phovea_core.tar.gz *"
+  },
+  "dependencies": {
+    "@types/whatwg-fetch": "0.0.33"
   },
   "devDependencies": {
     "@types/jasmine": "2.5.35",
@@ -62,25 +82,5 @@
     "webpack": "2.1.0-beta.26",
     "webpack-dev-server": "2.1.0-beta.10",
     "extract-loader": "0.0.2"
-  },
-  "dependencies": {
-    "@types/whatwg-fetch": "0.0.33"
-  },
-  "name": "phovea_core",
-  "description": "Phovea Core including plugin registry, data definition (+ common types: tables, matrix, vector, stratification), ajax, selections",
-  "homepage": "https://phovea.caleydo.org",
-  "version": "0.1.0-SNAPSHOT",
-  "author": {
-    "name": "The Caleydo Team",
-    "email": "contact@caleydo.org",
-    "url": "https://caleydo.org"
-  },
-  "license": "BSD-3-Clause",
-  "bugs": {
-    "url": "https://github.com/phovea/phovea_core/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/phovea/phovea_core.git"
   }
 }
