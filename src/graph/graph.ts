@@ -28,28 +28,28 @@ export class AttributeContainer extends EventHandler implements IPersistable {
   }
 
   setAttr(attr: string, value: any) {
-    const bak = this.attrs.get(attr);
+    const bak = this.attrMap.get(attr);
     if (bak === value && !Array.isArray(bak)) {
       return;
     }
-    this.attrs.set(attr, value);
+    this.attrMap.set(attr, value);
     this.fire('attr-' + attr, value, bak);
     this.fire('setAttr', attr, value, bak);
   }
 
   hasAttr(attr: string) {
-    return this.attrs.has(attr);
+    return this.attrMap.has(attr);
   }
 
   getAttr(attr: string, default_: any = null) {
-    if (this.attrs.has(attr)) {
-      return this.attrs.get(attr);
+    if (this.attrMap.has(attr)) {
+      return this.attrMap.get(attr);
     }
     return default_;
   }
 
   get attrs() {
-    return Array.from(this.attrs.keys());
+    return Array.from(this.attrMap.keys());
   }
 
   restore(persisted: any) {
