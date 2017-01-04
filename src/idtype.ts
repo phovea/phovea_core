@@ -1016,7 +1016,9 @@ function toPlural(name:string) {
   return name + 's';
 }
 
-export function resolve(id:string|IDType):IDType {
+export declare type IDTypeLike = string|IDType;
+
+export function resolve(id:IDTypeLike):IDType {
   if (id instanceof IDType) {
     return id;
   } else {

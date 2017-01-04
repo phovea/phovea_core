@@ -66,8 +66,7 @@ export function send(url: string, data: any = {}, method = 'GET', expectedDataTy
     credentials: 'same-origin',
     method: method,
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Accept': 'application/json'
     },
   };
   if (data && !(data instanceof FormData)) {

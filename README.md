@@ -18,8 +18,10 @@ Testing
 -------
 
 ```
-npm test
+npm run test:watch
 ```
+
+When you save changes, tests will re-run.
 
 Building
 --------

@@ -9,28 +9,42 @@
 
 import {Range} from './range';
 import {IDType} from './idtype';
-import {IDataType} from './datatype';
+import {IDataType, IValueType, IValueTypeDesc} from './datatype';
 import {IVector as IVVector} from './vector';
 
 export declare type IVector = IVVector;
 
 export interface ITable extends IDataType {
-  ncol : number;
-  nrow : number;
+  readonly ncol : number;
+  readonly nrow : number;
 
   /**
    * id type
    */
-  rowtype:IDType;
+  readonly rowtype:IDType;
 
+  /**
+   * returns the chosen columns
+   * @param range optional subset
+   */
   cols(range?:Range) : IVector[];
 
-  col(i:number) : IVector;
   /**
+   * return the specific column
+   * @param i
+   */
+  col(i:number) : IVector;
+
+  /**
+   * returns the row names
    * returns a promise for getting the row names of the matrix
-   * @param range
+   * @param range optional subset
    */
   rows(range?:Range) : Promise<string[]>;
+  /**
+   * returns the row ids
+   * @param range optional subset
+   */
   rowIds(range?:Range) : Promise<Range>;
 
   /**
