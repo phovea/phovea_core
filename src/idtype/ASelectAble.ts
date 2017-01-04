@@ -75,7 +75,9 @@ export abstract class ASelectAble extends EventHandler implements ISelectAble {
     });
   }
 
-  abstract get idtypes(): IDType[];
+  get idtypes(): IDType[] {
+    return [];
+  }
 
   private selectionListener(idtype: IDType, index: number, total: number) {
     return (event: any, type: string, act: Range, added: Range, removed: Range) => {

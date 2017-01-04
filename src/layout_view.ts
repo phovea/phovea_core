@@ -40,9 +40,13 @@ export abstract class AView extends EventHandler implements IView {
 
   abstract getBounds(): Rect;
 
-  abstract get data(): IDataType[];
+  get data(): IDataType[] {
+    return [];
+  }
 
-  abstract get idtypes(): IDType[];
+  get idtypes(): IDType[] {
+    return [];
+  }
 
   setLayoutOption(name: string, value: any) {
     this._layoutOptions[name] = value;

@@ -37,8 +37,21 @@ export interface IGraphDataDescription extends IDataDescription {
 }
 
 export default class GraphBase extends AGraph implements IGraph {
-  constructor(public readonly desc: IGraphDataDescription, public readonly nodes: GraphNode[] = [], public readonly edges: GraphEdge[] = []) {
+  private readonly _nodes: GraphNode[];
+  private readonly _edges: GraphEdge[];
+
+  constructor(public readonly desc: IGraphDataDescription, nodes: GraphNode[] = [], edges: GraphEdge[] = []) {
     super();
+    this._nodes = nodes;
+    this._edges = edges;
+  }
+
+  get nodes() {
+    return this._nodes;
+  }
+
+  get edges() {
+    return this._edges;
   }
 
   addNode(n: GraphNode): this|Promise<this> {
