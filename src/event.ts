@@ -209,8 +209,8 @@ export class EventHandler implements IEventHandler {
   }
 
   private fireEvent(event: Event) {
-    if (this.handlers.hasOwnProperty(event.type)) {
-      let h: SingleEventHandler = this.handlers[event.type];
+    if (this.handlers.has(event.type)) {
+      let h: SingleEventHandler = this.handlers.get(event.type);
       return h.fire(event);
     }
     return false;
