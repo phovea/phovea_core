@@ -77,7 +77,7 @@ export function viaAPI2Loader() {
     },
     colIds: (desc: IMatrixDataDescription<any>, range: Range) => {
       if (colIds == null) {
-        colIds = getAPIJSON(`/dataset/matrix/${desc.id}/colds`).then(parse);
+        colIds = getAPIJSON(`/dataset/matrix/${desc.id}/colIds`).then(parse);
       }
       return colIds.then((d) => d.preMultiply(range, desc.size));
     },
