@@ -11,7 +11,7 @@
  * Use the browser's sessionStorage
  * @type {Storage}
  */
-const context:Storage = sessionStorage;
+const context: Storage = sessionStorage;
 
 /**
  * Store any value for a given key and returns the previous stored value.
@@ -50,6 +50,6 @@ export function has(key: string) {
  * @param default_
  * @returns {T}
  */
-export function retrieve<T>(key: string, default_ : T = null) : T {
+export function retrieve<T>(key: string, default_: T = null): T {
   return has(key) ? JSON.parse(context.getItem(key)) : default_;
 }

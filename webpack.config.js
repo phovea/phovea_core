@@ -140,10 +140,11 @@ function generateWebpack(options) {
       new webpack.DefinePlugin({
         __VERSION__: JSON.stringify(pkg.version),
         __LICENSE__: JSON.stringify(pkg.license),
-        __BUILD_ID__: buildId,
+        __BUILD_ID__: JSON.stringify(buildId),
         __DEBUG__: options.isDev || options.isTest,
         __TEST__: options.isTest,
-        __PRODUCTION__: options.isProduction
+        __PRODUCTION__: options.isProduction,
+        __APP_CONTEXT__: JSON.stringify(options.appContext)
       }),
       new webpack.optimize.MinChunkSizePlugin({
         minChunkSize: 10000 //at least 10.000 characters
@@ -268,7 +269,8 @@ function generateWebpackConfig(env) {
     ignore: ignores,
     isProduction: isProduction,
     isDev: isDev,
-    isTest: isTest
+    isTest: isTest,
+    appContext: process.env.PHOVEA_APP_CONTEXT || '/'
   };
 
   if (isTest) {

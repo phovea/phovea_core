@@ -8,25 +8,24 @@
  */
 
 import {none, list, Range, Range1D, CompositeRange1D} from './range';
-import {indexOf} from './index';
 /**
  * simple number statistics similar to DoubleStatistics in Caleydo
  * TODO use a standard library for that
  */
 export interface IStatistics {
-  min: number;
-  max: number;
-  sum: number;
-  mean: number;
-  var : number;
-  sd: number;
-  n: number;
-  nans: number;
-  moment2: number;
-  moment3: number;
-  moment4: number;
-  kurtosis: number;
-  skewness: number;
+  readonly min: number;
+  readonly max: number;
+  readonly sum: number;
+  readonly mean: number;
+  readonly var: number;
+  readonly sd: number;
+  readonly n: number;
+  readonly nans: number;
+  readonly moment2: number;
+  readonly moment3: number;
+  readonly moment4: number;
+  readonly kurtosis: number;
+  readonly skewness: number;
 }
 
 
@@ -35,41 +34,40 @@ export interface IIterable<T> {
 }
 
 export interface IHistogram extends IIterable<number> {
-  bins: number;
-  largestFrequency : number;
+  readonly bins: number;
+  readonly largestFrequency: number;
   /**
    * largest frequency without missing
    */
-  largestBin: number;
-  count: number;
+  readonly largestBin: number;
+  readonly count: number;
   /**
    * number of valid entries;
    */
-  validCount: number;
+  readonly validCount: number;
 
-  frequency(bin: number) : number;
+  frequency(bin: number): number;
   range(bin: number): Range;
 
-  binOf(value: any) : number;
+  binOf(value: any): number;
 
-  missing: number;
-  missingRange: Range;
+  readonly missing: number;
+  readonly missingRange: Range;
 
   forEach(callbackfn: (value: number, index: number) => void, thisArg?: any): void;
 }
 
 export interface ICatHistogram extends IHistogram {
-  categories: string[];
-  colors: string[];
+  readonly categories: string[];
+  readonly colors: string[];
 }
-
 
 class Statistics implements IStatistics {
   min: number = NaN;
   max: number = NaN;
   sum: number = 0;
   mean: number = 0;
-  private _var : number = 0;
+  private _var: number = 0;
   n: number = 0;
   nans: number = 0;
   moment2: number = NaN;
@@ -138,19 +136,19 @@ class Statistics implements IStatistics {
   }
 }
 
-export function computeStats(...arr: IIterable<number>[]) : IStatistics {
-  var r = new Statistics();
-  arr.forEach((a) => a.forEach(r.push,r));
+export function computeStats(...arr: IIterable<number>[]): IStatistics {
+  const r = new Statistics();
+  arr.forEach((a) => a.forEach(r.push, r));
   return r;
 }
 
-export function hist(arr: IIterable<number>, indices: Range1D, size: number, bins: number, range: number[]) : IHistogram {
+export function hist(arr: IIterable<number>, indices: Range1D, size: number, bins: number, range: number[]): IHistogram {
   const r = new Histogram(bins, range);
   r.pushAll(arr, indices, size);
   return r;
 }
 
-export function categoricalHist<T>(arr: IIterable<T>, indices: Range1D, size: number, categories: T[], labels: string[], colors: string[]) : IHistogram {
+export function categoricalHist<T>(arr: IIterable<T>, indices: Range1D, size: number, categories: T[], labels: string[], colors: string[]): IHistogram {
   const r = new CatHistogram(categories, labels, colors);
   r.pushAll(arr, indices, size);
   return r;
@@ -164,24 +162,24 @@ export function wrapHist(hist: number[], value_range: number[]) {
 }
 
 class AHistogram implements IHistogram {
-  private bins_ : number[];
-  private missing_ : number = 0;
-  private ranges_ : Range[];
-  private missingRange_  = none();
+  private bins_: number[];
+  private missing_: number = 0;
+  private ranges_: Range[];
+  private missingRange_ = none();
 
   constructor(bins: number, hist?: number[]) {
     this.bins_ = [];
-    for(var i = 0; i < bins; ++i) {
+    for (let i = 0; i < bins; ++i) {
       this.bins_.push(hist && hist.length > i ? hist[i] : 0);
     }
   }
 
   get largestFrequency() {
-    return Math.max(Math.max.apply(Math,this.bins_), this.missing_);
+    return Math.max(Math.max.apply(Math, this.bins_), this.missing_);
   }
 
   get largestBin() {
-    return Math.max.apply(Math,this.bins_);
+    return Math.max.apply(Math, this.bins_);
   }
 
   get count() {
@@ -189,7 +187,7 @@ class AHistogram implements IHistogram {
   }
 
   get validCount() {
-    return this.bins_.reduce((p,s) => p+s, 0);
+    return this.bins_.reduce((p, s) => p + s, 0);
   }
 
   get bins() {
@@ -204,7 +202,7 @@ class AHistogram implements IHistogram {
     return this.bins_[bin];
   }
 
-  range(bin:number) {
+  range(bin: number) {
     return this.ranges_ ? this.ranges_[bin] : none();
   }
 
@@ -216,9 +214,9 @@ class AHistogram implements IHistogram {
     return this.missingRange_;
   }
 
-  pushAll(arr: IIterable<any>, indices: Range1D, size: number) {
-    var binindex = [], missingindex = [];
-    for(var i = this.bins-1; i>=0; --i) {
+  pushAll(arr: IIterable<any>, indices?: Range1D, size?: number) {
+    const binindex = [], missingindex = [];
+    for (let i = this.bins - 1; i >= 0; --i) {
       binindex.push([]);
     }
     if (indices) {
@@ -235,8 +233,8 @@ class AHistogram implements IHistogram {
         }
       });
       //build range and remove duplicates
-      this.ranges_ = binindex.map((d) => list(d.sort().filter((di, i, a) => di !== a[i-1])));
-      this.missingRange_ = list(missingindex.sort().filter((di, i, a) => di !== a[i-1]));
+      this.ranges_ = binindex.map((d) => list(d.sort().filter((di, i, a) => di !== a[i - 1])));
+      this.missingRange_ = list(missingindex.sort().filter((di, i, a) => di !== a[i - 1]));
     } else {
       arr.forEach((x) => {
         const bin = this.binOf(x);
@@ -273,7 +271,7 @@ class Histogram extends AHistogram {
       return -1;
     }
     const n = (value - this.value_range[0]) / (this.value_range[1] - this.value_range[0]);
-    var bin = Math.round(n * (this.bins - 1));
+    let bin = Math.round(n * (this.bins - 1));
     if (bin < 0) {
       bin = 0;
     }
@@ -285,7 +283,7 @@ class Histogram extends AHistogram {
 }
 
 class CatHistogram extends AHistogram implements ICatHistogram {
-  constructor(private values: any[], public categories: string[], public colors: string[]) {
+  constructor(private values: any[], public readonly categories: string[], public readonly colors: string[]) {
     super(values.length);
   }
 
@@ -328,14 +326,14 @@ class RangeHistogram implements ICatHistogram {
   }
 
   binOf(value: any) {
-    return indexOf(this.range_.groups, (g) => g.name === value);
+    return this.range_.groups.findIndex((g) => g.name === value);
   }
 
   frequency(bin: number) {
     return this.range_.groups[bin].length;
   }
 
-  range(bin:number) {
+  range(bin: number) {
     return list(this.range_.groups[bin]);
   }
 
@@ -348,6 +346,27 @@ class RangeHistogram implements ICatHistogram {
   }
 
   forEach(callbackfn: (value: number, index: number) => void, thisArg?: any) {
-    return this.range_.groups.forEach((g,i) => callbackfn.call(thisArg, g.length, i));
+    return this.range_.groups.forEach((g, i) => callbackfn.call(thisArg, g.length, i));
   }
+}
+
+/**
+ * computes the extent [min, max] for the given array, in case of empty array [NaN, NaN] is returned
+ * @param arr the array
+ * @return {[number,number]} [min, max]
+ */
+export function extent(arr: IIterable<number>) : [number, number] {
+  let min = NaN, max = NaN;
+  arr.forEach((v) => {
+    if (isNaN(v)) {
+      return;
+    }
+    if (isNaN(min) || min > v) {
+      min = v;
+    }
+    if (isNaN(max) || min < v) {
+      max = v;
+    }
+  });
+  return [min, max];
 }

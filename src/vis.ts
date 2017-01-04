@@ -20,7 +20,7 @@ export interface ITransform {
   /**
    * scale factors (width, height)
    */
-  readonly scale: number[];
+  readonly scale: [number, number];
 
   /**
    * rotation
@@ -94,6 +94,11 @@ export interface IVisPluginDesc extends IPluginDesc, IVisMetaData {
   iconify(node: HTMLElement);
 }
 
+export interface IVisInstanceOptions {
+  rotate?: number;
+  scale?: [number, number];
+}
+
 /**
  * basic interface of an visualization instance
  */
@@ -134,7 +139,7 @@ export interface IVisInstance extends IPersistable, IEventHandler, ILocateAble {
    * @param scale [w,h]
    * @param rotate
    */
-  transform(scale: number[], rotate: number): ITransform;
+  transform(scale: [number, number], rotate: number): ITransform;
 
   /**
    * option getter
@@ -232,7 +237,7 @@ export class AVisInstance extends EventHandler {
     this.fire('destroyed');
   }
 
-  transform() {
+  transform(): ITransform {
     return {
       scale: [1, 1],
       rotate: 0
@@ -251,7 +256,7 @@ export class AVisInstance extends EventHandler {
   }
 }
 
-function extrapolateFilter(r: { filter?: string|((data:IDataType)=>boolean)}) {
+function extrapolateFilter(r: {filter?: string|((data: IDataType) => boolean)}) {
   const v = r.filter;
   if (typeof v === 'undefined') {
     r.filter = () => true;

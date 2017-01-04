@@ -7,9 +7,10 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {IPersistable, extendClass, mixin} from './index';
+import {IPersistable, extendClass, mixin, uniqueString} from './index';
 import {ISelectAble, SelectAble} from './idtype';
-import {all, none, Range1D, Range1DGroup, composite, Range, CompositeRange1D} from './range';
+import {extent, IHistogram} from './math';
+import {all, none, Range1D, RangeLike, Range1DGroup, composite, Range, CompositeRange1D} from './range';
 
 /**
  * basic description elements
@@ -28,12 +29,17 @@ export interface IDataDescription {
    * the name of the dataset
    */
   readonly name: string;
+
+  readonly description: string;
   /**
    * a fully qualified name, e.g. project_name/name
    */
   readonly fqname: string;
 
   readonly [extras: string]: any;
+
+  readonly creator: string;
+  readonly ts: number;
 }
 
 /**
@@ -51,7 +57,7 @@ export interface IDataType extends ISelectAble, IPersistable {
   readonly dim: number[];
 
 
-  idView(idRange?: Range) : Promise<IDataType>;
+  idView(idRange?: RangeLike): Promise<IDataType>;
 }
 
 export const VALUE_TYPE_CATEGORICAL = 'categorical';
@@ -59,7 +65,11 @@ export const VALUE_TYPE_STRING = 'string';
 export const VALUE_TYPE_REAL = 'real';
 export const VALUE_TYPE_INT = 'int';
 
-export interface INumberValueTypeDesc {
+export interface IValueTypeDesc {
+  type: string;
+}
+
+export interface INumberValueTypeDesc extends IValueTypeDesc {
   readonly type: 'int'|'real';
   /**
    * min, max
@@ -77,21 +87,15 @@ export interface ICategory {
   readonly label?: string;
 }
 
-export interface ICategoricalValueTypeDesc {
+export interface ICategoricalValueTypeDesc extends IValueTypeDesc {
   readonly type: 'categorical';
   readonly categories: (ICategory|string)[];
 }
 
-export interface IStringValueTypeDesc {
+export interface IStringValueTypeDesc extends IValueTypeDesc {
   readonly type: 'string';
 }
 
-export interface IUnknownValueTypeDesc {
-  readonly type: string;
-  readonly [extras: string]: any;
-}
-
-export declare type IValueTypeDesc = INumberValueTypeDesc | IStringValueTypeDesc | ICategoricalValueTypeDesc | IUnknownValueTypeDesc;
 export declare type IValueType = number | string | any;
 
 /**
@@ -100,7 +104,7 @@ export declare type IValueType = number | string | any;
  * @return {any}
  */
 export function isDataType(v: IDataType) {
-  if (v instanceof DataTypeBase) {
+  if (v instanceof ADataType) {
     return true;
   }
   //sounds good
@@ -116,10 +120,18 @@ export function assignData(node: Element, data: IDataType) {
   (<any>node).__data__ = data;
 }
 
+
+export interface IHistAbleDataType<D extends IValueTypeDesc> extends IDataType {
+  valuetype: D;
+  hist(nbins?:number): Promise<IHistogram>;
+  readonly length: number;
+}
+
+
 /**
  * dummy data type just holding the description
  */
-export class DataTypeBase<T extends IDataDescription> extends SelectAble implements IDataType {
+export abstract class ADataType<T extends IDataDescription> extends SelectAble implements IDataType {
   constructor(public readonly desc: T) {
     super();
   }
@@ -128,11 +140,11 @@ export class DataTypeBase<T extends IDataDescription> extends SelectAble impleme
     return [];
   }
 
-  ids(range:Range = all()) : Promise<Range> {
+  ids(range: RangeLike = all()): Promise<Range> {
     return Promise.resolve(none());
   }
 
-  idView(idRange?: Range) : Promise<DataTypeBase<T>> {
+  idView(idRange?: RangeLike): Promise<ADataType<T>> {
     return Promise.resolve(this);
   }
 
@@ -140,7 +152,7 @@ export class DataTypeBase<T extends IDataDescription> extends SelectAble impleme
     return [];
   }
 
-  persist() : any {
+  persist(): any {
     return this.desc.id;
   }
 
@@ -153,6 +165,13 @@ export class DataTypeBase<T extends IDataDescription> extends SelectAble impleme
   }
 }
 
+export class DummyDataType extends ADataType<IDataDescription> {
+  constructor(desc: IDataDescription) {
+    super(desc);
+  }
+
+}
+
 /**
  * transpose the given matrix
  * @param m
@@ -163,8 +182,8 @@ export function transpose(m: any[][]) {
     return [];
   }
   let r = m[0].map((i) => [i]);
-  for(let i = 1; i < m.length; ++i) {
-     m[i].forEach((v,i) => r[i].push(v));
+  for (let i = 1; i < m.length; ++i) {
+    m[i].forEach((v, i) => r[i].push(v));
   }
   return r;
 }
@@ -216,9 +235,9 @@ export interface ICategorical2PartitioningOptions {
  * @param options
  * @return {CompositeRange1D}
  */
-export function categorical2partitioning<T>(data: T[], categories: T[], options : ICategorical2PartitioningOptions = {}): CompositeRange1D {
+export function categorical2partitioning<T>(data: T[], categories: T[], options: ICategorical2PartitioningOptions = {}): CompositeRange1D {
   const m: ICategorical2PartitioningOptions = mixin({
-    skipEmptyCategories : true,
+    skipEmptyCategories: true,
     colors: ['gray'],
     labels: null,
     name: 'Partitioning'
@@ -227,13 +246,13 @@ export function categorical2partitioning<T>(data: T[], categories: T[], options 
   let groups = categories.map((d, i) => {
     return {
       name: m.labels ? m.labels[i] : d.toString(),
-      color: m.colors[Math.min(i,m.colors.length-1)],
+      color: m.colors[Math.min(i, m.colors.length - 1)],
       indices: []
     };
   });
   data.forEach((d, j) => {
     const i = categories.indexOf(d);
-    if (i>=0) {
+    if (i >= 0) {
       groups[i].indices.push(j);
     }
   });
@@ -254,15 +273,60 @@ export function categorical2partitioning<T>(data: T[], categories: T[], options 
  */
 export function defineDataType(name: string, functions: any) {
   function DataType(desc: IDataDescription) {
-    DataTypeBase.call(this, desc);
+    ADataType.call(this, desc);
     if (typeof(this.init) === 'function') {
       this.init.apply(this, Array.from(arguments));
     }
   }
-  extendClass(DataType, DataTypeBase);
+
+  extendClass(DataType, ADataType);
   DataType.prototype.toString = () => name;
   DataType.prototype = mixin(DataType.prototype, functions);
 
   return DataType;
 }
 
+
+function isNumeric(obj) {
+  return (obj - parseFloat(obj) + 1) >= 0;
+}
+
+
+/**
+ * guesses the type of the given value array returning its description
+ * @param arr
+ * @return {any}
+ */
+export function guessValueTypeDesc(arr: IValueType[]): IValueTypeDesc {
+  if (arr.length === 0) {
+    return {type: 'string'}; //doesn't matter
+  }
+  const test = arr[0];
+  if (typeof test === 'number' || isNumeric(test)) {
+    return <INumberValueTypeDesc>{type: VALUE_TYPE_REAL, range: extent(arr.map(parseFloat))};
+  }
+  const values = new Set(<string[]>arr);
+  if (values.size < arr.length * 0.2 || values.size < 8) {
+    //guess as categorical
+    return <ICategoricalValueTypeDesc>{type: 'categorical', categories: Array.from(values.values())};
+  }
+  return <IStringValueTypeDesc>{type: 'string'};
+}
+
+
+/**
+ * creates a default data description
+ * @return {{type: string, id: string, name: string, fqname: string, description: string, creator: string, ts: number}}
+ */
+export function createDefaultDataDesc(namespace = 'localData'): IDataDescription {
+  const id = uniqueString(namespace);
+  return {
+    type: 'default',
+    id: id,
+    name: id,
+    fqname: id,
+    description: '',
+    creator: 'Anonymous',
+    ts: Date.now()
+  };
+}
