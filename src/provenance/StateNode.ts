@@ -4,17 +4,142 @@
 import {GraphNode, isType} from '../graph/graph';
 import ActionNode from './ActionNode';
 import ObjectNode from './ObjectNode';
+import {MatchedTokenTree, SimHash} from './SimilarityHash';
+import {IStateToken} from './StateToken';
 
 /**
  * a state node is one state in the visual exploration consisting of an action creating it and one or more following ones.
  * In addition, a state is characterized by the set of active object nodes
  */
 export default class StateNode extends GraphNode {
+
   constructor(name: string, description = '') {
     super('state');
     super.setAttr('name', name);
     super.setAttr('description', description);
   }
+
+  //<author>: Michael Gillhofer
+  private treeMatches: MatchedTokenTree[] = [];
+  public isHoveredInLineUp: boolean = false;
+  private _lineupIndex: number = -1;
+
+  get lineUpIndex(): number {
+    return this._lineupIndex;
+  }
+
+  set lineUpIndex(value: number) {
+    this._lineupIndex = value;
+  }
+
+  get stateTokens(): IStateToken[] {
+    let allTokens: IStateToken[] = this.getAttr('stateTokens');
+    if (allTokens === null) {
+      allTokens = [];
+      for (var oN of this.consistsOf) {
+        if (oN.stateTokenPropertyExists) {
+          if (oN.category === 'data') {
+            continue;
+          }
+          allTokens = allTokens.concat(oN.stateTokens);
+        }
+      }
+      allTokens = SimHash.normalizeTokenPriority(allTokens);
+      this.setAttr('stateTokens', allTokens);
+    }
+    return allTokens;
+  }
+
+  get simHash(): string[] {
+    const simHash: string[] = this.getAttr('simHash');
+    if (simHash === null) {
+      let allTokens = this.stateTokens;
+      let hash: string[] = SimHash.hasher.calcHash(allTokens);
+      this.setAttr('simHash', hash);
+    }
+    return simHash;
+  }
+
+  /*
+   getSimilarityTo(otherState:StateNode): number{
+   return 1-this.numberOfSetBits(this.simHash ^ otherState.simHash)/32
+   }
+   */
+
+  getSimilarityTo(otherState: StateNode, exact: boolean = false): number {
+    //exact = true
+    if (exact) {
+      return this.getExactSimilarityTo(otherState);
+    }
+    let thisH: string[] = this.simHash;
+    let otherH: string[] = otherState.simHash;
+    if (thisH === null || otherH === null) {
+      return -1;
+    }
+    if (thisH[0] === 'invalid' || otherH[0] === 'invalid') {
+      return -1;
+    }
+    let weighting = SimHash.hasher.categoryWeighting;
+    let similarity: number = 0;
+    for (let j = 0; j < 5; j++) {
+      let len = Math.min(thisH[j].length, otherH[j].length);
+      let nrEqu = 0;
+      for (let i = 0; i < len; i++) {
+        if (thisH[j].charAt(i) === otherH[j].charAt(i)) {
+          nrEqu++;
+        }
+      }
+      similarity += (nrEqu / len - 0.5) * 2 * weighting[j] / 100;
+    }
+    return similarity >= 0 ? similarity : 0;
+  }
+
+  public getMatchedTreeWithOtherState(otherState: StateNode): MatchedTokenTree {
+    if (otherState === null || otherState === undefined) {
+      otherState = this;
+    }
+    if (this.treeMatches[otherState.id]) {
+      return this.treeMatches[otherState.id];
+    }
+    let tree = new MatchedTokenTree(this, otherState);
+    this.treeMatches[otherState.id] = tree;
+    otherState.treeMatches[this.id] = tree;
+    return tree;
+  }
+
+  public getExactSimilarityTo(otherState: StateNode): number {
+    if (this.id === otherState.id) {
+      return 1;
+    }
+    let tree: MatchedTokenTree = this.getMatchedTreeWithOtherState(otherState);
+    //if (tree === null) return 0;
+    return tree.similarity;
+  }
+
+  getSimForLineupTo(otherState: StateNode) {
+    return this.getMatchedTreeWithOtherState(otherState).similarityForLineup;
+  }
+
+  numberOfSetBits(i: number): number {
+    /*jshint bitwise:false */
+    /*tslint:disable:no-bitwise */
+    i = i - ((i >> 1) & 0x55555555);
+    i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
+    return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
+    /*jshint bitwise:true */
+    /*tslint:enable:no-bitwise */
+  }
+
+  public duplicates: StateNode[] = [];
+
+  //checkduplicate() {
+
+  //if (this.simHash === ){
+  // this.duplicates[this.duplicates.length] = state;
+  // }
+  // }
+
+  //</author>
 
   get name(): string {
     return super.getAttr('name');

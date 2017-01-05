@@ -4,9 +4,10 @@
  * Licensed under the new BSD license, available at http://caleydo.org/license
  **************************************************************************** */
 /**
- * Created by michael gillhofer
+ * Created by Michael Gillhofer
  */
 'use strict';
+import IDType from '../idtype/IDType';
 
 
 export enum TokenType {
@@ -20,12 +21,18 @@ export enum TokenType {
 export interface IStateToken {
   name: string;
   importance: number;
+  childs: IStateToken[];
+  isLeaf: boolean;
 }
 
 export class StateTokenNode implements IStateToken {
   name: string;
+
   importance: number;
-  childs: IStateToken[];
+
+  childs: IStateToken[] = [];
+
+  isLeaf: boolean = false;
 
   constructor(name:string, importance:number, childs:IStateToken[]) {
     this.name = name;
@@ -36,12 +43,22 @@ export class StateTokenNode implements IStateToken {
 
 export class StateTokenLeaf implements IStateToken {
   name: string;
-  importance: number;
-  type: TokenType;
-  value;
-  category;
 
-  constructor(name:string,  importance: number,  type: TokenType,  value,  category) {
+  hash:string = '';
+
+  importance: number;
+
+  type: TokenType;
+
+  value:number|string|IDType;
+
+  category:string = '';
+
+  childs = [];
+
+  isLeaf = true;
+
+  constructor(name:string,  importance: number,  type: TokenType,  value:number|string|IDType,  category:string = '') {
     this.name = name;
     this.importance = importance;
     this.type = type;

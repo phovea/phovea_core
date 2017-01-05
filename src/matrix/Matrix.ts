@@ -11,11 +11,15 @@ import {Range, RangeLike, all, parse, join} from '../range';
 import {IValueTypeDesc, VALUE_TYPE_REAL, VALUE_TYPE_INT, guessValueTypeDesc} from '../datatype';
 import {IHistogram} from '../math';
 import {mixin} from '../index';
-import {IDType, ProductIDType, resolve as resolveIDType, resolveProduct, createLocalAssigner} from '../idtype';
+import {resolve as resolveIDType, resolveProduct, createLocalAssigner} from '../idtype';
 import {IMatrix, IMatrixDataDescription, IHeatMapUrlOptions, createDefaultMatrixDesc} from './IMatrix';
 import AMatrix from './AMatrix';
 import TransposedMatrix from './internal/TransposedMatrix';
 import {IMatrixLoader, IMatrixLoader2, viaAPI2Loader, adapterOne2Two} from './loader';
+import IDType from '../idtype/IDType';
+import ProductIDType from '../idtype/ProductIDType';
+import {StateTokenLeaf, TokenType} from '../provenance/StateToken';
+
 /**
  * root matrix implementation holding the data
  */
@@ -42,6 +46,11 @@ export default class Matrix<T, D extends IValueTypeDesc> extends AMatrix<T, D> {
 
   get idtypes() {
     return [this.rowtype, this.coltype];
+  }
+
+  get stateTokens(): StateTokenLeaf[] {
+    const token: StateTokenLeaf = new StateTokenLeaf('scaling', 2, TokenType.string, this.desc.name);
+    return [token];
   }
 
   /**

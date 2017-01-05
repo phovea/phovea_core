@@ -137,6 +137,22 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
     super.setAttr('description', description);
   }
 
+  get stateTokenPropertyExists() {
+    let value = <any>this.value;
+    if (value === null || value === '') {
+      return false;
+    }
+    return 'stateTokens' in value;
+  }
+
+  get stateTokens() {
+    if (!this.stateTokenPropertyExists) {
+      return 'undefined';
+    }
+    return (<any>this.value).stateTokens;
+  }
+
+
   get value() {
     this.checkPersisted();
     return this._v;

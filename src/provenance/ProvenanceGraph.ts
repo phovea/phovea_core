@@ -12,6 +12,7 @@ import ActionNode, {IAction, meta, ActionMetaData} from './ActionNode';
 import SlideNode from './SlideNode';
 import {isType, GraphEdge, GraphNode} from '../graph/graph';
 import GraphBase, {IGraphFactory, IGraphDataDescription} from '../graph/GraphBase';
+import {hoverSelectionType} from "../idtype/IIDType";
 
 export interface IProvenanceGraphDataDescription extends IGraphDataDescription {
   readonly local?: boolean;
@@ -236,6 +237,21 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
 
   act: StateNode = null;
   private lastAction: ActionNode = null;
+  public comparing: boolean = false;
+
+  get compareMode(): boolean {
+    return this.comparing && this.selectedStates(hoverSelectionType).length > 0;
+  }
+
+  private _similarityMode: boolean = false;
+
+  get similarityMode(): boolean {
+    return this._similarityMode;
+  }
+
+  set similarityMode(value: boolean) {
+    this._similarityMode = value;
+  }
 
   //currently executing promise
   private currentlyRunning = false;
@@ -613,6 +629,9 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
 
     this.switchToImpl(action, next);
 
+    //let hash = next.simHash;
+    this.fire('action-execution-complete', action.resultsIn);
+
     return {
       action: action,
       state: next,
@@ -669,6 +688,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   /**
    * execute a bunch of already executed actions
    * @param actions
+   * @param withinMilliseconds
    */
   private runChain(actions: ActionNode[], withinMilliseconds = -1) {
     if (actions.length === 0) {
