@@ -77,13 +77,14 @@ export function list(): Range {
         r.dim(i).setList(arr);
       }
     });
+    return r;
   } else if (typeof arguments[0] === 'number') { //single slice mode
     const r = new Range();
     r.dim(0).setList(Array.from(arguments));
   } else if (arguments[0] instanceof Range1D) {
     return new Range(Array.from(arguments));
   }
-  return new Range();
+  return none();
 }
 
 
