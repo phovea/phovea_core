@@ -50,7 +50,7 @@ export class StateTokenLeaf implements IStateToken {
 
   type: TokenType;
 
-  value:number|string|IDType;
+  value:number|string|IDType|number[];
 
   category:string = '';
 
@@ -58,7 +58,7 @@ export class StateTokenLeaf implements IStateToken {
 
   isLeaf = true;
 
-  constructor(name:string,  importance: number,  type: TokenType,  value:number|string|IDType,  category:string = '') {
+  constructor(name:string,  importance: number,  type: TokenType,  value:number|string|IDType|number[],  category:string = '') {
     this.name = name;
     this.importance = importance;
     this.type = type;
