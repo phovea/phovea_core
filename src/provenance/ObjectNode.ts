@@ -83,6 +83,9 @@ export function ref<T>(v: T, name: string, category = cat.data, hash = name + '_
  * @returns {any}
  */
 function persistData(v: any): any {
+  if (v === undefined || v === null) {
+    return null;
+  }
   if (v instanceof Element) {
     let e = <Element>v,
       id = e.getAttribute('id');
