@@ -432,6 +432,6 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
 }
 
 
-export function create(data: IDataType, range: Range, parent: HTMLElement, viewFactory: IViewFactory, options: IMultiFormGridOptions) {
+export function create(data: IDataType, range: Range, parent: HTMLElement, viewFactory: IViewFactory, options?: IMultiFormGridOptions) {
   return new MultiFormGrid(data, range, parent, viewFactory, options);
 }
