@@ -104,6 +104,9 @@ export declare type IValueType = number | string | any;
  * @return {any}
  */
 export function isDataType(v: IDataType) {
+  if (v === null || v === undefined) {
+    return false;
+  }
   if (v instanceof ADataType) {
     return true;
   }

@@ -420,7 +420,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   }
 
   private initAction(r: ActionNode, inputs: IObjectRef<any>[] = []) {
-    var inobjects = inputs.map((i) => this.findInArray(this._objects, i));
+    var inobjects = inputs.map((i) => ProvenanceGraph.findInArray(this._objects, i));
     this._actions.push(r);
     this.backend.addNode(r);
     this.fire('add_action', r);
@@ -516,7 +516,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     });
   }
 
-  private findInArray(arr: ObjectNode<any>[], r: IObjectRef<any>) {
+  private static findInArray(arr: ObjectNode<any>[], r: IObjectRef<any>) {
     if (r instanceof ObjectNode) {
       return <ObjectNode<any>>r;
     }
@@ -600,7 +600,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
       });
       // a removed one should be part of the inputs
       const requires = action.requires;
-      var removed = result.removed.map((r) => this.findInArray(requires, r));
+      var removed = result.removed.map((r) => ProvenanceGraph.findInArray(requires, r));
       removed.forEach((c) => {
         c.value = null; //free reference
         this.addEdge(action, 'removes', c);
