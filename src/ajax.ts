@@ -3,6 +3,8 @@
  * Copyright (c) The Caleydo Team. All rights reserved.
  * Licensed under the new BSD license, available at http://caleydo.org/license
  **************************************************************************** */
+// to resolve the window extensions
+/// <reference types="whatwg-fetch" />
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
