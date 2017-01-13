@@ -57,7 +57,7 @@ class HashTable {
       cdf[i] = this.probs[this.dict[i]] / cdf[i];
     }
 
-    const rng:RNG = new RNG(1);
+    const rng:RandomNumberGenerator = new RandomNumberGenerator(1);
     const samples:number[] = [];
     for (let i:number = 0; i < n; i++) {
       let found:boolean = false;
@@ -310,7 +310,7 @@ export class TreeNode {
       return null;
     }
     let cat = this.leftToken === null ? (<StateTokenLeaf>this.rightToken).category : (<StateTokenLeaf>this.leftToken).category;
-    return SimHash.categories.indexOf(cat);
+    return SimHash.CATEGORIES.indexOf(cat);
   }
 
   public get categoryName():string {
@@ -342,23 +342,23 @@ export class TreeNode {
       }
       if (right !== null) {
         //both left and right
-        if (!(left.category === SimHash.categories[2])) {
+        if (!(left.category === SimHash.CATEGORIES[2])) {
           return;
         }
         let sim = this.tokenSimilarity;
-        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', left.importance, left.type, 'matching', SimHash.categories[2]);
-        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, left.type, 'matching', SimHash.categories[2]);
+        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', left.importance, left.type, 'matching', SimHash.CATEGORIES[2]);
+        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, left.type, 'matching', SimHash.CATEGORIES[2]);
         this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, rightChildMatch, this.id + '_match', sim));
-        let leftChildNonMatch:StateTokenLeaf = new StateTokenLeaf('Non-Matching', left.importance, left.type, 'non-matching', SimHash.categories[2]);
-        let rightChildNonMatch:StateTokenLeaf = new StateTokenLeaf('Non-Matching', right.importance, left.type, 'non-matching', SimHash.categories[2]);
+        let leftChildNonMatch:StateTokenLeaf = new StateTokenLeaf('Non-Matching', left.importance, left.type, 'non-matching', SimHash.CATEGORIES[2]);
+        let rightChildNonMatch:StateTokenLeaf = new StateTokenLeaf('Non-Matching', right.importance, left.type, 'non-matching', SimHash.CATEGORIES[2]);
         this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildNonMatch, rightChildNonMatch, this.id + '_match', (1 - sim)));
         return;
       } else {
         //just left
-        if (!(left.category === SimHash.categories[2])) {
+        if (!(left.category === SimHash.CATEGORIES[2])) {
           return;
         }
-        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', left.importance, left.type, 'matching', SimHash.categories[2]);
+        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', left.importance, left.type, 'matching', SimHash.CATEGORIES[2]);
         this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, null, this.id + '_match',0));
       }
     } else {
@@ -366,10 +366,10 @@ export class TreeNode {
         if (!(right instanceof StateTokenLeaf)) {
           return;
         }
-        if (!(right.category === SimHash.categories[2])) {
+        if (!(right.category === SimHash.CATEGORIES[2])) {
           return;
         }
-        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, right.type, 'matching', SimHash.categories[2]);
+        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, right.type, 'matching', SimHash.CATEGORIES[2]);
         this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(null, rightChildMatch, this.id + '_match',0));
       } else {
         //both are null
@@ -392,13 +392,13 @@ export class TreeNode {
     if (this.impPerCat === null) {
       let childsImpPerCat:number[] = [0, 0, 0, 0, 0];
       if (this.isLeafNode) {
-        childsImpPerCat[SimHash.categories.indexOf(this.categoryName)] += this.importance;
+        childsImpPerCat[SimHash.CATEGORIES.indexOf(this.categoryName)] += this.importance;
         this.impPerCat = childsImpPerCat;
         return childsImpPerCat;
       }
       for (let i = 0; i < this._childs.length; i++) {
         if (this._childs[i].isLeafNode) {
-          childsImpPerCat[SimHash.categories.indexOf(this._childs[i].categoryName)] += this._childs[i].importance;
+          childsImpPerCat[SimHash.CATEGORIES.indexOf(this._childs[i].categoryName)] += this._childs[i].importance;
         } else {
           let tmp = this._childs[i].impOfChildsPerCat;
           for (let j = 0; j < tmp.length; j++) {
@@ -629,9 +629,13 @@ class TreeRoot extends TreeNode {
 
 export class SimHash extends EventHandler {
 
-  private static _instance:SimHash = new SimHash();
-  public static categories:string[] = ['data', 'visual', 'selection', 'layout', 'analysis'];
-  public static cols = ['#e41a1c', '#377eb8', '#984ea3', '#ffff33', '#ff7f00'];
+  public static CATEGORIES:string[] = ['data', 'visual', 'selection', 'layout', 'analysis'];
+  public static COLORS = ['#e41a1c', '#377eb8', '#984ea3', '#ffff33', '#ff7f00'];
+
+  private static INSTANCE:SimHash = new SimHash(); // === Singleton
+
+  private static NUMBER_OF_BITS:number = 300;
+  private static HASH_TABLE_SIZE:number = 1000;
 
   public static shadeColor(color, percent) {
     /*jshint bitwise:false */
@@ -647,19 +651,21 @@ export class SimHash extends EventHandler {
     /*tslint:enable:no-bitwise */
   }
 
-  static colorOfCat(cat:string) {
-    return SimHash.cols[SimHash.categories.indexOf(cat)];
+  static getCategoryColor(category:string) {
+    return SimHash.COLORS[SimHash.CATEGORIES.indexOf(category)];
+  }
+
+  /**
+   * Uses the singleton pattern
+   * @returns {SimHash}
+   */
+  public static get hasher():SimHash {
+    return this.INSTANCE;
   }
 
   private _catWeighting:number[] = [30, 20, 25, 20, 5];
-  private _nrBits:number = 300;
-
-  public static get hasher():SimHash {
-    return this._instance;
-  }
 
   private hashTable:HashTable[] = [];
-  private _HashTableSize:number = 1000;
 
   get categoryWeighting() {
     return this._catWeighting;
@@ -684,19 +690,19 @@ export class SimHash extends EventHandler {
       allTokens = allTokens.concat(t);
     }
     if (this.hashTable[type.id] == null) {
-      this.hashTable[type.id] = new HashTable(this._HashTableSize);
+      this.hashTable[type.id] = new HashTable(SimHash.HASH_TABLE_SIZE);
     }
     for (let i:number = 0; i < allTokens.length; i++) {
       this.hashTable[type.id].push(allTokens[i].value, allTokens[i].value, allTokens[i].importance, null);
     }
-    let hash = this.hashTable[type.id].toHash(this._nrBits);
+    let hash = this.hashTable[type.id].toHash(SimHash.NUMBER_OF_BITS);
     token.hash = hash;
     return hash;
   }
 
   getHashOfOrdinalIDTypeSelection(type:IDType, min:number, max:number, selectionType):string {
     if (this.hashTable[type.id] == null) {
-      this.hashTable[type.id] = new HashTable(this._HashTableSize);
+      this.hashTable[type.id] = new HashTable(SimHash.HASH_TABLE_SIZE);
     }
     let selection:number[] = type.selections(selectionType).dim(0).asList(0);
     for (const sel of selection) {
@@ -704,9 +710,9 @@ export class SimHash extends EventHandler {
         String(sel),
         String(sel),
         1,
-        ordinalHash(min, max, sel, this._nrBits));
+        ordinalHash(min, max, sel, SimHash.NUMBER_OF_BITS));
     }
-    return this.hashTable[type.id].toHash(this._nrBits);
+    return this.hashTable[type.id].toHash(SimHash.NUMBER_OF_BITS);
   }
 
 
@@ -755,20 +761,20 @@ export class SimHash extends EventHandler {
     let hashes:string[] = [];
     let groupedTokens = groupBy(leafs);
     for (let i = 0; i < 5; i++) {
-      hashes[i] = this.calcHashOfCat(groupedTokens[SimHash.categories[i]], SimHash.categories[i]);
+      hashes[i] = this.calcHashOfCat(groupedTokens[SimHash.CATEGORIES[i]], SimHash.CATEGORIES[i]);
     }
     return hashes;
   }
 
   private calcHashOfCat(tokens:StateTokenLeaf[], cat:string) {
     if (!(typeof tokens !== 'undefined')) {
-      return Array(this._nrBits + 1).join('0');
+      return Array(SimHash.NUMBER_OF_BITS + 1).join('0');
     }
 
     //let b:number = 0;
     let splitTokens = SimHash.prepHashCalc(tokens);
     if (this.hashTable[cat] == null) {
-      this.hashTable[cat] = new HashTable(this._HashTableSize);
+      this.hashTable[cat] = new HashTable(SimHash.HASH_TABLE_SIZE);
     }
 
     let ordinalTokens:StateTokenLeaf[] = splitTokens[1];
@@ -782,7 +788,7 @@ export class SimHash extends EventHandler {
             ordinalTokens[i].value[0],
             ordinalTokens[i].value[1],
             ordinalTokens[i].value[2],
-            this._nrBits
+            SimHash.NUMBER_OF_BITS
           )
         );
       }
@@ -829,7 +835,7 @@ export class SimHash extends EventHandler {
     }
 
 
-    return this.hashTable[cat].toHash(this._nrBits);
+    return this.hashTable[cat].toHash(SimHash.NUMBER_OF_BITS);
   };
 
   public static normalizeTokenPriority(tokens:IStateToken[], baseLevel:number = 1):IStateToken[] {
@@ -965,7 +971,7 @@ function ordinalHash(min:number, max:number, value:number, nrBits:number):string
   let pct = (value - min) / (max - min);
   let minH:string = hashFnv32a(String(min), 0);
   let maxH:string = hashFnv32a(String(max), 0);
-  let rng = new RNG(1);
+  let rng = new RandomNumberGenerator(1);
 
   let hash:string = '';
   for (let i = 0; i < nrBits; i++) {
@@ -982,17 +988,35 @@ function ordinalHash(min:number, max:number, value:number, nrBits:number):string
   return (dec >>> 0).toString(2);
 }*/
 
+/**
+ * Generating pseudo random numbers based on a given seed
+ *
+ * @author Olaf J. Horstmann
+ * @see http://indiegamr.com/generate-repeatable-random-numbers-in-js/
+ */
+class RandomNumberGenerator {
 
-class RNG {
-  private seed:number;
+  constructor(private seed:number) {
 
-  constructor(seed:number) {
-    this.seed = seed;
   }
 
+  /**
+   * Returns the next discrete random number between min and max according the given seed
+   * @param min
+   * @param max
+   * @returns {number}
+   */
   private next(min:number, max:number):number {
     max = max || 0;
     min = min || 0;
+
+    // You may ask: Why "(seed * 9301 + 49297) % 233280" ?!
+    // The answer is both simple & complicated:
+    // The combination of 9301, 49297 and 233280 provide a very even distributed set of "random" numbers.
+    // Please don’t ask WHY – that’s the complicated part,
+    // some very smart people figured out those numbers quite some time ago,
+    // and I also cannot tell you how they did it.
+    // But as always: Google is your friend ;-)
 
     this.seed = (this.seed * 9301 + 49297) % 233280;
     const rnd = this.seed / 233280;
@@ -1000,16 +1024,15 @@ class RNG {
     return min + rnd * (max - min);
   }
 
-  // http://indiegamr.com/generate-repeatable-random-numbers-in-js/
-  public nextInt(min:number, max:number):number {
-    return Math.round(this.next(min, max));
-  }
-
   public nextDouble():number {
     return this.next(0, 1);
   }
 
-  public pick(collection:any[]):any {
-    return collection[this.nextInt(0, collection.length - 1)];
+  /*private nextInt(min:number, max:number):number {
+    return Math.round(this.next(min, max));
   }
+
+  private pick(collection:any[]):any {
+    return collection[this.nextInt(0, collection.length - 1)];
+  }*/
 }
