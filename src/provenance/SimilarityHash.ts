@@ -6,16 +6,16 @@ import {EventHandler} from '../event';
 import {RandomNumberGenerator} from './internal/RandomNumberGenerator';
 import {HashBuilder} from './internal/HashBuilder';
 
-
 export class SimHash extends EventHandler {
 
-  public static CATEGORIES:string[] = ['data', 'visual', 'selection', 'layout', 'analysis'];
-  public static COLORS = ['#e41a1c', '#377eb8', '#984ea3', '#ffff33', '#ff7f00'];
+  public static readonly INVALID_CATEGORY:string = 'invalid';
+  public static readonly CATEGORIES:string[] = ['data', 'visual', 'selection', 'layout', 'analysis'];
+  public static readonly COLORS = ['#e41a1c', '#377eb8', '#984ea3', '#ffff33', '#ff7f00'];
 
   private static INSTANCE:SimHash = new SimHash(); // === Singleton
 
-  private static NUMBER_OF_BITS:number = 300;
-  private static HASH_TABLE_SIZE:number = 1000;
+  private static readonly NUMBER_OF_BITS:number = 300;
+  private static readonly HASH_TABLE_SIZE:number = 1000;
 
   public static shadeColor(color, percent) {
     /*jshint bitwise:false */
@@ -43,7 +43,7 @@ export class SimHash extends EventHandler {
     return this.INSTANCE;
   }
 
-  private hashTable:HashBuilder[] = [];
+  private readonly hashBuilder:HashBuilder[] = [];
 
   private _catWeighting:number[] = [30, 20, 25, 20, 5];
 
@@ -56,94 +56,77 @@ export class SimHash extends EventHandler {
     //this.fire('weighting_change');
   }
 
-  getHashOfIDTypeSelection(token:StateTokenLeaf, selectionType):string {
+  public getHashOfIDTypeSelection(token:StateTokenLeaf, selectionType):string {
     let type:IDType = (<IDType>token.value); // TODO ensure that value contains an IDType
-    let selection:number[] = type.selections(selectionType).dim(0).asList(0);
-    let allTokens:StateTokenLeaf[] = [];
-    for (const sel of selection) {
-      const t = new StateTokenLeaf(
-        'dummy',
-        1,
-        TokenType.string,
-        sel.toString()
-      );
-      allTokens = allTokens.concat(t);
+
+    if (this.hashBuilder[type.id] === undefined) {
+      this.hashBuilder[type.id] = new HashBuilder(SimHash.HASH_TABLE_SIZE);
     }
-    if (this.hashTable[type.id] == null) {
-      this.hashTable[type.id] = new HashBuilder(SimHash.HASH_TABLE_SIZE);
-    }
-    for (let i:number = 0; i < allTokens.length; i++) {
-      this.hashTable[type.id].push(allTokens[i].value, allTokens[i].value, allTokens[i].importance, null);
-    }
-    let hash = this.hashTable[type.id].toHash(SimHash.NUMBER_OF_BITS);
-    token.hash = hash;
-    return hash;
+
+    type.selections(selectionType).dim(0).asList(0) // array of selected ids
+      .map((sel) => {
+        return new StateTokenLeaf(
+          'dummy',
+          1,
+          TokenType.string,
+          sel.toString()
+        );
+      })
+      .forEach((t) => {
+        return this.hashBuilder[type.id].push(t.value, t.value, t.importance, null);
+      });
+
+    token.hash = this.hashBuilder[type.id].toHash(SimHash.NUMBER_OF_BITS);
+    return token.hash;
   }
 
-  getHashOfOrdinalIDTypeSelection(type:IDType, min:number, max:number, selectionType):string {
-    if (this.hashTable[type.id] == null) {
-      this.hashTable[type.id] = new HashBuilder(SimHash.HASH_TABLE_SIZE);
+  public getHashOfOrdinalIDTypeSelection(type:IDType, min:number, max:number, selectionType):string {
+    if (this.hashBuilder[type.id] === undefined) {
+      this.hashBuilder[type.id] = new HashBuilder(SimHash.HASH_TABLE_SIZE);
     }
-    let selection:number[] = type.selections(selectionType).dim(0).asList(0);
-    for (const sel of selection) {
-      this.hashTable[type.id].push(
-        String(sel),
-        String(sel),
-        1,
-        ordinalHash(min, max, sel, SimHash.NUMBER_OF_BITS));
-    }
-    return this.hashTable[type.id].toHash(SimHash.NUMBER_OF_BITS);
+
+    type.selections(selectionType).dim(0).asList(0) // array of selected ids
+      .forEach((sel) => {
+        this.hashBuilder[type.id].push(
+          String(sel),
+          String(sel),
+          1,
+          ordinalHash(min, max, sel, SimHash.NUMBER_OF_BITS)
+        );
+      });
+
+    return this.hashBuilder[type.id].toHash(SimHash.NUMBER_OF_BITS);
   }
 
+  private static groupBy(arr:StateTokenLeaf[], property:string) {
+    return arr.reduce((prev, curr:StateTokenLeaf) => {
+      let val = curr[property];
+      if (!prev[val]) {
+        prev[val] = [];
+      }
+      prev[val].push(curr);
+      return prev;
+    }, {});
+  }
 
   private static prepHashCalc(tokens:StateTokenLeaf[], needsNormalization:boolean = true) {
-    function groupBy(arr:StateTokenLeaf[]) {
-      return arr.reduce(function (memo, x:StateTokenLeaf) {
-          if (!memo[x.type]) {
-            memo[x.type] = [];
-          }
-          memo[x.type].push(x);
-          return memo;
-        }, {}
-      );
-    }
-
     if (needsNormalization && typeof tokens !== 'undefined') {
       let totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0);
       for (let i:number = 0; i < tokens.length; i++) {
         tokens[i].importance /= totalImportance;
       }
     }
-
-    return groupBy(tokens);
+    return SimHash.groupBy(tokens, 'type');
   }
-
 
   public calcHash(tokens:IStateToken[]):string[] {
     if (tokens.length === 0) {
-      return ['invalid', 'invalid', 'invalid', 'invalid', 'invalid'];
+      return SimHash.CATEGORIES.map(() => SimHash.INVALID_CATEGORY);
     }
     tokens = SimHash.normalizeTokenPriority(tokens, 1);
     let leafs:StateTokenLeaf[] = this.filterLeafsAndSerialize(tokens);
-
-    function groupBy(arr:StateTokenLeaf[]) {
-      return arr.reduce(function (memo, x:StateTokenLeaf) {
-          if (!memo[x.category]) {
-            memo[x.category] = [];
-          }
-          memo[x.category].push(x);
-          return memo;
-        }, {}
-      );
-    }
-
-
-    let hashes:string[] = [];
-    let groupedTokens = groupBy(leafs);
-    for (let i = 0; i < 5; i++) {
-      hashes[i] = this.calcHashOfCat(groupedTokens[SimHash.CATEGORIES[i]], SimHash.CATEGORIES[i]);
-    }
-    return hashes;
+    let groupedTokens = SimHash.groupBy(leafs, 'category');
+    return SimHash.CATEGORIES.map((cat) => this.calcHashOfCat(groupedTokens[cat], cat));
   }
 
   private calcHashOfCat(tokens:StateTokenLeaf[], cat:string) {
@@ -151,16 +134,15 @@ export class SimHash extends EventHandler {
       return Array(SimHash.NUMBER_OF_BITS + 1).join('0');
     }
 
-    //let b:number = 0;
     let splitTokens = SimHash.prepHashCalc(tokens);
-    if (this.hashTable[cat] == null) {
-      this.hashTable[cat] = new HashBuilder(SimHash.HASH_TABLE_SIZE);
+    if (this.hashBuilder[cat] === undefined) {
+      this.hashBuilder[cat] = new HashBuilder(SimHash.HASH_TABLE_SIZE);
     }
 
     let ordinalTokens:StateTokenLeaf[] = splitTokens[1];
     if (ordinalTokens !== undefined) {
       for (let i:number = 0; i < ordinalTokens.length; i++) {
-        this.hashTable[cat].push(
+        this.hashBuilder[cat].push(
           ordinalTokens[i].name,
           ordinalTokens[i].value,
           ordinalTokens[i].importance,
@@ -177,7 +159,7 @@ export class SimHash extends EventHandler {
     let ordidTypeTokens:StateTokenLeaf[] = splitTokens[2];
     if (ordidTypeTokens !== undefined) {
       for (let i:number = 0; i < ordidTypeTokens.length; i++) {
-        this.hashTable[cat].push(
+        this.hashBuilder[cat].push(
           ordidTypeTokens[i].name,
           ordidTypeTokens[i].value,
           ordidTypeTokens[i].importance,
@@ -195,7 +177,7 @@ export class SimHash extends EventHandler {
     let idtypeTokens:StateTokenLeaf[] = splitTokens[3];
     if (idtypeTokens !== undefined) {
       for (let i:number = 0; i < idtypeTokens.length; i++) {
-        this.hashTable[cat].push(
+        this.hashBuilder[cat].push(
           idtypeTokens[i].name,
           idtypeTokens[i].value,
           idtypeTokens[i].importance,
@@ -210,12 +192,12 @@ export class SimHash extends EventHandler {
     let regularTokens:StateTokenLeaf[] = splitTokens[0];
     if (regularTokens !== undefined) {
       for (let i:number = 0; i < regularTokens.length; i++) {
-        this.hashTable[cat].push(regularTokens[i].name, regularTokens[i].value, regularTokens[i].importance, null);
+        this.hashBuilder[cat].push(regularTokens[i].name, regularTokens[i].value, regularTokens[i].importance, null);
       }
     }
 
 
-    return this.hashTable[cat].toHash(SimHash.NUMBER_OF_BITS);
+    return this.hashBuilder[cat].toHash(SimHash.NUMBER_OF_BITS);
   };
 
   public static normalizeTokenPriority(tokens:IStateToken[], baseLevel:number = 1):IStateToken[] {

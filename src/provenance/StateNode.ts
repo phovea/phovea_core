@@ -78,7 +78,7 @@ export default class StateNode extends GraphNode {
     if (thisH === null || otherH === null) {
       return -1;
     }
-    if (thisH[0] === 'invalid' || otherH[0] === 'invalid') {
+    if (thisH[0] === SimHash.INVALID_CATEGORY || otherH[0] === SimHash.INVALID_CATEGORY) {
       return -1;
     }
     let weighting = SimHash.hasher.categoryWeighting;
