@@ -106,15 +106,16 @@ export class SimHash extends EventHandler {
       }
       prev[val].push(curr);
       return prev;
-    }, {});
+    }, []);
   }
 
   private static prepHashCalc(tokens:StateTokenLeaf[], needsNormalization:boolean = true) {
-    if (needsNormalization && typeof tokens !== 'undefined') {
+    if (needsNormalization && tokens !== undefined) {
       let totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0);
-      for (let i:number = 0; i < tokens.length; i++) {
-        tokens[i].importance /= totalImportance;
-      }
+      tokens = tokens.map((t) => {
+        t.importance /= totalImportance;
+        return t;
+      });
     }
     return SimHash.groupBy(tokens, 'type');
   }
@@ -130,74 +131,47 @@ export class SimHash extends EventHandler {
   }
 
   private calcHashOfCat(tokens:StateTokenLeaf[], cat:string) {
-    if (!(typeof tokens !== 'undefined')) {
+    if (tokens === undefined) {
       return Array(SimHash.NUMBER_OF_BITS + 1).join('0');
     }
 
-    let splitTokens = SimHash.prepHashCalc(tokens);
     if (this.hashBuilder[cat] === undefined) {
       this.hashBuilder[cat] = new HashBuilder(SimHash.HASH_TABLE_SIZE);
     }
 
-    let ordinalTokens:StateTokenLeaf[] = splitTokens[1];
-    if (ordinalTokens !== undefined) {
-      for (let i:number = 0; i < ordinalTokens.length; i++) {
-        this.hashBuilder[cat].push(
-          ordinalTokens[i].name,
-          ordinalTokens[i].value,
-          ordinalTokens[i].importance,
-          ordinalHash(
-            ordinalTokens[i].value[0],
-            ordinalTokens[i].value[1],
-            ordinalTokens[i].value[2],
-            SimHash.NUMBER_OF_BITS
-          )
-        );
-      }
-    }
-
-    let ordidTypeTokens:StateTokenLeaf[] = splitTokens[2];
-    if (ordidTypeTokens !== undefined) {
-      for (let i:number = 0; i < ordidTypeTokens.length; i++) {
-        this.hashBuilder[cat].push(
-          ordidTypeTokens[i].name,
-          ordidTypeTokens[i].value,
-          ordidTypeTokens[i].importance,
-          this.getHashOfOrdinalIDTypeSelection(
-            ordidTypeTokens[i].value[0],
-            ordidTypeTokens[i].value[1],
-            ordidTypeTokens[i].value[2],
-            defaultSelectionType
-          )
-        );
-      }
-    }
-
-
-    let idtypeTokens:StateTokenLeaf[] = splitTokens[3];
-    if (idtypeTokens !== undefined) {
-      for (let i:number = 0; i < idtypeTokens.length; i++) {
-        this.hashBuilder[cat].push(
-          idtypeTokens[i].name,
-          idtypeTokens[i].value,
-          idtypeTokens[i].importance,
-          this.getHashOfIDTypeSelection(
-            idtypeTokens[i],
-            defaultSelectionType
-          )
-        );
-      }
-    }
-
-    let regularTokens:StateTokenLeaf[] = splitTokens[0];
-    if (regularTokens !== undefined) {
-      for (let i:number = 0; i < regularTokens.length; i++) {
-        this.hashBuilder[cat].push(regularTokens[i].name, regularTokens[i].value, regularTokens[i].importance, null);
-      }
-    }
-
+    SimHash.prepHashCalc(tokens)
+      .forEach((tokenLeafs, index) => {
+        this.pushHashBuilder(this.hashBuilder[cat], tokenLeafs, index);
+      });
 
     return this.hashBuilder[cat].toHash(SimHash.NUMBER_OF_BITS);
+  };
+
+  private pushHashBuilder(hashBuilder:HashBuilder, tokenLeaves:StateTokenLeaf[], index:number) {
+    if(!tokenLeaves) {
+      return;
+    }
+
+    let hashingFnc;
+
+    switch(index) {
+      case 0: // regularTokens
+        hashingFnc = (t) => null;
+        break;
+      case 1: // ordinalTokens
+        hashingFnc = (t) => (t) => ordinalHash(t.value[0], t.value[1], t.value[2], SimHash.NUMBER_OF_BITS);
+        break;
+      case 2: // ordidTypeTokens
+        hashingFnc = (t) => this.getHashOfOrdinalIDTypeSelection(t.value[0], t.value[1], t.value[2], defaultSelectionType);
+        break;
+      case 3: // idtypeTokens
+        hashingFnc = (t) => this.getHashOfIDTypeSelection(t, defaultSelectionType);
+        break;
+    }
+
+    tokenLeaves.forEach((t) => {
+      hashBuilder.push(t.name, <string>t.value, t.importance, hashingFnc(t));
+    });
   };
 
   public static normalizeTokenPriority(tokens:IStateToken[], baseLevel:number = 1):IStateToken[] {
