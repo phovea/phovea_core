@@ -43,6 +43,53 @@ export class SimHash extends EventHandler {
     return this.INSTANCE;
   }
 
+  public static normalizeTokenPriority(tokens:IStateToken[], baseLevel:number = 1):IStateToken[] {
+    let totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0);
+    return tokens.map((t) => {
+      t.importance /= totalImportance * baseLevel;
+      if (!(t.isLeaf)) {
+        (<StateTokenNode>t).childs = this.normalizeTokenPriority((<StateTokenNode>t).childs, t.importance);
+      }
+      return t;
+    });
+  }
+
+  private static groupBy(arr:StateTokenLeaf[], property:string) {
+    return arr.reduce((prev, curr:StateTokenLeaf) => {
+      let val = curr[property];
+      if (!prev[val]) {
+        prev[val] = [];
+      }
+      prev[val].push(curr);
+      return prev;
+    }, []);
+  }
+
+  private static prepHashCalc(tokens:StateTokenLeaf[], needsNormalization:boolean = true) {
+    if (needsNormalization && tokens !== undefined) {
+      let totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0);
+      tokens = tokens.map((t) => {
+        t.importance /= totalImportance;
+        return t;
+      });
+    }
+    return SimHash.groupBy(tokens, 'type');
+  }
+
+  private static filterLeafsAndSerialize(tokens:IStateToken[]):StateTokenLeaf[] {
+    let childs:StateTokenLeaf[] = [];
+    for (let i = 0; i < tokens.length; i++) {
+      if (tokens[i].isLeaf) {
+        childs = childs.concat(<StateTokenLeaf>tokens[i]);
+      } else {
+        childs = childs.concat(
+          this.filterLeafsAndSerialize((<StateTokenNode>tokens[i]).childs)
+        );
+      }
+    }
+    return childs;
+  }
+
   private readonly hashBuilder:HashBuilder[] = [];
 
   private _catWeighting:number[] = [30, 20, 25, 20, 5];
@@ -98,34 +145,12 @@ export class SimHash extends EventHandler {
     return this.hashBuilder[type.id].toHash(SimHash.NUMBER_OF_BITS);
   }
 
-  private static groupBy(arr:StateTokenLeaf[], property:string) {
-    return arr.reduce((prev, curr:StateTokenLeaf) => {
-      let val = curr[property];
-      if (!prev[val]) {
-        prev[val] = [];
-      }
-      prev[val].push(curr);
-      return prev;
-    }, []);
-  }
-
-  private static prepHashCalc(tokens:StateTokenLeaf[], needsNormalization:boolean = true) {
-    if (needsNormalization && tokens !== undefined) {
-      let totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0);
-      tokens = tokens.map((t) => {
-        t.importance /= totalImportance;
-        return t;
-      });
-    }
-    return SimHash.groupBy(tokens, 'type');
-  }
-
   public calcHash(tokens:IStateToken[]):string[] {
     if (tokens.length === 0) {
       return SimHash.CATEGORIES.map(() => SimHash.INVALID_CATEGORY);
     }
     tokens = SimHash.normalizeTokenPriority(tokens, 1);
-    let leafs:StateTokenLeaf[] = this.filterLeafsAndSerialize(tokens);
+    let leafs:StateTokenLeaf[] = SimHash.filterLeafsAndSerialize(tokens);
     let groupedTokens = SimHash.groupBy(leafs, 'category');
     return SimHash.CATEGORIES.map((cat) => this.calcHashOfCat(groupedTokens[cat], cat));
   }
@@ -155,16 +180,16 @@ export class SimHash extends EventHandler {
     let hashingFnc;
 
     switch(index) {
-      case 0: // regularTokens
+      case 0: // regular tokens
         hashingFnc = (t) => null;
         break;
-      case 1: // ordinalTokens
+      case 1: // ordinal tokens
         hashingFnc = (t) => (t) => ordinalHash(t.value[0], t.value[1], t.value[2], SimHash.NUMBER_OF_BITS);
         break;
-      case 2: // ordidTypeTokens
+      case 2: // ordinal idType tokens
         hashingFnc = (t) => this.getHashOfOrdinalIDTypeSelection(t.value[0], t.value[1], t.value[2], defaultSelectionType);
         break;
-      case 3: // idtypeTokens
+      case 3: // idtype tokens
         hashingFnc = (t) => this.getHashOfIDTypeSelection(t, defaultSelectionType);
         break;
     }
@@ -173,31 +198,6 @@ export class SimHash extends EventHandler {
       hashBuilder.push(t.name, <string>t.value, t.importance, hashingFnc(t));
     });
   };
-
-  public static normalizeTokenPriority(tokens:IStateToken[], baseLevel:number = 1):IStateToken[] {
-    let totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0);
-    for (let i:number = 0; i < tokens.length; i++) {
-      tokens[i].importance = tokens[i].importance / totalImportance * baseLevel;
-      if (!(tokens[i].isLeaf)) {
-        (<StateTokenNode>tokens[i]).childs = this.normalizeTokenPriority((<StateTokenNode>tokens[i]).childs, tokens[i].importance);
-      }
-    }
-    return tokens;
-  }
-
-  private filterLeafsAndSerialize(tokens:IStateToken[]):StateTokenLeaf[] {
-    let childs:StateTokenLeaf[] = [];
-    for (let i = 0; i < tokens.length; i++) {
-      if (tokens[i].isLeaf) {
-        childs = childs.concat(<StateTokenLeaf>tokens[i]);
-      } else {
-        childs = childs.concat(
-          this.filterLeafsAndSerialize((<StateTokenNode>tokens[i]).childs)
-        );
-      }
-    }
-    return childs;
-  }
 
 }
 
