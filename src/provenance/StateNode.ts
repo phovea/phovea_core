@@ -4,8 +4,10 @@
 import {GraphNode, isType} from '../graph/graph';
 import ActionNode from './ActionNode';
 import ObjectNode from './ObjectNode';
-import {MatchedTokenTree, SimHash} from './SimilarityHash';
-import {IStateToken} from './StateToken';
+import {SimHash} from './SimilarityHash';
+import {IStateToken} from './token/StateToken';
+import {MatchedTokenTree} from './token/MatchedTokenTree';
+
 
 /**
  * a state node is one state in the visual exploration consisting of an action creating it and one or more following ones.
@@ -238,4 +240,12 @@ export default class StateNode extends GraphNode {
   toString() {
     return this.name;
   }
+}
+
+
+export class SimVisStateNode extends StateNode {
+  lineUpIndex: number;
+  isHoveredInLineUp: boolean;
+  duplicates: any[]; // any??
+  stateTokens: IStateToken[];
 }

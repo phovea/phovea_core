@@ -18,7 +18,7 @@ import TransposedMatrix from './internal/TransposedMatrix';
 import {IMatrixLoader, IMatrixLoader2, viaAPI2Loader, adapterOne2Two} from './loader';
 import IDType from '../idtype/IDType';
 import ProductIDType from '../idtype/ProductIDType';
-import {StateTokenLeaf, TokenType} from '../provenance/StateToken';
+import {StateTokenLeaf, TokenType} from '../provenance/token/StateToken';
 
 /**
  * root matrix implementation holding the data

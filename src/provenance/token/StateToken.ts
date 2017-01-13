@@ -1,13 +1,8 @@
-/* *****************************************************************************
- * Caleydo - Visualization for Molecular Biology - http://caleydo.org
- * Copyright (c) The Caleydo Team. All rights reserved.
- * Licensed under the new BSD license, available at http://caleydo.org/license
- **************************************************************************** */
 /**
  * Created by Michael Gillhofer
  */
 'use strict';
-import IDType from '../idtype/IDType';
+import IDType from '../../idtype/IDType';
 
 
 export enum TokenType {
