@@ -4,7 +4,7 @@ import {IStateToken, StateTokenLeaf, StateTokenNode, TokenType} from './token/St
 import IDType from '../idtype/IDType';
 import {EventHandler} from '../event';
 import {RandomNumberGenerator} from './internal/RandomNumberGenerator';
-import {HashTable} from './internal/HashTable';
+import {HashBuilder} from './internal/HashBuilder';
 
 
 export class SimHash extends EventHandler {
@@ -43,7 +43,7 @@ export class SimHash extends EventHandler {
     return this.INSTANCE;
   }
 
-  private hashTable:HashTable[] = [];
+  private hashTable:HashBuilder[] = [];
 
   private _catWeighting:number[] = [30, 20, 25, 20, 5];
 
@@ -70,7 +70,7 @@ export class SimHash extends EventHandler {
       allTokens = allTokens.concat(t);
     }
     if (this.hashTable[type.id] == null) {
-      this.hashTable[type.id] = new HashTable(SimHash.HASH_TABLE_SIZE);
+      this.hashTable[type.id] = new HashBuilder(SimHash.HASH_TABLE_SIZE);
     }
     for (let i:number = 0; i < allTokens.length; i++) {
       this.hashTable[type.id].push(allTokens[i].value, allTokens[i].value, allTokens[i].importance, null);
@@ -82,7 +82,7 @@ export class SimHash extends EventHandler {
 
   getHashOfOrdinalIDTypeSelection(type:IDType, min:number, max:number, selectionType):string {
     if (this.hashTable[type.id] == null) {
-      this.hashTable[type.id] = new HashTable(SimHash.HASH_TABLE_SIZE);
+      this.hashTable[type.id] = new HashBuilder(SimHash.HASH_TABLE_SIZE);
     }
     let selection:number[] = type.selections(selectionType).dim(0).asList(0);
     for (const sel of selection) {
@@ -154,7 +154,7 @@ export class SimHash extends EventHandler {
     //let b:number = 0;
     let splitTokens = SimHash.prepHashCalc(tokens);
     if (this.hashTable[cat] == null) {
-      this.hashTable[cat] = new HashTable(SimHash.HASH_TABLE_SIZE);
+      this.hashTable[cat] = new HashBuilder(SimHash.HASH_TABLE_SIZE);
     }
 
     let ordinalTokens:StateTokenLeaf[] = splitTokens[1];
