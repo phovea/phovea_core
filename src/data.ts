@@ -9,7 +9,7 @@
 import {offline as isOffline, fixId, randomId} from './index';
 import {getAPIJSON, sendAPI} from './ajax';
 import {list as listPlugins} from './plugin';
-import {IDataDescription, IDataType, DummyDataType} from './datatype';
+import {IDataDescription, IDataType, DummyDataType, IDataDescriptionMetaData} from './datatype';
 import {ITable} from './table';
 import {wrapObjects} from './table/Table';
 export {random_id, fixId} from './index';
@@ -170,7 +170,7 @@ export function getFirstByFQName(name: string | RegExp) {
 
 function getFirstWithCache(name: string | RegExp, cache: Map<string, Promise<IDataType>>, attr: string) {
   const r = typeof name === 'string' ? new RegExp(<string>name) : name;
-  for (let [k, v] of Array.from(cache.entries())) {
+  for (const [k, v] of Array.from(cache.entries())) {
     if (r.test(k)) {
       return v;
     }
@@ -214,7 +214,7 @@ export function create(desc: IDataDescription): Promise<IDataType> {
   return transformEntry(desc);
 }
 
-function prepareData(desc: IDataDescription, file?: File) {
+function prepareData(desc: any, file?: File) {
   const data = new FormData();
   data.append('desc', JSON.stringify(desc));
   if (file) {
@@ -225,12 +225,12 @@ function prepareData(desc: IDataDescription, file?: File) {
 
 /**
  * uploads a given dataset description with optional file attachment ot the server
- * @param desc
+ * @param data
  * @param file
  * @returns {Promise<*>}
  */
-export function upload(desc: IDataDescription, file?: File): Promise<IDataType> {
-  const data = prepareData(desc, file);
+export function upload(data: any, file?: File): Promise<IDataType> {
+  data = prepareData(data, file);
   return sendAPI('/dataset/', data, 'POST').then(transformEntry);
 }
 
@@ -241,8 +241,8 @@ export function upload(desc: IDataDescription, file?: File): Promise<IDataType> 
  * @param file
  * @returns {Promise<*>} returns the update dataset
  */
-export function update(entry: IDataType, desc: IDataDescription, file?: File): Promise<IDataType> {
-  const data = prepareData(desc, file);
+export function update(entry: IDataType, data: any, file?: File): Promise<IDataType> {
+  data = prepareData(data, file);
   return sendAPI(`/dataset/${entry.desc.id}`, data, 'PUT').then((desc: IDataDescription) => {
     // clear existing cache
     clearCache(entry);
@@ -258,8 +258,8 @@ export function update(entry: IDataType, desc: IDataDescription, file?: File): P
  * @param file
  * @returns {Promise<*>} returns the update dataset
  */
-export function modify(entry: IDataType, desc: IDataDescription, file?: File): Promise<IDataType> {
-  const data = prepareData(desc, file);
+export function modify(entry: IDataType, data: any, file?: File): Promise<IDataType> {
+  data = prepareData(data, file);
   return sendAPI(`/dataset/${entry.desc.id}`, data, 'POST').then((desc: IDataDescription) => {
     clearCache(entry);
     return transformEntry(desc);

@@ -37,19 +37,19 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
     return this.getGraph(desc).then((impl) => new ProvenanceGraph(desc, impl));
   }
 
-  clone(graph: GraphBase) {
+  clone(graph: GraphBase): Promise<ProvenanceGraph> {
     const desc = this.createDesc();
-    return this.getGraph(desc).then((new_) => {
-      new_.restoreDump(graph.persist(), provenanceGraphFactory());
-      return new ProvenanceGraph(desc, new_);
+    return this.getGraph(desc).then((newGraph) => {
+      newGraph.restoreDump(graph.persist(), provenanceGraphFactory());
+      return new ProvenanceGraph(desc, newGraph);
     });
   }
 
   import(json: any): Promise<ProvenanceGraph> {
     const desc = this.createDesc();
-    return this.getGraph(desc).then((new_) => {
-      new_.restoreDump(json, provenanceGraphFactory());
-      return new ProvenanceGraph(desc, new_);
+    return this.getGraph(desc).then((newGraph) => {
+      newGraph.restoreDump(json, provenanceGraphFactory());
+      return new ProvenanceGraph(desc, newGraph);
     });
   }
 

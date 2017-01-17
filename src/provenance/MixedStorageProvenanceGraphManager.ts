@@ -54,7 +54,7 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
   }
 
   cloneLocal(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
-    return this.getGraph(desc).then(this.local.clone.bind(this.local));
+    return this.getGraph(desc).then((g) => this.local.clone(g));
   }
 
   importLocal(json: any) {

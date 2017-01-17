@@ -12,14 +12,7 @@ import {ISelectAble, SelectAble} from './idtype';
 import {extent, IHistogram} from './math';
 import {all, none, Range1D, RangeLike, Range1DGroup, composite, Range, CompositeRange1D} from './range';
 
-/**
- * basic description elements
- */
-export interface IDataDescription {
-  /**
-   * the unique id
-   */
-  readonly id: string;
+export interface IDataDescriptionMetaData {
   /**
    * the type of the datatype, e.g. matrix, vector, stratification, ...
    */
@@ -40,6 +33,15 @@ export interface IDataDescription {
 
   readonly creator: string;
   readonly ts: number;
+}
+/**
+ * basic description elements
+ */
+export interface IDataDescription extends IDataDescriptionMetaData {
+  /**
+   * the unique id
+   */
+  readonly id: string;
 }
 
 /**
@@ -126,7 +128,7 @@ export function assignData(node: Element, data: IDataType) {
 
 export interface IHistAbleDataType<D extends IValueTypeDesc> extends IDataType {
   valuetype: D;
-  hist(nbins?:number): Promise<IHistogram>;
+  hist(nbins?: number): Promise<IHistogram>;
   readonly length: number;
 }
 
