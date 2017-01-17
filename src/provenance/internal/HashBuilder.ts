@@ -5,6 +5,8 @@
 import {RandomNumberGenerator} from './RandomNumberGenerator';
 
 interface IHashTableValue {
+  name: string;
+  value: string;
   hash: string;
   probability: number;
 }
@@ -13,7 +15,7 @@ export class HashBuilder {
 
   private static readonly MAX_PROBABILITY = 1;
 
-  private readonly dict = new Map<string, IHashTableValue>();
+  private readonly dict = new Set<IHashTableValue>();
 
   constructor(private readonly maxSize:number) {
 
@@ -24,7 +26,7 @@ export class HashBuilder {
       hash = String(murmurhash2_32_gc(value, 0));
     }
 
-    this.dict.set(name, {hash: hash, probability: probability});
+    this.dict.add({name: name, value: value, hash: hash, probability: probability});
 
     return this;
   }

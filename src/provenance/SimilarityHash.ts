@@ -94,6 +94,10 @@ export class SimHash extends EventHandler {
 
   private _catWeighting:number[] = [30, 20, 25, 20, 5];
 
+  private constructor() {
+    super();
+  }
+
   get categoryWeighting() {
     return this._catWeighting;
   }
@@ -103,7 +107,7 @@ export class SimHash extends EventHandler {
     //this.fire('weighting_change');
   }
 
-  public getHashOfIDTypeSelection(token:StateTokenLeaf, selectionType):string {
+  public getHashOfIDTypeSelection(token:StateTokenLeaf, selectionType = defaultSelectionType):string {
     let type:IDType = (<IDType>token.value); // TODO ensure that value contains an IDType
 
     if (this.hashBuilder[type.id] === undefined) {
@@ -127,7 +131,7 @@ export class SimHash extends EventHandler {
     return token.hash;
   }
 
-  public getHashOfOrdinalIDTypeSelection(type:IDType, min:number, max:number, selectionType):string {
+  public getHashOfOrdinalIDTypeSelection(type:IDType, min:number, max:number, selectionType = defaultSelectionType):string {
     if (this.hashBuilder[type.id] === undefined) {
       this.hashBuilder[type.id] = new HashBuilder(SimHash.HASH_TABLE_SIZE);
     }
@@ -184,13 +188,13 @@ export class SimHash extends EventHandler {
         hashingFnc = (t) => null;
         break;
       case 1: // ordinal tokens
-        hashingFnc = (t) => (t) => ordinalHash(t.value[0], t.value[1], t.value[2], SimHash.NUMBER_OF_BITS);
+        hashingFnc = (t) => ordinalHash(t.value[0], t.value[1], t.value[2], SimHash.NUMBER_OF_BITS);
         break;
       case 2: // ordinal idType tokens
-        hashingFnc = (t) => this.getHashOfOrdinalIDTypeSelection(t.value[0], t.value[1], t.value[2], defaultSelectionType);
+        hashingFnc = (t) => this.getHashOfOrdinalIDTypeSelection(t.value[0], t.value[1], t.value[2]);
         break;
       case 3: // idtype tokens
-        hashingFnc = (t) => this.getHashOfIDTypeSelection(t, defaultSelectionType);
+        hashingFnc = (t) => this.getHashOfIDTypeSelection(t);
         break;
     }
 
