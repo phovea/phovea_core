@@ -14,7 +14,7 @@ export interface ILayoutElem {
   getBounds(): Rect;
 
   layoutOption<T>(name: string): T;
-  layoutOption<T>(name: string, default_: T): T;
+  layoutOption<T>(name: string, defaultValue: T): T;
 }
 
 export interface ILayoutOptions {
@@ -62,11 +62,11 @@ export class ALayoutElem {
     return this.getBounds().size;
   }
 
-  layoutOption<T>(name: string, default_: T = null): T {
+  layoutOption<T>(name: string, defaultValue: T = null): T {
     if (this.options.hasOwnProperty(name)) {
       return this.options[name];
     }
-    return default_;
+    return defaultValue;
   }
 }
 
@@ -131,8 +131,8 @@ function isDefault(v: number) {
   return v < 0 || isNaN(v);
 }
 
-function grab(v_def: number, v: number) {
-  return isDefault(v_def) ? v : v_def;
+function grab(definition: number, v: number) {
+  return isDefault(definition) ? v : definition;
 }
 
 function waitFor(promises: Promise<any>[], redo: boolean = false): Promise<boolean> {

@@ -50,7 +50,7 @@ export class AIterator<T> {
   }
 
   forEach(callbackfn: (value: T, index: number) => void, thisArg?: any): void {
-    var i = 0;
+    let i = 0;
     while (this.hasNext()) {
       callbackfn.call(thisArg, this.next(), i++);
     }
@@ -70,7 +70,7 @@ export class AIterator<T> {
    * @returns {Array}
    */
   asList() {
-    var r = [];
+    const r = [];
     while (this.hasNext()) {
       r.push(this.next());
     }
