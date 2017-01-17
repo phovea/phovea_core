@@ -52,11 +52,11 @@ export abstract class AView extends EventHandler implements IView {
     this._layoutOptions[name] = value;
   }
 
-  layoutOption<T>(name: string, default_: T = null): T {
+  layoutOption<T>(name: string, defaultValue: T = null): T {
     if (this._layoutOptions.hasOwnProperty(name)) {
       return this._layoutOptions[name];
     }
-    return default_;
+    return defaultValue;
   }
 }
 

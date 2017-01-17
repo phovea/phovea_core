@@ -186,7 +186,7 @@ export function transpose(m: any[][]) {
   if (m.length === 0 || m[0].length === 0) {
     return [];
   }
-  let r = m[0].map((i) => [i]);
+  const r = m[0].map((i) => [i]);
   for (let i = 1; i < m.length; ++i) {
     m[i].forEach((v, i) => r[i].push(v));
   }
@@ -195,7 +195,7 @@ export function transpose(m: any[][]) {
 
 function maskImpl(arr: number|number[], missing: number) {
   if (Array.isArray(arr)) {
-    let vs = <number[]>arr;
+    const vs = <number[]>arr;
     if (vs.indexOf(missing) >= 0) {
       return vs.map((v) => v === missing ? NaN : v);
     }
@@ -264,7 +264,7 @@ export function categorical2partitioning<T>(data: T[], categories: T[], options:
   if (m.skipEmptyCategories) {
     groups = groups.filter((g) => g.indices.length > 0);
   }
-  let granges = groups.map((g) => {
+  const granges = groups.map((g) => {
     return new Range1DGroup(g.name, g.color, Range1D.from(g.indices));
   });
   return composite(m.name, granges);
@@ -327,7 +327,7 @@ export function createDefaultDataDesc(namespace = 'localData'): IDataDescription
   const id = uniqueString(namespace);
   return {
     type: 'default',
-    id: id,
+    id,
     name: id,
     fqname: id,
     description: '',

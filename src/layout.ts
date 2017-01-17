@@ -198,16 +198,16 @@ export function flowLayout(horizontal: boolean, gap: number, padding = {top: 0, 
       }
     });
     // set all locations
-    let x_acc = padding.left;
-    let y_acc = padding.top;
+    let xAccumulator = padding.left;
+    let yAccumulator = padding.top;
     const promises = [];
     elems.forEach((elem, i) => {
       const s = sizes[i];
-      promises.push(elem.setBounds(x_acc, y_acc, s[0], s[1]));
+      promises.push(elem.setBounds(xAccumulator, yAccumulator, s[0], s[1]));
       if (horizontal) {
-        x_acc += s[0] + gap;
+        xAccumulator += s[0] + gap;
       } else {
-        y_acc += s[1] + gap;
+        yAccumulator += s[1] + gap;
       }
     });
     return waitFor(promises);
@@ -228,7 +228,7 @@ export function distributeLayout(horizontal: boolean, defaultValue: number, padd
   function DistributeLayout(elems: ILayoutElem[], w: number, h: number, parent: ILayoutElem) {
     w -= padding.left + padding.right;
     h -= padding.top + padding.bottom;
-    let freeSpace = (horizontal ? w : h);
+    const freeSpace = (horizontal ? w : h);
     let fixUsed = 0;
 
     // count statistics
@@ -242,14 +242,14 @@ export function distributeLayout(horizontal: boolean, defaultValue: number, padd
 
     const gap = (freeSpace - fixUsed) / (elems.length - 1);
 
-    let x_acc = padding.left;
-    let y_acc = padding.top;
+    let xAccumulator = padding.left;
+    let yAccumulator = padding.top;
 
     if (elems.length === 1) { //center the single one
       if (horizontal) {
-        x_acc += (freeSpace - fixUsed) / 2;
+        xAccumulator += (freeSpace - fixUsed) / 2;
       } else {
-        y_acc += (freeSpace - fixUsed) / 2;
+        yAccumulator += (freeSpace - fixUsed) / 2;
       }
     }
 
@@ -259,11 +259,11 @@ export function distributeLayout(horizontal: boolean, defaultValue: number, padd
       if (isDefault(fix)) {
         fix = defaultValue;
       }
-      promises.push(setBounds(x_acc, y_acc, w, h, elem, fix));
+      promises.push(setBounds(xAccumulator, yAccumulator, w, h, elem, fix));
       if (horizontal) {
-        x_acc += fix + gap;
+        xAccumulator += fix + gap;
       } else {
-        y_acc += fix + gap;
+        yAccumulator += fix + gap;
       }
     });
     return waitFor(promises);

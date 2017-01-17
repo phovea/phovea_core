@@ -119,7 +119,7 @@ export class Iterator extends AIterator<number> implements IIterator<number> {
     if (!this.hasNext()) {
       throw new RangeError('end of iterator');
     }
-    var r = this.act;
+    const r = this.act;
     this.act += this.step;
     if (this.step < 0 && this.act < this.to) {
       this.act = this.to;
@@ -151,8 +151,8 @@ export class Iterator extends AIterator<number> implements IIterator<number> {
     } else if (this.byMinusOne) {
       return Math.max(this.from - this.to, 0);
     }
-    var d = this.isIncreasing ? (this.to - this.from + 1) : (this.from - this.to + 1);
-    var s = Math.abs(this.step);
+    const d = this.isIncreasing ? (this.to - this.from + 1) : (this.from - this.to + 1);
+    const s = Math.abs(this.step);
     if (d <= 0) { //no range
       return 0;
     }
@@ -244,7 +244,7 @@ export class ConcatIterator<T> extends AIterator<T> implements IIterator<T> {
    */
   hasNext() {
     //based on http://grepcode.com/file/repo1.maven.org/maven2/com.google.guava/guava/r08/com/google/common/collect/Iterators.java#Iterators.concat%28java.util.Iterator%29
-    var currentHasNext = false;
+    let currentHasNext = false;
     while (!(currentHasNext = this.act.hasNext()) && this.its.length > 0) {
       this.act = this.its.shift();
     }
@@ -266,7 +266,7 @@ export class ConcatIterator<T> extends AIterator<T> implements IIterator<T> {
    * @returns {Array}
    */
   asList() {
-    var r = [];
+    const r = [];
     while (this.hasNext()) {
       r.push(this.next());
     }
@@ -274,19 +274,19 @@ export class ConcatIterator<T> extends AIterator<T> implements IIterator<T> {
   }
 
   get isIncreasing() {
-    return this.its.every((it => it.isIncreasing));
+    return this.its.every((it) => it.isIncreasing);
   }
 
   get isDecreasing() {
-    return this.its.every((it => it.isDecreasing));
+    return this.its.every((it) => it.isDecreasing);
   }
 
   get byOne() {
-    return this.its.every((it => it.byOne));
+    return this.its.every((it) => it.byOne);
   }
 
   get byMinusOne() {
-    return this.its.every((it => it.byMinusOne));
+    return this.its.every((it) => it.byMinusOne);
   }
 }
 
