@@ -3,7 +3,11 @@
  */
 import {mixin} from '../index';
 import {get as getData, remove as removeData, upload, list as listData} from '../data';
-import ProvenanceGraph, {IProvenanceGraphManager, provenanceGraphFactory, IProvenanceGraphDataDescription} from './ProvenanceGraph';
+import ProvenanceGraph, {
+  IProvenanceGraphManager,
+  provenanceGraphFactory,
+  IProvenanceGraphDataDescription
+} from './ProvenanceGraph';
 import GraphBase from '../graph/GraphBase';
 import GraphProxy from '../graph/GraphProxy';
 import {retrieve} from '../session';
@@ -69,7 +73,7 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
       name: 'Workspace for ' + this.options.application,
       fqname: 'provenance_graphs/Workspace for ' + this.options.application,
       creator: getCurrentUser(),
-      size: [0,0],
+      size: [0, 0],
       ts: Date.now(),
       description: ''
     };

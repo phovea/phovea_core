@@ -2,7 +2,11 @@
  * Created by sam on 12.02.2015.
  */
 import {mixin} from '../index';
-import ProvenanceGraph, {IProvenanceGraphManager, provenanceGraphFactory, IProvenanceGraphDataDescription} from './ProvenanceGraph';
+import ProvenanceGraph, {
+  IProvenanceGraphManager,
+  provenanceGraphFactory,
+  IProvenanceGraphDataDescription
+} from './ProvenanceGraph';
 import {retrieve} from '../session';
 import GraphBase from '../graph/GraphBase';
 import LocalStorageGraph from '../graph/LocalStorageGraph';

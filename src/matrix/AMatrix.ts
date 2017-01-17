@@ -90,7 +90,7 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
     if (v.type === VALUE_TYPE_INT || v.type === VALUE_TYPE_REAL) {
       return this.data().then((d) => computeStats(...<any>d));
     }
-    return Promise.reject('invalid value type: '+v.type);
+    return Promise.reject('invalid value type: ' + v.type);
   }
 
   hist(bins?: number, range: RangeLike = all(), containedIds = 0): Promise<IHistogram> {

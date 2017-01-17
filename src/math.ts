@@ -355,7 +355,7 @@ class RangeHistogram implements ICatHistogram {
  * @param arr the array
  * @return {[number,number]} [min, max]
  */
-export function extent(arr: IIterable<number>) : [number, number] {
+export function extent(arr: IIterable<number>): [number, number] {
   let min = NaN, max = NaN;
   arr.forEach((v) => {
     if (isNaN(v)) {
