@@ -119,10 +119,6 @@ export default class StateNode extends GraphNode {
     return tree.similarity;
   }
 
-  getSimForLineupTo(otherState: StateNode) {
-    return this.getMatchedTreeWithOtherState(otherState).similarityForLineup;
-  }
-
   numberOfSetBits(i: number): number {
     /*jshint bitwise:false */
     /*tslint:disable:no-bitwise */
