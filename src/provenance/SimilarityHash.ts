@@ -14,14 +14,6 @@ export class SimHash extends EventHandler {
   private static readonly NUMBER_OF_BITS:number = 300;
   private static readonly HASH_TABLE_SIZE:number = 1000;
 
-  public static getCategoryColor(category:string) {
-    return SimCats.CATEGORIES.filter((d) => d.name === category)[0].color;
-  }
-
-  public static getWeighting():number[] {
-    return SimCats.CATEGORIES.map((d) => d.weight);
-  }
-
   /**
    * Uses the singleton pattern
    * @returns {SimHash}

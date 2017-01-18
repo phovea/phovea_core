@@ -83,7 +83,7 @@ export default class StateNode extends GraphNode {
     if (thisH[0] === SimCats.INVALID.name || otherH[0] === SimCats.INVALID.name) {
       return -1;
     }
-    let weighting = SimHash.getWeighting();
+    let weighting = SimCats.getWeights();
     let similarity: number = 0;
     for (let j = 0; j < 5; j++) {
       let len = Math.min(thisH[j].length, otherH[j].length);

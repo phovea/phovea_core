@@ -188,7 +188,7 @@ export class MatchedTokenTree {
 
   get similarityPerCategory() {
     let leafs:TreeNode[] = this.root.leafs;
-    let weights = SimHash.getWeighting();
+    let weights = SimCats.getWeights();
     const sims = [0, 0, 0, 0, 0];
     const total = [0, 0, 0, 0, 0];
     for (let i = 0; i < leafs.length; i++) {
@@ -203,7 +203,7 @@ export class MatchedTokenTree {
   }
 
   get similarity() {
-    let weights = SimHash.getWeighting();
+    let weights = SimCats.getWeights();
     const sims = this.similarityPerCategory;
     let sim = 0;
     for (let i = 0; i < weights.length; i++) {

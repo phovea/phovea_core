@@ -70,4 +70,13 @@ export class SimCats {
     SimCats.LOGIC,
   ];
 
+
+  public static getCategoryColor(category:string) {
+    return SimCats.CATEGORIES.filter((d) => d.name === category)[0].color;
+  }
+
+  public static getWeights():number[] {
+    return SimCats.CATEGORIES.map((d) => d.weight);
+  }
+
 }

@@ -247,7 +247,7 @@ export class TreeNode {
   protected _unscaledSize = -1;
 
   get getScaledSize() {
-    let weights = SimHash.getWeighting();
+    let weights = SimCats.getWeights();
     return this._unscaledSize * weights[this.category];
   }
 
@@ -319,7 +319,7 @@ class DummyTreeNode extends TreeNode {
   private tokenSim = -1;
 
   get getScaledSize() {
-    let weights = SimHash.getWeighting();
+    let weights = SimCats.getWeights();
     return this.tokenSim * weights[this.category];
   }
 
