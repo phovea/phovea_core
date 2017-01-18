@@ -17,18 +17,68 @@ export interface ISimilarityCategory {
   active: boolean;
 }
 
+export class SimilarityCategories {
 
-export class SimHash extends EventHandler {
+  public static readonly INVALID:ISimilarityCategory = {
+    name: 'invalid',
+    color: '#fff',
+    icon: '',
+    weight: 0,
+    active: false
+  };
 
-  public static readonly CATEGORIES2: ISimilarityCategory[] = [
-    {name: cat.data, color: '#e41a1c', icon: 'fa-database', weight: 30, active: true},
-    {name: cat.visual, color: '#377eb8', icon: 'fa-bar-chart', weight: 20, active: true},
-    {name: cat.selection, color: '#984ea3', icon: 'fa-pencil-square', weight: 25, active: true},
-    {name: cat.layout, color: '#ffff33', icon: 'fa-desktop', weight: 20, active: true},
-    {name: cat.logic, color: '#ff7f00', icon: 'fa-gear', weight: 5, active: true}
+  public static readonly DATA:ISimilarityCategory = {
+    name: cat.data,
+    color: '#e41a1c',
+    icon: 'fa-database',
+    weight: 30,
+    active: true
+  };
+
+  public static readonly VISUAL:ISimilarityCategory = {
+    name: cat.visual,
+    color: '#377eb8',
+    icon: 'fa-bar-chart',
+    weight: 20,
+    active: true
+  };
+
+  public static readonly SELECTION:ISimilarityCategory = {
+    name: cat.selection,
+    color: '#984ea3',
+    icon: 'fa-pencil-square',
+    weight: 25,
+    active: true
+  };
+
+  public static readonly LAYOUT:ISimilarityCategory = {
+    name: cat.layout,
+    color: '#ffff33',
+    icon: 'fa-desktop',
+    weight: 20,
+    active: true
+  };
+
+  public static readonly LOGIC:ISimilarityCategory = {
+    name: cat.logic,
+    color: '#ff7f00',
+    icon: 'fa-gear',
+    weight: 5,
+    active: true
+  };
+
+  public static readonly CATEGORIES: ISimilarityCategory[] = [
+    SimilarityCategories.DATA,
+    SimilarityCategories.VISUAL,
+    SimilarityCategories.SELECTION,
+    SimilarityCategories.LAYOUT,
+    SimilarityCategories.LOGIC,
   ];
 
-  public static readonly INVALID_CATEGORY:ISimilarityCategory = {name: 'invalid', color: '#fff', icon: '', weight: 0, active: false};
+}
+
+
+export class SimHash extends EventHandler {
 
   private static INSTANCE:SimHash = new SimHash(); // === Singleton
 
@@ -36,11 +86,11 @@ export class SimHash extends EventHandler {
   private static readonly HASH_TABLE_SIZE:number = 1000;
 
   public static getCategoryColor(category:string) {
-    return this.CATEGORIES2.filter((d) => d.name === category)[0].color;
+    return SimilarityCategories.CATEGORIES.filter((d) => d.name === category)[0].color;
   }
 
   public static getWeighting():number[] {
-    return this.CATEGORIES2.map((d) => d.weight);
+    return SimilarityCategories.CATEGORIES.map((d) => d.weight);
   }
 
   /**
@@ -153,12 +203,12 @@ export class SimHash extends EventHandler {
 
   public calcHash(tokens:IStateToken[]):string[] {
     if (tokens.length === 0) {
-      return SimHash.CATEGORIES2.map(() => SimHash.INVALID_CATEGORY.name);
+      return SimilarityCategories.CATEGORIES.map(() => SimilarityCategories.INVALID.name);
     }
     tokens = SimHash.normalizeTokenPriority(tokens, 1);
     let leafs:StateTokenLeaf[] = SimHash.filterLeafsAndSerialize(tokens);
     let groupedTokens = SimHash.groupBy(leafs, 'category');
-    return SimHash.CATEGORIES2.map((cat) => this.calcHashOfCat(groupedTokens[cat.name], cat.name));
+    return SimilarityCategories.CATEGORIES.map((cat) => this.calcHashOfCat(groupedTokens[cat.name], cat.name));
   }
 
   private calcHashOfCat(tokens:StateTokenLeaf[], cat:string) {

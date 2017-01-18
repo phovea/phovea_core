@@ -4,7 +4,7 @@
 import {GraphNode, isType} from '../graph/graph';
 import ActionNode from './ActionNode';
 import ObjectNode from './ObjectNode';
-import {SimHash} from './SimilarityHash';
+import {SimHash, SimilarityCategories} from './SimilarityHash';
 import {IStateToken} from './token/StateToken';
 import {MatchedTokenTree} from './token/MatchedTokenTree';
 import {cat} from './ObjectNode';
@@ -79,7 +79,7 @@ export default class StateNode extends GraphNode {
     if (thisH === null || otherH === null) {
       return -1;
     }
-    if (thisH[0] === SimHash.INVALID_CATEGORY.name || otherH[0] === SimHash.INVALID_CATEGORY.name) {
+    if (thisH[0] === SimilarityCategories.INVALID.name || otherH[0] === SimilarityCategories.INVALID.name) {
       return -1;
     }
     let weighting = SimHash.getWeighting();
