@@ -151,7 +151,7 @@ export class EventHandler implements IEventHandler {
       });
     } else {
       Object.keys(events).forEach((event) => {
-        let h = events[event];
+        const h = events[event];
         this.on(event, h);
       });
     }
@@ -176,7 +176,7 @@ export class EventHandler implements IEventHandler {
       });
     } else {
       Object.keys(events).forEach((event) => {
-        let h = events[event];
+        const h = events[event];
         this.off(event, h);
       });
     }

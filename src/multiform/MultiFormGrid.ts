@@ -222,7 +222,7 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
         return this.switchTo(selected).then((vis) => {
           //FIXME
           if (vis && persisted.content && typeof((<any>vis).restore) === 'function') {
-            return Promise.resolve((<any>vis).restore(persisted.content)).then(() => that);
+            return <Promise<MultiFormGrid>>Promise.resolve((<any>vis).restore(persisted.content)).then(() => that);
           }
           return Promise.resolve(that);
         });

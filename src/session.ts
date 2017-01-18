@@ -47,9 +47,9 @@ export function has(key: string) {
  * Returns the value for the given key if it exists in the session.
  * Otherwise returns the `default_` parameter, which is by default `null`.
  * @param key
- * @param default_
+ * @param defaultValue
  * @returns {T}
  */
-export function retrieve<T>(key: string, default_: T = null): T {
-  return has(key) ? JSON.parse(context.getItem(key)) : default_;
+export function retrieve<T>(key: string, defaultValue: T = null): T {
+  return has(key) ? JSON.parse(context.getItem(key)) : defaultValue;
 }

@@ -15,7 +15,7 @@ import GraphBase, {IGraphFactory, IGraphDataDescription} from '../graph/GraphBas
 
 export interface IProvenanceGraphDataDescription extends IGraphDataDescription {
   readonly local?: boolean;
-  readonly size: [number,number];
+  readonly size: [number, number];
   readonly attrs: {
     graphtype: string;
     of: string;

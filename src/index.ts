@@ -25,17 +25,20 @@ export const version = __VERSION__;
  * @type {boolean}
  */
 export let offline = false;
+declare const __APP_CONTEXT__;
+
+/* tslint:disable:variable-name */
 /**
  * server prefix ofr api calls
  * @type {string}
  */
-declare const __APP_CONTEXT__;
 export let server_url: string = (__APP_CONTEXT__ || '/') + 'api';
 /**
  * server suffix for api calls
  * @type {string}
  */
 export let server_json_suffix: string = '';
+/* tslint:enable:variable-name */
 
 /**
  * initializes certain properties of the core
@@ -43,9 +46,9 @@ export let server_json_suffix: string = '';
  */
 export function init(config: {offline?: boolean, server_url?: string, server_json_suffix?: string} = {}) {
   config = mixin({
-    offline: offline,
-    server_url: server_url,
-    server_json_suffix: server_json_suffix
+    offline,
+    server_url,
+    server_json_suffix
   }, config);
   offline = config.offline;
   server_url = config.server_url;
@@ -90,7 +93,7 @@ _init();
 export function mixin<T>(a: T, ...bs: any[]): T {
   function extend(r, b) {
     Object.keys(b).forEach((key) => {
-      let v = b[key];
+      const v = b[key];
       if (Object.prototype.toString.call(v) === '[object Object]') {
         r[key] = (r[key] != null) ? extend(r[key], v) : v;
       } else {
@@ -139,7 +142,6 @@ export function bind(f: () => any, thisArg: any, ...args: any[]) {
 /**
  * getter generator by name or index
  * @deprecated too simple to write
- * @param attr
  */
 export function getter(...index: number[]);
 export function getter(...attr: string[]);
@@ -244,7 +246,12 @@ export function randomId(length = 8) {
   }
   return id.substr(0, length);
 }
+/* tslint:disable:variable-name */
+/**
+ * @deprecated
+ */
 export const random_id = randomId;
+/* tslint:enable:variable-name */
 
 /**
  * fixes a given name by converting it to plain camelcase
@@ -256,7 +263,13 @@ export function fixId(name: string) {
   const words = clean.trim().split(/\s+/); //remove heading and trailing spaces and combine multiple one during split
   return words.map((w, i) => (i === 0 ? w[0].toLowerCase() : w[0].toUpperCase()) + w.slice(1)).join('');
 }
+
+/* tslint:disable:variable-name */
+/**
+ * @deprecated
+ */
 export const fix_id = fixId;
+/* tslint:enable:variable-name */
 
 /**
  * utility function to get notified, when the given dom element is removed from its parent
@@ -298,7 +311,7 @@ export function onDOMNodeRemoved(node: Element|Element[], callback: () => void, 
  * @param baseClass
  */
 export function extendClass(subClass, baseClass) {
-  for (let p in baseClass) {
+  for (const p in baseClass) {
     if (baseClass.hasOwnProperty(p)) {
       subClass[p] = baseClass[p];
     }

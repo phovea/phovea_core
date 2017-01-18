@@ -30,7 +30,7 @@ interface IParseDimResult {
  * @returns {Range}
  */
 export default function parseRange(code: string) {
-  const dims : Range1D[] = [];
+  const dims: Range1D[] = [];
   let act = 0, c: string, t: IParseDimResult;
   code = code.trim();
   while (act < code.length) {

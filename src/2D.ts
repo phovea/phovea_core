@@ -139,17 +139,15 @@ export class Intersection {
     const g = c12.x * (c10.y - c20.y) + c12.y * (-c10.x + c20.x);
     const poly = new Polynomial(-e * e, -2 * e * f, a * b - f * f - 2 * e * g, a * c - 2 * f * g, a * d - g * g);
     const roots = poly.getRoots();
-    for (let i = 0; i < roots.length; i++) {
-      const s = roots[i];
+    for (const s of roots) {
       if (0 <= s && s <= 1) {
-        let xRoots = new Polynomial(-c12.x, -c11.x, -c10.x + c20.x + s * c21.x + s * s * c22.x).getRoots();
-        let yRoots = new Polynomial(-c12.y, -c11.y, -c10.y + c20.y + s * c21.y + s * s * c22.y).getRoots();
+        const xRoots = new Polynomial(-c12.x, -c11.x, -c10.x + c20.x + s * c21.x + s * s * c22.x).getRoots();
+        const yRoots = new Polynomial(-c12.y, -c11.y, -c10.y + c20.y + s * c21.y + s * s * c22.y).getRoots();
         if (xRoots.length > 0 && yRoots.length > 0) {
-          checkRoots:for (let j = 0; j < xRoots.length; j++) {
-            let xRoot = xRoots[j];
+          checkRoots:for (const xRoot of xRoots) {
             if (0 <= xRoot && xRoot <= 1) {
-              for (let k = 0; k < yRoots.length; k++) {
-                if (Math.abs(xRoot - yRoots[k]) < TOLERANCE) {
+              for (const yRoot of yRoots) {
+                if (Math.abs(xRoot - yRoot) < TOLERANCE) {
                   result.points.push(c22.multiply(s * s).add(c21.multiply(s).add(c20)));
                   break checkRoots;
                 }
@@ -166,7 +164,7 @@ export class Intersection {
     let a, b, c, d;
     let c12, c11, c10;
     let c23, c22, c21, c20;
-    let result = new Intersection();
+    const result = new Intersection();
     a = a2.multiply(-2);
     c12 = a1.add(a.add(a3));
     a = a1.multiply(-2);
@@ -188,33 +186,31 @@ export class Intersection {
     c = a.add(b);
     c21 = new Vector2D(c.x, c.y);
     c20 = new Vector2D(b1.x, b1.y);
-    let c10x2 = c10.x * c10.x;
-    let c10y2 = c10.y * c10.y;
-    let c11x2 = c11.x * c11.x;
-    let c11y2 = c11.y * c11.y;
-    let c12x2 = c12.x * c12.x;
-    let c12y2 = c12.y * c12.y;
-    let c20x2 = c20.x * c20.x;
-    let c20y2 = c20.y * c20.y;
-    let c21x2 = c21.x * c21.x;
-    let c21y2 = c21.y * c21.y;
-    let c22x2 = c22.x * c22.x;
-    let c22y2 = c22.y * c22.y;
-    let c23x2 = c23.x * c23.x;
-    let c23y2 = c23.y * c23.y;
-    let poly = new Polynomial(-2 * c12.x * c12.y * c23.x * c23.y + c12x2 * c23y2 + c12y2 * c23x2, -2 * c12.x * c12.y * c22.x * c23.y - 2 * c12.x * c12.y * c22.y * c23.x + 2 * c12y2 * c22.x * c23.x + 2 * c12x2 * c22.y * c23.y, -2 * c12.x * c21.x * c12.y * c23.y - 2 * c12.x * c12.y * c21.y * c23.x - 2 * c12.x * c12.y * c22.x * c22.y + 2 * c21.x * c12y2 * c23.x + c12y2 * c22x2 + c12x2 * (2 * c21.y * c23.y + c22y2), 2 * c10.x * c12.x * c12.y * c23.y + 2 * c10.y * c12.x * c12.y * c23.x + c11.x * c11.y * c12.x * c23.y + c11.x * c11.y * c12.y * c23.x - 2 * c20.x * c12.x * c12.y * c23.y - 2 * c12.x * c20.y * c12.y * c23.x - 2 * c12.x * c21.x * c12.y * c22.y - 2 * c12.x * c12.y * c21.y * c22.x - 2 * c10.x * c12y2 * c23.x - 2 * c10.y * c12x2 * c23.y + 2 * c20.x * c12y2 * c23.x + 2 * c21.x * c12y2 * c22.x - c11y2 * c12.x * c23.x - c11x2 * c12.y * c23.y + c12x2 * (2 * c20.y * c23.y + 2 * c21.y * c22.y), 2 * c10.x * c12.x * c12.y * c22.y + 2 * c10.y * c12.x * c12.y * c22.x + c11.x * c11.y * c12.x * c22.y + c11.x * c11.y * c12.y * c22.x - 2 * c20.x * c12.x * c12.y * c22.y - 2 * c12.x * c20.y * c12.y * c22.x - 2 * c12.x * c21.x * c12.y * c21.y - 2 * c10.x * c12y2 * c22.x - 2 * c10.y * c12x2 * c22.y + 2 * c20.x * c12y2 * c22.x - c11y2 * c12.x * c22.x - c11x2 * c12.y * c22.y + c21x2 * c12y2 + c12x2 * (2 * c20.y * c22.y + c21y2), 2 * c10.x * c12.x * c12.y * c21.y + 2 * c10.y * c12.x * c21.x * c12.y + c11.x * c11.y * c12.x * c21.y + c11.x * c11.y * c21.x * c12.y - 2 * c20.x * c12.x * c12.y * c21.y - 2 * c12.x * c20.y * c21.x * c12.y - 2 * c10.x * c21.x * c12y2 - 2 * c10.y * c12x2 * c21.y + 2 * c20.x * c21.x * c12y2 - c11y2 * c12.x * c21.x - c11x2 * c12.y * c21.y + 2 * c12x2 * c20.y * c21.y, -2 * c10.x * c10.y * c12.x * c12.y - c10.x * c11.x * c11.y * c12.y - c10.y * c11.x * c11.y * c12.x + 2 * c10.x * c12.x * c20.y * c12.y + 2 * c10.y * c20.x * c12.x * c12.y + c11.x * c20.x * c11.y * c12.y + c11.x * c11.y * c12.x * c20.y - 2 * c20.x * c12.x * c20.y * c12.y - 2 * c10.x * c20.x * c12y2 + c10.x * c11y2 * c12.x + c10.y * c11x2 * c12.y - 2 * c10.y * c12x2 * c20.y - c20.x * c11y2 * c12.x - c11x2 * c20.y * c12.y + c10x2 * c12y2 + c10y2 * c12x2 + c20x2 * c12y2 + c12x2 * c20y2);
-    let roots = poly.getRootsInInterval(0, 1);
-    for (let i = 0; i < roots.length; i++) {
-      let s = roots[i];
-      let xRoots = new Polynomial(c12.x, c11.x, c10.x - c20.x - s * c21.x - s * s * c22.x - s * s * s * c23.x).getRoots();
-      let yRoots = new Polynomial(c12.y, c11.y, c10.y - c20.y - s * c21.y - s * s * c22.y - s * s * s * c23.y).getRoots();
+    const c10x2 = c10.x * c10.x;
+    const c10y2 = c10.y * c10.y;
+    const c11x2 = c11.x * c11.x;
+    const c11y2 = c11.y * c11.y;
+    const c12x2 = c12.x * c12.x;
+    const c12y2 = c12.y * c12.y;
+    const c20x2 = c20.x * c20.x;
+    const c20y2 = c20.y * c20.y;
+    const c21x2 = c21.x * c21.x;
+    const c21y2 = c21.y * c21.y;
+    const c22x2 = c22.x * c22.x;
+    const c22y2 = c22.y * c22.y;
+    const c23x2 = c23.x * c23.x;
+    const c23y2 = c23.y * c23.y;
+    const poly = new Polynomial(-2 * c12.x * c12.y * c23.x * c23.y + c12x2 * c23y2 + c12y2 * c23x2, -2 * c12.x * c12.y * c22.x * c23.y - 2 * c12.x * c12.y * c22.y * c23.x + 2 * c12y2 * c22.x * c23.x + 2 * c12x2 * c22.y * c23.y, -2 * c12.x * c21.x * c12.y * c23.y - 2 * c12.x * c12.y * c21.y * c23.x - 2 * c12.x * c12.y * c22.x * c22.y + 2 * c21.x * c12y2 * c23.x + c12y2 * c22x2 + c12x2 * (2 * c21.y * c23.y + c22y2), 2 * c10.x * c12.x * c12.y * c23.y + 2 * c10.y * c12.x * c12.y * c23.x + c11.x * c11.y * c12.x * c23.y + c11.x * c11.y * c12.y * c23.x - 2 * c20.x * c12.x * c12.y * c23.y - 2 * c12.x * c20.y * c12.y * c23.x - 2 * c12.x * c21.x * c12.y * c22.y - 2 * c12.x * c12.y * c21.y * c22.x - 2 * c10.x * c12y2 * c23.x - 2 * c10.y * c12x2 * c23.y + 2 * c20.x * c12y2 * c23.x + 2 * c21.x * c12y2 * c22.x - c11y2 * c12.x * c23.x - c11x2 * c12.y * c23.y + c12x2 * (2 * c20.y * c23.y + 2 * c21.y * c22.y), 2 * c10.x * c12.x * c12.y * c22.y + 2 * c10.y * c12.x * c12.y * c22.x + c11.x * c11.y * c12.x * c22.y + c11.x * c11.y * c12.y * c22.x - 2 * c20.x * c12.x * c12.y * c22.y - 2 * c12.x * c20.y * c12.y * c22.x - 2 * c12.x * c21.x * c12.y * c21.y - 2 * c10.x * c12y2 * c22.x - 2 * c10.y * c12x2 * c22.y + 2 * c20.x * c12y2 * c22.x - c11y2 * c12.x * c22.x - c11x2 * c12.y * c22.y + c21x2 * c12y2 + c12x2 * (2 * c20.y * c22.y + c21y2), 2 * c10.x * c12.x * c12.y * c21.y + 2 * c10.y * c12.x * c21.x * c12.y + c11.x * c11.y * c12.x * c21.y + c11.x * c11.y * c21.x * c12.y - 2 * c20.x * c12.x * c12.y * c21.y - 2 * c12.x * c20.y * c21.x * c12.y - 2 * c10.x * c21.x * c12y2 - 2 * c10.y * c12x2 * c21.y + 2 * c20.x * c21.x * c12y2 - c11y2 * c12.x * c21.x - c11x2 * c12.y * c21.y + 2 * c12x2 * c20.y * c21.y, -2 * c10.x * c10.y * c12.x * c12.y - c10.x * c11.x * c11.y * c12.y - c10.y * c11.x * c11.y * c12.x + 2 * c10.x * c12.x * c20.y * c12.y + 2 * c10.y * c20.x * c12.x * c12.y + c11.x * c20.x * c11.y * c12.y + c11.x * c11.y * c12.x * c20.y - 2 * c20.x * c12.x * c20.y * c12.y - 2 * c10.x * c20.x * c12y2 + c10.x * c11y2 * c12.x + c10.y * c11x2 * c12.y - 2 * c10.y * c12x2 * c20.y - c20.x * c11y2 * c12.x - c11x2 * c20.y * c12.y + c10x2 * c12y2 + c10y2 * c12x2 + c20x2 * c12y2 + c12x2 * c20y2);
+    const roots = poly.getRootsInInterval(0, 1);
+    for (const s of roots) {
+      const xRoots = new Polynomial(c12.x, c11.x, c10.x - c20.x - s * c21.x - s * s * c22.x - s * s * s * c23.x).getRoots();
+      const yRoots = new Polynomial(c12.y, c11.y, c10.y - c20.y - s * c21.y - s * s * c22.y - s * s * s * c23.y).getRoots();
       if (xRoots.length > 0 && yRoots.length > 0) {
-        let TOLERANCE = 1e-4;
-        checkRoots:for (let j = 0; j < xRoots.length; j++) {
-          let xRoot = xRoots[j];
+        const TOLERANCE = 1e-4;
+        checkRoots:for (const xRoot of xRoots) {
           if (0 <= xRoot && xRoot <= 1) {
-            for (let k = 0; k < yRoots.length; k++) {
-              if (Math.abs(xRoot - yRoots[k]) < TOLERANCE) {
+            for (const yRoot of yRoots) {
+              if (Math.abs(xRoot - yRoot) < TOLERANCE) {
                 result.points.push(c23.multiply(s * s * s).add(c22.multiply(s * s).add(c21.multiply(s).add(c20))));
                 break checkRoots;
               }
@@ -233,18 +229,17 @@ export class Intersection {
   static intersectBezier2Ellipse(p1, p2, p3, ec, rx, ry) {
     let a, b;
     let c2, c1, c0;
-    let result = new Intersection();
+    const result = new Intersection();
     a = p2.multiply(-2);
     c2 = p1.add(a.add(p3));
     a = p1.multiply(-2);
     b = p2.multiply(2);
     c1 = a.add(b);
     c0 = new Vector2D(p1.x, p1.y);
-    let rxrx = rx * rx;
-    let ryry = ry * ry;
-    let roots = new Polynomial(ryry * c2.x * c2.x + rxrx * c2.y * c2.y, 2 * (ryry * c2.x * c1.x + rxrx * c2.y * c1.y), ryry * (2 * c2.x * c0.x + c1.x * c1.x) + rxrx * (2 * c2.y * c0.y + c1.y * c1.y) - 2 * (ryry * ec.x * c2.x + rxrx * ec.y * c2.y), 2 * (ryry * c1.x * (c0.x - ec.x) + rxrx * c1.y * (c0.y - ec.y)), ryry * (c0.x * c0.x + ec.x * ec.x) + rxrx * (c0.y * c0.y + ec.y * ec.y) - 2 * (ryry * ec.x * c0.x + rxrx * ec.y * c0.y) - rxrx * ryry).getRoots();
-    for (let i = 0; i < roots.length; i++) {
-      let t = roots[i];
+    const rxrx = rx * rx;
+    const ryry = ry * ry;
+    const roots = new Polynomial(ryry * c2.x * c2.x + rxrx * c2.y * c2.y, 2 * (ryry * c2.x * c1.x + rxrx * c2.y * c1.y), ryry * (2 * c2.x * c0.x + c1.x * c1.x) + rxrx * (2 * c2.y * c0.y + c1.y * c1.y) - 2 * (ryry * ec.x * c2.x + rxrx * ec.y * c2.y), 2 * (ryry * c1.x * (c0.x - ec.x) + rxrx * c1.y * (c0.y - ec.y)), ryry * (c0.x * c0.x + ec.x * ec.x) + rxrx * (c0.y * c0.y + ec.y * ec.y) - 2 * (ryry * ec.x * c0.x + rxrx * ec.y * c0.y) - rxrx * ryry).getRoots();
+    for (const t of roots) {
       if (0 <= t && t <= 1) {
         result.points.push(c2.multiply(t * t).add(c1.multiply(t).add(c0)));
       }
@@ -257,9 +252,9 @@ export class Intersection {
     let c2, c1, c0;
     let cl;
     let n;
-    let min = a1.min(a2);
-    let max = a1.max(a2);
-    let result = new Intersection();
+    const min = a1.min(a2);
+    const max = a1.max(a2);
+    const result = new Intersection();
     a = p2.multiply(-2);
     c2 = p1.add(a.add(p3));
     a = p1.multiply(-2);
@@ -268,13 +263,12 @@ export class Intersection {
     c0 = new Vector2D(p1.x, p1.y);
     n = new Vector2D(a1.y - a2.y, a2.x - a1.x);
     cl = a1.x * a2.y - a2.x * a1.y;
-    let roots = new Polynomial(n.dot(c2), n.dot(c1), n.dot(c0) + cl).getRoots();
-    for (let i = 0; i < roots.length; i++) {
-      let t = roots[i];
+    const roots = new Polynomial(n.dot(c2), n.dot(c1), n.dot(c0) + cl).getRoots();
+    for (const t of roots) {
       if (0 <= t && t <= 1) {
-        let p4 = p1.lerp(p2, t);
-        let p5 = p2.lerp(p3, t);
-        let p6 = p4.lerp(p5, t);
+        const p4 = p1.lerp(p2, t);
+        const p5 = p2.lerp(p3, t);
+        const p6 = p4.lerp(p5, t);
         if (a1.x === a2.x) {
           if (min.y <= p6.y && p6.y <= max.y) {
             result.appendPoint(p6);
@@ -292,27 +286,27 @@ export class Intersection {
   }
 
   intersectBezier2Polygon(p1, p2, p3, points) {
-    let result = new Intersection();
-    let length = points.length;
+    const result = new Intersection();
+    const length = points.length;
     for (let i = 0; i < length; i++) {
-      let a1 = points[i];
-      let a2 = points[(i + 1) % length];
-      let inter = Intersection.intersectBezier2Line(p1, p2, p3, a1, a2);
+      const a1 = points[i];
+      const a2 = points[(i + 1) % length];
+      const inter = Intersection.intersectBezier2Line(p1, p2, p3, a1, a2);
       result.appendPoints(inter.points);
     }
     return result;
   }
 
   static intersectBezier2Rectangle(p1, p2, p3, r1, r2) {
-    let min = r1.min(r2);
-    let max = r1.max(r2);
-    let topRight = new Vector2D(max.x, min.y);
-    let bottomLeft = new Vector2D(min.x, max.y);
-    let inter1 = Intersection.intersectBezier2Line(p1, p2, p3, min, topRight);
-    let inter2 = Intersection.intersectBezier2Line(p1, p2, p3, topRight, max);
-    let inter3 = Intersection.intersectBezier2Line(p1, p2, p3, max, bottomLeft);
-    let inter4 = Intersection.intersectBezier2Line(p1, p2, p3, bottomLeft, min);
-    let result = new Intersection();
+    const min = r1.min(r2);
+    const max = r1.max(r2);
+    const topRight = new Vector2D(max.x, min.y);
+    const bottomLeft = new Vector2D(min.x, max.y);
+    const inter1 = Intersection.intersectBezier2Line(p1, p2, p3, min, topRight);
+    const inter2 = Intersection.intersectBezier2Line(p1, p2, p3, topRight, max);
+    const inter3 = Intersection.intersectBezier2Line(p1, p2, p3, max, bottomLeft);
+    const inter4 = Intersection.intersectBezier2Line(p1, p2, p3, bottomLeft, min);
+    const result = new Intersection();
     result.appendPoints(inter1.points);
     result.appendPoints(inter2.points);
     result.appendPoints(inter3.points);
@@ -324,7 +318,7 @@ export class Intersection {
     let a, b, c, d;
     let c13, c12, c11, c10;
     let c23, c22, c21, c20;
-    let result = new Intersection();
+    const result = new Intersection();
     a = a1.multiply(-1);
     b = a2.multiply(3);
     c = a3.multiply(-3);
@@ -355,49 +349,47 @@ export class Intersection {
     c = a.add(b);
     c21 = new Vector2D(c.x, c.y);
     c20 = new Vector2D(b1.x, b1.y);
-    let c10x2 = c10.x * c10.x;
-    let c10x3 = c10.x * c10.x * c10.x;
-    let c10y2 = c10.y * c10.y;
-    let c10y3 = c10.y * c10.y * c10.y;
-    let c11x2 = c11.x * c11.x;
-    let c11x3 = c11.x * c11.x * c11.x;
-    let c11y2 = c11.y * c11.y;
-    let c11y3 = c11.y * c11.y * c11.y;
-    let c12x2 = c12.x * c12.x;
-    let c12x3 = c12.x * c12.x * c12.x;
-    let c12y2 = c12.y * c12.y;
-    let c12y3 = c12.y * c12.y * c12.y;
-    let c13x2 = c13.x * c13.x;
-    let c13x3 = c13.x * c13.x * c13.x;
-    let c13y2 = c13.y * c13.y;
-    let c13y3 = c13.y * c13.y * c13.y;
-    let c20x2 = c20.x * c20.x;
-    let c20x3 = c20.x * c20.x * c20.x;
-    let c20y2 = c20.y * c20.y;
-    let c20y3 = c20.y * c20.y * c20.y;
-    let c21x2 = c21.x * c21.x;
-    let c21x3 = c21.x * c21.x * c21.x;
-    let c21y2 = c21.y * c21.y;
-    let c22x2 = c22.x * c22.x;
-    let c22x3 = c22.x * c22.x * c22.x;
-    let c22y2 = c22.y * c22.y;
-    let c23x2 = c23.x * c23.x;
-    let c23x3 = c23.x * c23.x * c23.x;
-    let c23y2 = c23.y * c23.y;
-    let c23y3 = c23.y * c23.y * c23.y;
-    let poly = new Polynomial(-c13x3 * c23y3 + c13y3 * c23x3 - 3 * c13.x * c13y2 * c23x2 * c23.y + 3 * c13x2 * c13.y * c23.x * c23y2, -6 * c13.x * c22.x * c13y2 * c23.x * c23.y + 6 * c13x2 * c13.y * c22.y * c23.x * c23.y + 3 * c22.x * c13y3 * c23x2 - 3 * c13x3 * c22.y * c23y2 - 3 * c13.x * c13y2 * c22.y * c23x2 + 3 * c13x2 * c22.x * c13.y * c23y2, -6 * c21.x * c13.x * c13y2 * c23.x * c23.y - 6 * c13.x * c22.x * c13y2 * c22.y * c23.x + 6 * c13x2 * c22.x * c13.y * c22.y * c23.y + 3 * c21.x * c13y3 * c23x2 + 3 * c22x2 * c13y3 * c23.x + 3 * c21.x * c13x2 * c13.y * c23y2 - 3 * c13.x * c21.y * c13y2 * c23x2 - 3 * c13.x * c22x2 * c13y2 * c23.y + c13x2 * c13.y * c23.x * (6 * c21.y * c23.y + 3 * c22y2) + c13x3 * (-c21.y * c23y2 - 2 * c22y2 * c23.y - c23.y * (2 * c21.y * c23.y + c22y2)), c11.x * c12.y * c13.x * c13.y * c23.x * c23.y - c11.y * c12.x * c13.x * c13.y * c23.x * c23.y + 6 * c21.x * c22.x * c13y3 * c23.x + 3 * c11.x * c12.x * c13.x * c13.y * c23y2 + 6 * c10.x * c13.x * c13y2 * c23.x * c23.y - 3 * c11.x * c12.x * c13y2 * c23.x * c23.y - 3 * c11.y * c12.y * c13.x * c13.y * c23x2 - 6 * c10.y * c13x2 * c13.y * c23.x * c23.y - 6 * c20.x * c13.x * c13y2 * c23.x * c23.y + 3 * c11.y * c12.y * c13x2 * c23.x * c23.y - 2 * c12.x * c12y2 * c13.x * c23.x * c23.y - 6 * c21.x * c13.x * c22.x * c13y2 * c23.y - 6 * c21.x * c13.x * c13y2 * c22.y * c23.x - 6 * c13.x * c21.y * c22.x * c13y2 * c23.x + 6 * c21.x * c13x2 * c13.y * c22.y * c23.y + 2 * c12x2 * c12.y * c13.y * c23.x * c23.y + c22x3 * c13y3 - 3 * c10.x * c13y3 * c23x2 + 3 * c10.y * c13x3 * c23y2 + 3 * c20.x * c13y3 * c23x2 + c12y3 * c13.x * c23x2 - c12x3 * c13.y * c23y2 - 3 * c10.x * c13x2 * c13.y * c23y2 + 3 * c10.y * c13.x * c13y2 * c23x2 - 2 * c11.x * c12.y * c13x2 * c23y2 + c11.x * c12.y * c13y2 * c23x2 - c11.y * c12.x * c13x2 * c23y2 + 2 * c11.y * c12.x * c13y2 * c23x2 + 3 * c20.x * c13x2 * c13.y * c23y2 - c12.x * c12y2 * c13.y * c23x2 - 3 * c20.y * c13.x * c13y2 * c23x2 + c12x2 * c12.y * c13.x * c23y2 - 3 * c13.x * c22x2 * c13y2 * c22.y + c13x2 * c13.y * c23.x * (6 * c20.y * c23.y + 6 * c21.y * c22.y) + c13x2 * c22.x * c13.y * (6 * c21.y * c23.y + 3 * c22y2) + c13x3 * (-2 * c21.y * c22.y * c23.y - c20.y * c23y2 - c22.y * (2 * c21.y * c23.y + c22y2) - c23.y * (2 * c20.y * c23.y + 2 * c21.y * c22.y)), 6 * c11.x * c12.x * c13.x * c13.y * c22.y * c23.y + c11.x * c12.y * c13.x * c22.x * c13.y * c23.y + c11.x * c12.y * c13.x * c13.y * c22.y * c23.x - c11.y * c12.x * c13.x * c22.x * c13.y * c23.y - c11.y * c12.x * c13.x * c13.y * c22.y * c23.x - 6 * c11.y * c12.y * c13.x * c22.x * c13.y * c23.x - 6 * c10.x * c22.x * c13y3 * c23.x + 6 * c20.x * c22.x * c13y3 * c23.x + 6 * c10.y * c13x3 * c22.y * c23.y + 2 * c12y3 * c13.x * c22.x * c23.x - 2 * c12x3 * c13.y * c22.y * c23.y + 6 * c10.x * c13.x * c22.x * c13y2 * c23.y + 6 * c10.x * c13.x * c13y2 * c22.y * c23.x + 6 * c10.y * c13.x * c22.x * c13y2 * c23.x - 3 * c11.x * c12.x * c22.x * c13y2 * c23.y - 3 * c11.x * c12.x * c13y2 * c22.y * c23.x + 2 * c11.x * c12.y * c22.x * c13y2 * c23.x + 4 * c11.y * c12.x * c22.x * c13y2 * c23.x - 6 * c10.x * c13x2 * c13.y * c22.y * c23.y - 6 * c10.y * c13x2 * c22.x * c13.y * c23.y - 6 * c10.y * c13x2 * c13.y * c22.y * c23.x - 4 * c11.x * c12.y * c13x2 * c22.y * c23.y - 6 * c20.x * c13.x * c22.x * c13y2 * c23.y - 6 * c20.x * c13.x * c13y2 * c22.y * c23.x - 2 * c11.y * c12.x * c13x2 * c22.y * c23.y + 3 * c11.y * c12.y * c13x2 * c22.x * c23.y + 3 * c11.y * c12.y * c13x2 * c22.y * c23.x - 2 * c12.x * c12y2 * c13.x * c22.x * c23.y - 2 * c12.x * c12y2 * c13.x * c22.y * c23.x - 2 * c12.x * c12y2 * c22.x * c13.y * c23.x - 6 * c20.y * c13.x * c22.x * c13y2 * c23.x - 6 * c21.x * c13.x * c21.y * c13y2 * c23.x - 6 * c21.x * c13.x * c22.x * c13y2 * c22.y + 6 * c20.x * c13x2 * c13.y * c22.y * c23.y + 2 * c12x2 * c12.y * c13.x * c22.y * c23.y + 2 * c12x2 * c12.y * c22.x * c13.y * c23.y + 2 * c12x2 * c12.y * c13.y * c22.y * c23.x + 3 * c21.x * c22x2 * c13y3 + 3 * c21x2 * c13y3 * c23.x - 3 * c13.x * c21.y * c22x2 * c13y2 - 3 * c21x2 * c13.x * c13y2 * c23.y + c13x2 * c22.x * c13.y * (6 * c20.y * c23.y + 6 * c21.y * c22.y) + c13x2 * c13.y * c23.x * (6 * c20.y * c22.y + 3 * c21y2) + c21.x * c13x2 * c13.y * (6 * c21.y * c23.y + 3 * c22y2) + c13x3 * (-2 * c20.y * c22.y * c23.y - c23.y * (2 * c20.y * c22.y + c21y2) - c21.y * (2 * c21.y * c23.y + c22y2) - c22.y * (2 * c20.y * c23.y + 2 * c21.y * c22.y)), c11.x * c21.x * c12.y * c13.x * c13.y * c23.y + c11.x * c12.y * c13.x * c21.y * c13.y * c23.x + c11.x * c12.y * c13.x * c22.x * c13.y * c22.y - c11.y * c12.x * c21.x * c13.x * c13.y * c23.y - c11.y * c12.x * c13.x * c21.y * c13.y * c23.x - c11.y * c12.x * c13.x * c22.x * c13.y * c22.y - 6 * c11.y * c21.x * c12.y * c13.x * c13.y * c23.x - 6 * c10.x * c21.x * c13y3 * c23.x + 6 * c20.x * c21.x * c13y3 * c23.x + 2 * c21.x * c12y3 * c13.x * c23.x + 6 * c10.x * c21.x * c13.x * c13y2 * c23.y + 6 * c10.x * c13.x * c21.y * c13y2 * c23.x + 6 * c10.x * c13.x * c22.x * c13y2 * c22.y + 6 * c10.y * c21.x * c13.x * c13y2 * c23.x - 3 * c11.x * c12.x * c21.x * c13y2 * c23.y - 3 * c11.x * c12.x * c21.y * c13y2 * c23.x - 3 * c11.x * c12.x * c22.x * c13y2 * c22.y + 2 * c11.x * c21.x * c12.y * c13y2 * c23.x + 4 * c11.y * c12.x * c21.x * c13y2 * c23.x - 6 * c10.y * c21.x * c13x2 * c13.y * c23.y - 6 * c10.y * c13x2 * c21.y * c13.y * c23.x - 6 * c10.y * c13x2 * c22.x * c13.y * c22.y - 6 * c20.x * c21.x * c13.x * c13y2 * c23.y - 6 * c20.x * c13.x * c21.y * c13y2 * c23.x - 6 * c20.x * c13.x * c22.x * c13y2 * c22.y + 3 * c11.y * c21.x * c12.y * c13x2 * c23.y - 3 * c11.y * c12.y * c13.x * c22x2 * c13.y + 3 * c11.y * c12.y * c13x2 * c21.y * c23.x + 3 * c11.y * c12.y * c13x2 * c22.x * c22.y - 2 * c12.x * c21.x * c12y2 * c13.x * c23.y - 2 * c12.x * c21.x * c12y2 * c13.y * c23.x - 2 * c12.x * c12y2 * c13.x * c21.y * c23.x - 2 * c12.x * c12y2 * c13.x * c22.x * c22.y - 6 * c20.y * c21.x * c13.x * c13y2 * c23.x - 6 * c21.x * c13.x * c21.y * c22.x * c13y2 + 6 * c20.y * c13x2 * c21.y * c13.y * c23.x + 2 * c12x2 * c21.x * c12.y * c13.y * c23.y + 2 * c12x2 * c12.y * c21.y * c13.y * c23.x + 2 * c12x2 * c12.y * c22.x * c13.y * c22.y - 3 * c10.x * c22x2 * c13y3 + 3 * c20.x * c22x2 * c13y3 + 3 * c21x2 * c22.x * c13y3 + c12y3 * c13.x * c22x2 + 3 * c10.y * c13.x * c22x2 * c13y2 + c11.x * c12.y * c22x2 * c13y2 + 2 * c11.y * c12.x * c22x2 * c13y2 - c12.x * c12y2 * c22x2 * c13.y - 3 * c20.y * c13.x * c22x2 * c13y2 - 3 * c21x2 * c13.x * c13y2 * c22.y + c12x2 * c12.y * c13.x * (2 * c21.y * c23.y + c22y2) + c11.x * c12.x * c13.x * c13.y * (6 * c21.y * c23.y + 3 * c22y2) + c21.x * c13x2 * c13.y * (6 * c20.y * c23.y + 6 * c21.y * c22.y) + c12x3 * c13.y * (-2 * c21.y * c23.y - c22y2) + c10.y * c13x3 * (6 * c21.y * c23.y + 3 * c22y2) + c11.y * c12.x * c13x2 * (-2 * c21.y * c23.y - c22y2) + c11.x * c12.y * c13x2 * (-4 * c21.y * c23.y - 2 * c22y2) + c10.x * c13x2 * c13.y * (-6 * c21.y * c23.y - 3 * c22y2) + c13x2 * c22.x * c13.y * (6 * c20.y * c22.y + 3 * c21y2) + c20.x * c13x2 * c13.y * (6 * c21.y * c23.y + 3 * c22y2) + c13x3 * (-2 * c20.y * c21.y * c23.y - c22.y * (2 * c20.y * c22.y + c21y2) - c20.y * (2 * c21.y * c23.y + c22y2) - c21.y * (2 * c20.y * c23.y + 2 * c21.y * c22.y)), -c10.x * c11.x * c12.y * c13.x * c13.y * c23.y + c10.x * c11.y * c12.x * c13.x * c13.y * c23.y + 6 * c10.x * c11.y * c12.y * c13.x * c13.y * c23.x - 6 * c10.y * c11.x * c12.x * c13.x * c13.y * c23.y - c10.y * c11.x * c12.y * c13.x * c13.y * c23.x + c10.y * c11.y * c12.x * c13.x * c13.y * c23.x + c11.x * c11.y * c12.x * c12.y * c13.x * c23.y - c11.x * c11.y * c12.x * c12.y * c13.y * c23.x + c11.x * c20.x * c12.y * c13.x * c13.y * c23.y + c11.x * c20.y * c12.y * c13.x * c13.y * c23.x + c11.x * c21.x * c12.y * c13.x * c13.y * c22.y + c11.x * c12.y * c13.x * c21.y * c22.x * c13.y - c20.x * c11.y * c12.x * c13.x * c13.y * c23.y - 6 * c20.x * c11.y * c12.y * c13.x * c13.y * c23.x - c11.y * c12.x * c20.y * c13.x * c13.y * c23.x - c11.y * c12.x * c21.x * c13.x * c13.y * c22.y - c11.y * c12.x * c13.x * c21.y * c22.x * c13.y - 6 * c11.y * c21.x * c12.y * c13.x * c22.x * c13.y - 6 * c10.x * c20.x * c13y3 * c23.x - 6 * c10.x * c21.x * c22.x * c13y3 - 2 * c10.x * c12y3 * c13.x * c23.x + 6 * c20.x * c21.x * c22.x * c13y3 + 2 * c20.x * c12y3 * c13.x * c23.x + 2 * c21.x * c12y3 * c13.x * c22.x + 2 * c10.y * c12x3 * c13.y * c23.y - 6 * c10.x * c10.y * c13.x * c13y2 * c23.x + 3 * c10.x * c11.x * c12.x * c13y2 * c23.y - 2 * c10.x * c11.x * c12.y * c13y2 * c23.x - 4 * c10.x * c11.y * c12.x * c13y2 * c23.x + 3 * c10.y * c11.x * c12.x * c13y2 * c23.x + 6 * c10.x * c10.y * c13x2 * c13.y * c23.y + 6 * c10.x * c20.x * c13.x * c13y2 * c23.y - 3 * c10.x * c11.y * c12.y * c13x2 * c23.y + 2 * c10.x * c12.x * c12y2 * c13.x * c23.y + 2 * c10.x * c12.x * c12y2 * c13.y * c23.x + 6 * c10.x * c20.y * c13.x * c13y2 * c23.x + 6 * c10.x * c21.x * c13.x * c13y2 * c22.y + 6 * c10.x * c13.x * c21.y * c22.x * c13y2 + 4 * c10.y * c11.x * c12.y * c13x2 * c23.y + 6 * c10.y * c20.x * c13.x * c13y2 * c23.x + 2 * c10.y * c11.y * c12.x * c13x2 * c23.y - 3 * c10.y * c11.y * c12.y * c13x2 * c23.x + 2 * c10.y * c12.x * c12y2 * c13.x * c23.x + 6 * c10.y * c21.x * c13.x * c22.x * c13y2 - 3 * c11.x * c20.x * c12.x * c13y2 * c23.y + 2 * c11.x * c20.x * c12.y * c13y2 * c23.x + c11.x * c11.y * c12y2 * c13.x * c23.x - 3 * c11.x * c12.x * c20.y * c13y2 * c23.x - 3 * c11.x * c12.x * c21.x * c13y2 * c22.y - 3 * c11.x * c12.x * c21.y * c22.x * c13y2 + 2 * c11.x * c21.x * c12.y * c22.x * c13y2 + 4 * c20.x * c11.y * c12.x * c13y2 * c23.x + 4 * c11.y * c12.x * c21.x * c22.x * c13y2 - 2 * c10.x * c12x2 * c12.y * c13.y * c23.y - 6 * c10.y * c20.x * c13x2 * c13.y * c23.y - 6 * c10.y * c20.y * c13x2 * c13.y * c23.x - 6 * c10.y * c21.x * c13x2 * c13.y * c22.y - 2 * c10.y * c12x2 * c12.y * c13.x * c23.y - 2 * c10.y * c12x2 * c12.y * c13.y * c23.x - 6 * c10.y * c13x2 * c21.y * c22.x * c13.y - c11.x * c11.y * c12x2 * c13.y * c23.y - 2 * c11.x * c11y2 * c13.x * c13.y * c23.x + 3 * c20.x * c11.y * c12.y * c13x2 * c23.y - 2 * c20.x * c12.x * c12y2 * c13.x * c23.y - 2 * c20.x * c12.x * c12y2 * c13.y * c23.x - 6 * c20.x * c20.y * c13.x * c13y2 * c23.x - 6 * c20.x * c21.x * c13.x * c13y2 * c22.y - 6 * c20.x * c13.x * c21.y * c22.x * c13y2 + 3 * c11.y * c20.y * c12.y * c13x2 * c23.x + 3 * c11.y * c21.x * c12.y * c13x2 * c22.y + 3 * c11.y * c12.y * c13x2 * c21.y * c22.x - 2 * c12.x * c20.y * c12y2 * c13.x * c23.x - 2 * c12.x * c21.x * c12y2 * c13.x * c22.y - 2 * c12.x * c21.x * c12y2 * c22.x * c13.y - 2 * c12.x * c12y2 * c13.x * c21.y * c22.x - 6 * c20.y * c21.x * c13.x * c22.x * c13y2 - c11y2 * c12.x * c12.y * c13.x * c23.x + 2 * c20.x * c12x2 * c12.y * c13.y * c23.y + 6 * c20.y * c13x2 * c21.y * c22.x * c13.y + 2 * c11x2 * c11.y * c13.x * c13.y * c23.y + c11x2 * c12.x * c12.y * c13.y * c23.y + 2 * c12x2 * c20.y * c12.y * c13.y * c23.x + 2 * c12x2 * c21.x * c12.y * c13.y * c22.y + 2 * c12x2 * c12.y * c21.y * c22.x * c13.y + c21x3 * c13y3 + 3 * c10x2 * c13y3 * c23.x - 3 * c10y2 * c13x3 * c23.y + 3 * c20x2 * c13y3 * c23.x + c11y3 * c13x2 * c23.x - c11x3 * c13y2 * c23.y - c11.x * c11y2 * c13x2 * c23.y + c11x2 * c11.y * c13y2 * c23.x - 3 * c10x2 * c13.x * c13y2 * c23.y + 3 * c10y2 * c13x2 * c13.y * c23.x - c11x2 * c12y2 * c13.x * c23.y + c11y2 * c12x2 * c13.y * c23.x - 3 * c21x2 * c13.x * c21.y * c13y2 - 3 * c20x2 * c13.x * c13y2 * c23.y + 3 * c20y2 * c13x2 * c13.y * c23.x + c11.x * c12.x * c13.x * c13.y * (6 * c20.y * c23.y + 6 * c21.y * c22.y) + c12x3 * c13.y * (-2 * c20.y * c23.y - 2 * c21.y * c22.y) + c10.y * c13x3 * (6 * c20.y * c23.y + 6 * c21.y * c22.y) + c11.y * c12.x * c13x2 * (-2 * c20.y * c23.y - 2 * c21.y * c22.y) + c12x2 * c12.y * c13.x * (2 * c20.y * c23.y + 2 * c21.y * c22.y) + c11.x * c12.y * c13x2 * (-4 * c20.y * c23.y - 4 * c21.y * c22.y) + c10.x * c13x2 * c13.y * (-6 * c20.y * c23.y - 6 * c21.y * c22.y) + c20.x * c13x2 * c13.y * (6 * c20.y * c23.y + 6 * c21.y * c22.y) + c21.x * c13x2 * c13.y * (6 * c20.y * c22.y + 3 * c21y2) + c13x3 * (-2 * c20.y * c21.y * c22.y - c20y2 * c23.y - c21.y * (2 * c20.y * c22.y + c21y2) - c20.y * (2 * c20.y * c23.y + 2 * c21.y * c22.y)), -c10.x * c11.x * c12.y * c13.x * c13.y * c22.y + c10.x * c11.y * c12.x * c13.x * c13.y * c22.y + 6 * c10.x * c11.y * c12.y * c13.x * c22.x * c13.y - 6 * c10.y * c11.x * c12.x * c13.x * c13.y * c22.y - c10.y * c11.x * c12.y * c13.x * c22.x * c13.y + c10.y * c11.y * c12.x * c13.x * c22.x * c13.y + c11.x * c11.y * c12.x * c12.y * c13.x * c22.y - c11.x * c11.y * c12.x * c12.y * c22.x * c13.y + c11.x * c20.x * c12.y * c13.x * c13.y * c22.y + c11.x * c20.y * c12.y * c13.x * c22.x * c13.y + c11.x * c21.x * c12.y * c13.x * c21.y * c13.y - c20.x * c11.y * c12.x * c13.x * c13.y * c22.y - 6 * c20.x * c11.y * c12.y * c13.x * c22.x * c13.y - c11.y * c12.x * c20.y * c13.x * c22.x * c13.y - c11.y * c12.x * c21.x * c13.x * c21.y * c13.y - 6 * c10.x * c20.x * c22.x * c13y3 - 2 * c10.x * c12y3 * c13.x * c22.x + 2 * c20.x * c12y3 * c13.x * c22.x + 2 * c10.y * c12x3 * c13.y * c22.y - 6 * c10.x * c10.y * c13.x * c22.x * c13y2 + 3 * c10.x * c11.x * c12.x * c13y2 * c22.y - 2 * c10.x * c11.x * c12.y * c22.x * c13y2 - 4 * c10.x * c11.y * c12.x * c22.x * c13y2 + 3 * c10.y * c11.x * c12.x * c22.x * c13y2 + 6 * c10.x * c10.y * c13x2 * c13.y * c22.y + 6 * c10.x * c20.x * c13.x * c13y2 * c22.y - 3 * c10.x * c11.y * c12.y * c13x2 * c22.y + 2 * c10.x * c12.x * c12y2 * c13.x * c22.y + 2 * c10.x * c12.x * c12y2 * c22.x * c13.y + 6 * c10.x * c20.y * c13.x * c22.x * c13y2 + 6 * c10.x * c21.x * c13.x * c21.y * c13y2 + 4 * c10.y * c11.x * c12.y * c13x2 * c22.y + 6 * c10.y * c20.x * c13.x * c22.x * c13y2 + 2 * c10.y * c11.y * c12.x * c13x2 * c22.y - 3 * c10.y * c11.y * c12.y * c13x2 * c22.x + 2 * c10.y * c12.x * c12y2 * c13.x * c22.x - 3 * c11.x * c20.x * c12.x * c13y2 * c22.y + 2 * c11.x * c20.x * c12.y * c22.x * c13y2 + c11.x * c11.y * c12y2 * c13.x * c22.x - 3 * c11.x * c12.x * c20.y * c22.x * c13y2 - 3 * c11.x * c12.x * c21.x * c21.y * c13y2 + 4 * c20.x * c11.y * c12.x * c22.x * c13y2 - 2 * c10.x * c12x2 * c12.y * c13.y * c22.y - 6 * c10.y * c20.x * c13x2 * c13.y * c22.y - 6 * c10.y * c20.y * c13x2 * c22.x * c13.y - 6 * c10.y * c21.x * c13x2 * c21.y * c13.y - 2 * c10.y * c12x2 * c12.y * c13.x * c22.y - 2 * c10.y * c12x2 * c12.y * c22.x * c13.y - c11.x * c11.y * c12x2 * c13.y * c22.y - 2 * c11.x * c11y2 * c13.x * c22.x * c13.y + 3 * c20.x * c11.y * c12.y * c13x2 * c22.y - 2 * c20.x * c12.x * c12y2 * c13.x * c22.y - 2 * c20.x * c12.x * c12y2 * c22.x * c13.y - 6 * c20.x * c20.y * c13.x * c22.x * c13y2 - 6 * c20.x * c21.x * c13.x * c21.y * c13y2 + 3 * c11.y * c20.y * c12.y * c13x2 * c22.x + 3 * c11.y * c21.x * c12.y * c13x2 * c21.y - 2 * c12.x * c20.y * c12y2 * c13.x * c22.x - 2 * c12.x * c21.x * c12y2 * c13.x * c21.y - c11y2 * c12.x * c12.y * c13.x * c22.x + 2 * c20.x * c12x2 * c12.y * c13.y * c22.y - 3 * c11.y * c21x2 * c12.y * c13.x * c13.y + 6 * c20.y * c21.x * c13x2 * c21.y * c13.y + 2 * c11x2 * c11.y * c13.x * c13.y * c22.y + c11x2 * c12.x * c12.y * c13.y * c22.y + 2 * c12x2 * c20.y * c12.y * c22.x * c13.y + 2 * c12x2 * c21.x * c12.y * c21.y * c13.y - 3 * c10.x * c21x2 * c13y3 + 3 * c20.x * c21x2 * c13y3 + 3 * c10x2 * c22.x * c13y3 - 3 * c10y2 * c13x3 * c22.y + 3 * c20x2 * c22.x * c13y3 + c21x2 * c12y3 * c13.x + c11y3 * c13x2 * c22.x - c11x3 * c13y2 * c22.y + 3 * c10.y * c21x2 * c13.x * c13y2 - c11.x * c11y2 * c13x2 * c22.y + c11.x * c21x2 * c12.y * c13y2 + 2 * c11.y * c12.x * c21x2 * c13y2 + c11x2 * c11.y * c22.x * c13y2 - c12.x * c21x2 * c12y2 * c13.y - 3 * c20.y * c21x2 * c13.x * c13y2 - 3 * c10x2 * c13.x * c13y2 * c22.y + 3 * c10y2 * c13x2 * c22.x * c13.y - c11x2 * c12y2 * c13.x * c22.y + c11y2 * c12x2 * c22.x * c13.y - 3 * c20x2 * c13.x * c13y2 * c22.y + 3 * c20y2 * c13x2 * c22.x * c13.y + c12x2 * c12.y * c13.x * (2 * c20.y * c22.y + c21y2) + c11.x * c12.x * c13.x * c13.y * (6 * c20.y * c22.y + 3 * c21y2) + c12x3 * c13.y * (-2 * c20.y * c22.y - c21y2) + c10.y * c13x3 * (6 * c20.y * c22.y + 3 * c21y2) + c11.y * c12.x * c13x2 * (-2 * c20.y * c22.y - c21y2) + c11.x * c12.y * c13x2 * (-4 * c20.y * c22.y - 2 * c21y2) + c10.x * c13x2 * c13.y * (-6 * c20.y * c22.y - 3 * c21y2) + c20.x * c13x2 * c13.y * (6 * c20.y * c22.y + 3 * c21y2) + c13x3 * (-2 * c20.y * c21y2 - c20y2 * c22.y - c20.y * (2 * c20.y * c22.y + c21y2)), -c10.x * c11.x * c12.y * c13.x * c21.y * c13.y + c10.x * c11.y * c12.x * c13.x * c21.y * c13.y + 6 * c10.x * c11.y * c21.x * c12.y * c13.x * c13.y - 6 * c10.y * c11.x * c12.x * c13.x * c21.y * c13.y - c10.y * c11.x * c21.x * c12.y * c13.x * c13.y + c10.y * c11.y * c12.x * c21.x * c13.x * c13.y - c11.x * c11.y * c12.x * c21.x * c12.y * c13.y + c11.x * c11.y * c12.x * c12.y * c13.x * c21.y + c11.x * c20.x * c12.y * c13.x * c21.y * c13.y + 6 * c11.x * c12.x * c20.y * c13.x * c21.y * c13.y + c11.x * c20.y * c21.x * c12.y * c13.x * c13.y - c20.x * c11.y * c12.x * c13.x * c21.y * c13.y - 6 * c20.x * c11.y * c21.x * c12.y * c13.x * c13.y - c11.y * c12.x * c20.y * c21.x * c13.x * c13.y - 6 * c10.x * c20.x * c21.x * c13y3 - 2 * c10.x * c21.x * c12y3 * c13.x + 6 * c10.y * c20.y * c13x3 * c21.y + 2 * c20.x * c21.x * c12y3 * c13.x + 2 * c10.y * c12x3 * c21.y * c13.y - 2 * c12x3 * c20.y * c21.y * c13.y - 6 * c10.x * c10.y * c21.x * c13.x * c13y2 + 3 * c10.x * c11.x * c12.x * c21.y * c13y2 - 2 * c10.x * c11.x * c21.x * c12.y * c13y2 - 4 * c10.x * c11.y * c12.x * c21.x * c13y2 + 3 * c10.y * c11.x * c12.x * c21.x * c13y2 + 6 * c10.x * c10.y * c13x2 * c21.y * c13.y + 6 * c10.x * c20.x * c13.x * c21.y * c13y2 - 3 * c10.x * c11.y * c12.y * c13x2 * c21.y + 2 * c10.x * c12.x * c21.x * c12y2 * c13.y + 2 * c10.x * c12.x * c12y2 * c13.x * c21.y + 6 * c10.x * c20.y * c21.x * c13.x * c13y2 + 4 * c10.y * c11.x * c12.y * c13x2 * c21.y + 6 * c10.y * c20.x * c21.x * c13.x * c13y2 + 2 * c10.y * c11.y * c12.x * c13x2 * c21.y - 3 * c10.y * c11.y * c21.x * c12.y * c13x2 + 2 * c10.y * c12.x * c21.x * c12y2 * c13.x - 3 * c11.x * c20.x * c12.x * c21.y * c13y2 + 2 * c11.x * c20.x * c21.x * c12.y * c13y2 + c11.x * c11.y * c21.x * c12y2 * c13.x - 3 * c11.x * c12.x * c20.y * c21.x * c13y2 + 4 * c20.x * c11.y * c12.x * c21.x * c13y2 - 6 * c10.x * c20.y * c13x2 * c21.y * c13.y - 2 * c10.x * c12x2 * c12.y * c21.y * c13.y - 6 * c10.y * c20.x * c13x2 * c21.y * c13.y - 6 * c10.y * c20.y * c21.x * c13x2 * c13.y - 2 * c10.y * c12x2 * c21.x * c12.y * c13.y - 2 * c10.y * c12x2 * c12.y * c13.x * c21.y - c11.x * c11.y * c12x2 * c21.y * c13.y - 4 * c11.x * c20.y * c12.y * c13x2 * c21.y - 2 * c11.x * c11y2 * c21.x * c13.x * c13.y + 3 * c20.x * c11.y * c12.y * c13x2 * c21.y - 2 * c20.x * c12.x * c21.x * c12y2 * c13.y - 2 * c20.x * c12.x * c12y2 * c13.x * c21.y - 6 * c20.x * c20.y * c21.x * c13.x * c13y2 - 2 * c11.y * c12.x * c20.y * c13x2 * c21.y + 3 * c11.y * c20.y * c21.x * c12.y * c13x2 - 2 * c12.x * c20.y * c21.x * c12y2 * c13.x - c11y2 * c12.x * c21.x * c12.y * c13.x + 6 * c20.x * c20.y * c13x2 * c21.y * c13.y + 2 * c20.x * c12x2 * c12.y * c21.y * c13.y + 2 * c11x2 * c11.y * c13.x * c21.y * c13.y + c11x2 * c12.x * c12.y * c21.y * c13.y + 2 * c12x2 * c20.y * c21.x * c12.y * c13.y + 2 * c12x2 * c20.y * c12.y * c13.x * c21.y + 3 * c10x2 * c21.x * c13y3 - 3 * c10y2 * c13x3 * c21.y + 3 * c20x2 * c21.x * c13y3 + c11y3 * c21.x * c13x2 - c11x3 * c21.y * c13y2 - 3 * c20y2 * c13x3 * c21.y - c11.x * c11y2 * c13x2 * c21.y + c11x2 * c11.y * c21.x * c13y2 - 3 * c10x2 * c13.x * c21.y * c13y2 + 3 * c10y2 * c21.x * c13x2 * c13.y - c11x2 * c12y2 * c13.x * c21.y + c11y2 * c12x2 * c21.x * c13.y - 3 * c20x2 * c13.x * c21.y * c13y2 + 3 * c20y2 * c21.x * c13x2 * c13.y, c10.x * c10.y * c11.x * c12.y * c13.x * c13.y - c10.x * c10.y * c11.y * c12.x * c13.x * c13.y + c10.x * c11.x * c11.y * c12.x * c12.y * c13.y - c10.y * c11.x * c11.y * c12.x * c12.y * c13.x - c10.x * c11.x * c20.y * c12.y * c13.x * c13.y + 6 * c10.x * c20.x * c11.y * c12.y * c13.x * c13.y + c10.x * c11.y * c12.x * c20.y * c13.x * c13.y - c10.y * c11.x * c20.x * c12.y * c13.x * c13.y - 6 * c10.y * c11.x * c12.x * c20.y * c13.x * c13.y + c10.y * c20.x * c11.y * c12.x * c13.x * c13.y - c11.x * c20.x * c11.y * c12.x * c12.y * c13.y + c11.x * c11.y * c12.x * c20.y * c12.y * c13.x + c11.x * c20.x * c20.y * c12.y * c13.x * c13.y - c20.x * c11.y * c12.x * c20.y * c13.x * c13.y - 2 * c10.x * c20.x * c12y3 * c13.x + 2 * c10.y * c12x3 * c20.y * c13.y - 3 * c10.x * c10.y * c11.x * c12.x * c13y2 - 6 * c10.x * c10.y * c20.x * c13.x * c13y2 + 3 * c10.x * c10.y * c11.y * c12.y * c13x2 - 2 * c10.x * c10.y * c12.x * c12y2 * c13.x - 2 * c10.x * c11.x * c20.x * c12.y * c13y2 - c10.x * c11.x * c11.y * c12y2 * c13.x + 3 * c10.x * c11.x * c12.x * c20.y * c13y2 - 4 * c10.x * c20.x * c11.y * c12.x * c13y2 + 3 * c10.y * c11.x * c20.x * c12.x * c13y2 + 6 * c10.x * c10.y * c20.y * c13x2 * c13.y + 2 * c10.x * c10.y * c12x2 * c12.y * c13.y + 2 * c10.x * c11.x * c11y2 * c13.x * c13.y + 2 * c10.x * c20.x * c12.x * c12y2 * c13.y + 6 * c10.x * c20.x * c20.y * c13.x * c13y2 - 3 * c10.x * c11.y * c20.y * c12.y * c13x2 + 2 * c10.x * c12.x * c20.y * c12y2 * c13.x + c10.x * c11y2 * c12.x * c12.y * c13.x + c10.y * c11.x * c11.y * c12x2 * c13.y + 4 * c10.y * c11.x * c20.y * c12.y * c13x2 - 3 * c10.y * c20.x * c11.y * c12.y * c13x2 + 2 * c10.y * c20.x * c12.x * c12y2 * c13.x + 2 * c10.y * c11.y * c12.x * c20.y * c13x2 + c11.x * c20.x * c11.y * c12y2 * c13.x - 3 * c11.x * c20.x * c12.x * c20.y * c13y2 - 2 * c10.x * c12x2 * c20.y * c12.y * c13.y - 6 * c10.y * c20.x * c20.y * c13x2 * c13.y - 2 * c10.y * c20.x * c12x2 * c12.y * c13.y - 2 * c10.y * c11x2 * c11.y * c13.x * c13.y - c10.y * c11x2 * c12.x * c12.y * c13.y - 2 * c10.y * c12x2 * c20.y * c12.y * c13.x - 2 * c11.x * c20.x * c11y2 * c13.x * c13.y - c11.x * c11.y * c12x2 * c20.y * c13.y + 3 * c20.x * c11.y * c20.y * c12.y * c13x2 - 2 * c20.x * c12.x * c20.y * c12y2 * c13.x - c20.x * c11y2 * c12.x * c12.y * c13.x + 3 * c10y2 * c11.x * c12.x * c13.x * c13.y + 3 * c11.x * c12.x * c20y2 * c13.x * c13.y + 2 * c20.x * c12x2 * c20.y * c12.y * c13.y - 3 * c10x2 * c11.y * c12.y * c13.x * c13.y + 2 * c11x2 * c11.y * c20.y * c13.x * c13.y + c11x2 * c12.x * c20.y * c12.y * c13.y - 3 * c20x2 * c11.y * c12.y * c13.x * c13.y - c10x3 * c13y3 + c10y3 * c13x3 + c20x3 * c13y3 - c20y3 * c13x3 - 3 * c10.x * c20x2 * c13y3 - c10.x * c11y3 * c13x2 + 3 * c10x2 * c20.x * c13y3 + c10.y * c11x3 * c13y2 + 3 * c10.y * c20y2 * c13x3 + c20.x * c11y3 * c13x2 + c10x2 * c12y3 * c13.x - 3 * c10y2 * c20.y * c13x3 - c10y2 * c12x3 * c13.y + c20x2 * c12y3 * c13.x - c11x3 * c20.y * c13y2 - c12x3 * c20y2 * c13.y - c10.x * c11x2 * c11.y * c13y2 + c10.y * c11.x * c11y2 * c13x2 - 3 * c10.x * c10y2 * c13x2 * c13.y - c10.x * c11y2 * c12x2 * c13.y + c10.y * c11x2 * c12y2 * c13.x - c11.x * c11y2 * c20.y * c13x2 + 3 * c10x2 * c10.y * c13.x * c13y2 + c10x2 * c11.x * c12.y * c13y2 + 2 * c10x2 * c11.y * c12.x * c13y2 - 2 * c10y2 * c11.x * c12.y * c13x2 - c10y2 * c11.y * c12.x * c13x2 + c11x2 * c20.x * c11.y * c13y2 - 3 * c10.x * c20y2 * c13x2 * c13.y + 3 * c10.y * c20x2 * c13.x * c13y2 + c11.x * c20x2 * c12.y * c13y2 - 2 * c11.x * c20y2 * c12.y * c13x2 + c20.x * c11y2 * c12x2 * c13.y - c11.y * c12.x * c20y2 * c13x2 - c10x2 * c12.x * c12y2 * c13.y - 3 * c10x2 * c20.y * c13.x * c13y2 + 3 * c10y2 * c20.x * c13x2 * c13.y + c10y2 * c12x2 * c12.y * c13.x - c11x2 * c20.y * c12y2 * c13.x + 2 * c20x2 * c11.y * c12.x * c13y2 + 3 * c20.x * c20y2 * c13x2 * c13.y - c20x2 * c12.x * c12y2 * c13.y - 3 * c20x2 * c20.y * c13.x * c13y2 + c12x2 * c20y2 * c12.y * c13.x);
-    let roots = poly.getRootsInInterval(0, 1);
-    for (let i = 0; i < roots.length; i++) {
-      let s = roots[i];
-      let xRoots = new Polynomial(c13.x, c12.x, c11.x, c10.x - c20.x - s * c21.x - s * s * c22.x - s * s * s * c23.x).getRoots();
-      let yRoots = new Polynomial(c13.y, c12.y, c11.y, c10.y - c20.y - s * c21.y - s * s * c22.y - s * s * s * c23.y).getRoots();
+    const c10x2 = c10.x * c10.x;
+    const c10x3 = c10.x * c10.x * c10.x;
+    const c10y2 = c10.y * c10.y;
+    const c10y3 = c10.y * c10.y * c10.y;
+    const c11x2 = c11.x * c11.x;
+    const c11x3 = c11.x * c11.x * c11.x;
+    const c11y2 = c11.y * c11.y;
+    const c11y3 = c11.y * c11.y * c11.y;
+    const c12x2 = c12.x * c12.x;
+    const c12x3 = c12.x * c12.x * c12.x;
+    const c12y2 = c12.y * c12.y;
+    const c12y3 = c12.y * c12.y * c12.y;
+    const c13x2 = c13.x * c13.x;
+    const c13x3 = c13.x * c13.x * c13.x;
+    const c13y2 = c13.y * c13.y;
+    const c13y3 = c13.y * c13.y * c13.y;
+    const c20x2 = c20.x * c20.x;
+    const c20x3 = c20.x * c20.x * c20.x;
+    const c20y2 = c20.y * c20.y;
+    const c20y3 = c20.y * c20.y * c20.y;
+    const c21x2 = c21.x * c21.x;
+    const c21x3 = c21.x * c21.x * c21.x;
+    const c21y2 = c21.y * c21.y;
+    const c22x2 = c22.x * c22.x;
+    const c22x3 = c22.x * c22.x * c22.x;
+    const c22y2 = c22.y * c22.y;
+    const c23x2 = c23.x * c23.x;
+    const c23x3 = c23.x * c23.x * c23.x;
+    const c23y2 = c23.y * c23.y;
+    const c23y3 = c23.y * c23.y * c23.y;
+    const poly = new Polynomial(-c13x3 * c23y3 + c13y3 * c23x3 - 3 * c13.x * c13y2 * c23x2 * c23.y + 3 * c13x2 * c13.y * c23.x * c23y2, -6 * c13.x * c22.x * c13y2 * c23.x * c23.y + 6 * c13x2 * c13.y * c22.y * c23.x * c23.y + 3 * c22.x * c13y3 * c23x2 - 3 * c13x3 * c22.y * c23y2 - 3 * c13.x * c13y2 * c22.y * c23x2 + 3 * c13x2 * c22.x * c13.y * c23y2, -6 * c21.x * c13.x * c13y2 * c23.x * c23.y - 6 * c13.x * c22.x * c13y2 * c22.y * c23.x + 6 * c13x2 * c22.x * c13.y * c22.y * c23.y + 3 * c21.x * c13y3 * c23x2 + 3 * c22x2 * c13y3 * c23.x + 3 * c21.x * c13x2 * c13.y * c23y2 - 3 * c13.x * c21.y * c13y2 * c23x2 - 3 * c13.x * c22x2 * c13y2 * c23.y + c13x2 * c13.y * c23.x * (6 * c21.y * c23.y + 3 * c22y2) + c13x3 * (-c21.y * c23y2 - 2 * c22y2 * c23.y - c23.y * (2 * c21.y * c23.y + c22y2)), c11.x * c12.y * c13.x * c13.y * c23.x * c23.y - c11.y * c12.x * c13.x * c13.y * c23.x * c23.y + 6 * c21.x * c22.x * c13y3 * c23.x + 3 * c11.x * c12.x * c13.x * c13.y * c23y2 + 6 * c10.x * c13.x * c13y2 * c23.x * c23.y - 3 * c11.x * c12.x * c13y2 * c23.x * c23.y - 3 * c11.y * c12.y * c13.x * c13.y * c23x2 - 6 * c10.y * c13x2 * c13.y * c23.x * c23.y - 6 * c20.x * c13.x * c13y2 * c23.x * c23.y + 3 * c11.y * c12.y * c13x2 * c23.x * c23.y - 2 * c12.x * c12y2 * c13.x * c23.x * c23.y - 6 * c21.x * c13.x * c22.x * c13y2 * c23.y - 6 * c21.x * c13.x * c13y2 * c22.y * c23.x - 6 * c13.x * c21.y * c22.x * c13y2 * c23.x + 6 * c21.x * c13x2 * c13.y * c22.y * c23.y + 2 * c12x2 * c12.y * c13.y * c23.x * c23.y + c22x3 * c13y3 - 3 * c10.x * c13y3 * c23x2 + 3 * c10.y * c13x3 * c23y2 + 3 * c20.x * c13y3 * c23x2 + c12y3 * c13.x * c23x2 - c12x3 * c13.y * c23y2 - 3 * c10.x * c13x2 * c13.y * c23y2 + 3 * c10.y * c13.x * c13y2 * c23x2 - 2 * c11.x * c12.y * c13x2 * c23y2 + c11.x * c12.y * c13y2 * c23x2 - c11.y * c12.x * c13x2 * c23y2 + 2 * c11.y * c12.x * c13y2 * c23x2 + 3 * c20.x * c13x2 * c13.y * c23y2 - c12.x * c12y2 * c13.y * c23x2 - 3 * c20.y * c13.x * c13y2 * c23x2 + c12x2 * c12.y * c13.x * c23y2 - 3 * c13.x * c22x2 * c13y2 * c22.y + c13x2 * c13.y * c23.x * (6 * c20.y * c23.y + 6 * c21.y * c22.y) + c13x2 * c22.x * c13.y * (6 * c21.y * c23.y + 3 * c22y2) + c13x3 * (-2 * c21.y * c22.y * c23.y - c20.y * c23y2 - c22.y * (2 * c21.y * c23.y + c22y2) - c23.y * (2 * c20.y * c23.y + 2 * c21.y * c22.y)), 6 * c11.x * c12.x * c13.x * c13.y * c22.y * c23.y + c11.x * c12.y * c13.x * c22.x * c13.y * c23.y + c11.x * c12.y * c13.x * c13.y * c22.y * c23.x - c11.y * c12.x * c13.x * c22.x * c13.y * c23.y - c11.y * c12.x * c13.x * c13.y * c22.y * c23.x - 6 * c11.y * c12.y * c13.x * c22.x * c13.y * c23.x - 6 * c10.x * c22.x * c13y3 * c23.x + 6 * c20.x * c22.x * c13y3 * c23.x + 6 * c10.y * c13x3 * c22.y * c23.y + 2 * c12y3 * c13.x * c22.x * c23.x - 2 * c12x3 * c13.y * c22.y * c23.y + 6 * c10.x * c13.x * c22.x * c13y2 * c23.y + 6 * c10.x * c13.x * c13y2 * c22.y * c23.x + 6 * c10.y * c13.x * c22.x * c13y2 * c23.x - 3 * c11.x * c12.x * c22.x * c13y2 * c23.y - 3 * c11.x * c12.x * c13y2 * c22.y * c23.x + 2 * c11.x * c12.y * c22.x * c13y2 * c23.x + 4 * c11.y * c12.x * c22.x * c13y2 * c23.x - 6 * c10.x * c13x2 * c13.y * c22.y * c23.y - 6 * c10.y * c13x2 * c22.x * c13.y * c23.y - 6 * c10.y * c13x2 * c13.y * c22.y * c23.x - 4 * c11.x * c12.y * c13x2 * c22.y * c23.y - 6 * c20.x * c13.x * c22.x * c13y2 * c23.y - 6 * c20.x * c13.x * c13y2 * c22.y * c23.x - 2 * c11.y * c12.x * c13x2 * c22.y * c23.y + 3 * c11.y * c12.y * c13x2 * c22.x * c23.y + 3 * c11.y * c12.y * c13x2 * c22.y * c23.x - 2 * c12.x * c12y2 * c13.x * c22.x * c23.y - 2 * c12.x * c12y2 * c13.x * c22.y * c23.x - 2 * c12.x * c12y2 * c22.x * c13.y * c23.x - 6 * c20.y * c13.x * c22.x * c13y2 * c23.x - 6 * c21.x * c13.x * c21.y * c13y2 * c23.x - 6 * c21.x * c13.x * c22.x * c13y2 * c22.y + 6 * c20.x * c13x2 * c13.y * c22.y * c23.y + 2 * c12x2 * c12.y * c13.x * c22.y * c23.y + 2 * c12x2 * c12.y * c22.x * c13.y * c23.y + 2 * c12x2 * c12.y * c13.y * c22.y * c23.x + 3 * c21.x * c22x2 * c13y3 + 3 * c21x2 * c13y3 * c23.x - 3 * c13.x * c21.y * c22x2 * c13y2 - 3 * c21x2 * c13.x * c13y2 * c23.y + c13x2 * c22.x * c13.y * (6 * c20.y * c23.y + 6 * c21.y * c22.y) + c13x2 * c13.y * c23.x * (6 * c20.y * c22.y + 3 * c21y2) + c21.x * c13x2 * c13.y * (6 * c21.y * c23.y + 3 * c22y2) + c13x3 * (-2 * c20.y * c22.y * c23.y - c23.y * (2 * c20.y * c22.y + c21y2) - c21.y * (2 * c21.y * c23.y + c22y2) - c22.y * (2 * c20.y * c23.y + 2 * c21.y * c22.y)), c11.x * c21.x * c12.y * c13.x * c13.y * c23.y + c11.x * c12.y * c13.x * c21.y * c13.y * c23.x + c11.x * c12.y * c13.x * c22.x * c13.y * c22.y - c11.y * c12.x * c21.x * c13.x * c13.y * c23.y - c11.y * c12.x * c13.x * c21.y * c13.y * c23.x - c11.y * c12.x * c13.x * c22.x * c13.y * c22.y - 6 * c11.y * c21.x * c12.y * c13.x * c13.y * c23.x - 6 * c10.x * c21.x * c13y3 * c23.x + 6 * c20.x * c21.x * c13y3 * c23.x + 2 * c21.x * c12y3 * c13.x * c23.x + 6 * c10.x * c21.x * c13.x * c13y2 * c23.y + 6 * c10.x * c13.x * c21.y * c13y2 * c23.x + 6 * c10.x * c13.x * c22.x * c13y2 * c22.y + 6 * c10.y * c21.x * c13.x * c13y2 * c23.x - 3 * c11.x * c12.x * c21.x * c13y2 * c23.y - 3 * c11.x * c12.x * c21.y * c13y2 * c23.x - 3 * c11.x * c12.x * c22.x * c13y2 * c22.y + 2 * c11.x * c21.x * c12.y * c13y2 * c23.x + 4 * c11.y * c12.x * c21.x * c13y2 * c23.x - 6 * c10.y * c21.x * c13x2 * c13.y * c23.y - 6 * c10.y * c13x2 * c21.y * c13.y * c23.x - 6 * c10.y * c13x2 * c22.x * c13.y * c22.y - 6 * c20.x * c21.x * c13.x * c13y2 * c23.y - 6 * c20.x * c13.x * c21.y * c13y2 * c23.x - 6 * c20.x * c13.x * c22.x * c13y2 * c22.y + 3 * c11.y * c21.x * c12.y * c13x2 * c23.y - 3 * c11.y * c12.y * c13.x * c22x2 * c13.y + 3 * c11.y * c12.y * c13x2 * c21.y * c23.x + 3 * c11.y * c12.y * c13x2 * c22.x * c22.y - 2 * c12.x * c21.x * c12y2 * c13.x * c23.y - 2 * c12.x * c21.x * c12y2 * c13.y * c23.x - 2 * c12.x * c12y2 * c13.x * c21.y * c23.x - 2 * c12.x * c12y2 * c13.x * c22.x * c22.y - 6 * c20.y * c21.x * c13.x * c13y2 * c23.x - 6 * c21.x * c13.x * c21.y * c22.x * c13y2 + 6 * c20.y * c13x2 * c21.y * c13.y * c23.x + 2 * c12x2 * c21.x * c12.y * c13.y * c23.y + 2 * c12x2 * c12.y * c21.y * c13.y * c23.x + 2 * c12x2 * c12.y * c22.x * c13.y * c22.y - 3 * c10.x * c22x2 * c13y3 + 3 * c20.x * c22x2 * c13y3 + 3 * c21x2 * c22.x * c13y3 + c12y3 * c13.x * c22x2 + 3 * c10.y * c13.x * c22x2 * c13y2 + c11.x * c12.y * c22x2 * c13y2 + 2 * c11.y * c12.x * c22x2 * c13y2 - c12.x * c12y2 * c22x2 * c13.y - 3 * c20.y * c13.x * c22x2 * c13y2 - 3 * c21x2 * c13.x * c13y2 * c22.y + c12x2 * c12.y * c13.x * (2 * c21.y * c23.y + c22y2) + c11.x * c12.x * c13.x * c13.y * (6 * c21.y * c23.y + 3 * c22y2) + c21.x * c13x2 * c13.y * (6 * c20.y * c23.y + 6 * c21.y * c22.y) + c12x3 * c13.y * (-2 * c21.y * c23.y - c22y2) + c10.y * c13x3 * (6 * c21.y * c23.y + 3 * c22y2) + c11.y * c12.x * c13x2 * (-2 * c21.y * c23.y - c22y2) + c11.x * c12.y * c13x2 * (-4 * c21.y * c23.y - 2 * c22y2) + c10.x * c13x2 * c13.y * (-6 * c21.y * c23.y - 3 * c22y2) + c13x2 * c22.x * c13.y * (6 * c20.y * c22.y + 3 * c21y2) + c20.x * c13x2 * c13.y * (6 * c21.y * c23.y + 3 * c22y2) + c13x3 * (-2 * c20.y * c21.y * c23.y - c22.y * (2 * c20.y * c22.y + c21y2) - c20.y * (2 * c21.y * c23.y + c22y2) - c21.y * (2 * c20.y * c23.y + 2 * c21.y * c22.y)), -c10.x * c11.x * c12.y * c13.x * c13.y * c23.y + c10.x * c11.y * c12.x * c13.x * c13.y * c23.y + 6 * c10.x * c11.y * c12.y * c13.x * c13.y * c23.x - 6 * c10.y * c11.x * c12.x * c13.x * c13.y * c23.y - c10.y * c11.x * c12.y * c13.x * c13.y * c23.x + c10.y * c11.y * c12.x * c13.x * c13.y * c23.x + c11.x * c11.y * c12.x * c12.y * c13.x * c23.y - c11.x * c11.y * c12.x * c12.y * c13.y * c23.x + c11.x * c20.x * c12.y * c13.x * c13.y * c23.y + c11.x * c20.y * c12.y * c13.x * c13.y * c23.x + c11.x * c21.x * c12.y * c13.x * c13.y * c22.y + c11.x * c12.y * c13.x * c21.y * c22.x * c13.y - c20.x * c11.y * c12.x * c13.x * c13.y * c23.y - 6 * c20.x * c11.y * c12.y * c13.x * c13.y * c23.x - c11.y * c12.x * c20.y * c13.x * c13.y * c23.x - c11.y * c12.x * c21.x * c13.x * c13.y * c22.y - c11.y * c12.x * c13.x * c21.y * c22.x * c13.y - 6 * c11.y * c21.x * c12.y * c13.x * c22.x * c13.y - 6 * c10.x * c20.x * c13y3 * c23.x - 6 * c10.x * c21.x * c22.x * c13y3 - 2 * c10.x * c12y3 * c13.x * c23.x + 6 * c20.x * c21.x * c22.x * c13y3 + 2 * c20.x * c12y3 * c13.x * c23.x + 2 * c21.x * c12y3 * c13.x * c22.x + 2 * c10.y * c12x3 * c13.y * c23.y - 6 * c10.x * c10.y * c13.x * c13y2 * c23.x + 3 * c10.x * c11.x * c12.x * c13y2 * c23.y - 2 * c10.x * c11.x * c12.y * c13y2 * c23.x - 4 * c10.x * c11.y * c12.x * c13y2 * c23.x + 3 * c10.y * c11.x * c12.x * c13y2 * c23.x + 6 * c10.x * c10.y * c13x2 * c13.y * c23.y + 6 * c10.x * c20.x * c13.x * c13y2 * c23.y - 3 * c10.x * c11.y * c12.y * c13x2 * c23.y + 2 * c10.x * c12.x * c12y2 * c13.x * c23.y + 2 * c10.x * c12.x * c12y2 * c13.y * c23.x + 6 * c10.x * c20.y * c13.x * c13y2 * c23.x + 6 * c10.x * c21.x * c13.x * c13y2 * c22.y + 6 * c10.x * c13.x * c21.y * c22.x * c13y2 + 4 * c10.y * c11.x * c12.y * c13x2 * c23.y + 6 * c10.y * c20.x * c13.x * c13y2 * c23.x + 2 * c10.y * c11.y * c12.x * c13x2 * c23.y - 3 * c10.y * c11.y * c12.y * c13x2 * c23.x + 2 * c10.y * c12.x * c12y2 * c13.x * c23.x + 6 * c10.y * c21.x * c13.x * c22.x * c13y2 - 3 * c11.x * c20.x * c12.x * c13y2 * c23.y + 2 * c11.x * c20.x * c12.y * c13y2 * c23.x + c11.x * c11.y * c12y2 * c13.x * c23.x - 3 * c11.x * c12.x * c20.y * c13y2 * c23.x - 3 * c11.x * c12.x * c21.x * c13y2 * c22.y - 3 * c11.x * c12.x * c21.y * c22.x * c13y2 + 2 * c11.x * c21.x * c12.y * c22.x * c13y2 + 4 * c20.x * c11.y * c12.x * c13y2 * c23.x + 4 * c11.y * c12.x * c21.x * c22.x * c13y2 - 2 * c10.x * c12x2 * c12.y * c13.y * c23.y - 6 * c10.y * c20.x * c13x2 * c13.y * c23.y - 6 * c10.y * c20.y * c13x2 * c13.y * c23.x - 6 * c10.y * c21.x * c13x2 * c13.y * c22.y - 2 * c10.y * c12x2 * c12.y * c13.x * c23.y - 2 * c10.y * c12x2 * c12.y * c13.y * c23.x - 6 * c10.y * c13x2 * c21.y * c22.x * c13.y - c11.x * c11.y * c12x2 * c13.y * c23.y - 2 * c11.x * c11y2 * c13.x * c13.y * c23.x + 3 * c20.x * c11.y * c12.y * c13x2 * c23.y - 2 * c20.x * c12.x * c12y2 * c13.x * c23.y - 2 * c20.x * c12.x * c12y2 * c13.y * c23.x - 6 * c20.x * c20.y * c13.x * c13y2 * c23.x - 6 * c20.x * c21.x * c13.x * c13y2 * c22.y - 6 * c20.x * c13.x * c21.y * c22.x * c13y2 + 3 * c11.y * c20.y * c12.y * c13x2 * c23.x + 3 * c11.y * c21.x * c12.y * c13x2 * c22.y + 3 * c11.y * c12.y * c13x2 * c21.y * c22.x - 2 * c12.x * c20.y * c12y2 * c13.x * c23.x - 2 * c12.x * c21.x * c12y2 * c13.x * c22.y - 2 * c12.x * c21.x * c12y2 * c22.x * c13.y - 2 * c12.x * c12y2 * c13.x * c21.y * c22.x - 6 * c20.y * c21.x * c13.x * c22.x * c13y2 - c11y2 * c12.x * c12.y * c13.x * c23.x + 2 * c20.x * c12x2 * c12.y * c13.y * c23.y + 6 * c20.y * c13x2 * c21.y * c22.x * c13.y + 2 * c11x2 * c11.y * c13.x * c13.y * c23.y + c11x2 * c12.x * c12.y * c13.y * c23.y + 2 * c12x2 * c20.y * c12.y * c13.y * c23.x + 2 * c12x2 * c21.x * c12.y * c13.y * c22.y + 2 * c12x2 * c12.y * c21.y * c22.x * c13.y + c21x3 * c13y3 + 3 * c10x2 * c13y3 * c23.x - 3 * c10y2 * c13x3 * c23.y + 3 * c20x2 * c13y3 * c23.x + c11y3 * c13x2 * c23.x - c11x3 * c13y2 * c23.y - c11.x * c11y2 * c13x2 * c23.y + c11x2 * c11.y * c13y2 * c23.x - 3 * c10x2 * c13.x * c13y2 * c23.y + 3 * c10y2 * c13x2 * c13.y * c23.x - c11x2 * c12y2 * c13.x * c23.y + c11y2 * c12x2 * c13.y * c23.x - 3 * c21x2 * c13.x * c21.y * c13y2 - 3 * c20x2 * c13.x * c13y2 * c23.y + 3 * c20y2 * c13x2 * c13.y * c23.x + c11.x * c12.x * c13.x * c13.y * (6 * c20.y * c23.y + 6 * c21.y * c22.y) + c12x3 * c13.y * (-2 * c20.y * c23.y - 2 * c21.y * c22.y) + c10.y * c13x3 * (6 * c20.y * c23.y + 6 * c21.y * c22.y) + c11.y * c12.x * c13x2 * (-2 * c20.y * c23.y - 2 * c21.y * c22.y) + c12x2 * c12.y * c13.x * (2 * c20.y * c23.y + 2 * c21.y * c22.y) + c11.x * c12.y * c13x2 * (-4 * c20.y * c23.y - 4 * c21.y * c22.y) + c10.x * c13x2 * c13.y * (-6 * c20.y * c23.y - 6 * c21.y * c22.y) + c20.x * c13x2 * c13.y * (6 * c20.y * c23.y + 6 * c21.y * c22.y) + c21.x * c13x2 * c13.y * (6 * c20.y * c22.y + 3 * c21y2) + c13x3 * (-2 * c20.y * c21.y * c22.y - c20y2 * c23.y - c21.y * (2 * c20.y * c22.y + c21y2) - c20.y * (2 * c20.y * c23.y + 2 * c21.y * c22.y)), -c10.x * c11.x * c12.y * c13.x * c13.y * c22.y + c10.x * c11.y * c12.x * c13.x * c13.y * c22.y + 6 * c10.x * c11.y * c12.y * c13.x * c22.x * c13.y - 6 * c10.y * c11.x * c12.x * c13.x * c13.y * c22.y - c10.y * c11.x * c12.y * c13.x * c22.x * c13.y + c10.y * c11.y * c12.x * c13.x * c22.x * c13.y + c11.x * c11.y * c12.x * c12.y * c13.x * c22.y - c11.x * c11.y * c12.x * c12.y * c22.x * c13.y + c11.x * c20.x * c12.y * c13.x * c13.y * c22.y + c11.x * c20.y * c12.y * c13.x * c22.x * c13.y + c11.x * c21.x * c12.y * c13.x * c21.y * c13.y - c20.x * c11.y * c12.x * c13.x * c13.y * c22.y - 6 * c20.x * c11.y * c12.y * c13.x * c22.x * c13.y - c11.y * c12.x * c20.y * c13.x * c22.x * c13.y - c11.y * c12.x * c21.x * c13.x * c21.y * c13.y - 6 * c10.x * c20.x * c22.x * c13y3 - 2 * c10.x * c12y3 * c13.x * c22.x + 2 * c20.x * c12y3 * c13.x * c22.x + 2 * c10.y * c12x3 * c13.y * c22.y - 6 * c10.x * c10.y * c13.x * c22.x * c13y2 + 3 * c10.x * c11.x * c12.x * c13y2 * c22.y - 2 * c10.x * c11.x * c12.y * c22.x * c13y2 - 4 * c10.x * c11.y * c12.x * c22.x * c13y2 + 3 * c10.y * c11.x * c12.x * c22.x * c13y2 + 6 * c10.x * c10.y * c13x2 * c13.y * c22.y + 6 * c10.x * c20.x * c13.x * c13y2 * c22.y - 3 * c10.x * c11.y * c12.y * c13x2 * c22.y + 2 * c10.x * c12.x * c12y2 * c13.x * c22.y + 2 * c10.x * c12.x * c12y2 * c22.x * c13.y + 6 * c10.x * c20.y * c13.x * c22.x * c13y2 + 6 * c10.x * c21.x * c13.x * c21.y * c13y2 + 4 * c10.y * c11.x * c12.y * c13x2 * c22.y + 6 * c10.y * c20.x * c13.x * c22.x * c13y2 + 2 * c10.y * c11.y * c12.x * c13x2 * c22.y - 3 * c10.y * c11.y * c12.y * c13x2 * c22.x + 2 * c10.y * c12.x * c12y2 * c13.x * c22.x - 3 * c11.x * c20.x * c12.x * c13y2 * c22.y + 2 * c11.x * c20.x * c12.y * c22.x * c13y2 + c11.x * c11.y * c12y2 * c13.x * c22.x - 3 * c11.x * c12.x * c20.y * c22.x * c13y2 - 3 * c11.x * c12.x * c21.x * c21.y * c13y2 + 4 * c20.x * c11.y * c12.x * c22.x * c13y2 - 2 * c10.x * c12x2 * c12.y * c13.y * c22.y - 6 * c10.y * c20.x * c13x2 * c13.y * c22.y - 6 * c10.y * c20.y * c13x2 * c22.x * c13.y - 6 * c10.y * c21.x * c13x2 * c21.y * c13.y - 2 * c10.y * c12x2 * c12.y * c13.x * c22.y - 2 * c10.y * c12x2 * c12.y * c22.x * c13.y - c11.x * c11.y * c12x2 * c13.y * c22.y - 2 * c11.x * c11y2 * c13.x * c22.x * c13.y + 3 * c20.x * c11.y * c12.y * c13x2 * c22.y - 2 * c20.x * c12.x * c12y2 * c13.x * c22.y - 2 * c20.x * c12.x * c12y2 * c22.x * c13.y - 6 * c20.x * c20.y * c13.x * c22.x * c13y2 - 6 * c20.x * c21.x * c13.x * c21.y * c13y2 + 3 * c11.y * c20.y * c12.y * c13x2 * c22.x + 3 * c11.y * c21.x * c12.y * c13x2 * c21.y - 2 * c12.x * c20.y * c12y2 * c13.x * c22.x - 2 * c12.x * c21.x * c12y2 * c13.x * c21.y - c11y2 * c12.x * c12.y * c13.x * c22.x + 2 * c20.x * c12x2 * c12.y * c13.y * c22.y - 3 * c11.y * c21x2 * c12.y * c13.x * c13.y + 6 * c20.y * c21.x * c13x2 * c21.y * c13.y + 2 * c11x2 * c11.y * c13.x * c13.y * c22.y + c11x2 * c12.x * c12.y * c13.y * c22.y + 2 * c12x2 * c20.y * c12.y * c22.x * c13.y + 2 * c12x2 * c21.x * c12.y * c21.y * c13.y - 3 * c10.x * c21x2 * c13y3 + 3 * c20.x * c21x2 * c13y3 + 3 * c10x2 * c22.x * c13y3 - 3 * c10y2 * c13x3 * c22.y + 3 * c20x2 * c22.x * c13y3 + c21x2 * c12y3 * c13.x + c11y3 * c13x2 * c22.x - c11x3 * c13y2 * c22.y + 3 * c10.y * c21x2 * c13.x * c13y2 - c11.x * c11y2 * c13x2 * c22.y + c11.x * c21x2 * c12.y * c13y2 + 2 * c11.y * c12.x * c21x2 * c13y2 + c11x2 * c11.y * c22.x * c13y2 - c12.x * c21x2 * c12y2 * c13.y - 3 * c20.y * c21x2 * c13.x * c13y2 - 3 * c10x2 * c13.x * c13y2 * c22.y + 3 * c10y2 * c13x2 * c22.x * c13.y - c11x2 * c12y2 * c13.x * c22.y + c11y2 * c12x2 * c22.x * c13.y - 3 * c20x2 * c13.x * c13y2 * c22.y + 3 * c20y2 * c13x2 * c22.x * c13.y + c12x2 * c12.y * c13.x * (2 * c20.y * c22.y + c21y2) + c11.x * c12.x * c13.x * c13.y * (6 * c20.y * c22.y + 3 * c21y2) + c12x3 * c13.y * (-2 * c20.y * c22.y - c21y2) + c10.y * c13x3 * (6 * c20.y * c22.y + 3 * c21y2) + c11.y * c12.x * c13x2 * (-2 * c20.y * c22.y - c21y2) + c11.x * c12.y * c13x2 * (-4 * c20.y * c22.y - 2 * c21y2) + c10.x * c13x2 * c13.y * (-6 * c20.y * c22.y - 3 * c21y2) + c20.x * c13x2 * c13.y * (6 * c20.y * c22.y + 3 * c21y2) + c13x3 * (-2 * c20.y * c21y2 - c20y2 * c22.y - c20.y * (2 * c20.y * c22.y + c21y2)), -c10.x * c11.x * c12.y * c13.x * c21.y * c13.y + c10.x * c11.y * c12.x * c13.x * c21.y * c13.y + 6 * c10.x * c11.y * c21.x * c12.y * c13.x * c13.y - 6 * c10.y * c11.x * c12.x * c13.x * c21.y * c13.y - c10.y * c11.x * c21.x * c12.y * c13.x * c13.y + c10.y * c11.y * c12.x * c21.x * c13.x * c13.y - c11.x * c11.y * c12.x * c21.x * c12.y * c13.y + c11.x * c11.y * c12.x * c12.y * c13.x * c21.y + c11.x * c20.x * c12.y * c13.x * c21.y * c13.y + 6 * c11.x * c12.x * c20.y * c13.x * c21.y * c13.y + c11.x * c20.y * c21.x * c12.y * c13.x * c13.y - c20.x * c11.y * c12.x * c13.x * c21.y * c13.y - 6 * c20.x * c11.y * c21.x * c12.y * c13.x * c13.y - c11.y * c12.x * c20.y * c21.x * c13.x * c13.y - 6 * c10.x * c20.x * c21.x * c13y3 - 2 * c10.x * c21.x * c12y3 * c13.x + 6 * c10.y * c20.y * c13x3 * c21.y + 2 * c20.x * c21.x * c12y3 * c13.x + 2 * c10.y * c12x3 * c21.y * c13.y - 2 * c12x3 * c20.y * c21.y * c13.y - 6 * c10.x * c10.y * c21.x * c13.x * c13y2 + 3 * c10.x * c11.x * c12.x * c21.y * c13y2 - 2 * c10.x * c11.x * c21.x * c12.y * c13y2 - 4 * c10.x * c11.y * c12.x * c21.x * c13y2 + 3 * c10.y * c11.x * c12.x * c21.x * c13y2 + 6 * c10.x * c10.y * c13x2 * c21.y * c13.y + 6 * c10.x * c20.x * c13.x * c21.y * c13y2 - 3 * c10.x * c11.y * c12.y * c13x2 * c21.y + 2 * c10.x * c12.x * c21.x * c12y2 * c13.y + 2 * c10.x * c12.x * c12y2 * c13.x * c21.y + 6 * c10.x * c20.y * c21.x * c13.x * c13y2 + 4 * c10.y * c11.x * c12.y * c13x2 * c21.y + 6 * c10.y * c20.x * c21.x * c13.x * c13y2 + 2 * c10.y * c11.y * c12.x * c13x2 * c21.y - 3 * c10.y * c11.y * c21.x * c12.y * c13x2 + 2 * c10.y * c12.x * c21.x * c12y2 * c13.x - 3 * c11.x * c20.x * c12.x * c21.y * c13y2 + 2 * c11.x * c20.x * c21.x * c12.y * c13y2 + c11.x * c11.y * c21.x * c12y2 * c13.x - 3 * c11.x * c12.x * c20.y * c21.x * c13y2 + 4 * c20.x * c11.y * c12.x * c21.x * c13y2 - 6 * c10.x * c20.y * c13x2 * c21.y * c13.y - 2 * c10.x * c12x2 * c12.y * c21.y * c13.y - 6 * c10.y * c20.x * c13x2 * c21.y * c13.y - 6 * c10.y * c20.y * c21.x * c13x2 * c13.y - 2 * c10.y * c12x2 * c21.x * c12.y * c13.y - 2 * c10.y * c12x2 * c12.y * c13.x * c21.y - c11.x * c11.y * c12x2 * c21.y * c13.y - 4 * c11.x * c20.y * c12.y * c13x2 * c21.y - 2 * c11.x * c11y2 * c21.x * c13.x * c13.y + 3 * c20.x * c11.y * c12.y * c13x2 * c21.y - 2 * c20.x * c12.x * c21.x * c12y2 * c13.y - 2 * c20.x * c12.x * c12y2 * c13.x * c21.y - 6 * c20.x * c20.y * c21.x * c13.x * c13y2 - 2 * c11.y * c12.x * c20.y * c13x2 * c21.y + 3 * c11.y * c20.y * c21.x * c12.y * c13x2 - 2 * c12.x * c20.y * c21.x * c12y2 * c13.x - c11y2 * c12.x * c21.x * c12.y * c13.x + 6 * c20.x * c20.y * c13x2 * c21.y * c13.y + 2 * c20.x * c12x2 * c12.y * c21.y * c13.y + 2 * c11x2 * c11.y * c13.x * c21.y * c13.y + c11x2 * c12.x * c12.y * c21.y * c13.y + 2 * c12x2 * c20.y * c21.x * c12.y * c13.y + 2 * c12x2 * c20.y * c12.y * c13.x * c21.y + 3 * c10x2 * c21.x * c13y3 - 3 * c10y2 * c13x3 * c21.y + 3 * c20x2 * c21.x * c13y3 + c11y3 * c21.x * c13x2 - c11x3 * c21.y * c13y2 - 3 * c20y2 * c13x3 * c21.y - c11.x * c11y2 * c13x2 * c21.y + c11x2 * c11.y * c21.x * c13y2 - 3 * c10x2 * c13.x * c21.y * c13y2 + 3 * c10y2 * c21.x * c13x2 * c13.y - c11x2 * c12y2 * c13.x * c21.y + c11y2 * c12x2 * c21.x * c13.y - 3 * c20x2 * c13.x * c21.y * c13y2 + 3 * c20y2 * c21.x * c13x2 * c13.y, c10.x * c10.y * c11.x * c12.y * c13.x * c13.y - c10.x * c10.y * c11.y * c12.x * c13.x * c13.y + c10.x * c11.x * c11.y * c12.x * c12.y * c13.y - c10.y * c11.x * c11.y * c12.x * c12.y * c13.x - c10.x * c11.x * c20.y * c12.y * c13.x * c13.y + 6 * c10.x * c20.x * c11.y * c12.y * c13.x * c13.y + c10.x * c11.y * c12.x * c20.y * c13.x * c13.y - c10.y * c11.x * c20.x * c12.y * c13.x * c13.y - 6 * c10.y * c11.x * c12.x * c20.y * c13.x * c13.y + c10.y * c20.x * c11.y * c12.x * c13.x * c13.y - c11.x * c20.x * c11.y * c12.x * c12.y * c13.y + c11.x * c11.y * c12.x * c20.y * c12.y * c13.x + c11.x * c20.x * c20.y * c12.y * c13.x * c13.y - c20.x * c11.y * c12.x * c20.y * c13.x * c13.y - 2 * c10.x * c20.x * c12y3 * c13.x + 2 * c10.y * c12x3 * c20.y * c13.y - 3 * c10.x * c10.y * c11.x * c12.x * c13y2 - 6 * c10.x * c10.y * c20.x * c13.x * c13y2 + 3 * c10.x * c10.y * c11.y * c12.y * c13x2 - 2 * c10.x * c10.y * c12.x * c12y2 * c13.x - 2 * c10.x * c11.x * c20.x * c12.y * c13y2 - c10.x * c11.x * c11.y * c12y2 * c13.x + 3 * c10.x * c11.x * c12.x * c20.y * c13y2 - 4 * c10.x * c20.x * c11.y * c12.x * c13y2 + 3 * c10.y * c11.x * c20.x * c12.x * c13y2 + 6 * c10.x * c10.y * c20.y * c13x2 * c13.y + 2 * c10.x * c10.y * c12x2 * c12.y * c13.y + 2 * c10.x * c11.x * c11y2 * c13.x * c13.y + 2 * c10.x * c20.x * c12.x * c12y2 * c13.y + 6 * c10.x * c20.x * c20.y * c13.x * c13y2 - 3 * c10.x * c11.y * c20.y * c12.y * c13x2 + 2 * c10.x * c12.x * c20.y * c12y2 * c13.x + c10.x * c11y2 * c12.x * c12.y * c13.x + c10.y * c11.x * c11.y * c12x2 * c13.y + 4 * c10.y * c11.x * c20.y * c12.y * c13x2 - 3 * c10.y * c20.x * c11.y * c12.y * c13x2 + 2 * c10.y * c20.x * c12.x * c12y2 * c13.x + 2 * c10.y * c11.y * c12.x * c20.y * c13x2 + c11.x * c20.x * c11.y * c12y2 * c13.x - 3 * c11.x * c20.x * c12.x * c20.y * c13y2 - 2 * c10.x * c12x2 * c20.y * c12.y * c13.y - 6 * c10.y * c20.x * c20.y * c13x2 * c13.y - 2 * c10.y * c20.x * c12x2 * c12.y * c13.y - 2 * c10.y * c11x2 * c11.y * c13.x * c13.y - c10.y * c11x2 * c12.x * c12.y * c13.y - 2 * c10.y * c12x2 * c20.y * c12.y * c13.x - 2 * c11.x * c20.x * c11y2 * c13.x * c13.y - c11.x * c11.y * c12x2 * c20.y * c13.y + 3 * c20.x * c11.y * c20.y * c12.y * c13x2 - 2 * c20.x * c12.x * c20.y * c12y2 * c13.x - c20.x * c11y2 * c12.x * c12.y * c13.x + 3 * c10y2 * c11.x * c12.x * c13.x * c13.y + 3 * c11.x * c12.x * c20y2 * c13.x * c13.y + 2 * c20.x * c12x2 * c20.y * c12.y * c13.y - 3 * c10x2 * c11.y * c12.y * c13.x * c13.y + 2 * c11x2 * c11.y * c20.y * c13.x * c13.y + c11x2 * c12.x * c20.y * c12.y * c13.y - 3 * c20x2 * c11.y * c12.y * c13.x * c13.y - c10x3 * c13y3 + c10y3 * c13x3 + c20x3 * c13y3 - c20y3 * c13x3 - 3 * c10.x * c20x2 * c13y3 - c10.x * c11y3 * c13x2 + 3 * c10x2 * c20.x * c13y3 + c10.y * c11x3 * c13y2 + 3 * c10.y * c20y2 * c13x3 + c20.x * c11y3 * c13x2 + c10x2 * c12y3 * c13.x - 3 * c10y2 * c20.y * c13x3 - c10y2 * c12x3 * c13.y + c20x2 * c12y3 * c13.x - c11x3 * c20.y * c13y2 - c12x3 * c20y2 * c13.y - c10.x * c11x2 * c11.y * c13y2 + c10.y * c11.x * c11y2 * c13x2 - 3 * c10.x * c10y2 * c13x2 * c13.y - c10.x * c11y2 * c12x2 * c13.y + c10.y * c11x2 * c12y2 * c13.x - c11.x * c11y2 * c20.y * c13x2 + 3 * c10x2 * c10.y * c13.x * c13y2 + c10x2 * c11.x * c12.y * c13y2 + 2 * c10x2 * c11.y * c12.x * c13y2 - 2 * c10y2 * c11.x * c12.y * c13x2 - c10y2 * c11.y * c12.x * c13x2 + c11x2 * c20.x * c11.y * c13y2 - 3 * c10.x * c20y2 * c13x2 * c13.y + 3 * c10.y * c20x2 * c13.x * c13y2 + c11.x * c20x2 * c12.y * c13y2 - 2 * c11.x * c20y2 * c12.y * c13x2 + c20.x * c11y2 * c12x2 * c13.y - c11.y * c12.x * c20y2 * c13x2 - c10x2 * c12.x * c12y2 * c13.y - 3 * c10x2 * c20.y * c13.x * c13y2 + 3 * c10y2 * c20.x * c13x2 * c13.y + c10y2 * c12x2 * c12.y * c13.x - c11x2 * c20.y * c12y2 * c13.x + 2 * c20x2 * c11.y * c12.x * c13y2 + 3 * c20.x * c20y2 * c13x2 * c13.y - c20x2 * c12.x * c12y2 * c13.y - 3 * c20x2 * c20.y * c13.x * c13y2 + c12x2 * c20y2 * c12.y * c13.x);
+    const roots = poly.getRootsInInterval(0, 1);
+    for (const s of roots) {
+      const xRoots = new Polynomial(c13.x, c12.x, c11.x, c10.x - c20.x - s * c21.x - s * s * c22.x - s * s * s * c23.x).getRoots();
+      const yRoots = new Polynomial(c13.y, c12.y, c11.y, c10.y - c20.y - s * c21.y - s * s * c22.y - s * s * s * c23.y).getRoots();
       if (xRoots.length > 0 && yRoots.length > 0) {
-        let TOLERANCE = 1e-4;
-        checkRoots:for (let j = 0; j < xRoots.length; j++) {
-          let xRoot = xRoots[j];
+        const TOLERANCE = 1e-4;
+        checkRoots:for (const xRoot of xRoots) {
           if (0 <= xRoot && xRoot <= 1) {
-            for (let k = 0; k < yRoots.length; k++) {
-              if (Math.abs(xRoot - yRoots[k]) < TOLERANCE) {
+            for (const yRoot of yRoots) {
+              if (Math.abs(xRoot - yRoot) < TOLERANCE) {
                 result.points.push(c23.multiply(s * s * s).add(c22.multiply(s * s).add(c21.multiply(s).add(c20))));
                 break checkRoots;
               }
@@ -416,7 +408,7 @@ export class Intersection {
   static intersectBezier3Ellipse(p1, p2, p3, p4, ec, rx, ry) {
     let a, b, c, d;
     let c3, c2, c1, c0;
-    let result = new Intersection();
+    const result = new Intersection();
     a = p1.multiply(-1);
     b = p2.multiply(3);
     c = p3.multiply(-3);
@@ -432,12 +424,11 @@ export class Intersection {
     c = a.add(b);
     c1 = new Vector2D(c.x, c.y);
     c0 = new Vector2D(p1.x, p1.y);
-    let rxrx = rx * rx;
-    let ryry = ry * ry;
-    let poly = new Polynomial(c3.x * c3.x * ryry + c3.y * c3.y * rxrx, 2 * (c3.x * c2.x * ryry + c3.y * c2.y * rxrx), 2 * (c3.x * c1.x * ryry + c3.y * c1.y * rxrx) + c2.x * c2.x * ryry + c2.y * c2.y * rxrx, 2 * c3.x * ryry * (c0.x - ec.x) + 2 * c3.y * rxrx * (c0.y - ec.y) + 2 * (c2.x * c1.x * ryry + c2.y * c1.y * rxrx), 2 * c2.x * ryry * (c0.x - ec.x) + 2 * c2.y * rxrx * (c0.y - ec.y) + c1.x * c1.x * ryry + c1.y * c1.y * rxrx, 2 * c1.x * ryry * (c0.x - ec.x) + 2 * c1.y * rxrx * (c0.y - ec.y), c0.x * c0.x * ryry - 2 * c0.y * ec.y * rxrx - 2 * c0.x * ec.x * ryry + c0.y * c0.y * rxrx + ec.x * ec.x * ryry + ec.y * ec.y * rxrx - rxrx * ryry);
-    let roots = poly.getRootsInInterval(0, 1);
-    for (let i = 0; i < roots.length; i++) {
-      let t = roots[i];
+    const rxrx = rx * rx;
+    const ryry = ry * ry;
+    const poly = new Polynomial(c3.x * c3.x * ryry + c3.y * c3.y * rxrx, 2 * (c3.x * c2.x * ryry + c3.y * c2.y * rxrx), 2 * (c3.x * c1.x * ryry + c3.y * c1.y * rxrx) + c2.x * c2.x * ryry + c2.y * c2.y * rxrx, 2 * c3.x * ryry * (c0.x - ec.x) + 2 * c3.y * rxrx * (c0.y - ec.y) + 2 * (c2.x * c1.x * ryry + c2.y * c1.y * rxrx), 2 * c2.x * ryry * (c0.x - ec.x) + 2 * c2.y * rxrx * (c0.y - ec.y) + c1.x * c1.x * ryry + c1.y * c1.y * rxrx, 2 * c1.x * ryry * (c0.x - ec.x) + 2 * c1.y * rxrx * (c0.y - ec.y), c0.x * c0.x * ryry - 2 * c0.y * ec.y * rxrx - 2 * c0.x * ec.x * ryry + c0.y * c0.y * rxrx + ec.x * ec.x * ryry + ec.y * ec.y * rxrx - rxrx * ryry);
+    const roots = poly.getRootsInInterval(0, 1);
+    for (const t of roots) {
       result.points.push(c3.multiply(t * t * t).add(c2.multiply(t * t).add(c1.multiply(t).add(c0))));
     }
     return result;
@@ -448,9 +439,9 @@ export class Intersection {
     let c3, c2, c1, c0;
     let cl;
     let n;
-    let min = a1.min(a2);
-    let max = a1.max(a2);
-    let result = new Intersection();
+    const min = a1.min(a2);
+    const max = a1.max(a2);
+    const result = new Intersection();
     a = p1.multiply(-1);
     b = p2.multiply(3);
     c = p3.multiply(-3);
@@ -468,16 +459,15 @@ export class Intersection {
     c0 = new Vector2D(p1.x, p1.y);
     n = new Vector2D(a1.y - a2.y, a2.x - a1.x);
     cl = a1.x * a2.y - a2.x * a1.y;
-    let roots = new Polynomial(n.dot(c3), n.dot(c2), n.dot(c1), n.dot(c0) + cl).getRoots();
-    for (let i = 0; i < roots.length; i++) {
-      let t = roots[i];
+    const roots = new Polynomial(n.dot(c3), n.dot(c2), n.dot(c1), n.dot(c0) + cl).getRoots();
+    for (const t of roots) {
       if (0 <= t && t <= 1) {
-        let p5 = p1.lerp(p2, t);
-        let p6 = p2.lerp(p3, t);
-        let p7 = p3.lerp(p4, t);
-        let p8 = p5.lerp(p6, t);
-        let p9 = p6.lerp(p7, t);
-        let p10 = p8.lerp(p9, t);
+        const p5 = p1.lerp(p2, t);
+        const p6 = p2.lerp(p3, t);
+        const p7 = p3.lerp(p4, t);
+        const p8 = p5.lerp(p6, t);
+        const p9 = p6.lerp(p7, t);
+        const p10 = p8.lerp(p9, t);
         if (a1.x === a2.x) {
           if (min.y <= p10.y && p10.y <= max.y) {
             result.appendPoint(p10);
@@ -495,27 +485,27 @@ export class Intersection {
   }
 
   static intersectBezier3Polygon(p1, p2, p3, p4, points) {
-    let result = new Intersection();
-    let length = points.length;
+    const result = new Intersection();
+    const length = points.length;
     for (let i = 0; i < length; i++) {
-      let a1 = points[i];
-      let a2 = points[(i + 1) % length];
-      let inter = Intersection.intersectBezier3Line(p1, p2, p3, p4, a1, a2);
+      const a1 = points[i];
+      const a2 = points[(i + 1) % length];
+      const inter = Intersection.intersectBezier3Line(p1, p2, p3, p4, a1, a2);
       result.appendPoints(inter.points);
     }
     return result;
   }
 
   static intersectBezier3Rectangle(p1, p2, p3, p4, r1, r2) {
-    let min = r1.min(r2);
-    let max = r1.max(r2);
-    let topRight = new Vector2D(max.x, min.y);
-    let bottomLeft = new Vector2D(min.x, max.y);
-    let inter1 = Intersection.intersectBezier3Line(p1, p2, p3, p4, min, topRight);
-    let inter2 = Intersection.intersectBezier3Line(p1, p2, p3, p4, topRight, max);
-    let inter3 = Intersection.intersectBezier3Line(p1, p2, p3, p4, max, bottomLeft);
-    let inter4 = Intersection.intersectBezier3Line(p1, p2, p3, p4, bottomLeft, min);
-    let result = new Intersection();
+    const min = r1.min(r2);
+    const max = r1.max(r2);
+    const topRight = new Vector2D(max.x, min.y);
+    const bottomLeft = new Vector2D(min.x, max.y);
+    const inter1 = Intersection.intersectBezier3Line(p1, p2, p3, p4, min, topRight);
+    const inter2 = Intersection.intersectBezier3Line(p1, p2, p3, p4, topRight, max);
+    const inter3 = Intersection.intersectBezier3Line(p1, p2, p3, p4, max, bottomLeft);
+    const inter4 = Intersection.intersectBezier3Line(p1, p2, p3, p4, bottomLeft, min);
+    const result = new Intersection();
     result.appendPoints(inter1.points);
     result.appendPoints(inter2.points);
     result.appendPoints(inter3.points);
@@ -525,19 +515,19 @@ export class Intersection {
 
   static intersectCircleCircle(c1, r1, c2, r2) {
     let result;
-    let r_max = r1 + r2;
-    let r_min = Math.abs(r1 - r2);
-    let c_dist = c1.distanceFrom(c2);
-    if (c_dist > r_max) {
+    const rMax = r1 + r2;
+    const rMin = Math.abs(r1 - r2);
+    const cDist = c1.distanceFrom(c2);
+    if (cDist > rMax) {
       result = new Intersection('Outside');
-    } else if (c_dist < r_min) {
+    } else if (cDist < rMin) {
       result = new Intersection('Inside');
     } else {
       result = new Intersection('Intersection');
-      let a = (r1 * r1 - r2 * r2 + c_dist * c_dist) / (2 * c_dist);
-      let h = Math.sqrt(r1 * r1 - a * a);
-      let p = c1.lerp(c2, a / c_dist);
-      let b = h / c_dist;
+      const a = (r1 * r1 - r2 * r2 + cDist * cDist) / (2 * cDist);
+      const h = Math.sqrt(r1 * r1 - a * a);
+      const p = c1.lerp(c2, a / cDist);
+      const b = h / cDist;
       result.points.push(new Vector2D(p.x - b * (c2.y - c1.y), p.y + b * (c2.x - c1.x)));
       result.points.push(new Vector2D(p.x + b * (c2.y - c1.y), p.y - b * (c2.x - c1.x)));
     }
@@ -550,18 +540,18 @@ export class Intersection {
 
   static intersectCircleLine(c, r, a1, a2) {
     let result;
-    let a = (a2.x - a1.x) * (a2.x - a1.x) + (a2.y - a1.y) * (a2.y - a1.y);
-    let b = 2 * ((a2.x - a1.x) * (a1.x - c.x) + (a2.y - a1.y) * (a1.y - c.y));
-    let cc = c.x * c.x + c.y * c.y + a1.x * a1.x + a1.y * a1.y - 2 * (c.x * a1.x + c.y * a1.y) - r * r;
-    let deter = b * b - 4 * a * cc;
+    const a = (a2.x - a1.x) * (a2.x - a1.x) + (a2.y - a1.y) * (a2.y - a1.y);
+    const b = 2 * ((a2.x - a1.x) * (a1.x - c.x) + (a2.y - a1.y) * (a1.y - c.y));
+    const cc = c.x * c.x + c.y * c.y + a1.x * a1.x + a1.y * a1.y - 2 * (c.x * a1.x + c.y * a1.y) - r * r;
+    const deter = b * b - 4 * a * cc;
     if (deter < 0) {
       result = new Intersection('Outside');
     } else if (deter === 0) {
       result = new Intersection('Tangent');
     } else {
-      let e = Math.sqrt(deter);
-      let u1 = (-b + e) / (2 * a);
-      let u2 = (-b - e) / (2 * a);
+      const e = Math.sqrt(deter);
+      const u1 = (-b + e) / (2 * a);
+      const u2 = (-b - e) / (2 * a);
       if ((u1 < 0 || u1 > 1) && (u2 < 0 || u2 > 1)) {
         if ((u1 < 0 && u2 < 0) || (u1 > 1 && u2 > 1)) {
           result = new Intersection('Outside');
@@ -582,12 +572,12 @@ export class Intersection {
   }
 
   static intersectCirclePolygon(c, r, points) {
-    let result = new Intersection();
-    let length = points.length;
+    const result = new Intersection();
+    const length = points.length;
     let inter;
     for (let i = 0; i < length; i++) {
-      let a1 = points[i];
-      let a2 = points[(i + 1) % length];
+      const a1 = points[i];
+      const a2 = points[(i + 1) % length];
       inter = Intersection.intersectCircleLine(c, r, a1, a2);
       result.appendPoints(inter.points);
     }
@@ -600,15 +590,15 @@ export class Intersection {
   }
 
   static intersectCircleRectangle(c, r, r1, r2) {
-    let min = r1.min(r2);
-    let max = r1.max(r2);
-    let topRight = new Vector2D(max.x, min.y);
-    let bottomLeft = new Vector2D(min.x, max.y);
-    let inter1 = Intersection.intersectCircleLine(c, r, min, topRight);
-    let inter2 = Intersection.intersectCircleLine(c, r, topRight, max);
-    let inter3 = Intersection.intersectCircleLine(c, r, max, bottomLeft);
-    let inter4 = Intersection.intersectCircleLine(c, r, bottomLeft, min);
-    let result = new Intersection();
+    const min = r1.min(r2);
+    const max = r1.max(r2);
+    const topRight = new Vector2D(max.x, min.y);
+    const bottomLeft = new Vector2D(min.x, max.y);
+    const inter1 = Intersection.intersectCircleLine(c, r, min, topRight);
+    const inter2 = Intersection.intersectCircleLine(c, r, topRight, max);
+    const inter3 = Intersection.intersectCircleLine(c, r, max, bottomLeft);
+    const inter4 = Intersection.intersectCircleLine(c, r, bottomLeft, min);
+    const result = new Intersection();
     result.appendPoints(inter1.points);
     result.appendPoints(inter2.points);
     result.appendPoints(inter3.points);
@@ -622,23 +612,23 @@ export class Intersection {
   }
 
   static intersectEllipseEllipse(c1, rx1, ry1, c2, rx2, ry2) {
-    let a = [ry1 * ry1, 0, rx1 * rx1, -2 * ry1 * ry1 * c1.x, -2 * rx1 * rx1 * c1.y, ry1 * ry1 * c1.x * c1.x + rx1 * rx1 * c1.y * c1.y - rx1 * rx1 * ry1 * ry1];
-    let b = [ry2 * ry2, 0, rx2 * rx2, -2 * ry2 * ry2 * c2.x, -2 * rx2 * rx2 * c2.y, ry2 * ry2 * c2.x * c2.x + rx2 * rx2 * c2.y * c2.y - rx2 * rx2 * ry2 * ry2];
-    let yPoly = Intersection.bezout(a, b);
-    let yRoots = yPoly.getRoots();
-    let epsilon = 1e-3;
-    let norm0 = (a[0] * a[0] + 2 * a[1] * a[1] + a[2] * a[2]) * epsilon;
-    let norm1 = (b[0] * b[0] + 2 * b[1] * b[1] + b[2] * b[2]) * epsilon;
-    let result = new Intersection();
-    for (let y = 0; y < yRoots.length; y++) {
-      let xPoly = new Polynomial(a[0], a[3] + yRoots[y] * a[1], a[5] + yRoots[y] * (a[4] + yRoots[y] * a[2]));
-      let xRoots = xPoly.getRoots();
-      for (let x = 0; x < xRoots.length; x++) {
-        let test = (a[0] * xRoots[x] + a[1] * yRoots[y] + a[3]) * xRoots[x] + (a[2] * yRoots[y] + a[4]) * yRoots[y] + a[5];
+    const a = [ry1 * ry1, 0, rx1 * rx1, -2 * ry1 * ry1 * c1.x, -2 * rx1 * rx1 * c1.y, ry1 * ry1 * c1.x * c1.x + rx1 * rx1 * c1.y * c1.y - rx1 * rx1 * ry1 * ry1];
+    const b = [ry2 * ry2, 0, rx2 * rx2, -2 * ry2 * ry2 * c2.x, -2 * rx2 * rx2 * c2.y, ry2 * ry2 * c2.x * c2.x + rx2 * rx2 * c2.y * c2.y - rx2 * rx2 * ry2 * ry2];
+    const yPoly = Intersection.bezout(a, b);
+    const yRoots = yPoly.getRoots();
+    const epsilon = 1e-3;
+    const norm0 = (a[0] * a[0] + 2 * a[1] * a[1] + a[2] * a[2]) * epsilon;
+    const norm1 = (b[0] * b[0] + 2 * b[1] * b[1] + b[2] * b[2]) * epsilon;
+    const result = new Intersection();
+    for (const yRoot of yRoots) {
+      const xPoly = new Polynomial(a[0], a[3] + yRoot * a[1], a[5] + yRoot * (a[4] + yRoot * a[2]));
+      const xRoots = xPoly.getRoots();
+      for (const xRoot of xRoots) {
+        let test = (a[0] * xRoot + a[1] * yRoot + a[3]) * xRoot + (a[2] * yRoot + a[4]) * yRoot + a[5];
         if (Math.abs(test) < norm0) {
-          test = (b[0] * xRoots[x] + b[1] * yRoots[y] + b[3]) * xRoots[x] + (b[2] * yRoots[y] + b[4]) * yRoots[y] + b[5];
+          test = (b[0] * xRoot + b[1] * yRoot + b[3]) * xRoot + (b[2] * yRoot + b[4]) * yRoot + b[5];
           if (Math.abs(test) < norm1) {
-            result.appendPoint(new Vector2D(xRoots[x], yRoots[y]));
+            result.appendPoint(new Vector2D(xRoot, yRoot));
           }
         }
       }
@@ -648,39 +638,39 @@ export class Intersection {
 
   static intersectEllipseLine(c, rx, ry, a1, a2) {
     let result;
-    let origin = new Vector2D(a1.x, a1.y);
-    let dir = Vector2D.fromPoints(a1, a2);
-    let center = new Vector2D(c.x, c.y);
-    let diff = origin.subtract(center);
-    let mDir = new Vector2D(dir.x / (rx * rx), dir.y / (ry * ry));
-    let mDiff = new Vector2D(diff.x / (rx * rx), diff.y / (ry * ry));
-    let a = dir.dot(mDir);
-    let b = dir.dot(mDiff);
+    const origin = new Vector2D(a1.x, a1.y);
+    const dir = Vector2D.fromPoints(a1, a2);
+    const center = new Vector2D(c.x, c.y);
+    const diff = origin.subtract(center);
+    const mDir = new Vector2D(dir.x / (rx * rx), dir.y / (ry * ry));
+    const mDiff = new Vector2D(diff.x / (rx * rx), diff.y / (ry * ry));
+    const a = dir.dot(mDir);
+    const b = dir.dot(mDiff);
     c = diff.dot(mDiff) - 1.0;
-    let d = b * b - a * c;
+    const d = b * b - a * c;
     if (d < 0) {
       result = new Intersection('Outside');
     } else if (d > 0) {
-      let root = Math.sqrt(d);
-      let t_a = (-b - root) / a;
-      let t_b = (-b + root) / a;
-      if ((t_a < 0 || 1 < t_a) && (t_b < 0 || 1 < t_b)) {
-        if ((t_a < 0 && t_b < 0) || (t_a > 1 && t_b > 1)) {
+      const root = Math.sqrt(d);
+      const tA = (-b - root) / a;
+      const tB = (-b + root) / a;
+      if ((tA < 0 || 1 < tA) && (tB < 0 || 1 < tB)) {
+        if ((tA < 0 && tB < 0) || (tA > 1 && tB > 1)) {
           result = new Intersection('Outside');
         } else {
           result = new Intersection('Inside');
         }
       } else {
         result = new Intersection('Intersection');
-        if (0 <= t_a && t_a <= 1) {
-          result.appendPoint(a1.lerp(a2, t_a));
+        if (0 <= tA && tA <= 1) {
+          result.appendPoint(a1.lerp(a2, tA));
         }
-        if (0 <= t_b && t_b <= 1) {
-          result.appendPoint(a1.lerp(a2, t_b));
+        if (0 <= tB && tB <= 1) {
+          result.appendPoint(a1.lerp(a2, tB));
         }
       }
     } else {
-      let t = -b / a;
+      const t = -b / a;
       if (0 <= t && t <= 1) {
         result = new Intersection('Intersection');
         result.appendPoint(a1.lerp(a2, t));
@@ -692,27 +682,27 @@ export class Intersection {
   }
 
   static intersectEllipsePolygon(c, rx, ry, points) {
-    let result = new Intersection();
-    let length = points.length;
+    const result = new Intersection();
+    const length = points.length;
     for (let i = 0; i < length; i++) {
-      let b1 = points[i];
-      let b2 = points[(i + 1) % length];
-      let inter = Intersection.intersectEllipseLine(c, rx, ry, b1, b2);
+      const b1 = points[i];
+      const b2 = points[(i + 1) % length];
+      const inter = Intersection.intersectEllipseLine(c, rx, ry, b1, b2);
       result.appendPoints(inter.points);
     }
     return result;
   }
 
   static intersectEllipseRectangle(c, rx, ry, r1, r2) {
-    let min = r1.min(r2);
-    let max = r1.max(r2);
-    let topRight = new Vector2D(max.x, min.y);
-    let bottomLeft = new Vector2D(min.x, max.y);
-    let inter1 = Intersection.intersectEllipseLine(c, rx, ry, min, topRight);
-    let inter2 = Intersection.intersectEllipseLine(c, rx, ry, topRight, max);
-    let inter3 = Intersection.intersectEllipseLine(c, rx, ry, max, bottomLeft);
-    let inter4 = Intersection.intersectEllipseLine(c, rx, ry, bottomLeft, min);
-    let result = new Intersection();
+    const min = r1.min(r2);
+    const max = r1.max(r2);
+    const topRight = new Vector2D(max.x, min.y);
+    const bottomLeft = new Vector2D(min.x, max.y);
+    const inter1 = Intersection.intersectEllipseLine(c, rx, ry, min, topRight);
+    const inter2 = Intersection.intersectEllipseLine(c, rx, ry, topRight, max);
+    const inter3 = Intersection.intersectEllipseLine(c, rx, ry, max, bottomLeft);
+    const inter4 = Intersection.intersectEllipseLine(c, rx, ry, bottomLeft, min);
+    const result = new Intersection();
     result.appendPoints(inter1.points);
     result.appendPoints(inter2.points);
     result.appendPoints(inter3.points);
@@ -722,12 +712,12 @@ export class Intersection {
 
   static intersectLineLine(a1, a2, b1, b2) {
     let result;
-    let ua_t = (b2.x - b1.x) * (a1.y - b1.y) - (b2.y - b1.y) * (a1.x - b1.x);
-    let ub_t = (a2.x - a1.x) * (a1.y - b1.y) - (a2.y - a1.y) * (a1.x - b1.x);
-    let u_b = (b2.y - b1.y) * (a2.x - a1.x) - (b2.x - b1.x) * (a2.y - a1.y);
-    if (u_b !== 0) {
-      let ua = ua_t / u_b;
-      let ub = ub_t / u_b;
+    const uaT = (b2.x - b1.x) * (a1.y - b1.y) - (b2.y - b1.y) * (a1.x - b1.x);
+    const ubT = (a2.x - a1.x) * (a1.y - b1.y) - (a2.y - a1.y) * (a1.x - b1.x);
+    const uB = (b2.y - b1.y) * (a2.x - a1.x) - (b2.x - b1.x) * (a2.y - a1.y);
+    if (uB !== 0) {
+      const ua = uaT / uB;
+      const ub = ubT / uB;
       if (0 <= ua && ua <= 1 && 0 <= ub && ub <= 1) {
         result = new Intersection('Intersection');
         result.points.push(new Vector2D(a1.x + ua * (a2.x - a1.x), a1.y + ua * (a2.y - a1.y)));
@@ -735,7 +725,7 @@ export class Intersection {
         result = new Intersection();
       }
     } else {
-      if (ua_t === 0 || ub_t === 0) {
+      if (uaT === 0 || ubT === 0) {
         result = new Intersection('Coincident');
       } else {
         result = new Intersection('Parallel');
@@ -745,27 +735,27 @@ export class Intersection {
   }
 
   static intersectLinePolygon(a1, a2, points) {
-    let result = new Intersection();
-    let length = points.length;
+    const result = new Intersection();
+    const length = points.length;
     for (let i = 0; i < length; i++) {
-      let b1 = points[i];
-      let b2 = points[(i + 1) % length];
-      let inter = Intersection.intersectLineLine(a1, a2, b1, b2);
+      const b1 = points[i];
+      const b2 = points[(i + 1) % length];
+      const inter = Intersection.intersectLineLine(a1, a2, b1, b2);
       result.appendPoints(inter.points);
     }
     return result;
   }
 
   static intersectLineRectangle(a1, a2, r1, r2) {
-    let min = r1.min(r2);
-    let max = r1.max(r2);
-    let topRight = new Vector2D(max.x, min.y);
-    let bottomLeft = new Vector2D(min.x, max.y);
-    let inter1 = Intersection.intersectLineLine(min, topRight, a1, a2);
-    let inter2 = Intersection.intersectLineLine(topRight, max, a1, a2);
-    let inter3 = Intersection.intersectLineLine(max, bottomLeft, a1, a2);
-    let inter4 = Intersection.intersectLineLine(bottomLeft, min, a1, a2);
-    let result = new Intersection();
+    const min = r1.min(r2);
+    const max = r1.max(r2);
+    const topRight = new Vector2D(max.x, min.y);
+    const bottomLeft = new Vector2D(min.x, max.y);
+    const inter1 = Intersection.intersectLineLine(min, topRight, a1, a2);
+    const inter2 = Intersection.intersectLineLine(topRight, max, a1, a2);
+    const inter3 = Intersection.intersectLineLine(max, bottomLeft, a1, a2);
+    const inter4 = Intersection.intersectLineLine(bottomLeft, min, a1, a2);
+    const result = new Intersection();
     result.appendPoints(inter1.points);
     result.appendPoints(inter2.points);
     result.appendPoints(inter3.points);
@@ -774,27 +764,27 @@ export class Intersection {
   }
 
   static intersectPolygonPolygon(points1, points2) {
-    let result = new Intersection();
-    let length = points1.length;
+    const result = new Intersection();
+    const length = points1.length;
     for (let i = 0; i < length; i++) {
-      let a1 = points1[i];
-      let a2 = points1[(i + 1) % length];
-      let inter = Intersection.intersectLinePolygon(a1, a2, points2);
+      const a1 = points1[i];
+      const a2 = points1[(i + 1) % length];
+      const inter = Intersection.intersectLinePolygon(a1, a2, points2);
       result.appendPoints(inter.points);
     }
     return result;
   }
 
   static intersectPolygonRectangle(points, r1, r2) {
-    let min = r1.min(r2);
-    let max = r1.max(r2);
-    let topRight = new Vector2D(max.x, min.y);
-    let bottomLeft = new Vector2D(min.x, max.y);
-    let inter1 = Intersection.intersectLinePolygon(min, topRight, points);
-    let inter2 = Intersection.intersectLinePolygon(topRight, max, points);
-    let inter3 = Intersection.intersectLinePolygon(max, bottomLeft, points);
-    let inter4 = Intersection.intersectLinePolygon(bottomLeft, min, points);
-    let result = new Intersection();
+    const min = r1.min(r2);
+    const max = r1.max(r2);
+    const topRight = new Vector2D(max.x, min.y);
+    const bottomLeft = new Vector2D(min.x, max.y);
+    const inter1 = Intersection.intersectLinePolygon(min, topRight, points);
+    const inter2 = Intersection.intersectLinePolygon(topRight, max, points);
+    const inter3 = Intersection.intersectLinePolygon(max, bottomLeft, points);
+    const inter4 = Intersection.intersectLinePolygon(bottomLeft, min, points);
+    const result = new Intersection();
     result.appendPoints(inter1.points);
     result.appendPoints(inter2.points);
     result.appendPoints(inter3.points);
@@ -804,15 +794,15 @@ export class Intersection {
 
   static intersectRayRay(a1, a2, b1, b2) {
     let result;
-    let ua_t = (b2.x - b1.x) * (a1.y - b1.y) - (b2.y - b1.y) * (a1.x - b1.x);
-    let ub_t = (a2.x - a1.x) * (a1.y - b1.y) - (a2.y - a1.y) * (a1.x - b1.x);
-    let u_b = (b2.y - b1.y) * (a2.x - a1.x) - (b2.x - b1.x) * (a2.y - a1.y);
-    if (u_b !== 0) {
-      let ua = ua_t / u_b;
+    const uaT = (b2.x - b1.x) * (a1.y - b1.y) - (b2.y - b1.y) * (a1.x - b1.x);
+    const ubT = (a2.x - a1.x) * (a1.y - b1.y) - (a2.y - a1.y) * (a1.x - b1.x);
+    const uB = (b2.y - b1.y) * (a2.x - a1.x) - (b2.x - b1.x) * (a2.y - a1.y);
+    if (uB !== 0) {
+      const ua = uaT / uB;
       result = new Intersection('Intersection');
       result.points.push(new Vector2D(a1.x + ua * (a2.x - a1.x), a1.y + ua * (a2.y - a1.y)));
     } else {
-      if (ua_t === 0 || ub_t === 0) {
+      if (uaT === 0 || ubT === 0) {
         result = new Intersection('Coincident');
       } else {
         result = new Intersection('Parallel');
@@ -822,15 +812,15 @@ export class Intersection {
   }
 
   static intersectRectangleRectangle(a1, a2, b1, b2) {
-    let min = a1.min(a2);
-    let max = a1.max(a2);
-    let topRight = new Vector2D(max.x, min.y);
-    let bottomLeft = new Vector2D(min.x, max.y);
-    let inter1 = Intersection.intersectLineRectangle(min, topRight, b1, b2);
-    let inter2 = Intersection.intersectLineRectangle(topRight, max, b1, b2);
-    let inter3 = Intersection.intersectLineRectangle(max, bottomLeft, b1, b2);
-    let inter4 = Intersection.intersectLineRectangle(bottomLeft, min, b1, b2);
-    let result = new Intersection();
+    const min = a1.min(a2);
+    const max = a1.max(a2);
+    const topRight = new Vector2D(max.x, min.y);
+    const bottomLeft = new Vector2D(min.x, max.y);
+    const inter1 = Intersection.intersectLineRectangle(min, topRight, b1, b2);
+    const inter2 = Intersection.intersectLineRectangle(topRight, max, b1, b2);
+    const inter3 = Intersection.intersectLineRectangle(max, bottomLeft, b1, b2);
+    const inter4 = Intersection.intersectLineRectangle(bottomLeft, min, b1, b2);
+    const result = new Intersection();
     result.appendPoints(inter1.points);
     result.appendPoints(inter2.points);
     result.appendPoints(inter3.points);
@@ -839,20 +829,20 @@ export class Intersection {
   }
 
   static bezout(e1, e2) {
-    let AB = e1[0] * e2[1] - e2[0] * e1[1];
-    let AC = e1[0] * e2[2] - e2[0] * e1[2];
-    let AD = e1[0] * e2[3] - e2[0] * e1[3];
-    let AE = e1[0] * e2[4] - e2[0] * e1[4];
-    let AF = e1[0] * e2[5] - e2[0] * e1[5];
-    let BC = e1[1] * e2[2] - e2[1] * e1[2];
-    let BE = e1[1] * e2[4] - e2[1] * e1[4];
-    let BF = e1[1] * e2[5] - e2[1] * e1[5];
-    let CD = e1[2] * e2[3] - e2[2] * e1[3];
-    let DE = e1[3] * e2[4] - e2[3] * e1[4];
-    let DF = e1[3] * e2[5] - e2[3] * e1[5];
-    let BFpDE = BF + DE;
-    let BEmCD = BE - CD;
-    return new Polynomial(AB * BC - AC * AC, AB * BEmCD + AD * BC - 2 * AC * AE, AB * BFpDE + AD * BEmCD - AE * AE - 2 * AC * AF, AB * DF + AD * BFpDE - 2 * AE * AF, AD * DF - AF * AF);
+    const AB = e1[0] * e2[1] - e2[0] * e1[1];
+    const AC = e1[0] * e2[2] - e2[0] * e1[2];
+    const AD = e1[0] * e2[3] - e2[0] * e1[3];
+    const AE = e1[0] * e2[4] - e2[0] * e1[4];
+    const AF = e1[0] * e2[5] - e2[0] * e1[5];
+    const BC = e1[1] * e2[2] - e2[1] * e1[2];
+    const BE = e1[1] * e2[4] - e2[1] * e1[4];
+    const BF = e1[1] * e2[5] - e2[1] * e1[5];
+    const CD = e1[2] * e2[3] - e2[2] * e1[3];
+    const DE = e1[3] * e2[4] - e2[3] * e1[4];
+    const DF = e1[3] * e2[5] - e2[3] * e1[5];
+    const BFPLUSDE = BF + DE;
+    const BEMINUSCD = BE - CD;
+    return new Polynomial(AB * BC - AC * AC, AB * BEMINUSCD + AD * BC - 2 * AC * AE, AB * BFPLUSDE + AD * BEMINUSCD - AE * AE - 2 * AC * AF, AB * DF + AD * BFPLUSDE - 2 * AE * AF, AD * DF - AF * AF);
   }
 }
 
@@ -956,8 +946,8 @@ export class Vector2D {
   }
 
   distanceFrom(that: Vector2D) {
-    let dx = this.x - that.x;
-    let dy = this.y - that.y;
+    const dx = this.x - that.x;
+    const dy = this.y - that.y;
     return Math.sqrt(dx * dx + dy * dy);
   }
 
@@ -984,8 +974,8 @@ export class Vector2D {
   }
 
   swap(that: Vector2D) {
-    let x = this.x;
-    let y = this.y;
+    const x = this.x;
+    const y = this.y;
     this.x = that.x;
     this.y = that.y;
     that.x = x;
@@ -1043,7 +1033,7 @@ class Polynomial {
   }
 
   multiply(that) {
-    let result = new Polynomial();
+    const result = new Polynomial();
     let i;
     for (i = 0; i <= this.getDegree() + that.getDegree(); i++) {
       result.coefs.push(0);
@@ -1081,12 +1071,12 @@ class Polynomial {
     } else if (Math.abs(maxValue) <= Polynomial.TOLERANCE) {
       result = max;
     } else if (minValue * maxValue <= 0) {
-      let tmp1 = Math.log(max - min);
-      let tmp2 = Math.log(10) * Polynomial.ACCURACY;
-      let iters = Math.ceil((tmp1 + tmp2) / Math.log(2));
+      const tmp1 = Math.log(max - min);
+      const tmp2 = Math.log(10) * Polynomial.ACCURACY;
+      const iters = Math.ceil((tmp1 + tmp2) / Math.log(2));
       for (let i = 0; i < iters; i++) {
         result = 0.5 * (min + max);
-        let value = this.eval(result);
+        const value = this.eval(result);
         if (Math.abs(value) <= Polynomial.TOLERANCE) {
           break;
         }
@@ -1103,13 +1093,13 @@ class Polynomial {
   }
 
   toString() {
-    let coefs = new Array();
-    let signs = new Array();
+    const coefs = [];
+    const signs = [];
     let i;
     for (i = this.coefs.length - 1; i >= 0; i--) {
       let value = this.coefs[i];
       if (value !== 0) {
-        let sign = (value < 0) ? ' - ' : ' + ';
+        const sign = (value < 0) ? ' - ' : ' + ';
         value = Math.abs(value);
         if (i > 0 && value === 1) {
           value = 'x';
@@ -1136,7 +1126,7 @@ class Polynomial {
   }
 
   getDerivative() {
-    let derivative = new Polynomial();
+    const derivative = new Polynomial();
     for (let i = 1; i < this.coefs.length; i++) {
       derivative.coefs.push(i * this.coefs[i]);
     }
@@ -1148,7 +1138,7 @@ class Polynomial {
     this.simplify();
     switch (this.getDegree()) {
       case 0:
-        result = new Array();
+        result = [];
         break;
       case 1:
         result = this.getLinearRoot();
@@ -1163,13 +1153,14 @@ class Polynomial {
         result = this.getQuarticRoots();
         break;
       default:
-        result = new Array();
+        result = [];
     }
     return result;
   }
 
   getRootsInInterval(min, max) {
-    let roots = new Array(), i;
+    const roots = [];
+    let i;
     let root;
     if (this.getDegree() === 1) {
       root = this.bisection(min, max);
@@ -1177,8 +1168,8 @@ class Polynomial {
         roots.push(root);
       }
     } else {
-      let deriv = this.getDerivative();
-      let droots = deriv.getRootsInInterval(min, max);
+      const deriv = this.getDerivative();
+      const droots = deriv.getRootsInInterval(min, max);
       if (droots.length > 0) {
         root = this.bisection(min, droots[0]);
         if (root != null) {
@@ -1205,8 +1196,8 @@ class Polynomial {
   }
 
   getLinearRoot() {
-    let result = new Array();
-    let a = this.coefs[1];
+    const result = [];
+    const a = this.coefs[1];
     if (a !== 0) {
       result.push(-this.coefs[0] / a);
     }
@@ -1214,14 +1205,14 @@ class Polynomial {
   }
 
   getQuadraticRoots() {
-    let results = new Array();
+    const results = [];
     if (this.getDegree() === 2) {
-      let a = this.coefs[2];
-      let b = this.coefs[1] / a;
-      let c = this.coefs[0] / a;
-      let d = b * b - 4 * c;
+      const a = this.coefs[2];
+      const b = this.coefs[1] / a;
+      const c = this.coefs[0] / a;
+      const d = b * b - 4 * c;
       if (d > 0) {
-        let e = Math.sqrt(d);
+        const e = Math.sqrt(d);
         results.push(0.5 * (-b + e));
         results.push(0.5 * (-b - e));
       } else if (d === 0) {
@@ -1232,23 +1223,24 @@ class Polynomial {
   }
 
   getCubicRoots() {
-    let results = new Array(), disrim;
+    const results = [];
+    let disrim;
     if (this.getDegree() === 3) {
-      let c3 = this.coefs[3];
-      let c2 = this.coefs[2] / c3;
-      let c1 = this.coefs[1] / c3;
-      let c0 = this.coefs[0] / c3;
-      let a = (3 * c1 - c2 * c2) / 3;
-      let b = (2 * c2 * c2 * c2 - 9 * c1 * c2 + 27 * c0) / 27;
-      let offset = c2 / 3;
-      let discrim = b * b / 4 + a * a * a / 27;
-      let halfB = b / 2;
+      const c3 = this.coefs[3];
+      const c2 = this.coefs[2] / c3;
+      const c1 = this.coefs[1] / c3;
+      const c0 = this.coefs[0] / c3;
+      const a = (3 * c1 - c2 * c2) / 3;
+      const b = (2 * c2 * c2 * c2 - 9 * c1 * c2 + 27 * c0) / 27;
+      const offset = c2 / 3;
+      const discrim = b * b / 4 + a * a * a / 27;
+      const halfB = b / 2;
       if (Math.abs(discrim) <= Polynomial.TOLERANCE) {
         disrim = 0;
       }
       let tmp;
       if (discrim > 0) {
-        let e = Math.sqrt(discrim);
+        const e = Math.sqrt(discrim);
         let root;
         tmp = -halfB + e;
         if (tmp >= 0) {
@@ -1264,11 +1256,11 @@ class Polynomial {
         }
         results.push(root - offset);
       } else if (discrim < 0) {
-        let distance = Math.sqrt(-a / 3);
-        let angle = Math.atan2(Math.sqrt(-discrim), -halfB) / 3;
-        let cos = Math.cos(angle);
-        let sin = Math.sin(angle);
-        let sqrt3 = Math.sqrt(3);
+        const distance = Math.sqrt(-a / 3);
+        const angle = Math.atan2(Math.sqrt(-discrim), -halfB) / 3;
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        const sqrt3 = Math.sqrt(3);
         results.push(2 * distance * cos - offset);
         results.push(-distance * (cos + sqrt3 * sin) - offset);
         results.push(-distance * (cos - sqrt3 * sin) - offset);
@@ -1286,15 +1278,15 @@ class Polynomial {
   }
 
   getQuarticRoots() {
-    let results = new Array();
+    const results = [];
     if (this.getDegree() === 4) {
-      let c4 = this.coefs[4];
-      let c3 = this.coefs[3] / c4;
-      let c2 = this.coefs[2] / c4;
-      let c1 = this.coefs[1] / c4;
-      let c0 = this.coefs[0] / c4;
-      let resolveRoots = new Polynomial(1, -c2, c3 * c1 - 4 * c0, -c3 * c3 * c0 + 4 * c2 * c0 - c1 * c1).getCubicRoots();
-      let y = resolveRoots[0];
+      const c4 = this.coefs[4];
+      const c3 = this.coefs[3] / c4;
+      const c2 = this.coefs[2] / c4;
+      const c1 = this.coefs[1] / c4;
+      const c0 = this.coefs[0] / c4;
+      const resolveRoots = new Polynomial(1, -c2, c3 * c1 - 4 * c0, -c3 * c3 * c0 + 4 * c2 * c0 - c1 * c1).getCubicRoots();
+      const y = resolveRoots[0];
       let discrim = c3 * c3 / 4 - c2 + y;
       if (Math.abs(discrim) <= Polynomial.TOLERANCE) {
         discrim = 0;
@@ -1303,8 +1295,8 @@ class Polynomial {
       let t2;
       let d: number;
       if (discrim > 0) {
-        let e = Math.sqrt(discrim);
-        let t1 = 3 * c3 * c3 / 4 - e * e - 2 * c2;
+        const e = Math.sqrt(discrim);
+        const t1 = 3 * c3 * c3 / 4 - e * e - 2 * c2;
         t2 = (4 * c3 * c2 - 8 * c1 - c3 * c3 * c3) / (4 * e);
         let plus = t1 + t2;
         let minus = t1 - t2;
@@ -1332,7 +1324,7 @@ class Polynomial {
             t2 = 0;
           }
           t2 = 2 * Math.sqrt(t2);
-          let t1 = 3 * c3 * c3 / 4 - 2 * c2;
+          const t1 = 3 * c3 * c3 / 4 - 2 * c2;
           if (t1 + t2 >= Polynomial.TOLERANCE) {
             d = Math.sqrt(t1 + t2);
             results.push(-c3 / 4 + d / 2);
@@ -1401,34 +1393,34 @@ export class Path {
   }
 
   parseData(d) {
-    let tokens = this.tokenize(d);
+    const tokens = this.tokenize(d);
     let index = 0;
     let token = tokens[index];
     let mode = 'BOD';
-    this.segments = new Array();
+    this.segments = [];
     while (!token.typeis(Path.EOD)) {
-      let param_length;
-      let params = new Array();
+      let paramLength;
+      const params = [];
       if (mode === 'BOD') {
         if (token.text === 'M' || token.text === 'm') {
           index++;
-          param_length = Path.PARAMS[token.text].length;
+          paramLength = Path.PARAMS[token.text].length;
           mode = token.text;
         } else {
           throw new Error('Path data must begin with a moveto command');
         }
       } else {
         if (token.typeis(Path.NUMBER)) {
-          param_length = Path.PARAMS[mode].length;
+          paramLength = Path.PARAMS[mode].length;
         } else {
           index++;
-          param_length = Path.PARAMS[token.text].length;
+          paramLength = Path.PARAMS[token.text].length;
           mode = token.text;
         }
       }
-      if ((index + param_length) < tokens.length) {
-        for (let i = index; i < index + param_length; i++) {
-          let n = tokens[i];
+      if ((index + paramLength) < tokens.length) {
+        for (let i = index; i < index + paramLength; i++) {
+          const n = tokens[i];
           if (n.typeis(Path.NUMBER)) {
             params[params.length] = n.text;
           } else {
@@ -1436,8 +1428,8 @@ export class Path {
           }
         }
         let segment;
-        let length = this.segments.length;
-        let previous = (length === 0) ? null : this.segments[length - 1];
+        const length = this.segments.length;
+        const previous = (length === 0) ? null : this.segments[length - 1];
         switch (mode) {
           case'A':
             segment = new AbsoluteArcPath(params, this, previous);
@@ -1491,7 +1483,7 @@ export class Path {
             throw new Error('Unsupported segment type: ' + mode);
         }
         this.segments.push(segment);
-        index += param_length;
+        index += paramLength;
         token = tokens[index];
         if (mode === 'M') {
           mode = 'L';
@@ -1506,7 +1498,7 @@ export class Path {
   }
 
   tokenize(d) {
-    let tokens = new Array();
+    const tokens = [];
     while (d !== '') {
       if (d.match(/^([ \t\r\n,]+)/)) {
         d = d.substr(RegExp.$1.length);
@@ -1525,9 +1517,9 @@ export class Path {
   }
 
   intersectShape(shape: IShape) {
-    let result = new Intersection();
-    for (let i = 0; i < this.segments.length; i++) {
-      let inter = Intersection.intersectShapes(this.segments[i], shape);
+    const result = new Intersection();
+    for (const segment of this.segments) {
+      const inter = Intersection.intersectShapes(segment, shape);
       result.appendPoints(inter.points);
     }
     return result;
@@ -1556,7 +1548,7 @@ class AbsolutePathSegment implements IPathSegment {
   }
 
   toString() {
-    let points = this.points.map((v) => v.toString());
+    const points = this.points.map((v) => v.toString());
     let command = '';
     if (this.previous.command !== this.command) {
       command = this.command;
@@ -1602,30 +1594,30 @@ class AbsoluteArcPath extends AbsolutePathSegment {
   }
 
   get center() {
-    let startPoint = this.previous.lastPoint;
-    let endPoint = this.points[0];
+    const startPoint = this.previous.lastPoint;
+    const endPoint = this.points[0];
     let rx = this.rx;
     let ry = this.ry;
-    let angle = this.angle * Math.PI / 180;
-    let c = Math.cos(angle);
-    let s = Math.sin(angle);
-    let TOLERANCE = 1e-6;
-    let halfDiff = startPoint.subtract(endPoint).divide(2);
-    let x1p = halfDiff.x * c + halfDiff.y * s;
-    let y1p = halfDiff.x * -s + halfDiff.y * c;
-    let x1px1p = x1p * x1p;
-    let y1py1p = y1p * y1p;
-    let lambda = (x1px1p / (rx * rx) ) + ( y1py1p / (ry * ry));
+    const angle = this.angle * Math.PI / 180;
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    const TOLERANCE = 1e-6;
+    const halfDiff = startPoint.subtract(endPoint).divide(2);
+    const x1p = halfDiff.x * c + halfDiff.y * s;
+    const y1p = halfDiff.x * -s + halfDiff.y * c;
+    const x1px1p = x1p * x1p;
+    const y1py1p = y1p * y1p;
+    const lambda = (x1px1p / (rx * rx) ) + ( y1py1p / (ry * ry));
     let factor: number;
     if (lambda > 1) {
       factor = Math.sqrt(lambda);
       rx *= factor;
       ry *= factor;
     }
-    let rxrx = rx * rx;
-    let ryry = ry * ry;
-    let rxy1 = rxrx * y1py1p;
-    let ryx1 = ryry * x1px1p;
+    const rxrx = rx * rx;
+    const ryry = ry * ry;
+    const rxy1 = rxrx * y1py1p;
+    const ryx1 = ryry * x1px1p;
     factor = (rxrx * ryry - rxy1 - ryx1) / (rxy1 + ryx1);
     if (Math.abs(factor) < TOLERANCE) {
       factor = 0;
@@ -1634,9 +1626,9 @@ class AbsoluteArcPath extends AbsolutePathSegment {
     if (this.arcFlag === this.sweepFlag) {
       sq = -sq;
     }
-    let mid = startPoint.add(endPoint).divide(2);
-    let cxp = sq * rx * y1p / ry;
-    let cyp = sq * -ry * x1p / rx;
+    const mid = startPoint.add(endPoint).divide(2);
+    const cxp = sq * rx * y1p / ry;
+    const cyp = sq * -ry * x1p / rx;
     return new Vector2D(cxp * c - cyp * s + mid.x, cxp * s + cyp * c + mid.y);
   }
 }
@@ -1736,8 +1728,8 @@ class AbsoluteSmoothCurveto3 extends AbsolutePathSegment {
     const lastPoint = this.previous.lastPoint;
     let point;
     if (this.previous.command.match(/^[SsCc]$/)) {
-      let lastControl = (<any>this.previous).lastControlPoint;
-      let diff = lastControl.subtract(lastPoint);
+      const lastControl = (<any>this.previous).lastControlPoint;
+      const diff = lastControl.subtract(lastPoint);
       point = lastPoint.subtract(diff);
     } else {
       point = lastPoint;
@@ -1774,9 +1766,9 @@ class RelativePathSegment implements IPathSegment {
     if (this.previous == null || this.previous.command !== this.command) {
       command = this.command;
     }
-    for (let i = 0; i < this.points.length; i++) {
-      let point = this.points[i].subtract(lastPoint);
-      points.push(point.toString());
+    for (const point of this.points) {
+      const diff = point.subtract(lastPoint);
+      points.push(diff.toString());
     }
     return command + points.join(' ');
   }
@@ -1899,8 +1891,8 @@ class RelativeSmoothCurveto3 extends RelativePathSegment {
     const lastPoint = this.previous.lastPoint;
     let point;
     if (this.previous.command.match(/^[SsCc]$/)) {
-      let lastControl = (<any>this.previous).lastControlPoint;
-      let diff = lastControl.subtract(lastPoint);
+      const lastControl = (<any>this.previous).lastControlPoint;
+      const diff = lastControl.subtract(lastPoint);
       point = lastPoint.subtract(diff);
     } else {
       point = lastPoint;
