@@ -4,6 +4,7 @@
 
 import {IStateToken, StateTokenLeaf} from './StateToken';
 import {SimHash} from '../SimilarityHash';
+import {cat} from '../ObjectNode';
 
 export class TreeNode {
   get id():number {
@@ -27,7 +28,7 @@ export class TreeNode {
       return null;
     }
     let cat = this.leftToken === null ? (<StateTokenLeaf>this.rightToken).category : (<StateTokenLeaf>this.leftToken).category;
-    return SimHash.CATEGORIES.indexOf(cat);
+    return SimHash.CATEGORIES2.findIndex((d) => d.name === cat);
   }
 
   public get categoryName():string {
@@ -59,23 +60,23 @@ export class TreeNode {
       }
       if (right !== null) {
         //both left and right
-        if (!(left.category === SimHash.CATEGORIES[2])) {
+        if (!(left.category === cat.selection)) {
           return;
         }
         let sim = this.tokenSimilarity;
-        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', left.importance, left.type, 'matching', SimHash.CATEGORIES[2]);
-        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, left.type, 'matching', SimHash.CATEGORIES[2]);
+        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', left.importance, left.type, 'matching', cat.selection);
+        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, left.type, 'matching', cat.selection);
         this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, rightChildMatch, this.id + '_match', sim));
-        let leftChildNonMatch:StateTokenLeaf = new StateTokenLeaf('Non-Matching', left.importance, left.type, 'non-matching', SimHash.CATEGORIES[2]);
-        let rightChildNonMatch:StateTokenLeaf = new StateTokenLeaf('Non-Matching', right.importance, left.type, 'non-matching', SimHash.CATEGORIES[2]);
+        let leftChildNonMatch:StateTokenLeaf = new StateTokenLeaf('Non-Matching', left.importance, left.type, 'non-matching', cat.selection);
+        let rightChildNonMatch:StateTokenLeaf = new StateTokenLeaf('Non-Matching', right.importance, left.type, 'non-matching', cat.selection);
         this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildNonMatch, rightChildNonMatch, this.id + '_match', (1 - sim)));
         return;
       } else {
         //just left
-        if (!(left.category === SimHash.CATEGORIES[2])) {
+        if (!(left.category === cat.selection)) {
           return;
         }
-        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', left.importance, left.type, 'matching', SimHash.CATEGORIES[2]);
+        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', left.importance, left.type, 'matching', cat.selection);
         this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, null, this.id + '_match',0));
       }
     } else {
@@ -83,10 +84,10 @@ export class TreeNode {
         if (!(right instanceof StateTokenLeaf)) {
           return;
         }
-        if (!(right.category === SimHash.CATEGORIES[2])) {
+        if (!(right.category === cat.selection)) {
           return;
         }
-        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, right.type, 'matching', SimHash.CATEGORIES[2]);
+        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, right.type, 'matching', cat.selection);
         this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(null, rightChildMatch, this.id + '_match',0));
       } else {
         //both are null
@@ -109,13 +110,13 @@ export class TreeNode {
     if (this.impPerCat === null) {
       let childsImpPerCat:number[] = [0, 0, 0, 0, 0];
       if (this.isLeafNode) {
-        childsImpPerCat[SimHash.CATEGORIES.indexOf(this.categoryName)] += this.importance;
+        childsImpPerCat[SimHash.CATEGORIES2.findIndex((d) => d.name === this.categoryName)] += this.importance;
         this.impPerCat = childsImpPerCat;
         return childsImpPerCat;
       }
       for (let i = 0; i < this._childs.length; i++) {
         if (this._childs[i].isLeafNode) {
-          childsImpPerCat[SimHash.CATEGORIES.indexOf(this._childs[i].categoryName)] += this._childs[i].importance;
+          childsImpPerCat[SimHash.CATEGORIES2.findIndex((d) => d.name === this._childs[i].categoryName)] += this._childs[i].importance;
         } else {
           let tmp = this._childs[i].impOfChildsPerCat;
           for (let j = 0; j < tmp.length; j++) {
@@ -245,7 +246,7 @@ export class TreeNode {
   protected _unscaledSize = -1;
 
   get getScaledSize() {
-    let weights = SimHash.hasher.categoryWeighting;
+    let weights = SimHash.getWeighting();
     return this._unscaledSize * weights[this.category];
   }
 
@@ -317,7 +318,7 @@ class DummyTreeNode extends TreeNode {
   private tokenSim = -1;
 
   get getScaledSize() {
-    let weights = SimHash.hasher.categoryWeighting;
+    let weights = SimHash.getWeighting();
     return this.tokenSim * weights[this.category];
   }
 

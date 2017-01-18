@@ -5,12 +5,30 @@ import IDType from '../idtype/IDType';
 import {EventHandler} from '../event';
 import {RandomNumberGenerator} from './internal/RandomNumberGenerator';
 import {HashBuilder} from './internal/HashBuilder';
+import {cat} from './ObjectNode';
+
+
+
+export interface ISimilarityCategory {
+  name: string;
+  color: string;
+  icon: string; // font-awesome CSS class
+  weight: number;
+  active: boolean;
+}
+
 
 export class SimHash extends EventHandler {
 
-  public static readonly INVALID_CATEGORY:string = 'invalid';
-  public static readonly CATEGORIES:string[] = ['data', 'visual', 'selection', 'layout', 'analysis'];
-  public static readonly COLORS = ['#e41a1c', '#377eb8', '#984ea3', '#ffff33', '#ff7f00'];
+  public static readonly CATEGORIES2: ISimilarityCategory[] = [
+    {name: cat.data, color: '#e41a1c', icon: 'fa-database', weight: 30, active: true},
+    {name: cat.visual, color: '#377eb8', icon: 'fa-bar-chart', weight: 20, active: true},
+    {name: cat.selection, color: '#984ea3', icon: 'fa-pencil-square', weight: 25, active: true},
+    {name: cat.layout, color: '#ffff33', icon: 'fa-desktop', weight: 20, active: true},
+    {name: cat.logic, color: '#ff7f00', icon: 'fa-gear', weight: 5, active: true}
+  ];
+
+  public static readonly INVALID_CATEGORY:ISimilarityCategory = {name: 'invalid', color: '#fff', icon: '', weight: 0, active: false};
 
   private static INSTANCE:SimHash = new SimHash(); // === Singleton
 
@@ -18,7 +36,11 @@ export class SimHash extends EventHandler {
   private static readonly HASH_TABLE_SIZE:number = 1000;
 
   public static getCategoryColor(category:string) {
-    return SimHash.COLORS[SimHash.CATEGORIES.indexOf(category)];
+    return this.CATEGORIES2.filter((d) => d.name === category)[0].color;
+  }
+
+  public static getWeighting():number[] {
+    return this.CATEGORIES2.map((d) => d.weight);
   }
 
   /**
@@ -76,29 +98,25 @@ export class SimHash extends EventHandler {
     return childs;
   }
 
-  private readonly hashBuilder:HashBuilder[] = [];
-
-  private _catWeighting:number[] = [30, 20, 25, 20, 5];
+  private readonly hashBuilder = new Map<string, HashBuilder>();
 
   private constructor() {
     super();
   }
 
-  get categoryWeighting() {
-    return this._catWeighting;
-  }
+  private hashBuilderForCategory(category:string):HashBuilder {
+    if (this.hashBuilder.has(category)) {
+      return this.hashBuilder.get(category);
+    }
 
-  set categoryWeighting(weighting) {
-    this._catWeighting = weighting;
-    //this.fire('weighting_change');
+    const hb = new HashBuilder(SimHash.HASH_TABLE_SIZE);
+    this.hashBuilder.set(category, hb);
+    return hb;
   }
 
   public getHashOfIDTypeSelection(token:StateTokenLeaf, selectionType = defaultSelectionType):string {
     let type:IDType = (<IDType>token.value); // TODO ensure that value contains an IDType
-
-    if (this.hashBuilder[type.id] === undefined) {
-      this.hashBuilder[type.id] = new HashBuilder(SimHash.HASH_TABLE_SIZE);
-    }
+    const hb = this.hashBuilderForCategory(type.id);
 
     type.selections(selectionType).dim(0).asList(0) // array of selected ids
       .map((sel) => {
@@ -110,56 +128,51 @@ export class SimHash extends EventHandler {
         );
       })
       .forEach((t) => {
-        return this.hashBuilder[type.id].push(t.value, t.value, t.importance, null);
+        hb.push(<string>t.value, <string>t.value, t.importance, null); // TODO avoid value cast
       });
 
-    token.hash = this.hashBuilder[type.id].toHash(SimHash.NUMBER_OF_BITS);
+    token.hash = hb.toHash(SimHash.NUMBER_OF_BITS);
     return token.hash;
   }
 
   public getHashOfOrdinalIDTypeSelection(type:IDType, min:number, max:number, selectionType = defaultSelectionType):string {
-    if (this.hashBuilder[type.id] === undefined) {
-      this.hashBuilder[type.id] = new HashBuilder(SimHash.HASH_TABLE_SIZE);
-    }
+    const hb = this.hashBuilderForCategory(type.id);
 
     type.selections(selectionType).dim(0).asList(0) // array of selected ids
       .forEach((sel) => {
-        this.hashBuilder[type.id].push(
-          String(sel),
+        hb.push(
+          String(sel), // TODO avoid value cast
           String(sel),
           1,
           ordinalHash(min, max, sel, SimHash.NUMBER_OF_BITS)
         );
       });
 
-    return this.hashBuilder[type.id].toHash(SimHash.NUMBER_OF_BITS);
+    return hb.toHash(SimHash.NUMBER_OF_BITS);
   }
 
   public calcHash(tokens:IStateToken[]):string[] {
     if (tokens.length === 0) {
-      return SimHash.CATEGORIES.map(() => SimHash.INVALID_CATEGORY);
+      return SimHash.CATEGORIES2.map(() => SimHash.INVALID_CATEGORY.name);
     }
     tokens = SimHash.normalizeTokenPriority(tokens, 1);
     let leafs:StateTokenLeaf[] = SimHash.filterLeafsAndSerialize(tokens);
     let groupedTokens = SimHash.groupBy(leafs, 'category');
-    return SimHash.CATEGORIES.map((cat) => this.calcHashOfCat(groupedTokens[cat], cat));
+    return SimHash.CATEGORIES2.map((cat) => this.calcHashOfCat(groupedTokens[cat.name], cat.name));
   }
 
   private calcHashOfCat(tokens:StateTokenLeaf[], cat:string) {
     if (tokens === undefined) {
       return Array(SimHash.NUMBER_OF_BITS + 1).join('0');
     }
-
-    if (this.hashBuilder[cat] === undefined) {
-      this.hashBuilder[cat] = new HashBuilder(SimHash.HASH_TABLE_SIZE);
-    }
+    const hb = this.hashBuilderForCategory(cat);
 
     SimHash.prepHashCalc(tokens)
       .forEach((tokenLeafs, index) => {
-        this.pushHashBuilder(this.hashBuilder[cat], tokenLeafs, index);
+        this.pushHashBuilder(hb, tokenLeafs, index);
       });
 
-    return this.hashBuilder[cat].toHash(SimHash.NUMBER_OF_BITS);
+    return hb.toHash(SimHash.NUMBER_OF_BITS);
   };
 
   private pushHashBuilder(hashBuilder:HashBuilder, tokenLeaves:StateTokenLeaf[], index:number) {

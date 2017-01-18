@@ -7,6 +7,7 @@ import ObjectNode from './ObjectNode';
 import {SimHash} from './SimilarityHash';
 import {IStateToken} from './token/StateToken';
 import {MatchedTokenTree} from './token/MatchedTokenTree';
+import {cat} from './ObjectNode';
 
 
 /**
@@ -40,7 +41,7 @@ export default class StateNode extends GraphNode {
       allTokens = [];
       for (var oN of this.consistsOf) {
         if (oN.stateTokenPropertyExists) {
-          if (oN.category === 'data') {
+          if (oN.category === cat.data) {
             continue;
           }
           allTokens = allTokens.concat(oN.stateTokens);
@@ -78,10 +79,10 @@ export default class StateNode extends GraphNode {
     if (thisH === null || otherH === null) {
       return -1;
     }
-    if (thisH[0] === SimHash.INVALID_CATEGORY || otherH[0] === SimHash.INVALID_CATEGORY) {
+    if (thisH[0] === SimHash.INVALID_CATEGORY.name || otherH[0] === SimHash.INVALID_CATEGORY.name) {
       return -1;
     }
-    let weighting = SimHash.hasher.categoryWeighting;
+    let weighting = SimHash.getWeighting();
     let similarity: number = 0;
     for (let j = 0; j < 5; j++) {
       let len = Math.min(thisH[j].length, otherH[j].length);
