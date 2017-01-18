@@ -3,8 +3,9 @@
  */
 
 import {IStateToken, StateTokenLeaf} from './StateToken';
-import {SimHash, SimilarityCategories} from '../SimilarityHash';
+import {SimHash} from '../SimilarityHash';
 import {cat} from '../ObjectNode';
+import {SimCats} from '../SimilarityCategories';
 
 export class TreeNode {
   get id():number {
@@ -28,7 +29,7 @@ export class TreeNode {
       return null;
     }
     let cat = this.leftToken === null ? (<StateTokenLeaf>this.rightToken).category : (<StateTokenLeaf>this.leftToken).category;
-    return SimilarityCategories.CATEGORIES.findIndex((d) => d.name === cat);
+    return SimCats.CATEGORIES.findIndex((d) => d.name === cat);
   }
 
   public get categoryName():string {
@@ -110,13 +111,13 @@ export class TreeNode {
     if (this.impPerCat === null) {
       let childsImpPerCat:number[] = [0, 0, 0, 0, 0];
       if (this.isLeafNode) {
-        childsImpPerCat[SimilarityCategories.CATEGORIES.findIndex((d) => d.name === this.categoryName)] += this.importance;
+        childsImpPerCat[SimCats.CATEGORIES.findIndex((d) => d.name === this.categoryName)] += this.importance;
         this.impPerCat = childsImpPerCat;
         return childsImpPerCat;
       }
       for (let i = 0; i < this._childs.length; i++) {
         if (this._childs[i].isLeafNode) {
-          childsImpPerCat[SimilarityCategories.CATEGORIES.findIndex((d) => d.name === this._childs[i].categoryName)] += this._childs[i].importance;
+          childsImpPerCat[SimCats.CATEGORIES.findIndex((d) => d.name === this._childs[i].categoryName)] += this._childs[i].importance;
         } else {
           let tmp = this._childs[i].impOfChildsPerCat;
           for (let j = 0; j < tmp.length; j++) {

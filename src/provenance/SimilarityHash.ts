@@ -5,78 +5,7 @@ import IDType from '../idtype/IDType';
 import {EventHandler} from '../event';
 import {RandomNumberGenerator} from './internal/RandomNumberGenerator';
 import {HashBuilder} from './internal/HashBuilder';
-import {cat} from './ObjectNode';
-
-
-
-export interface ISimilarityCategory {
-  name: string;
-  color: string;
-  icon: string; // font-awesome CSS class
-  weight: number;
-  active: boolean;
-}
-
-export class SimilarityCategories {
-
-  public static readonly INVALID:ISimilarityCategory = {
-    name: 'invalid',
-    color: '#fff',
-    icon: '',
-    weight: 0,
-    active: false
-  };
-
-  public static readonly DATA:ISimilarityCategory = {
-    name: cat.data,
-    color: '#e41a1c',
-    icon: 'fa-database',
-    weight: 30,
-    active: true
-  };
-
-  public static readonly VISUAL:ISimilarityCategory = {
-    name: cat.visual,
-    color: '#377eb8',
-    icon: 'fa-bar-chart',
-    weight: 20,
-    active: true
-  };
-
-  public static readonly SELECTION:ISimilarityCategory = {
-    name: cat.selection,
-    color: '#984ea3',
-    icon: 'fa-pencil-square',
-    weight: 25,
-    active: true
-  };
-
-  public static readonly LAYOUT:ISimilarityCategory = {
-    name: cat.layout,
-    color: '#ffff33',
-    icon: 'fa-desktop',
-    weight: 20,
-    active: true
-  };
-
-  public static readonly LOGIC:ISimilarityCategory = {
-    name: cat.logic,
-    color: '#ff7f00',
-    icon: 'fa-gear',
-    weight: 5,
-    active: true
-  };
-
-  public static readonly CATEGORIES: ISimilarityCategory[] = [
-    SimilarityCategories.DATA,
-    SimilarityCategories.VISUAL,
-    SimilarityCategories.SELECTION,
-    SimilarityCategories.LAYOUT,
-    SimilarityCategories.LOGIC,
-  ];
-
-}
-
+import {SimCats} from './SimilarityCategories';
 
 export class SimHash extends EventHandler {
 
@@ -86,11 +15,11 @@ export class SimHash extends EventHandler {
   private static readonly HASH_TABLE_SIZE:number = 1000;
 
   public static getCategoryColor(category:string) {
-    return SimilarityCategories.CATEGORIES.filter((d) => d.name === category)[0].color;
+    return SimCats.CATEGORIES.filter((d) => d.name === category)[0].color;
   }
 
   public static getWeighting():number[] {
-    return SimilarityCategories.CATEGORIES.map((d) => d.weight);
+    return SimCats.CATEGORIES.map((d) => d.weight);
   }
 
   /**
@@ -203,12 +132,12 @@ export class SimHash extends EventHandler {
 
   public calcHash(tokens:IStateToken[]):string[] {
     if (tokens.length === 0) {
-      return SimilarityCategories.CATEGORIES.map(() => SimilarityCategories.INVALID.name);
+      return SimCats.CATEGORIES.map(() => SimCats.INVALID.name);
     }
     tokens = SimHash.normalizeTokenPriority(tokens, 1);
     let leafs:StateTokenLeaf[] = SimHash.filterLeafsAndSerialize(tokens);
     let groupedTokens = SimHash.groupBy(leafs, 'category');
-    return SimilarityCategories.CATEGORIES.map((cat) => this.calcHashOfCat(groupedTokens[cat.name], cat.name));
+    return SimCats.CATEGORIES.map((cat) => this.calcHashOfCat(groupedTokens[cat.name], cat.name));
   }
 
   private calcHashOfCat(tokens:StateTokenLeaf[], cat:string) {
