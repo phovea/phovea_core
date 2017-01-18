@@ -68,7 +68,7 @@ export function send(url: string, data: any = {}, method = 'GET', expectedDataTy
 
   const options: RequestInit = {
     credentials: 'same-origin',
-    method: method,
+    method,
     headers: {
       'Accept': 'application/json'
     },
@@ -188,6 +188,7 @@ function offline(generator: OfflineGenerator, data: any = {}) {
  * @param data arguments
  * @param method http method
  * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
+ * @param offlineGenerator in case phovea is set to be offline
  * @returns {Promise<any>}
  */
 export function sendAPI(url: string, data: any = {}, method = 'GET', expectedDataType = 'json', offlineGenerator: OfflineGenerator = defaultOfflineGenerator): Promise<any> {

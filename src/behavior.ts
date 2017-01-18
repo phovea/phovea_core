@@ -69,7 +69,7 @@ export class ZoomLogic extends EventHandler {
       return null;
     }
     const old = this.v.transform();
-    let s : [number, number] = [zoomX, zoomY];
+    const s: [number, number] = [zoomX, zoomY];
     switch ((this.meta ? this.meta.scaling : 'free')) {
       case 'width-only':
         s[1] = old.scale[1];

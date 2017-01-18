@@ -7,9 +7,27 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-export {clearSelection, EVENT_REGISTER_IDTYPE, IDTypeLike, list, listAll, persist, register, restore, resolve, resolveProduct} from './manager'
+export {
+  clearSelection,
+  EVENT_REGISTER_IDTYPE,
+  IDTypeLike,
+  list,
+  listAll,
+  persist,
+  register,
+  restore,
+  resolve,
+  resolveProduct
+} from './manager'
 export {default as SelectAble, ISelectAble} from './ASelectAble';
-export {IIDType, asSelectOperation, defaultSelectionType, hoverSelectionType, SelectOperation, toSelectOperation} from './IIDType';
+export {
+  IIDType,
+  asSelectOperation,
+  defaultSelectionType,
+  hoverSelectionType,
+  SelectOperation,
+  toSelectOperation
+} from './IIDType';
 export {default as IDType} from './IDType';
 export {default as AProductSelectAble, IProductSelectAble} from './AProductSelectAble';
 export {default as ProductIDType} from './ProductIDType';

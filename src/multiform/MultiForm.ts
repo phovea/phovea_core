@@ -223,6 +223,6 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
   }
 }
 
-export function create(data: IDataType, parent: HTMLElement, options: IMultiFormOptions) {
+export function create(data: IDataType, parent: HTMLElement, options?: IMultiFormOptions) {
   return new MultiForm(data, parent, options);
 }

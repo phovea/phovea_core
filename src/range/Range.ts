@@ -13,7 +13,7 @@ import Range1D from './Range1D';
  * multi dimensional version of a RangeDim
  */
 export default class Range {
-  constructor(public readonly dims : Range1D[] = []) {
+  constructor(public readonly dims: Range1D[] = []) {
 
   }
 
