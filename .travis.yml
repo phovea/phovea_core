@@ -3,13 +3,14 @@ language: node_js
 node_js:
 - 6
 
+addons:
+  firefox: 49.0.1
+
 before_install:
 - export DISPLAY=:99.0
 - sh -e /etc/init.d/xvfb start
 - if [[ `npm -v` != 3* ]]; then npm i -g npm@3; fi
 
-addons:
-  firefox: 49.0.1
 script: npm run dist
 
 deploy:
@@ -23,3 +24,5 @@ deploy:
 notifications:
   slack:
     secure: E8/1UIdHSczUbN+6i6gd1d5LM4vmLdwLQ30tpyjvnM0wvfDce76oPxLJAy240WJ5ybXRZUtNrttpVpt4tEXCy8aLFCmxD7s77rVloH+q1J8R/ptTFWZGhFGEujk1awEmVbzcWxJkV9/JENQaeGBKxwv8/EQwWwEkAb7p/+AJb9owmH88b3wUZUGHBWtbMiyyaF4Rm1Wg1stJB8Z1Ga7PRF4cqufTgcDdsCPVv9gAY+VxOIGqX/Vfuc9UWpUH8vq8lHUE7Inn5QS78kuFfSgLWga3H6Mu/Gko1XNlWk0QWWQBUvEZ6ZC6Wuo68KzvUjJHDTnx8WyfHue2JNHIslcX+eJq2WHLeEgM24VeNkILCGo/H/60NGHiSjrIv/Y9h6bQ9FDjo6TUyE4nbdPYN1RN9FQ5UbI9Y4Gi753H9mqnHWlEywBOzHxdZCAuz9Wh03CCF/blsvJ+Obbyo6Jrfe+g44jyi9kQdBNQ78qG6v4EXws8FiYao6x3PpgIwFix42Cpr+soAh5FpA3C1zHSAyZZpXF65/lrDl5yPNofK7Wy0B9bw+0I6Z/u7ZKFNVZXvYPGYvtUVcsALGBdmYc61+LCta36Po0KZseWVAlJj6QnOJDYzv0wvV/zsuf9A5KpYFGiqV9Q7zmtiO5FYF5sBy+lE7O9tHVO4O18IRndhRQgxhs=
+    on_success: change
+    on_failure: always

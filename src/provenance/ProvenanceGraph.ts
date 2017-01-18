@@ -16,7 +16,7 @@ import {hoverSelectionType} from "../idtype/IIDType";
 
 export interface IProvenanceGraphDataDescription extends IGraphDataDescription {
   readonly local?: boolean;
-  readonly size: [number,number];
+  readonly size: [number, number];
   readonly attrs: {
     graphtype: string;
     of: string;

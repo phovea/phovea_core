@@ -69,18 +69,18 @@ export interface IPlugin {
 const registry: IPluginDesc[] = [];
 
 
-function push(type: string, id_or_loader: string | (() => any), desc_or_loader: any, desc?: any) {
-  const id = typeof id_or_loader === 'string' ? <string>id_or_loader : uniqueString(type);
-  const loader = typeof id_or_loader === 'string' ? <() => any>desc_or_loader : <() => any>desc_or_loader;
+function push(type: string, idOrLoader: string | (() => any), descOrLoader: any, desc?: any) {
+  const id = typeof idOrLoader === 'string' ? <string>idOrLoader : uniqueString(type);
+  const loader = typeof idOrLoader === 'string' ? <() => any>descOrLoader : <() => any>descOrLoader;
   const p: IPluginDesc = mixin({
-    type: type,
-    id: id,
+    type,
+    id,
     name: id,
     factory: 'create',
     description: '',
     version: '1.0.0',
     load: () => Promise.resolve(loader()).then((instance) => ({desc: p, factory: instance[p.factory]}))
-  }, typeof desc_or_loader === 'function' ? desc : desc_or_loader);
+  }, typeof descOrLoader === 'function' ? desc : descOrLoader);
 
   registry.push(p);
 }
@@ -88,7 +88,7 @@ function push(type: string, id_or_loader: string | (() => any), desc_or_loader: 
 export interface IRegistry {
   push(type: string, loader: () => any, desc?: any);
   push(type: string, id: string, loader: () => any, desc?: any);
-  push(type: string, id_or_loader: string | (() => any), desc_or_loader: any, desc?: any);
+  push(type: string, idOrLoader: string | (() => any), descOrLoader: any, desc?: any);
 }
 
 

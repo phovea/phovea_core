@@ -3,7 +3,7 @@ import {computeStats} from '../src/math';
 describe('computeStats', () => {
   function expectStats(input, expected) {
     describe('stats ' + input, () => {
-      var stats = computeStats(input);
+      const stats = computeStats(input);
       it('max', () => expect(stats.max).toEqual(expected.max));
       it('min', () => expect(stats.min).toEqual(expected.min));
       it('sum', () => expect(stats.sum).toEqual(expected.sum));

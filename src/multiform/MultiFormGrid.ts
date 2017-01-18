@@ -222,7 +222,7 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
         return this.switchTo(selected).then((vis) => {
           //FIXME
           if (vis && persisted.content && typeof((<any>vis).restore) === 'function') {
-            return Promise.resolve((<any>vis).restore(persisted.content)).then(() => that);
+            return <Promise<MultiFormGrid>>Promise.resolve((<any>vis).restore(persisted.content)).then(() => that);
           }
           return Promise.resolve(that);
         });
@@ -432,6 +432,6 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
 }
 
 
-export function create(data: IDataType, range: Range, parent: HTMLElement, viewFactory: IViewFactory, options: IMultiFormGridOptions) {
+export function create(data: IDataType, range: Range, parent: HTMLElement, viewFactory: IViewFactory, options?: IMultiFormGridOptions) {
   return new MultiFormGrid(data, range, parent, viewFactory, options);
 }
