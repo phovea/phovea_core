@@ -20,6 +20,12 @@ export interface IStateToken {
   isLeaf: boolean;
 }
 
+
+export interface IMatchedStateToken {
+  left: IStateToken;
+  right: IStateToken;
+}
+
 export class StateTokenNode implements IStateToken {
   name: string;
 
