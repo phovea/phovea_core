@@ -196,51 +196,54 @@ export class TreeNode {
 
   balanceWeights(targetWeight:number) {
     let factor:number = 1;
-    for (let i = 0; i < this._childs.length; i++) {
-      if (this._childs[i].isPaired) {
-        if (this._childs[i].leftToken.importance !== this._childs[i].rightToken.importance) {
-          factor = this._childs[i].leftToken.importance / this._childs[i].rightToken.importance;
-          break;
-        }
-      }
-    }
+    this._childs
+      .filter((d) => d.isPaired && d.leftToken.importance !== d.rightToken.importance)
+      .forEach((d) => {
+        factor = d.leftToken.importance / d.rightToken.importance;
+      });
+
     if (factor > 1) {
-      for (let i = 0; i < this._childs.length; i++) {
-        if (!(this._childs[i].leftToken === null)) {
-          this._childs[i].leftToken.importance /= factor;
-        }
-      }
+      this._childs
+        .filter((d) => d.leftToken !== null)
+        .forEach((d) => {
+          d.leftToken.importance /= factor;
+        });
+
     } else if (factor < 1) {
-      for (let i = 0; i < this._childs.length; i++) {
-        if (!(this._childs[i].rightToken === null)) {
-          this._childs[i].rightToken.importance *= factor;
-        }
-      }
+      this._childs
+        .filter((d) => d.rightToken !== null)
+        .forEach((d) => {
+          d.rightToken.importance *= factor;
+        });
     }
+
     let sumFactor = 0;
-    for (let i = 0; i < this._childs.length; i++) {
-      if (this._childs[i].leftToken !== null) {
-        sumFactor += this._childs[i].leftToken.importance;
-      } else if (this._childs[i].rightToken !== null) {
-        sumFactor += this._childs[i].rightToken.importance;
+
+    this._childs.forEach((d) => {
+      if (d.leftToken !== null) {
+        sumFactor += d.leftToken.importance;
+      } else if (d.rightToken !== null) {
+        sumFactor += d.rightToken.importance;
       }
-    }
+    });
+
     if (sumFactor !== targetWeight) {
-      for (let i = 0; i < this._childs.length; i++) {
-        if (this._childs[i].leftToken !== null) {
-          this._childs[i].leftToken.importance *= (targetWeight / sumFactor);
+      this._childs.forEach((d) => {
+        if (d.leftToken !== null) {
+          d.leftToken.importance *= (targetWeight / sumFactor);
         }
-        if (this._childs[i].rightToken !== null) {
-          this._childs[i].rightToken.importance *= (targetWeight / sumFactor);
+        if (d.rightToken !== null) {
+          d.rightToken.importance *= (targetWeight / sumFactor);
         }
-      }
+      });
     }
+
     //balance all childs
-    for (let i = 0; i < this._childs.length; i++) {
-      if (!(this._childs[i].isLeafNode)) {
-        this._childs[i].balanceWeights(this._childs[i].leftToken !== null ? this._childs[i].leftToken.importance : this._childs[i].rightToken.importance);
-      }
-    }
+    this._childs
+      .filter((d) => d.isLeafNode === false)
+      .forEach((d) => {
+        d.balanceWeights(d.leftToken !== null ? d.leftToken.importance : d.rightToken.importance);
+      });
   }
 
   protected _unscaledSize = -1;
@@ -256,10 +259,11 @@ export class TreeNode {
       this._unscaledSize = target[this.category];
       return;
     }
+
     const dummyAndOtherChilds:TreeNode[] = this._childs.concat(this._dummyChilds);
-    for (let i = 0; i < dummyAndOtherChilds.length; i++) {
+    dummyAndOtherChilds.forEach((child) => {
       const targetCpy = target.slice(0);
-      const childImp = dummyAndOtherChilds[i].impOfChildsPerCat;
+      const childImp = child.impOfChildsPerCat;
       for (let j = 0; j < SimCats.CATEGORIES.length; j++) {
         if (childImp[j]===0) {
           continue;
@@ -267,8 +271,8 @@ export class TreeNode {
         const ratio = currentImp[j]/childImp[j];
         targetCpy[j] = targetCpy[j]/ratio;
       }
-      dummyAndOtherChilds[i].setUnscaledSize(targetCpy);
-    }
+      child.setUnscaledSize(targetCpy);
+    });
   }
 
   get isLeafNodeWithoutDummyChilds():boolean {
@@ -292,40 +296,37 @@ export class TreeNode {
   }
 
   get leafs():TreeNode[] {
-    let leafs:TreeNode[] = [];
     if (!this.isLeafNode) {
-      for (let i = 0; i < this._childs.length; i++) {
-        leafs = leafs.concat(this._childs[i].leafs);
-      }
-    } else {
-      return [this];
+      return this._childs
+        .map((child) => child.leafs)
+        .reduce((a, b) => a.concat(b), []);
     }
-    return leafs;
+
+    return [this];
   }
 }
 
 
 class DummyTreeNode extends TreeNode {
 
-  checkForDummyChilds() {
-    return;
-  }
-
-  public get tokenSimilarity():number {
-    return 1;
-  }
-
   private tokenSim = -1;
+
+  constructor(left:IStateToken, right:IStateToken, id, unscaledSize) {
+    super(left, right, id);
+    this.tokenSim = unscaledSize;
+  }
 
   get getScaledSize() {
     const weights = SimCats.getWeights();
     return this.tokenSim * weights[this.category];
   }
 
+  get tokenSimilarity():number {
+    return 1;
+  }
 
-  constructor(left:IStateToken, right:IStateToken, id, unscaledSize) {
-    super(left,right,id);
-    this.tokenSim = unscaledSize;
+  checkForDummyChilds() {
+    return;
   }
 
 }
