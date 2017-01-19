@@ -44,39 +44,30 @@ export class MatchedTokenTree {
   }
 
 
-  // matches lists of tokens according to a venn diagramm
+  /**
+   * Matches lists of tokens according to a venn diagram
+   *
+   * @param leftList
+   * @param rightList
+   * @returns {[IStateToken[],Array,IStateToken[]]}
+   */
   private static matchTokens(leftList:IStateToken[], rightList:IStateToken[]) {
-    let left:IStateToken[] = [];
-    let center = [];
-    let right:IStateToken[] = [];
-    for (let i = 0; i < leftList.length; i++) {
-      let found:boolean = false;
-      for (let j = 0; j < rightList.length; j++) {
-        if (leftList[i].name === rightList[j].name) {
-          center = center.concat({'left': leftList[i], 'right': rightList[j]});
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        left = left.concat(leftList[i]);
-      }
-    }
-    for (let i = 0; i < rightList.length; i++) {
-      let found:boolean = false;
-      for (let j = 0; j < leftList.length; j++) {
-        if (rightList[i].name === leftList[j].name) {
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        right = right.concat(rightList[i]);
-      }
-    }
+    const left = leftList.filter((left) => rightList.findIndex((right) => right.name === left.name) === -1);
+    const right = rightList.filter((right) => leftList.findIndex((left) => right.name === left.name) === -1);
+
+    const center = leftList
+      .filter((left) => rightList.findIndex((right) => right.name === left.name) >= 0)
+      .map((left, index) => ({left, right: rightList[index]}));
+
     return [left, center, right];
   }
 
+  /**
+   *
+   * @param root
+   * @param left
+   * @param right
+   */
   matchIntoNode(root:TreeNode, left:IStateToken, right:IStateToken) {
     if (left === null && right === null) {
       //nothing to do
