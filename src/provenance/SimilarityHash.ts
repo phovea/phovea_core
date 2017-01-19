@@ -23,7 +23,7 @@ export class SimHash extends EventHandler {
   }
 
   public static normalizeTokenPriority(tokens:IStateToken[], baseLevel:number = 1):IStateToken[] {
-    let totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0);
+    const totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0);
     return tokens.map((t) => {
       t.importance /= totalImportance * baseLevel;
       if (!(t.isLeaf)) {
@@ -35,7 +35,7 @@ export class SimHash extends EventHandler {
 
   private static groupBy(arr:StateTokenLeaf[], property:string) {
     return arr.reduce((prev, curr:StateTokenLeaf) => {
-      let val = curr[property];
+      const val = curr[property];
       if (!prev[val]) {
         prev[val] = [];
       }
@@ -46,7 +46,7 @@ export class SimHash extends EventHandler {
 
   private static prepHashCalc(tokens:StateTokenLeaf[], needsNormalization:boolean = true) {
     if (needsNormalization && tokens !== undefined) {
-      let totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0);
+      const totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0);
       tokens = tokens.map((t) => {
         t.importance /= totalImportance;
         return t;
@@ -56,16 +56,14 @@ export class SimHash extends EventHandler {
   }
 
   private static filterLeafsAndSerialize(tokens:IStateToken[]):StateTokenLeaf[] {
-    let childs:StateTokenLeaf[] = [];
-    for (let i = 0; i < tokens.length; i++) {
-      if (tokens[i].isLeaf) {
-        childs = childs.concat(<StateTokenLeaf>tokens[i]);
+    const childs:StateTokenLeaf[] = [];
+    tokens.forEach((token:StateTokenLeaf) => {
+      if (token.isLeaf) {
+        childs.push(token);
       } else {
-        childs = childs.concat(
-          this.filterLeafsAndSerialize((<StateTokenNode>tokens[i]).childs)
-        );
+        childs.concat(this.filterLeafsAndSerialize(token.childs));
       }
-    }
+    });
     return childs;
   }
 
@@ -86,7 +84,7 @@ export class SimHash extends EventHandler {
   }
 
   public getHashOfIDTypeSelection(token:StateTokenLeaf, selectionType = defaultSelectionType):string {
-    let type:IDType = (<IDType>token.value); // TODO ensure that value contains an IDType
+    const type:IDType = (<IDType>token.value); // TODO ensure that value contains an IDType
     const hb = this.hashBuilderForCategory(type.id);
 
     type.selections(selectionType).dim(0).asList(0) // array of selected ids
@@ -127,8 +125,8 @@ export class SimHash extends EventHandler {
       return SimCats.CATEGORIES.map(() => SimCats.INVALID.name);
     }
     tokens = SimHash.normalizeTokenPriority(tokens, 1);
-    let leafs:StateTokenLeaf[] = SimHash.filterLeafsAndSerialize(tokens);
-    let groupedTokens = SimHash.groupBy(leafs, 'category');
+    const leafs:StateTokenLeaf[] = SimHash.filterLeafsAndSerialize(tokens);
+    const groupedTokens = SimHash.groupBy(leafs, 'category');
     return SimCats.CATEGORIES.map((cat) => this.calcHashOfCat(groupedTokens[cat.name], cat.name));
   }
 
@@ -188,7 +186,7 @@ function hashFnv32a(str:string, seed:number):string {
   /*jshint bitwise:false */
   /*tslint:disable:no-bitwise */
   let hval = (typeof seed !== 'undefined') ? 0x811c9dc5 : seed;
-  for (let i = 0, l = str.length; i < l; i++) {
+  for (let i = 0; i < str.length; i++) {
     hval ^= str.charCodeAt(i);
     hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
   }
@@ -199,10 +197,10 @@ function hashFnv32a(str:string, seed:number):string {
 
 
 function ordinalHash(min:number, max:number, value:number, nrBits:number):string {
-  let pct = (value - min) / (max - min);
-  let minH:string = hashFnv32a(String(min), 0);
-  let maxH:string = hashFnv32a(String(max), 0);
-  let rng = new RandomNumberGenerator(1);
+  const pct = (value - min) / (max - min);
+  const minH:string = hashFnv32a(String(min), 0);
+  const maxH:string = hashFnv32a(String(max), 0);
+  const rng = new RandomNumberGenerator(1);
 
   let hash:string = '';
   for (let i = 0; i < nrBits; i++) {

@@ -26,7 +26,7 @@ export class HashBuilder {
       hash = String(murmurhash2_32_gc(value, 0));
     }
 
-    this.dict.add({name: name, value: value, hash: hash, probability: probability});
+    this.dict.add({name, value, hash, probability});
 
     return this;
   }
@@ -51,7 +51,7 @@ export class HashBuilder {
         return maxSize;
       })  // results in sample array (e.g., [0, 1, 1, 2, 0, 0, 1, 0, ...])
       .map((sampleAsIndex, i) => {
-        let hashPart = dictArr[sampleAsIndex].hash;
+        const hashPart = dictArr[sampleAsIndex].hash;
         // pick only one bit from the hash sample
         return hashPart.charAt(i % hashPart.length);
       });
@@ -70,7 +70,7 @@ export class HashBuilder {
     return array
       .reduce((prev, curr) => {
         // sum previous and current probability
-        let accProb = prev[prev.length - 1] + (curr.probability || 0);
+        const accProb = prev[prev.length - 1] + (curr.probability || 0);
         return [...prev, accProb];
       }, [0]) // add initial value
       .slice(1) // remove the initial value

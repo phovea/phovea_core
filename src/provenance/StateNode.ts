@@ -40,7 +40,7 @@ export default class StateNode extends GraphNode {
     let allTokens: IStateToken[] = this.getAttr('stateTokens');
     if (allTokens === null) {
       allTokens = [];
-      for (var oN of this.consistsOf) {
+      for (const oN of this.consistsOf) {
         if (oN.stateTokenPropertyExists) {
           if (oN.category === cat.data) {
             continue;
@@ -57,8 +57,8 @@ export default class StateNode extends GraphNode {
   get simHash(): string[] {
     const simHash: string[] = this.getAttr('simHash');
     if (simHash === null) {
-      let allTokens = this.stateTokens;
-      let hash: string[] = SimHash.hasher.calcHash(allTokens);
+      const allTokens = this.stateTokens;
+      const hash: string[] = SimHash.hasher.calcHash(allTokens);
       this.setAttr('simHash', hash);
     }
     return simHash;
@@ -75,18 +75,18 @@ export default class StateNode extends GraphNode {
     if (exact) {
       return this.getExactSimilarityTo(otherState);
     }
-    let thisH: string[] = this.simHash;
-    let otherH: string[] = otherState.simHash;
+    const thisH: string[] = this.simHash;
+    const otherH: string[] = otherState.simHash;
     if (thisH === null || otherH === null) {
       return -1;
     }
     if (thisH[0] === SimCats.INVALID.name || otherH[0] === SimCats.INVALID.name) {
       return -1;
     }
-    let weighting = SimCats.getWeights();
+    const weighting = SimCats.getWeights();
     let similarity: number = 0;
     for (let j = 0; j < 5; j++) {
-      let len = Math.min(thisH[j].length, otherH[j].length);
+      const len = Math.min(thisH[j].length, otherH[j].length);
       let nrEqu = 0;
       for (let i = 0; i < len; i++) {
         if (thisH[j].charAt(i) === otherH[j].charAt(i)) {
@@ -105,7 +105,7 @@ export default class StateNode extends GraphNode {
     if (this.treeMatches[otherState.id]) {
       return this.treeMatches[otherState.id];
     }
-    let tree = new MatchedTokenTree(this, otherState);
+    const tree = new MatchedTokenTree(this, otherState);
     this.treeMatches[otherState.id] = tree;
     otherState.treeMatches[this.id] = tree;
     return tree;
@@ -115,7 +115,7 @@ export default class StateNode extends GraphNode {
     if (this.id === otherState.id) {
       return 1;
     }
-    let tree: MatchedTokenTree = this.getMatchedTreeWithOtherState(otherState);
+    const tree: MatchedTokenTree = this.getMatchedTreeWithOtherState(otherState);
     //if (tree === null) return 0;
     return tree.similarity;
   }

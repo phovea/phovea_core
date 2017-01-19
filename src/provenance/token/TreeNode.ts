@@ -28,7 +28,7 @@ export class TreeNode {
     if (!(this.isLeafNode)) {
       return null;
     }
-    let cat = this.leftToken === null ? (<StateTokenLeaf>this.rightToken).category : (<StateTokenLeaf>this.leftToken).category;
+    const cat = this.leftToken === null ? (<StateTokenLeaf>this.rightToken).category : (<StateTokenLeaf>this.leftToken).category;
     return SimCats.CATEGORIES.findIndex((d) => d.name === cat);
   }
 
@@ -53,8 +53,8 @@ export class TreeNode {
     if (this.leftToken === null && this.rightToken === null) {
       return;
     }
-    let left:StateTokenLeaf = <StateTokenLeaf>this.leftToken;
-    let right:StateTokenLeaf = <StateTokenLeaf>this.rightToken;
+    const left:StateTokenLeaf = <StateTokenLeaf>this.leftToken;
+    const right:StateTokenLeaf = <StateTokenLeaf>this.rightToken;
     if (left !== null) {
       if (!(left instanceof StateTokenLeaf)) {
         return;
@@ -64,12 +64,12 @@ export class TreeNode {
         if (!(left.category === cat.selection)) {
           return;
         }
-        let sim = this.tokenSimilarity;
-        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', left.importance, left.type, 'matching', cat.selection);
-        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, left.type, 'matching', cat.selection);
+        const sim = this.tokenSimilarity;
+        const leftChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', left.importance, left.type, 'matching', cat.selection);
+        const rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, left.type, 'matching', cat.selection);
         this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, rightChildMatch, this.id + '_match', sim));
-        let leftChildNonMatch:StateTokenLeaf = new StateTokenLeaf('Non-Matching', left.importance, left.type, 'non-matching', cat.selection);
-        let rightChildNonMatch:StateTokenLeaf = new StateTokenLeaf('Non-Matching', right.importance, left.type, 'non-matching', cat.selection);
+        const leftChildNonMatch:StateTokenLeaf = new StateTokenLeaf('Non-Matching', left.importance, left.type, 'non-matching', cat.selection);
+        const rightChildNonMatch:StateTokenLeaf = new StateTokenLeaf('Non-Matching', right.importance, left.type, 'non-matching', cat.selection);
         this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildNonMatch, rightChildNonMatch, this.id + '_match', (1 - sim)));
         return;
       } else {
@@ -77,7 +77,7 @@ export class TreeNode {
         if (!(left.category === cat.selection)) {
           return;
         }
-        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', left.importance, left.type, 'matching', cat.selection);
+        const leftChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', left.importance, left.type, 'matching', cat.selection);
         this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, null, this.id + '_match',0));
       }
     } else {
@@ -88,7 +88,7 @@ export class TreeNode {
         if (!(right.category === cat.selection)) {
           return;
         }
-        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, right.type, 'matching', cat.selection);
+        const rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, right.type, 'matching', cat.selection);
         this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(null, rightChildMatch, this.id + '_match',0));
       } else {
         //both are null
@@ -109,7 +109,7 @@ export class TreeNode {
 
   get impOfChildsPerCat():number[] {
     if (this.impPerCat === null) {
-      let childsImpPerCat:number[] = [0, 0, 0, 0, 0];
+      const childsImpPerCat:number[] = [0, 0, 0, 0, 0];
       if (this.isLeafNode) {
         childsImpPerCat[SimCats.CATEGORIES.findIndex((d) => d.name === this.categoryName)] += this.importance;
         this.impPerCat = childsImpPerCat;
@@ -141,10 +141,10 @@ export class TreeNode {
         case 0:
           return (<StateTokenLeaf>this.leftToken).value === (<StateTokenLeaf>this.rightToken).value ? 1 : 0;
         case 1:
-          let left:StateTokenLeaf = <StateTokenLeaf>this.leftToken;
-          let right:StateTokenLeaf = <StateTokenLeaf>this.rightToken;
-          let leftpct = (left.value[2] - left.value[0]) / (left.value[1] - left.value[0]);
-          let rightpct = (right.value[2] - right.value[0]) / (right.value[1] - right.value[0]);
+          const left:StateTokenLeaf = <StateTokenLeaf>this.leftToken;
+          const right:StateTokenLeaf = <StateTokenLeaf>this.rightToken;
+          const leftpct = (left.value[2] - left.value[0]) / (left.value[1] - left.value[0]);
+          const rightpct = (right.value[2] - right.value[0]) / (right.value[1] - right.value[0]);
           return 1 - Math.abs(leftpct - rightpct);
         case 2:
         case 3:
@@ -160,7 +160,7 @@ export class TreeNode {
     if (hash1 === null || hash2 === null) {
       return 0;
     }
-    let len = Math.min(hash1.length, hash2.length);
+    const len = Math.min(hash1.length, hash2.length);
     let nrEqu = 0;
     for (let i = 0; i < len; i++) {
       if (hash1.charAt(i) === hash2.charAt(i)) {
@@ -247,25 +247,25 @@ export class TreeNode {
   protected _unscaledSize = -1;
 
   get getScaledSize() {
-    let weights = SimCats.getWeights();
+    const weights = SimCats.getWeights();
     return this._unscaledSize * weights[this.category];
   }
 
   setUnscaledSize(target:number[]) {
-    let currentImp = this.impOfChildsPerCat;
+    const currentImp = this.impOfChildsPerCat;
     if (this.isLeafNodeWithoutDummyChilds) {
       this._unscaledSize = target[this.category];
       return;
     }
-    let dummyAndOtherChilds:TreeNode[] = this._childs.concat(this._dummyChilds);
+    const dummyAndOtherChilds:TreeNode[] = this._childs.concat(this._dummyChilds);
     for (let i = 0; i < dummyAndOtherChilds.length; i++) {
-      let targetCpy = target.slice(0);
-      let childImp = dummyAndOtherChilds[i].impOfChildsPerCat;
+      const targetCpy = target.slice(0);
+      const childImp = dummyAndOtherChilds[i].impOfChildsPerCat;
       for (let j = 0; j < 5; j++) {
         if (childImp[j]===0) {
           continue;
         }
-        let ratio = currentImp[j]/childImp[j];
+        const ratio = currentImp[j]/childImp[j];
         targetCpy[j] = targetCpy[j]/ratio;
       }
       dummyAndOtherChilds[i].setUnscaledSize(targetCpy);
@@ -319,7 +319,7 @@ class DummyTreeNode extends TreeNode {
   private tokenSim = -1;
 
   get getScaledSize() {
-    let weights = SimCats.getWeights();
+    const weights = SimCats.getWeights();
     return this.tokenSim * weights[this.category];
   }
 

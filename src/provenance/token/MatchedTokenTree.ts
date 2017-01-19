@@ -5,7 +5,7 @@
 import {SimVisStateNode} from '../StateNode';
 import {TreeNode} from './TreeNode';
 import {StateTokenNode, IStateToken} from './StateToken';
-import {SimHash} from '../SimilarityHash';
+import {SimCats} from '../SimilarityCategories';
 
 export class MatchedTokenTree {
   get leftState():SimVisStateNode {
@@ -31,8 +31,8 @@ export class MatchedTokenTree {
     this.root = new TreeRoot(null, null, this.size++);
     this._leftState = left;
     this._rightState = right;
-    let leftTokens:IStateToken[] = left.stateTokens;
-    let rightTokens:IStateToken[] = right.stateTokens;
+    const leftTokens:IStateToken[] = left.stateTokens;
+    const rightTokens:IStateToken[] = right.stateTokens;
     this.matchIntoNode(this.root, new StateTokenNode('dummyRoot', 1, leftTokens), new StateTokenNode('dummyRoot', 1, rightTokens));
     this.root.balanceWeights(1);
     this.root.setUnscaledSize([1,1,1,1,1]);
@@ -85,7 +85,7 @@ export class MatchedTokenTree {
       if (left === null) {
         if (!(right.isLeaf)) {
           for (let j = 0; j < (<StateTokenNode>right).childs.length; j++) {
-            let node = new TreeNode(null, (<StateTokenNode>right).childs[j], this.size++);
+            const node = new TreeNode(null, (<StateTokenNode>right).childs[j], this.size++);
             this.matchIntoNode(node, null, (<StateTokenNode>right).childs[j]);
             root.appendChild(node);
           }
@@ -93,7 +93,7 @@ export class MatchedTokenTree {
       } else if (right === null) {
         if (!(left.isLeaf)) {
           for (let j = 0; j < (<StateTokenNode>left).childs.length; j++) {
-            let node = new TreeNode((<StateTokenNode>left).childs[j], null, this.size++);
+            const node = new TreeNode((<StateTokenNode>left).childs[j], null, this.size++);
             this.matchIntoNode(node, (<StateTokenNode>left).childs[j], null);
             root.appendChild(node);
           }
@@ -104,23 +104,23 @@ export class MatchedTokenTree {
       if (left.isLeaf || right.isLeaf) {
         return;
       } else {
-        let leftNode = <StateTokenNode> left;
-        let rightNode = <StateTokenNode> right;
-        let matchedTokens = MatchedTokenTree.matchTokens(leftNode.childs, rightNode.childs);
+        const leftNode = <StateTokenNode> left;
+        const rightNode = <StateTokenNode> right;
+        const matchedTokens = MatchedTokenTree.matchTokens(leftNode.childs, rightNode.childs);
         for (let j = 0; j < matchedTokens[0].length; j++) {
-          let node = new TreeNode(matchedTokens[0][j], null, this.size++);
+          const node = new TreeNode(matchedTokens[0][j], null, this.size++);
           this.matchIntoNode(node, matchedTokens[0][j], null);
           root.appendChild(node);
         }
 
         for (let j = 0; j < matchedTokens[1].length; j++) {
-          let node = new TreeNode((<any>matchedTokens[1][j]).left, (<any>matchedTokens[1][j]).right, this.size++);
+          const node = new TreeNode((<any>matchedTokens[1][j]).left, (<any>matchedTokens[1][j]).right, this.size++);
           this.matchIntoNode(node, (<any>matchedTokens[1][j]).left, (<any>matchedTokens[1][j]).right);
           root.appendChild(node);
         }
 
         for (let j = 0; j < matchedTokens[2].length; j++) {
-          let node = new TreeNode(null, matchedTokens[2][j], this.size++);
+          const node = new TreeNode(null, matchedTokens[2][j], this.size++);
           this.matchIntoNode(node, null, matchedTokens[2][j]);
           root.appendChild(node);
         }
@@ -151,7 +151,7 @@ export class MatchedTokenTree {
     for (let i = 0; i < leafs.length; i++) {
       if (leafs[i].isPaired) {
         catContainsToken[leafs[i].category] = true;
-        let sim = leafs[i].tokenSimilarity;
+        const sim = leafs[i].tokenSimilarity;
         centerSims[leafs[i].category] += leafs[i].importance * sim;
         leftSims[leafs[i].category] += leafs[i].importance * (1 - sim) / 2;
         rightSims[leafs[i].category] += leafs[i].importance * (1 - sim) / 2;
@@ -187,8 +187,8 @@ export class MatchedTokenTree {
 
 
   get similarityPerCategory() {
-    let leafs:TreeNode[] = this.root.leafs;
-    let weights = SimCats.getWeights();
+    const leafs:TreeNode[] = this.root.leafs;
+    const weights = SimCats.getWeights();
     const sims = [0, 0, 0, 0, 0];
     const total = [0, 0, 0, 0, 0];
     for (let i = 0; i < leafs.length; i++) {
@@ -203,7 +203,7 @@ export class MatchedTokenTree {
   }
 
   get similarity() {
-    let weights = SimCats.getWeights();
+    const weights = SimCats.getWeights();
     const sims = this.similarityPerCategory;
     let sim = 0;
     for (let i = 0; i < weights.length; i++) {
