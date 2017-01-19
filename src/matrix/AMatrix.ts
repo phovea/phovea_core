@@ -9,7 +9,8 @@
 
 import {IPersistable} from '../index';
 import {Range, RangeLike, all, range, parse} from '../range';
-import {AProductSelectAble, resolve as resolveIDType, IDType} from '../idtype';
+import {resolve as resolveIDType, IDType} from '../idtype';
+import AProductSelectAble from '../idtype/AProductSelectAble';
 import {
   VALUE_TYPE_CATEGORICAL, VALUE_TYPE_INT, VALUE_TYPE_REAL, ICategoricalValueTypeDesc, INumberValueTypeDesc,
   IValueTypeDesc
