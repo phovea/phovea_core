@@ -69,14 +69,14 @@ export class MatchedTokenTree {
 
     if (left === null || right === null) {
       if (left === null && right.isLeaf === false) {
-        right.childs.forEach((child) => {
+        right.children.forEach((child) => {
           const node = new TreeNode(null, child, this.size++);
           this.matchIntoNode(node, null, child); // recursion
           root.appendChild(node);
         });
 
       } else if (right === null && left.isLeaf === false) {
-        left.childs.forEach((child) => {
+        left.children.forEach((child) => {
           const node = new TreeNode(child, null, this.size++);
           this.matchIntoNode(node, child, null); // recursion
           root.appendChild(node);
@@ -89,7 +89,7 @@ export class MatchedTokenTree {
         return;
       }
 
-      const [leftOnly, intersection, rightOnly] = MatchedTokenTree.matchTokens(left.childs, right.childs);
+      const [leftOnly, intersection, rightOnly] = MatchedTokenTree.matchTokens(left.children, right.children);
 
       (<IStateToken[]>leftOnly).forEach((left) => {
         const node = new TreeNode(left, null, this.size++);
@@ -132,7 +132,7 @@ export class MatchedTokenTree {
     const rightSims = Array(catLength).fill(0);
     const catContainsToken:boolean[] = Array(catLength).fill(false);
 
-    this.root.leafs.forEach((leaf) => {
+    this.root.leaves.forEach((leaf) => {
       if (leaf.isPaired) {
         catContainsToken[leaf.category] = true;
         const sim = leaf.tokenSimilarity;
@@ -173,7 +173,7 @@ export class MatchedTokenTree {
     const sims = Array(SimCats.CATEGORIES.length);
     const total = Array(SimCats.CATEGORIES.length);
 
-    this.root.leafs.forEach((leaf) => {
+    this.root.leaves.forEach((leaf) => {
       total[leaf.category] += leaf.importance;
       sims[leaf.category] += leaf.isPaired ? leaf.importance * leaf.tokenSimilarity : 0;
     });

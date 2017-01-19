@@ -12,15 +12,15 @@ export class TreeNode {
     return this._id;
   }
 
-  get childs():TreeNode[] {
-    return this._childs.concat();
+  get children():TreeNode[] {
+    return this._children.concat();
   }
 
-  get childsAndDummyChilds():TreeNode[] {
-    return this._childs.concat(this._dummyChilds);
+  get childrenAndDummyChilds():TreeNode[] {
+    return this._children.concat(this._dummyChilds);
   }
 
-  protected _childs:TreeNode[] = [];
+  protected _children:TreeNode[] = [];
   private leftToken:IStateToken;
   private rightToken:IStateToken;
 
@@ -101,30 +101,30 @@ export class TreeNode {
 
 
   appendChild(ch:TreeNode) {
-    this._childs = this._childs.concat(ch);
+    this._children = this._children.concat(ch);
   }
 
-  //stores the importance of all childs (recursive) per category.
+  //stores the importance of all children (recursive) per category.
   private impPerCat:number[] = null;
 
   get impOfChildsPerCat():number[] {
     if (this.impPerCat === null) {
-      const childsImpPerCat:number[] = Array(SimCats.CATEGORIES.length).fill(0);
+      const childrenImpPerCat:number[] = Array(SimCats.CATEGORIES.length).fill(0);
       if (this.isLeafNode) {
-        childsImpPerCat[SimCats.CATEGORIES.findIndex((d) => d.name === this.categoryName)] += this.importance;
-        this.impPerCat = childsImpPerCat;
-        return childsImpPerCat;
+        childrenImpPerCat[SimCats.CATEGORIES.findIndex((d) => d.name === this.categoryName)] += this.importance;
+        this.impPerCat = childrenImpPerCat;
+        return childrenImpPerCat;
       }
-      this._childs.forEach((child) => {
+      this._children.forEach((child) => {
         if (child.isLeafNode) {
-          childsImpPerCat[SimCats.CATEGORIES.findIndex((d) => d.name === child.categoryName)] += child.importance;
+          childrenImpPerCat[SimCats.CATEGORIES.findIndex((d) => d.name === child.categoryName)] += child.importance;
         } else {
           child.impOfChildsPerCat.forEach((importance, index) => {
-            childsImpPerCat[index] += importance;
+            childrenImpPerCat[index] += importance;
           });
         }
       });
-      this.impPerCat = childsImpPerCat;
+      this.impPerCat = childrenImpPerCat;
     }
     return this.impPerCat;
   }
@@ -196,21 +196,21 @@ export class TreeNode {
 
   balanceWeights(targetWeight:number) {
     let factor:number = 1;
-    this._childs
+    this._children
       .filter((d) => d.isPaired && d.leftToken.importance !== d.rightToken.importance)
       .forEach((d) => {
         factor = d.leftToken.importance / d.rightToken.importance;
       });
 
     if (factor > 1) {
-      this._childs
+      this._children
         .filter((d) => d.leftToken !== null)
         .forEach((d) => {
           d.leftToken.importance /= factor;
         });
 
     } else if (factor < 1) {
-      this._childs
+      this._children
         .filter((d) => d.rightToken !== null)
         .forEach((d) => {
           d.rightToken.importance *= factor;
@@ -219,7 +219,7 @@ export class TreeNode {
 
     let sumFactor = 0;
 
-    this._childs.forEach((d) => {
+    this._children.forEach((d) => {
       if (d.leftToken !== null) {
         sumFactor += d.leftToken.importance;
       } else if (d.rightToken !== null) {
@@ -228,7 +228,7 @@ export class TreeNode {
     });
 
     if (sumFactor !== targetWeight) {
-      this._childs.forEach((d) => {
+      this._children.forEach((d) => {
         if (d.leftToken !== null) {
           d.leftToken.importance *= (targetWeight / sumFactor);
         }
@@ -238,8 +238,8 @@ export class TreeNode {
       });
     }
 
-    //balance all childs
-    this._childs
+    //balance all children
+    this._children
       .filter((d) => d.isLeafNode === false)
       .forEach((d) => {
         d.balanceWeights(d.leftToken !== null ? d.leftToken.importance : d.rightToken.importance);
@@ -260,7 +260,7 @@ export class TreeNode {
       return;
     }
 
-    const dummyAndOtherChilds:TreeNode[] = this._childs.concat(this._dummyChilds);
+    const dummyAndOtherChilds:TreeNode[] = this._children.concat(this._dummyChilds);
     dummyAndOtherChilds.forEach((child) => {
       const targetCpy = target.slice(0);
       const childImp = child.impOfChildsPerCat;
@@ -276,11 +276,11 @@ export class TreeNode {
   }
 
   get isLeafNodeWithoutDummyChilds():boolean {
-    return (this._childs.length === 0 && this._dummyChilds.length === 0);
+    return (this._children.length === 0 && this._dummyChilds.length === 0);
   }
 
   get isLeafNode():boolean {
-    return this._childs.length === 0;
+    return this._children.length === 0;
   }
 
   get isPaired():boolean {
@@ -295,10 +295,10 @@ export class TreeNode {
     return !(this.rightToken === null);
   }
 
-  get leafs():TreeNode[] {
+  get leaves():TreeNode[] {
     if (!this.isLeafNode) {
-      return this._childs
-        .map((child) => child.leafs)
+      return this._children
+        .map((child) => child.leaves)
         .reduce((a, b) => a.concat(b), []);
     }
 

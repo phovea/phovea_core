@@ -6,17 +6,17 @@ import IDType from '../../idtype/IDType';
 
 
 export enum TokenType {
-    string,
-    ordinal,
-    ordinalIDType,
-    idtype
-  }
+  string,
+  ordinal,
+  ordinalIDType,
+  idtype
+}
 
 
 export interface IStateToken {
   name: string;
   importance: number;
-  childs: IStateToken[];
+  children: IStateToken[];
   isLeaf: boolean;
 }
 
@@ -27,43 +27,33 @@ export interface IMatchedStateToken {
 }
 
 export class StateTokenNode implements IStateToken {
-  name: string;
-
-  importance: number;
-
-  childs: IStateToken[] = [];
 
   isLeaf: boolean = false;
 
-  constructor(name:string, importance:number, childs:IStateToken[]) {
-    this.name = name;
-    this.importance = importance;
-    this.childs = childs;
+  constructor(
+    public name:string,
+    public importance:number,
+    public children:IStateToken[] = []
+  ) {
+
   }
 }
 
 export class StateTokenLeaf implements IStateToken {
-  name: string;
 
   hash:string = '';
 
-  importance: number;
-
-  type: TokenType;
-
-  value:number|string|IDType|number[];
-
-  category:string = '';
-
-  childs = [];
+  children = [];
 
   isLeaf = true;
 
-  constructor(name:string,  importance: number,  type: TokenType,  value:number|string|IDType|number[],  category:string = '') {
-    this.name = name;
-    this.importance = importance;
-    this.type = type;
-    this.value = value;
-    this.category = category;
+  constructor(
+    public name: string,
+    public importance: number,
+    public type: TokenType,
+    public value:number|string|IDType|number[],
+    public category:string = ''
+  ) {
+
   }
 }

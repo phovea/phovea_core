@@ -27,7 +27,7 @@ export class SimHash extends EventHandler {
     return tokens.map((t) => {
       t.importance /= totalImportance * baseLevel;
       if (!(t.isLeaf)) {
-        (<StateTokenNode>t).childs = this.normalizeTokenPriority((<StateTokenNode>t).childs, t.importance);
+        (<StateTokenNode>t).children = this.normalizeTokenPriority((<StateTokenNode>t).children, t.importance);
       }
       return t;
     });
@@ -56,15 +56,15 @@ export class SimHash extends EventHandler {
   }
 
   private static filterLeafsAndSerialize(tokens:IStateToken[]):StateTokenLeaf[] {
-    const childs:StateTokenLeaf[] = [];
+    const children:StateTokenLeaf[] = [];
     tokens.forEach((token:StateTokenLeaf) => {
       if (token.isLeaf) {
-        childs.push(token);
+        children.push(token);
       } else {
-        childs.concat(this.filterLeafsAndSerialize(token.childs));
+        children.concat(this.filterLeafsAndSerialize(token.children));
       }
     });
-    return childs;
+    return children;
   }
 
   private readonly hashBuilder = new Map<string, HashBuilder>();
@@ -125,8 +125,8 @@ export class SimHash extends EventHandler {
       return SimCats.CATEGORIES.map(() => SimCats.INVALID.name);
     }
     tokens = SimHash.normalizeTokenPriority(tokens, 1);
-    const leafs:StateTokenLeaf[] = SimHash.filterLeafsAndSerialize(tokens);
-    const groupedTokens = SimHash.groupBy(leafs, 'category');
+    const leaves:StateTokenLeaf[] = SimHash.filterLeafsAndSerialize(tokens);
+    const groupedTokens = SimHash.groupBy(leaves, 'category');
     return SimCats.CATEGORIES.map((cat) => this.calcHashOfCat(groupedTokens[cat.name], cat.name));
   }
 
