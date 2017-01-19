@@ -85,7 +85,7 @@ export default class StateNode extends GraphNode {
     }
     const weighting = SimCats.getWeights();
     let similarity: number = 0;
-    for (let j = 0; j < 5; j++) {
+    for (let j = 0; j < SimCats.CATEGORIES.length; j++) {
       const len = Math.min(thisH[j].length, otherH[j].length);
       let nrEqu = 0;
       for (let i = 0; i < len; i++) {

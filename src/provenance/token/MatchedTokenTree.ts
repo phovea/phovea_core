@@ -8,27 +8,20 @@ import {StateTokenNode, IStateToken, IMatchedStateToken} from './StateToken';
 import {SimCats} from '../SimilarityCategories';
 
 export class MatchedTokenTree {
-  private size:number = null;
-  private root:TreeNode = null;
+  private size:number = 0;
+  private root:TreeNode = new TreeRoot(null, null, this.size++);
 
   private _leftState:SimVisStateNode = null;
   private _rightState:SimVisStateNode = null;
 
-  /*get treeHasPartnerState():boolean {
-    return this._leftState !== null && this._leftState !== this._rightState;
-  }*/
-
   constructor(left:SimVisStateNode, right:SimVisStateNode) {
-    this.size = 0;
-    this.root = new TreeRoot(null, null, this.size++);
     this._leftState = left;
     this._rightState = right;
-    const leftTokens:IStateToken[] = left.stateTokens;
-    const rightTokens:IStateToken[] = right.stateTokens;
-    this.matchIntoNode(this.root, new StateTokenNode('dummyRoot', 1, leftTokens), new StateTokenNode('dummyRoot', 1, rightTokens));
+
+    this.matchIntoNode(this.root, new StateTokenNode('dummyRoot', 1, left.stateTokens), new StateTokenNode('dummyRoot', 1, right.stateTokens));
+
     this.root.balanceWeights(1);
-    this.root.setUnscaledSize([1,1,1,1,1]);
-    //let sim = this.similarity;
+    this.root.setUnscaledSize(Array(SimCats.CATEGORIES.length).fill(1));
   }
 
   get leftState():SimVisStateNode {
@@ -52,14 +45,14 @@ export class MatchedTokenTree {
    * @returns {[IStateToken[],IMatchedStateToken[],IStateToken[]]}
    */
   private static matchTokens(leftList:IStateToken[], rightList:IStateToken[]) {
-    const left = leftList.filter((left) => rightList.findIndex((right) => right.name === left.name) === -1);
-    const right = rightList.filter((right) => leftList.findIndex((left) => right.name === left.name) === -1);
+    const leftOnly = leftList.filter((left) => rightList.findIndex((right) => right.name === left.name) === -1);
+    const rightOnly = rightList.filter((right) => leftList.findIndex((left) => right.name === left.name) === -1);
 
-    const center:IMatchedStateToken[] = leftList
+    const intersection:IMatchedStateToken[] = leftList
       .filter((left) => rightList.findIndex((right) => right.name === left.name) >= 0)
       .map((left, index) => ({left, right: rightList[index]}));
 
-    return [left, center, right];
+    return [leftOnly, intersection, rightOnly];
   }
 
   /**
@@ -96,21 +89,21 @@ export class MatchedTokenTree {
         return;
       }
 
-      const [leftList, centerList, rightList] = MatchedTokenTree.matchTokens(left.childs, right.childs);
+      const [leftOnly, intersection, rightOnly] = MatchedTokenTree.matchTokens(left.childs, right.childs);
 
-      (<IStateToken[]>leftList).forEach((left) => {
+      (<IStateToken[]>leftOnly).forEach((left) => {
         const node = new TreeNode(left, null, this.size++);
         this.matchIntoNode(node, left, null); // recursion
         root.appendChild(node);
       });
 
-      (<IMatchedStateToken[]>centerList).forEach((center) => {
+      (<IMatchedStateToken[]>intersection).forEach((center) => {
         const node = new TreeNode(center.left, center.right, this.size++);
         this.matchIntoNode(node, center.left, center.right); // recursion
         root.appendChild(node);
       });
 
-      (<IStateToken[]>rightList).forEach((right) => {
+      (<IStateToken[]>rightOnly).forEach((right) => {
         const node = new TreeNode(null, right, this.size++);
         this.matchIntoNode(node, null, right); // recursion
         root.appendChild(node);
@@ -121,8 +114,8 @@ export class MatchedTokenTree {
   //not affected by weighting. Just delivers the correct proportions of leafs for each category.
   get similarityForLineup() {
     const catLength = SimCats.CATEGORIES.length;
-    const leftTokens:IStateToken[] = this._leftState.stateTokens;
-    const rightTokens:IStateToken[] = this._rightState.stateTokens;
+    const leftTokens:IStateToken[] = this.leftState.stateTokens;
+    const rightTokens:IStateToken[] = this.rightState.stateTokens;
 
     if (leftTokens.length === 0 && rightTokens.length === 0) {
       const fullWeight = Array(catLength).fill(1);

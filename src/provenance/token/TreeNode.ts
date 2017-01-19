@@ -109,22 +109,21 @@ export class TreeNode {
 
   get impOfChildsPerCat():number[] {
     if (this.impPerCat === null) {
-      const childsImpPerCat:number[] = [0, 0, 0, 0, 0];
+      const childsImpPerCat:number[] = Array(SimCats.CATEGORIES.length).fill(0);
       if (this.isLeafNode) {
         childsImpPerCat[SimCats.CATEGORIES.findIndex((d) => d.name === this.categoryName)] += this.importance;
         this.impPerCat = childsImpPerCat;
         return childsImpPerCat;
       }
-      for (let i = 0; i < this._childs.length; i++) {
-        if (this._childs[i].isLeafNode) {
-          childsImpPerCat[SimCats.CATEGORIES.findIndex((d) => d.name === this._childs[i].categoryName)] += this._childs[i].importance;
+      this._childs.forEach((child) => {
+        if (child.isLeafNode) {
+          childsImpPerCat[SimCats.CATEGORIES.findIndex((d) => d.name === child.categoryName)] += child.importance;
         } else {
-          let tmp = this._childs[i].impOfChildsPerCat;
-          for (let j = 0; j < tmp.length; j++) {
-            childsImpPerCat[j] += tmp[j];
-          }
+          child.impOfChildsPerCat.forEach((importance, index) => {
+            childsImpPerCat[index] += importance;
+          });
         }
-      }
+      });
       this.impPerCat = childsImpPerCat;
     }
     return this.impPerCat;
@@ -261,7 +260,7 @@ export class TreeNode {
     for (let i = 0; i < dummyAndOtherChilds.length; i++) {
       const targetCpy = target.slice(0);
       const childImp = dummyAndOtherChilds[i].impOfChildsPerCat;
-      for (let j = 0; j < 5; j++) {
+      for (let j = 0; j < SimCats.CATEGORIES.length; j++) {
         if (childImp[j]===0) {
           continue;
         }
