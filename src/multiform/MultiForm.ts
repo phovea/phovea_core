@@ -126,8 +126,8 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
       if (arguments.length === 0) {
         return this.actVis.transform();
       } else {
-        const t = (event, new_, old) => {
-          this.fire('transform', new_, old);
+        const t = (event, newValue, old) => {
+          this.fire('transform', newValue, old);
         };
         this.actVis.on('transform', t);
         const r = this.actVis.transform(scale, rotate);

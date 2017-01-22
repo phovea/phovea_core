@@ -64,7 +64,7 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
   private dims: Range1DGroup[][];
   private grid: GridElem[];
 
-  private metaData_: IVisMetaData = new ProxyMetaData(() => this.actDesc);
+  private _metaData: IVisMetaData = new ProxyMetaData(() => this.actDesc);
 
   constructor(public readonly data: IDataType, public readonly range: Range, parent: HTMLElement, viewFactory: IViewFactory, private options: IMultiFormGridOptions = {}) {
     super();
@@ -147,7 +147,7 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
    * @return {IVisMetaData}
    */
   get asMetaData() {
-    return this.metaData_;
+    return this._metaData;
   }
 
   private build() {
@@ -172,10 +172,10 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
     } else {
       const ndim = this.dimSizes;
       for (let i = 0; i < ndim[0]; ++i) {
-        let row = createNode(this.node, 'div', 'gridrow');
+        const row = createNode(this.node, 'div', 'gridrow');
         for (let j = 0; j < ndim[1]; ++j) {
           const elem = this.grid[i * ndim[1] + j];
-          let nn = createNode(row, 'div', 'content');
+          const nn = createNode(row, 'div', 'content');
           nn.style.display = 'inline-block';
           elem.setContent(wrap(nn, elem.data, elem.range, elem.pos));
         }
@@ -196,8 +196,8 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
       if (arguments.length > 0) {
         this.grid.forEach((g) => g.transform(scale, rotate));
         this.fire('transform', {
-          scale: scale,
-          rotate: rotate
+          scale,
+          rotate
         }, bak);
       }
       return bak;
@@ -248,7 +248,8 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
     }
 
     function filterTo() {
-      let inElems = [], i: number, matched, g: GridElem;
+      const inElems = [];
+      let i: number, matched, g: GridElem;
 
       for (i = 0; i < this.grid.length; ++i) {
         g = this.grid[i];
@@ -256,7 +257,7 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
 
         if (!matched.isNone) { //direct group hit
           inElems.push({
-            g: g,
+            g,
             pos: relativePos(g.location),
             r: matched
           });
@@ -276,7 +277,7 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
       //shift the locations according to grid position
       locations = locations.map((loc, i) => loc ? loc.shift(inElems[i].pos) : loc).filter((loc) => loc != null);
       //merge into a single one
-      let base = locations[0].aabb();
+      const base = locations[0].aabb();
       let x = base.x, y = base.y, x2 = base.x2, y2 = base.y2;
       locations.forEach((loc) => {
         const aab = loc.aabb();
@@ -362,7 +363,7 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
       return {
         cols: this.dims[1].map((d, i) => <number>max(grid, (row) => row[i][0])),
         rows: grid.map((row) => <number>max(row, (s) => s[1])),
-        grid: grid
+        grid
       };
     }
   }
