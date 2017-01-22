@@ -70,13 +70,14 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
     super();
     this.options = mixin({
       initialVis: 0,
-      singleRowOptimization: true
+      singleRowOptimization: true,
+      filter: () => true
     }, options);
     this.node = createNode(parent, 'div', 'multiformgrid');
     assignData(parent, data);
     assignVis(this.node, this);
     //find all suitable plugins
-    this.visses = listVisses(data);
+    this.visses = listVisses(data).filter(this.options.filter);
 
     //compute the dimensions and build the grid
     const dims = this.dims = range.dims.map((dim) => {

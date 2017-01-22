@@ -45,7 +45,7 @@ export function addIconVisChooser(toolbar: HTMLElement, ...forms: IMultiForm[]) 
   const visses = toAvailableVisses(forms);
 
   visses.forEach((v) => {
-    let child = createNode(s, 'i');
+    const child = createNode(s, 'i');
     v.iconify(child);
     child.onclick = () => forms.forEach((f) => f.switchTo(v));
   });
@@ -57,7 +57,7 @@ export function addSelectVisChooser(toolbar: HTMLElement, ...forms: IMultiForm[]
   const visses = toAvailableVisses(forms);
 
   visses.forEach((v, i) => {
-    let child = createNode(s, 'option');
+    const child = createNode(s, 'option');
     child.setAttribute('value', String(i));
     child.textContent = v.name;
   });
@@ -69,7 +69,21 @@ export function addSelectVisChooser(toolbar: HTMLElement, ...forms: IMultiForm[]
 }
 
 export interface IMultiFormOptions {
+  /**
+   * initial visualization
+   */
   initialVis?: string|number|IVisPluginDesc;
+  /**
+   * configuration for all visualizations
+   */
   all?: any;
+  /**
+   * custom config for individual visualizations identified by their id
+   */
   [visPluginId: string]: any;
+  /**
+   * optionally filter the list of visualizations
+   * @param vis
+   */
+  filter?(vis: IVisPluginDesc): boolean;
 }

@@ -29,7 +29,7 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
   private actDesc: IVisPluginDesc;
   private content: HTMLElement;
 
-  private metaData_: IVisMetaData = new ProxyMetaData(() => this.actDesc);
+  private _metaData: IVisMetaData = new ProxyMetaData(() => this.actDesc);
 
   constructor(public readonly data: IDataType, parent: HTMLElement, private options: IMultiFormOptions = {}) {
     super();
@@ -37,13 +37,14 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
       initialVis: 0,
       all: { //options to all visses
 
-      }
+      },
+      filter: () => true
     }, options);
     this.node = createNode(parent, 'div', 'multiform');
     assignData(parent, data);
     assignVis(this.node, this);
     //find all suitable plugins
-    this.visses = listVisses(data);
+    this.visses = listVisses(data).filter(this.options.filter);
 
     this.build();
   }
@@ -53,7 +54,7 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
    * @return {IVisMetaData}
    */
   get asMetaData() {
-    return this.metaData_;
+    return this._metaData;
   }
 
 
