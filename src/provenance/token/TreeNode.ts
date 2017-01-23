@@ -16,8 +16,8 @@ export class TreeNode {
     return this._children.concat();
   }
 
-  get childrenAndDummyChilds():TreeNode[] {
-    return this._children.concat(this._dummyChilds);
+  get childrenAndDummyChildren():TreeNode[] {
+    return this._children.concat(this._dummyChildren);
   }
 
   protected _children:TreeNode[] = [];
@@ -40,16 +40,16 @@ export class TreeNode {
   }
 
   private _id = null;
-  private _dummyChilds:TreeNode[] = [];
+  private _dummyChildren:TreeNode[] = [];
 
   constructor(left:IStateToken, right:IStateToken, id) {
     this._id = id;
     this.leftToken = left;
     this.rightToken = right;
-    this.checkForDummyChilds();
+    this.checkForDummyChildren();
   }
 
-  checkForDummyChilds() {
+  checkForDummyChildren() {
     if (this.leftToken === null && this.rightToken === null) {
       return;
     }
@@ -67,10 +67,10 @@ export class TreeNode {
         const sim = this.tokenSimilarity;
         const leftChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', left.importance, left.type, 'matching', cat.selection);
         const rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, left.type, 'matching', cat.selection);
-        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, rightChildMatch, this.id + '_match', sim));
+        this._dummyChildren = this._dummyChildren.concat(new DummyTreeNode(leftChildMatch, rightChildMatch, this.id + '_match', sim));
         const leftChildNonMatch:StateTokenLeaf = new StateTokenLeaf('Non-Matching', left.importance, left.type, 'non-matching', cat.selection);
         const rightChildNonMatch:StateTokenLeaf = new StateTokenLeaf('Non-Matching', right.importance, left.type, 'non-matching', cat.selection);
-        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildNonMatch, rightChildNonMatch, this.id + '_match', (1 - sim)));
+        this._dummyChildren = this._dummyChildren.concat(new DummyTreeNode(leftChildNonMatch, rightChildNonMatch, this.id + '_match', (1 - sim)));
         return;
       } else {
         //just left
@@ -78,7 +78,7 @@ export class TreeNode {
           return;
         }
         const leftChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', left.importance, left.type, 'matching', cat.selection);
-        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, null, this.id + '_match',0));
+        this._dummyChildren = this._dummyChildren.concat(new DummyTreeNode(leftChildMatch, null, this.id + '_match',0));
       }
     } else {
       if (right !== null) {
@@ -89,7 +89,7 @@ export class TreeNode {
           return;
         }
         const rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, right.type, 'matching', cat.selection);
-        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(null, rightChildMatch, this.id + '_match',0));
+        this._dummyChildren = this._dummyChildren.concat(new DummyTreeNode(null, rightChildMatch, this.id + '_match',0));
       } else {
         //both are null
         return;
@@ -107,7 +107,7 @@ export class TreeNode {
   //stores the importance of all children (recursive) per category.
   private impPerCat:number[] = null;
 
-  get impOfChildsPerCat():number[] {
+  get impOfChildrenPerCat():number[] {
     if (this.impPerCat === null) {
       const childrenImpPerCat:number[] = Array(SimCats.CATEGORIES.length).fill(0);
       if (this.isLeafNode) {
@@ -119,7 +119,7 @@ export class TreeNode {
         if (child.isLeafNode) {
           childrenImpPerCat[SimCats.CATEGORIES.findIndex((d) => d.name === child.categoryName)] += child.importance;
         } else {
-          child.impOfChildsPerCat.forEach((importance, index) => {
+          child.impOfChildrenPerCat.forEach((importance, index) => {
             childrenImpPerCat[index] += importance;
           });
         }
@@ -254,16 +254,16 @@ export class TreeNode {
   }
 
   setUnscaledSize(target:number[]) {
-    const currentImp = this.impOfChildsPerCat;
-    if (this.isLeafNodeWithoutDummyChilds) {
+    const currentImp = this.impOfChildrenPerCat;
+    if (this.isLeafNodeWithoutDummyChildren) {
       this._unscaledSize = target[this.category];
       return;
     }
 
-    const dummyAndOtherChilds:TreeNode[] = this._children.concat(this._dummyChilds);
-    dummyAndOtherChilds.forEach((child) => {
+    const dummyAndOtherChildren:TreeNode[] = this._children.concat(this._dummyChildren);
+    dummyAndOtherChildren.forEach((child) => {
       const targetCpy = target.slice(0);
-      const childImp = child.impOfChildsPerCat;
+      const childImp = child.impOfChildrenPerCat;
       for (let j = 0; j < SimCats.CATEGORIES.length; j++) {
         if (childImp[j]===0) {
           continue;
@@ -275,8 +275,8 @@ export class TreeNode {
     });
   }
 
-  get isLeafNodeWithoutDummyChilds():boolean {
-    return (this._children.length === 0 && this._dummyChilds.length === 0);
+  get isLeafNodeWithoutDummyChildren():boolean {
+    return (this._children.length === 0 && this._dummyChildren.length === 0);
   }
 
   get isLeafNode():boolean {
@@ -325,7 +325,7 @@ class DummyTreeNode extends TreeNode {
     return 1;
   }
 
-  checkForDummyChilds() {
+  checkForDummyChildren() {
     return;
   }
 
