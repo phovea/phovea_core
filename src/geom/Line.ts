@@ -28,7 +28,7 @@ export default class Line extends AShape {
     return `Line(x1=${this.x1},y1=${this.y1},x2=${this.x2},y2=${this.y2})`;
   }
 
-  protected shiftImpl(x, y) {
+  protected shiftImpl(x: number, y: number) {
     this.x1 += x;
     this.y1 += y;
     this.x2 += x;

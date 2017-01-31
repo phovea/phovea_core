@@ -20,7 +20,7 @@ export default class Ellipse extends AShape {
     return `Ellipse(x=${this.x},y=${this.y},radiusX=${this.radiusX},radiusY=${this.radiusY})`;
   }
 
-  protected shiftImpl(x, y) {
+  protected shiftImpl(x: number, y: number) {
     this.x += x;
     this.y += y;
   }

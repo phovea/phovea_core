@@ -20,7 +20,7 @@ export class AttributeContainer extends EventHandler implements IPersistable {
 
   persist(): any {
     if (this.attrMap.size > 0) {
-      const attrs = {};
+      const attrs: any = {};
       this.attrMap.forEach((v, k) => attrs[k] = v);
       return {attrs};
     }
@@ -207,7 +207,7 @@ export abstract class AGraph extends SelectAble {
 
   selectedNodes(): Promise<GraphNode[]> {
     return this.selections().then((r) => {
-      let nodes = [];
+      const nodes: GraphNode[] = [];
       r.dim(DIM_NODES).forEach((index) => nodes.push(this.nodes[index]));
       return nodes;
     });
@@ -219,7 +219,7 @@ export abstract class AGraph extends SelectAble {
 
   selectedEdges(): Promise<GraphEdge[]> {
     return this.selections().then((r) => {
-      let edges = [];
+      const edges: GraphEdge[] = [];
       r.dim(DIM_EDGES).forEach((index) => edges.push(this.edges[index]));
       return edges;
     });

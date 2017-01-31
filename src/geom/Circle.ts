@@ -19,7 +19,7 @@ export default class Circle extends AShape {
     return `Circle(x=${this.x},y=${this.y},radius=${this.radius})`;
   }
 
-  protected shiftImpl(x, y) {
+  protected shiftImpl(x: number, y: number) {
     this.x += x;
     this.y += y;
   }
