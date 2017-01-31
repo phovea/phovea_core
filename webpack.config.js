@@ -33,7 +33,7 @@ const webpackloaders = [
     test: /\.(png|jpg)$/,
     loader: 'url-loader',
     query: {
-      limit: 10000, //inline <= 10kb
+      limit: 10000 //inline <= 10kb
     }
   },
   {
@@ -139,6 +139,9 @@ function generateWebpack(options) {
       }),
       //define magic constants that are replaced
       new webpack.DefinePlugin({
+        'process.env': {
+          'NODE_ENV': JSON.stringify(options.isProduction ? 'production': 'development')
+        },
         __VERSION__: JSON.stringify(pkg.version),
         __LICENSE__: JSON.stringify(pkg.license),
         __BUILD_ID__: buildId,
@@ -297,7 +300,7 @@ function generateWebpackConfig(env) {
   //single generation
   if (isDev) {
     return generateWebpack(base);
-  } else if (type === 'app') { //isProduction app
+  } else if (type.startsWith('app')) { //isProduction app
     return generateWebpack(Object.assign({}, base, {
         min: true,
         nosuffix: true
