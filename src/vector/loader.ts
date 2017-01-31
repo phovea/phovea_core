@@ -12,17 +12,26 @@ import {Range, parse} from '../range';
 import {IValueType} from '../datatype';
 import {IVectorDataDescription} from './IVector';
 
+/**
+ * @internal
+ */
 export interface IVectorLoaderResult<T> {
   readonly rowIds: Range;
   readonly rows: string[];
   readonly data: T[];
 }
 
+/**
+ * @internal
+ */
 export interface IVectorLoader<T> {
   (desc: IVectorDataDescription<any>): Promise<IVectorLoaderResult<T>>;
 }
 
 
+/**
+ * @internal
+ */
 export function viaAPILoader() {
   let _loader = undefined;
   return (desc) => {
@@ -36,6 +45,9 @@ export function viaAPILoader() {
   };
 }
 
+/**
+ * @internal
+ */
 export function viaDataLoader(rows: string[], rowIds: number[], data: IValueType[]) {
   let _data = undefined;
   return () => {

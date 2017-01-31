@@ -91,7 +91,7 @@ export interface IVisPluginDesc extends IPluginDesc, IVisMetaData {
    * add all icon information of this vis to the given html element
    * @param node
    */
-  iconify(node: HTMLElement);
+  iconify(node: HTMLElement): HTMLElement;
 }
 
 export interface IVisInstanceOptions {
@@ -157,12 +157,12 @@ export interface IVisInstance extends IPersistable, IEventHandler, ILocateAble {
   /**
    * updates this vis
    */
-  update();
+  update(): void;
 
   /**
    * destroy this vis and deregister handlers,...
    */
-  destroy();
+  destroy(): void;
 }
 
 export function assignVis(node: Element, vis: IVisInstance) {
@@ -176,7 +176,7 @@ export class AVisInstance extends EventHandler {
   readonly id = uniqueId('vis');
   private _built = false;
 
-  option(name: string, value?: any) {
+  option(name: string, value?: any): any {
     //dummy
     //if (value) {
     //  this.fire('option', name, value, null);
@@ -184,7 +184,7 @@ export class AVisInstance extends EventHandler {
     return null;
   }
 
-  persist() {
+  persist(): any {
     return null;
   }
 
@@ -207,7 +207,7 @@ export class AVisInstance extends EventHandler {
   }
 
   locateById(...range: Range[]) {
-    return (<any>this).data.ids().then((ids) => {
+    return (<any>this).data.ids().then((ids: Range) => {
       if (range.length === 1) {
         return this.locateImpl(ids.indexOf(range[0]));
       }
@@ -271,12 +271,13 @@ function extrapolateIconify(r: {iconify?(node: HTMLElement): void}) {
   if (typeof r.iconify === 'function') {
     return;
   }
-  r.iconify = function iconfiy(node: HTMLElement) {
+  r.iconify = function iconfiy(this: IVisPluginDesc, node: HTMLElement) {
     node.title = this.name;
-    if (this.iconcss) {
+    const anyThis = <any>this;
+    if (anyThis.iconcss) {
       node.classList.add('phovea-vis-icon');
-      node.classList.add(this.iconcss);
-    } else if (this.icon) {
+      node.classList.add(anyThis.iconcss);
+    } else if (anyThis.icon) {
       node.classList.add('phovea-vis-icon');
       node.style.width = '1em';
       node.style.display = 'inline-block';
@@ -284,13 +285,14 @@ function extrapolateIconify(r: {iconify?(node: HTMLElement): void}) {
       node.style.backgroundSize = '100%';
       node.style.backgroundRepeat = 'no-repeat';
       //lazy load icon
-      this.icon().then((iconData) => {
+      anyThis.icon().then((iconData: string) => {
         node.style.backgroundImage = `url(${iconData})`;
       });
       node.innerHTML = '&nbsp';
     } else {
       node.innerText = this.name.substr(0, 1).toUpperCase();
     }
+    return node;
   };
 }
 function extrapolateSize(r: {scaling?: string, sizeDependsOnDataDimension: boolean|[boolean, boolean]}) {
@@ -313,7 +315,7 @@ function extrapolateRotation(r: {rotation: string|number|null}) {
     swap: 180
   };
   if (typeof r.rotation === 'string' && r.rotation in m) {
-    r.rotation = m[r.rotation];
+    r.rotation = (<any>m)[r.rotation];
   } else if (typeof r.rotation === 'number') {
     r.rotation = +r.rotation;
   } else if (r.rotation === null) {

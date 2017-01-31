@@ -18,6 +18,7 @@ import {ITableLoader, ITableLoader2, adapterOne2Two, viaAPI2Loader, viaDataLoade
 
 /**
  * root matrix implementation holding the data
+ * @internal
  */
 export default class Table extends ATable implements ITable {
   private vectors: TableVector<any, IValueTypeDesc>[];

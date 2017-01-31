@@ -44,6 +44,7 @@ export function indexOf<T>(arr: T[], f: (v: T) => boolean): number {
  * converts the given arguments object into an array
  * @param args
  * @deprecated use Array.from(arguments) instead
+ * @internal
  * @returns {*|Array}
  */
 export function argList(args: IArguments) {

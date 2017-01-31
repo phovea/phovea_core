@@ -9,6 +9,9 @@ import {IVector, IVectorDataDescription} from '../../vector';
 import {ITable} from '../ITable';
 import AVector from '../../vector/AVector';
 
+/**
+ * @internal
+ */
 export default class MultiTableVector<T, D extends IValueTypeDesc> extends AVector<T, D> implements IVector<T,D> {
   readonly desc: IVectorDataDescription<D>;
 

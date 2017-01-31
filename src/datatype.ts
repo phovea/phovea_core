@@ -8,7 +8,7 @@
  */
 
 import {IPersistable, extendClass, mixin, uniqueString} from './index';
-import {ISelectAble, SelectAble} from './idtype';
+import {ISelectAble, SelectAble, IDType} from './idtype';
 import {extent, IHistogram} from './math';
 import {all, none, Range1D, RangeLike, Range1DGroup, composite, Range, CompositeRange1D} from './range';
 
@@ -141,7 +141,7 @@ export abstract class ADataType<T extends IDataDescription> extends SelectAble i
     super();
   }
 
-  get dim() {
+  get dim(): number[] {
     return [];
   }
 
@@ -153,7 +153,7 @@ export abstract class ADataType<T extends IDataDescription> extends SelectAble i
     return Promise.resolve(this);
   }
 
-  get idtypes() {
+  get idtypes(): IDType[] {
     return [];
   }
 
@@ -277,7 +277,7 @@ export function categorical2partitioning<T>(data: T[], categories: T[], options:
  * @return {function(IDataDescription): undefined}
  */
 export function defineDataType(name: string, functions: any) {
-  function DataType(desc: IDataDescription) {
+  function DataType(this: any, desc: IDataDescription) {
     ADataType.call(this, desc);
     if (typeof(this.init) === 'function') {
       this.init.apply(this, Array.from(arguments));
@@ -292,7 +292,7 @@ export function defineDataType(name: string, functions: any) {
 }
 
 
-function isNumeric(obj) {
+function isNumeric(obj: any) {
   return (obj - parseFloat(obj) + 1) >= 0;
 }
 

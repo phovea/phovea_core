@@ -10,7 +10,9 @@ import {ITable, ITableDataDescription, IQueryArgs} from '../ITable';
 import ATable from '../ATable';
 import {IVector, IAnyVector} from '../../vector/IVector';
 
-
+/**
+ * @internal
+ */
 export default class VectorTable extends ATable implements ITable {
   readonly idtype: IDType;
   readonly desc: ITableDataDescription;

@@ -9,7 +9,7 @@
 import {offline as isOffline, fixId, randomId} from './index';
 import {getAPIJSON, sendAPI} from './ajax';
 import {list as listPlugins} from './plugin';
-import {IDataDescription, IDataType, DummyDataType, IDataDescriptionMetaData} from './datatype';
+import {IDataDescription, IDataType, DummyDataType} from './datatype';
 import {ITable} from './table';
 import {wrapObjects} from './table/Table';
 export {random_id, fixId} from './index';
@@ -102,7 +102,7 @@ export function list(filter?: ({[key: string]: string})|((d: IDataType) => boole
 export interface INode {
   readonly name: string;
   readonly children: INode[];
-  readonly data: IDataType;
+  data: IDataType;
 }
 
 /**
@@ -112,7 +112,7 @@ export interface INode {
  */
 export function convertToTree(list: IDataType[]): INode {
   //create a tree out of the list by the fqname
-  const root = {children: [], name: '/', data: null};
+  const root :INode = {children: [], name: '/', data: null};
 
   list.forEach((entry) => {
     const path = entry.desc.fqname.split('/');
@@ -236,9 +236,6 @@ export function upload(data: any, file?: File): Promise<IDataType> {
 
 /**
  * updates an existing dataset with a new description and optional file
- * @param entry
- * @param desc
- * @param file
  * @returns {Promise<*>} returns the update dataset
  */
 export function update(entry: IDataType, data: any, file?: File): Promise<IDataType> {
@@ -253,9 +250,6 @@ export function update(entry: IDataType, data: any, file?: File): Promise<IDataT
 
 /**
  * modifies an existing dataset with a new description and optional file, the difference to update is that this should be used for partial changes
- * @param entry
- * @param desc
- * @param file
  * @returns {Promise<*>} returns the update dataset
  */
 export function modify(entry: IDataType, data: any, file?: File): Promise<IDataType> {

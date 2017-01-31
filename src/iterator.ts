@@ -314,7 +314,7 @@ export class EmptyIterator<T> extends AIterator<T> implements IIterator<T> {
    * converts the remaining of this iterator to a list
    * @returns {Array}
    */
-  asList() {
+  asList(): T[] {
     return [];
   }
 }

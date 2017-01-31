@@ -74,7 +74,7 @@ export function send(url: string, data: any = {}, method = 'GET', expectedDataTy
     },
   };
   if (data && !(data instanceof FormData)) {
-    options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    (<any>options.headers)['Content-Type'] = 'application/x-www-form-urlencoded';
     options.body = encodeParams(data);
   } else if (data) {
     options.body = data;
@@ -126,7 +126,7 @@ export function api2absURL(url: string, data: any = null) {
  * @param data
  * @returns {any}
  */
-export function encodeParams(data = null) {
+export function encodeParams(data :any = null) {
   if (data === null) {
     return null;
   }
@@ -137,7 +137,7 @@ export function encodeParams(data = null) {
   if (keys.length === 0) {
     return null;
   }
-  const s = [];
+  const s :string[] = [];
 
   function add(prefix: string, key: string, value: any) {
     if (Array.isArray(value)) {

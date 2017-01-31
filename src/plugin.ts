@@ -86,9 +86,9 @@ function push(type: string, idOrLoader: string | (() => any), descOrLoader: any,
 }
 
 export interface IRegistry {
-  push(type: string, loader: () => any, desc?: any);
-  push(type: string, id: string, loader: () => any, desc?: any);
-  push(type: string, idOrLoader: string | (() => any), descOrLoader: any, desc?: any);
+  push(type: string, loader: () => any, desc?: any): void;
+  push(type: string, id: string, loader: () => any, desc?: any): void;
+  push(type: string, idOrLoader: string | (() => any), descOrLoader: any, desc?: any): void;
 }
 
 

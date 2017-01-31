@@ -8,6 +8,9 @@ import {Range, parse, range} from '../range';
 import {IValueType, VALUE_TYPE_INT, VALUE_TYPE_REAL, INumberValueTypeDesc, mask} from '../datatype';
 import {IQueryArgs, ITableDataDescription, ITableColumn} from './ITable';
 
+/**
+ * @internal
+ */
 export interface ITableLoader {
   (desc: ITableDataDescription): Promise<{
     rowIds: Range;
@@ -16,6 +19,9 @@ export interface ITableLoader {
   }>;
 }
 
+/**
+ * @internal
+ */
 export interface ITableLoader2 {
   rowIds(desc: ITableDataDescription, range: Range): Promise<Range>;
   rows(desc: ITableDataDescription, range: Range): Promise<string[]>;
@@ -25,6 +31,9 @@ export interface ITableLoader2 {
   view(desc: ITableDataDescription, name: string, args: any): ITableLoader;
 }
 
+/**
+ * @internal
+ */
 export function adapterOne2Two(loader: ITableLoader): ITableLoader2 {
   return {
     rowIds: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => range.preMultiply(d.rowIds, desc.size)),
@@ -39,6 +48,9 @@ export function adapterOne2Two(loader: ITableLoader): ITableLoader2 {
 }
 
 
+/**
+ * @internal
+ */
 export function viaAPIViewLoader(name: string, args: IQueryArgs): ITableLoader {
   let _loader = undefined;
   return (desc) => {
@@ -74,6 +86,9 @@ function maskObjects(arr: IValueType[], desc: ITableDataDescription) {
 }
 
 
+/**
+ * @internal
+ */
 export function viaAPI2Loader(): ITableLoader2 {
   let rowIds = null,
     rows = null,
@@ -146,7 +161,10 @@ function toFlat(data: any[][], vecs: ITableColumn<any>[]) {
   return data.map((row) => vecs.map((col) => row[col.name]));
 }
 
-// TODO
+
+/**
+ * @internal
+ */
 export function viaDataLoader(data: any[], nameProperty: any) {
   let _data: any = undefined;
   return (desc) => {

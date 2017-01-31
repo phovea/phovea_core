@@ -11,6 +11,7 @@ import AVector from '../../vector/AVector';
 
 /**
  * root matrix implementation holding the data
+ * @internal
  */
 export default class TableVector<T,D extends IValueTypeDesc> extends AVector<T,D> implements IVector<T,D> {
   readonly desc: IVectorDataDescription<D>;

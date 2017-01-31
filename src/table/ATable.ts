@@ -12,6 +12,7 @@ import {IValueType, IValueTypeDesc} from '../datatype';
 
 /**
  * base class for different Table implementations, views, transposed,...
+ * @internal
  */
 export abstract class ATable extends SelectAble {
   constructor(protected root: ITable) {
@@ -64,12 +65,9 @@ export abstract class ATable extends SelectAble {
 export default ATable;
 
 // circular dependency thus not extractable
+
 /**
- * view on the vector restricted by a range
- * @param root underlying matrix
- * @param range range selection
- * @param t optional its transposed version
- * @constructor
+ * @internal
  */
 export class TableView extends ATable implements ITable {
   constructor(root: ITable, private range: Range) {

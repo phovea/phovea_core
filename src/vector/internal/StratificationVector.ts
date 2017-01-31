@@ -16,6 +16,7 @@ import StratificationGroup from '../../stratification/StratificationGroup';
 
 /**
  * root matrix implementation holding the data
+ * @internal
  */
 export default class StratificationVector extends ADataType<IStratificationDataDescription> implements IStratification {
 

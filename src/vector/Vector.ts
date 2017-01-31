@@ -21,6 +21,7 @@ import AVector from './AVector';
 import {IVectorLoader, viaAPILoader, viaDataLoader, IVectorLoaderResult} from './loader';
 /**
  * root matrix implementation holding the data
+ * @internal
  */
 export default class Vector<T,D extends IValueTypeDesc> extends AVector<T,D> {
 
@@ -104,6 +105,7 @@ export default class Vector<T,D extends IValueTypeDesc> extends AVector<T,D> {
 
 /**
  * module entry point for creating a datatype
+ * @internal
  * @param desc
  * @returns {IVector}
  */

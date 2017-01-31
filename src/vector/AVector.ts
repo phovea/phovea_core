@@ -26,6 +26,7 @@ import {IStratification} from '../stratification';
 import StratificationVector from './internal/StratificationVector';
 /**
  * base class for different Vector implementations, views, transposed,...
+ * @internal
  */
 export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
   constructor(protected root: IVector<T,D>) {
@@ -158,12 +159,13 @@ export default AVector;
 
 /**
  * view on the vector restricted by a range
- * @param root underlying matrix
- * @param range range selection
- * @param t optional its transposed version
- * @constructor
+ * @internal
  */
 export class VectorView<T,D extends IValueTypeDesc> extends AVector<T,D> {
+  /**
+   * @param root underlying matrix
+   * @param range range selection
+   */
   constructor(root: IVector<T,D>, private range: Range) {
     super(root);
   }

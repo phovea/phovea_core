@@ -36,7 +36,7 @@ export class ZoomLogic extends EventHandler {
     if (!this.v) {
       return null;
     }
-    function toDelta(x) {
+    function toDelta(x: number) {
       return x > 0 ? 0.2 : (x < 0 ? -0.2 : 0);
     }
 
@@ -113,7 +113,7 @@ export class ZoomLogic extends EventHandler {
  * addition to ZoomLogic taking care of mouse wheel operations on the vis instance
  */
 export class ZoomBehavior extends ZoomLogic {
-  constructor(private node: Element, v: IVisInstance, meta: IVisMetaData) {
+  constructor(node: Element, v: IVisInstance, meta: IVisMetaData) {
     super(v, meta);
     node.addEventListener('mousewheel', (event: any) => {
       if (!this.v) {
