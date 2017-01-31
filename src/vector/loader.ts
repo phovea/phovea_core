@@ -32,9 +32,9 @@ export interface IVectorLoader<T> {
 /**
  * @internal
  */
-export function viaAPILoader() {
-  let _loader = undefined;
-  return (desc) => {
+export function viaAPILoader<T>() {
+  let _loader: Promise<IVectorLoaderResult<T>> = undefined;
+  return (desc: IVectorDataDescription<any>) => {
     if (_loader) { //in the cache
       return _loader;
     }
@@ -48,16 +48,16 @@ export function viaAPILoader() {
 /**
  * @internal
  */
-export function viaDataLoader(rows: string[], rowIds: number[], data: IValueType[]) {
-  let _data = undefined;
+export function viaDataLoader<T>(rows: string[], rowIds: number[], data: IValueType[]) {
+  let _data: IVectorLoaderResult<T> = undefined;
   return () => {
     if (_data) { //in the cache
       return Promise.resolve(_data);
     }
     _data = {
       rowIds: parse(rowIds),
-      rows: rows,
-      data: data
+      rows,
+      data
     };
     return Promise.resolve(_data);
   };

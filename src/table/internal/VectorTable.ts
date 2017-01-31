@@ -8,7 +8,7 @@ import IDType from '../../idtype/IDType';
 import {IDataDescription} from '../../datatype';
 import {ITable, ITableDataDescription, IQueryArgs} from '../ITable';
 import ATable from '../ATable';
-import {IVector, IAnyVector} from '../../vector/IVector';
+import {IAnyVector} from '../../vector/IVector';
 
 /**
  * @internal
@@ -42,7 +42,7 @@ export default class VectorTable extends ATable implements ITable {
     return parse(range).filter(this.vectors, [this.ncol]);
   }
 
-  at(i, j) {
+  at(i: number, j: number) {
     return this.col(i).at(j);
   }
 

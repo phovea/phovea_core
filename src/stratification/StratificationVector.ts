@@ -17,6 +17,7 @@ import Stratification from './Stratification';
 
 /**
  * root matrix implementation holding the data
+ * @internal
  */
 export default class StratificationVector extends AVector<string, ICategoricalValueTypeDesc> implements ICategoricalVector {
   readonly valuetype: ICategoricalValueTypeDesc;
@@ -84,7 +85,7 @@ export default class StratificationVector extends AVector<string, ICategoricalVa
    * @param i
    * @returns {*}
    */
-  at(i) {
+  at(i: number) {
     return Promise.resolve(this.load()[i]);
   }
 

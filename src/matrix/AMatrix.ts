@@ -22,7 +22,7 @@ import SliceColVector from './internal/SliceColVector';
 import ProjectedVector from './internal/ProjectedVector';
 
 function flatten<T>(arr: T[][], indices: Range, select: number = 0) {
-  let r = [];
+  let r: T[]= [];
   const dim = [arr.length, arr[0].length];
   if (select === 0) {
     r = r.concat.apply(r, arr);
@@ -101,13 +101,13 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
       switch (v.type) {
         case VALUE_TYPE_CATEGORICAL:
           const vc = <ICategoricalValueTypeDesc><any>v;
-          return categoricalHist(flat.data, flat.indices, flat.data.length, vc.categories.map((d) => typeof d === 'string' ? d : d.name),
+          return categoricalHist<string>(<any[]>flat.data, flat.indices, flat.data.length, vc.categories.map((d) => typeof d === 'string' ? d : d.name),
             vc.categories.map((d) => typeof d === 'string' ? d : d.name || d.label),
             vc.categories.map((d) => typeof d === 'string' ? 'gray' : d.color || 'gray'));
         case VALUE_TYPE_INT:
         case VALUE_TYPE_REAL:
           const vn = <INumberValueTypeDesc><any>v;
-          return hist(flat.data, flat.indices, flat.data.length, bins ? bins : Math.round(Math.sqrt(this.length)), vn.range);
+          return hist(<any[]>flat.data, flat.indices, flat.data.length, bins ? bins : Math.round(Math.sqrt(this.length)), vn.range);
         default:
           return Promise.reject<IHistogram>('invalid value type: ' + v.type); //cant create hist for unique objects or other ones
       }
@@ -122,8 +122,8 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
     return this.ids().then((ids) => this.view(ids.indexOf(r)));
   }
 
-  reduce<U, UD extends IValueTypeDesc>(f: (row: T[]) => U, this_f?: any, valuetype?: UD, idtype?: IDType): IVector<U,UD> {
-    return new ProjectedVector(this.root, f, this_f, valuetype, idtype);
+  reduce<U, UD extends IValueTypeDesc>(f: (row: T[]) => U, thisArgument?: any, valuetype?: UD, idtype?: IDType): IVector<U,UD> {
+    return new ProjectedVector(this.root, f, thisArgument, valuetype, idtype);
   }
 
   restore(persisted: any): IPersistable {

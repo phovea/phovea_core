@@ -9,7 +9,7 @@
 
 import {argSort, argFilter} from '../../index';
 import {list as rlist, RangeLike, parse} from '../../range';
-import {IValueType, IValueTypeDesc} from '../../datatype';
+import {IValueTypeDesc} from '../../datatype';
 import {IVector, IVectorDataDescription} from '../../vector';
 import AVector from '../../vector/AVector';
 import {IMatrix} from '../IMatrix';
@@ -20,7 +20,7 @@ import {IMatrix} from '../IMatrix';
 export default class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends IValueTypeDesc> extends AVector<T,D> implements IVector<T,D> {
   readonly desc: IVectorDataDescription<D>;
 
-  constructor(private m: IMatrix<M, MD>, private f: (row: M[]) => T, private this_f = m, public readonly valuetype: D = <any>m.valuetype, private _idtype = m.rowtype) {
+  constructor(private m: IMatrix<M, MD>, private f: (row: M[]) => T, private thisArgument = m, public readonly valuetype: D = <any>m.valuetype, private _idtype = m.rowtype) {
     super(null);
     this.desc = {
       name: m.desc.name + '-p',
@@ -83,7 +83,7 @@ export default class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends 
    */
   at(i: number): Promise<T> {
     return this.m.data(rlist(i)).then((d) => {
-      return this.f.call(this.this_f, d[0]);
+      return this.f.call(this.thisArgument, d[0]);
     });
   }
 
@@ -93,7 +93,7 @@ export default class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends 
    */
   data(range?: RangeLike): Promise<T[]> {
     return this.m.data(range).then((d) => {
-      return d.map(this.f, this.this_f);
+      return d.map(this.f, this.thisArgument);
     });
   }
 

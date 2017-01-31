@@ -12,6 +12,7 @@ import {IStratification, IGroup} from './IStratification';
 
 /**
  * root matrix implementation holding the data
+ * @internal
  */
 export default class StratificationGroup extends SelectAble implements IStratification {
   constructor(private root: IStratification, private groupIndex: number, private groupDesc: IGroup) {

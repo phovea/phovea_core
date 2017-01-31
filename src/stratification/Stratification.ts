@@ -20,6 +20,7 @@ import {IStratificationLoader, viaAPILoader, viaDataLoader} from './loader';
 import StratificationVector from './StratificationVector';
 /**
  * root matrix implementation holding the data
+ * @internal
  */
 export default class Stratification extends ADataType<IStratificationDataDescription> implements IStratification {
   private _v: Promise<ICategoricalVector>;
@@ -94,7 +95,7 @@ export default class Stratification extends ADataType<IStratificationDataDescrip
   }
 
   get length() {
-    return this.size()[0];
+    return this.dim[0];
   }
 
   get ngroups() {

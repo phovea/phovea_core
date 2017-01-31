@@ -33,10 +33,10 @@ export interface ISelectAble extends IEventHandler {
   /**
    * clear the specific selection (type) and dimension
    */
-  clear(): Promise<Range>;
-  clear(type: string): Promise<Range>;
-  clear(dim: number): Promise<Range>;
-  clear(dim: number, type: string): Promise<Range>;
+  clear(): Promise<any>;
+  clear(type: string): Promise<any>;
+  clear(dim: number): Promise<any>;
+  clear(dim: number, type: string): Promise<any>;
 }
 
 interface ISingleSelectionListener {

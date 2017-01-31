@@ -98,7 +98,7 @@ export default class StratificationVector extends ADataType<IStratificationDataD
   }
 
   get ngroups() {
-    return this.ngroups;
+    return this.groups.length;
   }
 
   get dim() {

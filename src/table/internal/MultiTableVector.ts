@@ -15,7 +15,7 @@ import AVector from '../../vector/AVector';
 export default class MultiTableVector<T, D extends IValueTypeDesc> extends AVector<T, D> implements IVector<T,D> {
   readonly desc: IVectorDataDescription<D>;
 
-  constructor(private table: ITable, private f: (row: IValueType[]) => T, private this_f = table, public readonly valuetype: D = null, private _idtype = table.idtype) {
+  constructor(private table: ITable, private f: (row: IValueType[]) => T, private thisArgument = table, public readonly valuetype: D = null, private _idtype = table.idtype) {
     super(null);
     this.desc = {
       name: table.desc.name + '-p',
@@ -78,7 +78,7 @@ export default class MultiTableVector<T, D extends IValueTypeDesc> extends AVect
    */
   at(i: number): Promise<any> {
     return this.table.data(rlist(i)).then((d) => {
-      return this.f.call(this.this_f, d[0]);
+      return this.f.call(this.thisArgument, d[0]);
     });
   }
 
@@ -88,20 +88,20 @@ export default class MultiTableVector<T, D extends IValueTypeDesc> extends AVect
    */
   data(range?: RangeLike): Promise<T[]> {
     return this.table.data(range).then((d) => {
-      return d.map(this.f, this.this_f);
+      return d.map(this.f, this.thisArgument);
     });
   }
 
   sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
     return this.data().then((d) => {
-      let indices = argSort(d, compareFn, thisArg);
+      const indices = argSort(d, compareFn, thisArg);
       return this.view(rlist(indices));
     });
   }
 
   filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
     return this.data().then((d) => {
-      let indices = argFilter(d, callbackfn, thisArg);
+      const indices = argFilter(d, callbackfn, thisArg);
       return this.view(rlist(indices));
     });
   }
