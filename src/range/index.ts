@@ -27,8 +27,8 @@ export function is(obj: any) {
   return obj instanceof Range;
 }
 
-export function range(from: number, to?: number, step?: number)
-export function range(...ranges: number[][]);
+export function range(from: number, to?: number, step?: number): Range;
+export function range(...ranges: number[][]): Range;
 export function range() {
   if (arguments.length === 0) {
     return all();
@@ -47,8 +47,8 @@ export function range() {
   }
   return r;
 }
-export function join(ranges: Range[]);
-export function join(...ranges: Range[]);
+export function join(ranges: Range[]): Range;
+export function join(...ranges: Range[]): Range;
 export function join() {
   if (arguments.length === 0) {
     return all();
@@ -57,10 +57,10 @@ export function join() {
   if (!Array.isArray(ranges)) { //array mode
     ranges = Array.from(arguments);
   }
-  return new Range(ranges.map((r) => r.dim(0)));
+  return new Range(ranges.map((r: Range) => r.dim(0)));
 }
 
-export function list(...dims_indices_indexarray: (Range1D | number[] | number)[]): Range;
+export function list(...dimsOrIndicesOrIndexArray: (Range1D | number[] | number)[]): Range;
 export function list(dims: Range1D[]): Range;
 export function list(): Range {
   if (arguments.length === 0) {
@@ -116,6 +116,6 @@ export function parse(arange: RangeLike = null) {
   return parseRange(Array.from(arguments).map(String).join(','));
 }
 
-export function cell(...dim_indices: number[]) {
-  return new Range(dim_indices.map(Range1D.single));
+export function cell(...dimIndices: number[]) {
+  return new Range(dimIndices.map(Range1D.single));
 }

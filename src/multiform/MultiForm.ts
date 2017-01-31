@@ -9,9 +9,13 @@
 
 import {mixin} from '../index';
 import {IDataType, assignData} from '../datatype';
-import {IVisMetaData, IVisInstance, IVisPluginDesc, AVisInstance, assignVis, list as listVisses} from '../vis';
+import {
+  IVisMetaData, IVisInstance, IVisPluginDesc, AVisInstance, assignVis, list as listVisses,
+  ITransform
+} from '../vis';
 import {IMultiForm, IMultiFormOptions, addSelectVisChooser, addIconVisChooser} from './IMultiForm';
 import {createNode, ProxyMetaData, clearNode, selectVis} from './internal';
+import {Range} from '../range';
 
 /**
  * a simple multi form class using a select to switch
@@ -21,7 +25,7 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
   /**
    * list of all possibles vis techniques
    */
-  visses: IVisPluginDesc[];
+  readonly visses: IVisPluginDesc[];
 
   private actVis: IVisInstance;
   private actVisPromise: Promise<any>;
@@ -29,7 +33,7 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
   private actDesc: IVisPluginDesc;
   private content: HTMLElement;
 
-  private metaData_: IVisMetaData = new ProxyMetaData(() => this.actDesc);
+  private readonly _metaData: IVisMetaData = new ProxyMetaData(() => this.actDesc);
 
   constructor(public readonly data: IDataType, parent: HTMLElement, private options: IMultiFormOptions = {}) {
     super();
@@ -53,7 +57,7 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
    * @return {IVisMetaData}
    */
   get asMetaData() {
-    return this.metaData_;
+    return this._metaData;
   }
 
 
@@ -96,9 +100,9 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
     return Promise.resolve(that);
   }
 
-  locate(...args) {
+  locate(...args: Range[]): Promise<any> {
     const p = this.actVisPromise || Promise.resolve(null);
-    return p.then((...aa) => {
+    return p.then((...aa: IVisInstance[]) => {
       const vis = aa.length > 0 ? aa[0] : undefined;
       if (vis && typeof(vis.locate) === 'function') {
         return vis.locate.apply(vis, args);
@@ -108,9 +112,9 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
     });
   }
 
-  locateById(...args) {
+  locateById(...args: Range[]): Promise<any> {
     const p = this.actVisPromise || Promise.resolve(null);
-    return p.then((...aa) => {
+    return p.then((...aa: IVisInstance[]) => {
       const vis = aa.length > 0 ? aa[0] : undefined;
       if (vis && typeof(vis.locateById) === 'function') {
         return vis.locateById.apply(vis, args);
@@ -125,8 +129,8 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
       if (arguments.length === 0) {
         return this.actVis.transform();
       } else {
-        const t = (event, new_, old) => {
-          this.fire('transform', new_, old);
+        const t = (event: any, newValue: ITransform, old: ITransform) => {
+          this.fire('transform', newValue, old);
         };
         this.actVis.on('transform', t);
         const r = this.actVis.transform(scale, rotate);
@@ -137,7 +141,6 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
     if (this.actVisPromise && arguments.length > 0) {
       //2nd try
       this.actVisPromise.then((v) => this.transform(scale, rotate));
-      return;
     }
     return {
       scale: <[number, number]>[1, 1],
