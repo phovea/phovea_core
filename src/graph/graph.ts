@@ -41,11 +41,11 @@ export class AttributeContainer extends EventHandler implements IPersistable {
     return this.attrMap.has(attr);
   }
 
-  getAttr(attr: string, default_: any = null) {
+  getAttr(attr: string, defaultValue: any = null) {
     if (this.attrMap.has(attr)) {
       return this.attrMap.get(attr);
     }
-    return default_;
+    return defaultValue;
   }
 
   get attrs() {

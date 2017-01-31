@@ -15,7 +15,7 @@ export default class RemoteStoreGraph extends GraphBase {
     if (s instanceof GraphEdge) {
       this.updateEdge(<GraphEdge>s);
     }
-  };
+  }
 
   private waitForSynced = 0;
 
@@ -24,7 +24,7 @@ export default class RemoteStoreGraph extends GraphBase {
     super(desc, nodes, edges);
   }
 
-  static load(desc, factory: IGraphFactory) {
+  static load(desc: IGraphDataDescription, factory: IGraphFactory) {
     const r = new RemoteStoreGraph(desc);
     return r.load(factory);
   }
@@ -38,16 +38,16 @@ export default class RemoteStoreGraph extends GraphBase {
   }
 
   private loadImpl(nodes: any[], edges: any[], factory: IGraphFactory) {
-    const lookup = {},
-      lookupFun = (id) => lookup[id];
+    const lookup = new Map<number, GraphNode>(),
+      lookupFun = lookup.get.bind(lookup);
     nodes.forEach((n) => {
-      let nn = factory.makeNode(n);
-      lookup[nn.id] = nn;
+      const nn = factory.makeNode(n);
+      lookup.set(nn.id, nn);
       nn.on('setAttr', this.updateHandler);
       super.addNode(nn);
     });
     edges.forEach((n) => {
-      let nn = factory.makeEdge(n, lookupFun);
+      const nn = factory.makeEdge(n, lookupFun);
       nn.on('setAttr', this.updateHandler);
       super.addEdge(nn);
     });
@@ -65,7 +65,7 @@ export default class RemoteStoreGraph extends GraphBase {
     this.fire('sync_start_node,sync_start', ++this.waitForSynced, 'add_node', n);
     return sendAPI(`/dataset/graph/${this.desc.id}/node`, {
       desc: JSON.stringify(n.persist())
-    }, 'POST').then((r) => {
+    }, 'POST').then(() => {
       this.fire('sync_node,sync', --this.waitForSynced, n);
       return this;
     });
@@ -76,7 +76,7 @@ export default class RemoteStoreGraph extends GraphBase {
     this.fire('sync_start_node,sync_start', ++this.waitForSynced, 'update_node', n);
     return sendAPI(`/dataset/graph/${this.desc.id}/node/${n.id}`, {
       desc: JSON.stringify(n.persist())
-    }, 'PUT').then((r) => {
+    }, 'PUT').then(() => {
       this.fire('sync_node,sync', --this.waitForSynced, n);
       return this;
     });
@@ -88,26 +88,26 @@ export default class RemoteStoreGraph extends GraphBase {
     }
     n.off('setAttr', this.updateHandler);
     this.fire('sync_start_node,sync_start', ++this.waitForSynced, 'remove_node', n);
-    return sendAPI(`/dataset/graph/${this.desc.id}/node/${n.id}`, {}, 'DELETE').then((r) => {
+    return sendAPI(`/dataset/graph/${this.desc.id}/node/${n.id}`, {}, 'DELETE').then(() => {
       this.fire('sync_node,sync', --this.waitForSynced, n);
       return this;
     });
   }
 
-  addEdge(e_or_s: GraphEdge | GraphNode, type?: string, t?: GraphNode): this|Promise<this> {
-    if (e_or_s instanceof GraphEdge) {
-      super.addEdge(e_or_s);
-      let e = <GraphEdge>e_or_s;
+  addEdge(edgeOrSource: GraphEdge | GraphNode, type?: string, t?: GraphNode): this|Promise<this> {
+    if (edgeOrSource instanceof GraphEdge) {
+      super.addEdge(edgeOrSource);
+      const e = <GraphEdge>edgeOrSource;
       e.on('setAttr', this.updateHandler);
       this.fire('sync_start_edge,sync_start', ++this.waitForSynced, 'add_edge', e);
       return sendAPI(`/dataset/graph/${this.desc.id}/edge`, {
         desc: JSON.stringify(e.persist())
-      }, 'POST').then((r) => {
+      }, 'POST').then(() => {
         this.fire('sync_edge,sync', --this.waitForSynced, e);
         return this;
       });
     }
-    return super.addEdge(<GraphNode>e_or_s, type, t);
+    return super.addEdge(<GraphNode>edgeOrSource, type, t);
   }
 
   removeEdge(e: GraphEdge): this|Promise<this> {
@@ -116,7 +116,7 @@ export default class RemoteStoreGraph extends GraphBase {
     }
     e.off('setAttr', this.updateHandler);
     this.fire('sync_start_edge,sync_start', ++this.waitForSynced, 'remove_edge', e);
-    return sendAPI(`/dataset/graph/${this.desc.id}/edge/${e.id}`, {}, 'DELETE').then((r) => {
+    return sendAPI(`/dataset/graph/${this.desc.id}/edge/${e.id}`, {}, 'DELETE').then(() => {
       this.fire('sync_edge,sync', --this.waitForSynced, e);
       return this;
     });
@@ -127,7 +127,7 @@ export default class RemoteStoreGraph extends GraphBase {
     this.fire('sync_start_edge,sync_start', ++this.waitForSynced, 'update_edge', e);
     return sendAPI(`/dataset/graph/${this.desc.id}/edge/${e.id}`, {
       desc: JSON.stringify(e.persist())
-    }, 'PUT').then((r) => {
+    }, 'PUT').then(() => {
       this.fire('sync_edge,sync', --this.waitForSynced, e);
       return this;
     });
@@ -142,7 +142,7 @@ export default class RemoteStoreGraph extends GraphBase {
     super.clear();
     this.fire('sync_start', ++this.waitForSynced, 'clear');
     //clear all nodes
-    return sendAPI(`/dataset/graph/${this.desc.id}/node`, {}, 'DELETE').then((r) => {
+    return sendAPI(`/dataset/graph/${this.desc.id}/node`, {}, 'DELETE').then(() => {
       this.fire('sync');
       return this;
     });
