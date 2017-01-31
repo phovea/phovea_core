@@ -23,7 +23,7 @@ describe('methods', () => {
 });
 
 describe('data types', () => {
-  function checkStore(data) {
+  function checkStore(data: any) {
     it(typeof data, () => {
       const key = 'key';
       store(key, data);
