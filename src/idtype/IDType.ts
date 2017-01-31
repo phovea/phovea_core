@@ -43,7 +43,7 @@ export default class IDType extends EventHandler implements IIDType {
   }
 
   persist() {
-    let s = {};
+    const s: any = {};
     this.sel.forEach((v, k) => s[k] = v.toString());
     return {
       sel: s,
@@ -85,10 +85,10 @@ export default class IDType extends EventHandler implements IIDType {
    * select the given range as
    * @param range
    */
-  select(range: RangeLike);
-  select(range: RangeLike, op: SelectOperation);
-  select(type: string, range: RangeLike);
-  select(type: string, range: RangeLike, op: SelectOperation);
+  select(range: RangeLike): Range;
+  select(range: RangeLike, op: SelectOperation): Range;
+  select(type: string, range: RangeLike): Range;
+  select(type: string, range: RangeLike, op: SelectOperation): Range;
   select() {
     const a = Array.from(arguments);
     const type = (typeof a[0] === 'string') ? a.shift() : defaultSelectionType,
@@ -99,26 +99,26 @@ export default class IDType extends EventHandler implements IIDType {
 
   private selectImpl(range: Range, op = SelectOperation.SET, type: string = defaultSelectionType) {
     const b = this.selections(type);
-    let new_: Range = none();
+    let newValue: Range = none();
     switch (op) {
       case SelectOperation.SET:
-        new_ = range;
+        newValue = range;
         break;
       case SelectOperation.ADD:
-        new_ = b.union(range);
+        newValue = b.union(range);
         break;
       case SelectOperation.REMOVE:
-        new_ = b.without(range);
+        newValue = b.without(range);
         break;
     }
-    if (b.eq(new_)) {
+    if (b.eq(newValue)) {
       return b;
     }
-    this.sel.set(type, new_);
+    this.sel.set(type, newValue);
     const added = op !== SelectOperation.REMOVE ? range : none();
     const removed = (op === SelectOperation.ADD ? none() : (op === SelectOperation.SET ? b : range));
-    this.fire(IDType.EVENT_SELECT, type, new_, added, removed, b);
-    this.fire(`${IDType.EVENT_SELECT}-${type}`, new_, added, removed, b);
+    this.fire(IDType.EVENT_SELECT, type, newValue, added, removed, b);
+    this.fire(`${IDType.EVENT_SELECT}-${type}`, newValue, added, removed, b);
     return b;
   }
 
@@ -200,10 +200,10 @@ export default class IDType extends EventHandler implements IIDType {
    */
   unmap(ids: RangeLike): Promise<string[]> {
     const r = parse(ids);
-    let toResolve: number[] = [];
+    const toResolve: number[] = [];
     r.dim(0).forEach((name) => !(this.id2nameCache.has(name)) ? toResolve.push(name) : null);
     if (toResolve.length === 0) {
-      let result = [];
+      const result: string[] = [];
       r.dim(0).forEach((name) => result.push(this.id2nameCache.get(name)));
       return Promise.resolve(result);
     }
@@ -212,7 +212,7 @@ export default class IDType extends EventHandler implements IIDType {
         this.id2nameCache.set(id, result[i]);
         this.name2idCache.set(result[i], id);
       });
-      let out = [];
+      const out: string[] = [];
       r.dim(0).forEach((name) => out.push(this.id2nameCache.get(name)));
       return out;
     });

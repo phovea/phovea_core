@@ -64,8 +64,8 @@ export default class ObjectManager<T extends IHasUniqueId> extends IDType {
     return this.instances.filter((item, i) => this.pool.isCheckedOut(i));
   }
 
-  remove(id: number);
-  remove(item: T);
+  remove(id: number): T;
+  remove(item: T): T;
   remove(item: any): T {
     let old = null;
     if (typeof item.id === 'number') {

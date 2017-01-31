@@ -15,7 +15,7 @@ let filledUp = false;
 
 export const EVENT_REGISTER_IDTYPE = 'register.idtype';
 
-function fillUpData(entries) {
+function fillUpData(entries: IIDType[]) {
   entries.forEach(function (row) {
     let entry = cache.get(row.id);
     let new_ = false;
@@ -92,7 +92,7 @@ export function register(id: string, idtype: IDType|ProductIDType): IDType|Produ
 }
 
 export function persist() {
-  let r = {};
+  let r: any = {};
 
   cache.forEach((v, id) => {
     r[id] = v.persist();
