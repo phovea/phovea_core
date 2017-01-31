@@ -158,7 +158,7 @@ export default class LocalStorageGraph extends AGraph implements IGraph {
   clear() {
     const nnodes = this.nnodes, nedges = this.nedges;
     if (nnodes === 0 && nedges === 0) {
-      return this;
+      return Promise.resolve(this);
     }
     this.nodes.forEach((n) => n.off('setAttr', this.updateHandler));
     this.edges.forEach((n) => n.off('setAttr', this.updateHandler));
@@ -172,7 +172,7 @@ export default class LocalStorageGraph extends AGraph implements IGraph {
       this.storage.removeItem(`${uid}.edge.${id}`);
     });
     this.storage.removeItem(`${uid}.edges`);
-    return this;
+    return Promise.resolve(this);
   }
 
   persist() {

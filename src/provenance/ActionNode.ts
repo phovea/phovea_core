@@ -20,7 +20,7 @@ export class ActionMetaData {
 
   }
 
-  static restore(p) {
+  static restore(p: any) {
     return new ActionMetaData(p.category, p.operation, p.name, p.timestamp, p.user);
   }
 
@@ -71,11 +71,11 @@ export interface IAction {
  */
 export function action(meta: ActionMetaData, id: string, f: ICmdFunction, inputs: IObjectRef<any>[] = [], parameter: any = {}): IAction {
   return {
-    meta: meta,
-    id: id,
-    f: f,
-    inputs: inputs,
-    parameter: parameter
+     meta,
+    id,
+    f,
+    inputs,
+    parameter
   };
 }
 
@@ -95,10 +95,10 @@ function byIndex(a: AttributeContainer, b: AttributeContainer) {
 export default class ActionNode extends GraphNode {
   private inverter: IInverseActionCreator;
 
-  constructor(meta: ActionMetaData, f_id: string, private f: ICmdFunction, parameter: any = {}) {
+  constructor(meta: ActionMetaData, functionId: string, private f: ICmdFunction, parameter: any = {}) {
     super('action');
     super.setAttr('meta', meta);
-    super.setAttr('f_id', f_id);
+    super.setAttr('f_id', functionId);
     super.setAttr('parameter', parameter);
   }
 
@@ -136,7 +136,7 @@ export default class ActionNode extends GraphNode {
     }
   }
 
-  static restore(r, factory: ICmdFunctionFactory) {
+  static restore(r: any, factory: ICmdFunctionFactory) {
     const a = new ActionNode(ActionMetaData.restore(r.attrs.meta), r.attrs.f_id, factory(r.attrs.f_id), r.attrs.parameter);
     return a.restore(r);
   }

@@ -5,7 +5,6 @@
  * Created by Samuel Gratzl on 22.10.2014.
  */
 import {IPersistable} from '../index';
-import {IDataDescription} from '../datatype';
 import GraphBase, {defaultGraphFactory, IGraphDataDescription} from './GraphBase';
 import {GraphEdge, GraphNode} from './graph';
 

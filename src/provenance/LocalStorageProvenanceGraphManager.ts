@@ -27,7 +27,7 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
   }
 
   list() {
-    const lists = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
+    const lists : string[] = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
     const l = lists.map((id) => JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graph.' + id)));
     return Promise.resolve(l);
   }
@@ -67,13 +67,13 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
   }
 
   private createDesc() {
-    const lists = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
+    const lists: string[] = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
     const id = this.options.prefix + (lists.length > 0 ? String(1 + Math.max(...lists.map((d) => parseInt(d.slice(this.options.prefix.length), 10)))) : '0');
     const desc: IProvenanceGraphDataDescription = {
       type: 'provenance_graph',
       name: 'Local Workspace#' + id,
       fqname: this.options.prefix + '.Provenance Graph #' + id,
-      id: id,
+      id,
       local: true,
       size: [0, 0],
       attrs: {

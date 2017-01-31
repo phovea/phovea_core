@@ -103,10 +103,10 @@ export default class GraphBase extends AGraph implements IGraph {
     return this;
   }
 
-  clear(): this|Promise<this> {
+  clear(): Promise<this> {
     this.nodes.splice(0, this.nodes.length);
     this.edges.splice(0, this.edges.length);
-    return this;
+    return Promise.resolve(this);
   }
 
   persist() {

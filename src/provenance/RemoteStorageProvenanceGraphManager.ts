@@ -30,8 +30,7 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
   }
 
   getGraph(desc: IProvenanceGraphDataDescription): Promise<GraphBase> {
-    return getData(desc.id)
-      .then((graph: GraphProxy) => graph.impl(provenanceGraphFactory()));
+    return getData(desc.id).then((graph: GraphProxy) => <any>graph.impl(provenanceGraphFactory()));
   }
 
   get(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {

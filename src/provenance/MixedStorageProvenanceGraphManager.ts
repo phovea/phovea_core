@@ -1,12 +1,10 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import {IDataDescription} from '../datatype';
 import ProvenanceGraph, {IProvenanceGraphManager, IProvenanceGraphDataDescription} from './ProvenanceGraph';
 import LocalStorageProvenanceGraphManager from './LocalStorageProvenanceGraphManager';
 import RemoteStorageProvenanceGraphManager from './RemoteStorageProvenanceGraphManager';
 import GraphBase from '../graph/GraphBase';
-import {IGraphDataDescription} from "../graph/GraphBase";
 
 export default class MixedStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private remote: RemoteStorageProvenanceGraphManager;
