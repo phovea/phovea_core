@@ -205,24 +205,22 @@ export abstract class AGraph extends SelectAble {
     this.select(DIM_NODES, [this.nodes.indexOf(node)], op);
   }
 
-  selectedNodes(): Promise<GraphNode[]> {
-    return this.selections().then((r) => {
-      const nodes: GraphNode[] = [];
-      r.dim(DIM_NODES).forEach((index) => nodes.push(this.nodes[index]));
-      return nodes;
-    });
+  async selectedNodes(): Promise<GraphNode[]> {
+    const r = await this.selections();
+    const nodes: GraphNode[] = [];
+    r.dim(DIM_NODES).forEach((index) => nodes.push(this.nodes[index]));
+    return nodes;
   }
 
   selectEdge(edge: GraphEdge, op = SelectOperation.SET) {
     this.select(DIM_EDGES, [this.edges.indexOf(edge)], op);
   }
 
-  selectedEdges(): Promise<GraphEdge[]> {
-    return this.selections().then((r) => {
-      const edges: GraphEdge[] = [];
-      r.dim(DIM_EDGES).forEach((index) => edges.push(this.edges[index]));
-      return edges;
-    });
+  async selectedEdges(): Promise<GraphEdge[]> {
+    const r = await this.selections();
+    const edges: GraphEdge[] = [];
+    r.dim(DIM_EDGES).forEach((index) => edges.push(this.edges[index]));
+    return edges;
   }
 
   get idtypes() {

@@ -76,7 +76,7 @@ export default class StratificationGroup extends SelectAble implements IStratifi
   }
 
   async names(range: RangeLike = all()) {
-    const g = this.rangeGroup();
+    const g = await this.rangeGroup();
     const r = list(g).preMultiply(parse(range));
     return this.root.names(r);
   }

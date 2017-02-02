@@ -48,34 +48,31 @@ export abstract class ASelectAble extends EventHandler implements ISelectAble {
 
   private numSelectListeners = 0;
   private selectionListeners: ISingleSelectionListener[] = [];
-  private singleSelectionListener = (event: any, type: string, act: Range, added: Range, removed: Range) => {
-    this.ids().then((ids: Range) => {
-      //filter to the right ids and convert to indices format
-      //given all ids convert the selected ids to the indices in the data type
-      act = ids.indexOf(act);
-      added = ids.indexOf(added);
-      removed = ids.indexOf(removed);
-      if (act.isNone && added.isNone && removed.isNone) {
-        return;
-      }
-      //ensure the right number of dimensions
-      fillWithNone(act, ids.ndim);
-      fillWithNone(added, ids.ndim);
-      fillWithNone(removed, ids.ndim);
+  private singleSelectionListener = async (event: any, type: string, act: Range, added: Range, removed: Range) => {
+    const ids = await this.ids();
+    //filter to the right ids and convert to indices format
+    //given all ids convert the selected ids to the indices in the data type
+    act = ids.indexOf(act);
+    added = ids.indexOf(added);
+    removed = ids.indexOf(removed);
+    if (act.isNone && added.isNone && removed.isNone) {
+      return;
+    }
+    //ensure the right number of dimensions
+    fillWithNone(act, ids.ndim);
+    fillWithNone(added, ids.ndim);
+    fillWithNone(removed, ids.ndim);
 
-      this.fire(ASelectAble.EVENT_SELECT, type, act, added, removed);
-      this.fire(`${ASelectAble.EVENT_SELECT}-${type}`, act, added, removed);
-    });
+    this.fire(ASelectAble.EVENT_SELECT, type, act, added, removed);
+    this.fire(`${ASelectAble.EVENT_SELECT}-${type}`, act, added, removed);
   }
   private selectionCache: {act: Range, added: Range, removed: Range}[] = [];
   private accumulateEvents = -1;
 
   abstract ids(range?: RangeLike): Promise<Range>;
 
-  fromIdRange(idRange: RangeLike = all()) {
-    return this.ids().then((ids) => {
-      return ids.indexOf(parse(idRange));
-    });
+  async fromIdRange(idRange: RangeLike = all()) {
+    return (await this.ids()).indexOf(parse(idRange));
   }
 
   get idtypes(): IDType[] {
@@ -145,11 +142,10 @@ export abstract class ASelectAble extends EventHandler implements ISelectAble {
     return super.off(events, handler);
   }
 
-  selections(type = defaultSelectionType) {
-    return this.ids().then((ids: Range) => {
-      const r = join(this.idtypes.map((idtype) => idtype.selections(type)));
-      return ids.indexRangeOf(r);
-    });
+  async selections(type = defaultSelectionType) {
+    const ids = await this.ids();
+    const r = join(this.idtypes.map((idtype) => idtype.selections(type)));
+    return ids.indexRangeOf(r);
   }
 
   select(range: RangeLike): Promise<Range>;
@@ -169,28 +165,28 @@ export abstract class ASelectAble extends EventHandler implements ISelectAble {
     return this.selectImpl(range, op, type, dim);
   }
 
-  private selectImpl(range: Range, op = SelectOperation.SET, type: string = defaultSelectionType, dim = -1): Promise<Range> {
-    return this.ids().then((ids: Range) => {
-      const types = this.idtypes;
-      if (dim === -1) {
-        range = ids.preMultiply(range);
-        this.accumulateEvents = 0;
-        const r = join(range.split().map((r, i) => types[i].select(type, r, op)));
-        if (this.accumulateEvents > 0) { //one event has not been fires, so do it manually
-          this.fillAndSend(type, -1);
-        }
-        while (r.ndim < types.length) {
-          r.dim(r.ndim); //create intermediate ones
-        }
-        return ids.indexRangeOf(r);
-      } else {
-        //just a single dimension
-        ids = ids.split()[dim];
-        range = ids.preMultiply(range);
-        types[dim].select(type, range, op);
-        return ids.indexRangeOf(range);
+  private async selectImpl(range: Range, op = SelectOperation.SET, type: string = defaultSelectionType, dim = -1): Promise<Range> {
+    const types = this.idtypes;
+    let ids = await this.ids();
+
+    if (dim === -1) {
+      range = ids.preMultiply(range);
+      this.accumulateEvents = 0;
+      const r = join(range.split().map((r, i) => types[i].select(type, r, op)));
+      if (this.accumulateEvents > 0) { //one event has not been fires, so do it manually
+        this.fillAndSend(type, -1);
       }
-    });
+      while (r.ndim < types.length) {
+        r.dim(r.ndim); //create intermediate ones
+      }
+      return ids.indexRangeOf(r);
+    } else {
+      //just a single dimension
+      ids = ids.split()[dim];
+      range = ids.preMultiply(range);
+      types[dim].select(type, range, op);
+      return ids.indexRangeOf(range);
+    }
   }
 
   /**

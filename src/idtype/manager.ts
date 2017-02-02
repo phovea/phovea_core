@@ -18,7 +18,7 @@ export const EVENT_REGISTER_IDTYPE = 'register.idtype';
 function fillUpData(entries: IIDType[]) {
   entries.forEach(function (row) {
     let entry = cache.get(row.id);
-    let new_ = false;
+    let newOne = false;
     if (entry) {
       if (entry instanceof IDType) {
         (<any>entry).name = row.name;
@@ -26,10 +26,10 @@ function fillUpData(entries: IIDType[]) {
       }
     } else {
       entry = new IDType(row.id, row.name, row.names);
-      new_ = true;
+      newOne = true;
     }
     cache.set(row.id, entry);
-    if (new_) {
+    if (newOne) {
       global_fire(EVENT_REGISTER_IDTYPE, entry);
     }
   });
@@ -71,15 +71,14 @@ export function list(): IIDType[] {
  * see list but with also the server side available ones
  * @returns {any}
  */
-export function listAll(): Promise<IIDType[]> {
+export async function listAll(): Promise<IIDType[]> {
   if (filledUp) {
     return Promise.resolve(list());
   }
   filledUp = true;
-  return getAPIJSON('/idtype', {}, []).then((c) => {
-    fillUpData(c);
-    return list();
-  });
+  const c: IIDType[] = <any>getAPIJSON('/idtype', {}, []);
+  fillUpData(c);
+  return list();
 }
 
 export function register(id: string, idtype: IDType|ProductIDType): IDType|ProductIDType {

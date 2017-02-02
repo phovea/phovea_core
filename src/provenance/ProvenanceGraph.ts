@@ -83,31 +83,27 @@ function compositeCompressor(cs: IActionCompressor[]) {
     return path;
   };
 }
-function createCompressor(path: ActionNode[]) {
+async function createCompressor(path: ActionNode[]) {
   const toload = listPlugins('actionCompressor').filter((plugin: any) => {
     return path.some((action) => action.f_id.match(plugin.matches) != null);
   });
-  return loadPlugin(toload).then((loaded) => {
-    return compositeCompressor(loaded.map((l) => <IActionCompressor>l.factory));
-  });
+  return compositeCompressor((await loadPlugin(toload)).map((l) => <IActionCompressor>l.factory));
 }
 /**
  * returns a compressed version of the paths where just the last selection operation remains
  * @param path
  */
-export function compress(path: ActionNode[]) {
+export async function compress(path: ActionNode[]) {
   //return Promise.resolve(path);
   //TODO find a strategy how to compress but also invert skipped actions
-  return createCompressor(path).then((compressor) => {
-    //return path;
-    let before: number;
-    do {
-      before = path.length;
-      path = compressor(path);
-    } while (before > path.length);
-    return path;
-  });
-
+  const compressor = await createCompressor(path);
+  //return path;
+  let before: number;
+  do {
+    before = path.length;
+    path = compressor(path);
+  } while (before > path.length);
+  return path;
 }
 
 /**
@@ -676,7 +672,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
    * execute a bunch of already executed actions
    * @param actions
    */
-  private runChain(actions: ActionNode[], withinMilliseconds = -1) {
+  private async runChain(actions: ActionNode[], withinMilliseconds = -1) {
     if (actions.length === 0) {
       if (withinMilliseconds > 0) {
         return resolveIn(withinMilliseconds).then(() => []);
@@ -686,34 +682,32 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     //actions = compress(actions, null);
     const last = actions[actions.length - 1];
 
-    return compress(actions).then((torun) => {
-      let r = Promise.resolve([]);
+    const torun = await compress(actions);
 
-      let remaining = withinMilliseconds;
 
-      function guessTime(index: number) {
-        const left = torun.length - index;
-        return () => remaining < 0 ? -1 : remaining / left; //uniformly distribute
-      }
+    let remaining = withinMilliseconds;
 
-      function updateTime(consumed: number) {
-        remaining -= consumed;
-      }
+    function guessTime(index: number) {
+      const left = torun.length - index;
+      return () => remaining < 0 ? -1 : remaining / left; //uniformly distribute
+    }
 
-      torun.forEach((action, i) => {
-        r = r.then((results) => this.run(action, null, withinMilliseconds < 0 ? -1 : guessTime(i)).then((result: any) => {
-          results.push(result);
-          updateTime(result.consumed);
-          return results;
-        }));
-      });
-      return r.then((results) => {
-        if (this.act !== last.resultsIn) {
-          this.switchToImpl(last, last.resultsIn);
-        }
-        return results;
-      });
-    });
+    function updateTime(consumed: number) {
+      remaining -= consumed;
+    }
+
+    const results =[];
+    for (let i = 0; i < torun.length; ++i) {
+      const action = torun[i];
+      const result = await this.run(action, null, withinMilliseconds < 0 ? -1 : guessTime(i));
+      results.push(result);
+      updateTime(result.consumed);
+    }
+
+    if (this.act !== last.resultsIn) {
+      this.switchToImpl(last, last.resultsIn);
+    }
+    return results;
   }
 
   undo() {

@@ -179,18 +179,17 @@ export default class IDType extends EventHandler implements IIDType {
    * @param names the entity names to resolve
    * @returns a promise of system identifiers that match the input names
    */
-  map(names: string[]): Promise<number[]> {
+  async map(names: string[]): Promise<number[]> {
     const toResolve = names.filter((name) => !this.name2idCache.has(name));
     if (toResolve.length === 0) {
       return Promise.resolve(names.map((name) => this.name2idCache.get(name)));
     }
-    return getAPIJSON(`/idtype/${this.id}/map`, {ids: toResolve}).then((ids: number[]) => {
-      toResolve.forEach((name, i) => {
-        this.name2idCache.set(name, ids[i]);
-        this.id2nameCache.set(ids[i], name);
-      });
-      return names.map((name) => this.name2idCache.get(name));
+    const ids: number[] = await getAPIJSON(`/idtype/${this.id}/map`, {ids: toResolve});
+    toResolve.forEach((name, i) => {
+      this.name2idCache.set(name, ids[i]);
+      this.id2nameCache.set(ids[i], name);
     });
+    return names.map((name) => this.name2idCache.get(name));
   }
 
   /**
@@ -198,7 +197,7 @@ export default class IDType extends EventHandler implements IIDType {
    * @param ids the entity names to resolve
    * @returns a promise of system identifiers that match the input names
    */
-  unmap(ids: RangeLike): Promise<string[]> {
+  async unmap(ids: RangeLike): Promise<string[]> {
     const r = parse(ids);
     const toResolve: number[] = [];
     r.dim(0).forEach((name) => !(this.id2nameCache.has(name)) ? toResolve.push(name) : null);
@@ -207,14 +206,13 @@ export default class IDType extends EventHandler implements IIDType {
       r.dim(0).forEach((name) => result.push(this.id2nameCache.get(name)));
       return Promise.resolve(result);
     }
-    return getAPIJSON(`/idtype/${this.id}/unmap`, {ids: rlist(toResolve).toString()}).then((result) => {
-      toResolve.forEach((id, i) => {
-        this.id2nameCache.set(id, result[i]);
-        this.name2idCache.set(result[i], id);
-      });
-      const out: string[] = [];
-      r.dim(0).forEach((name) => out.push(this.id2nameCache.get(name)));
-      return out;
+    const result: string[] = await getAPIJSON(`/idtype/${this.id}/unmap`, {ids: rlist(toResolve).toString()});
+    toResolve.forEach((id, i) => {
+      this.id2nameCache.set(id, result[i]);
+      this.name2idCache.set(result[i], id);
     });
+    const out: string[] = [];
+    r.dim(0).forEach((name) => out.push(this.id2nameCache.get(name)));
+    return out;
   }
 }

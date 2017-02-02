@@ -41,8 +41,8 @@ export abstract class ATable extends SelectAble {
 
   abstract queryView(name: string, args: IQueryArgs): ITable;
 
-  idView(idRange: RangeLike = all()): Promise<ITable> {
-    return this.ids().then((ids) => this.view(ids.indexOf(parse(idRange))));
+  async idView(idRange: RangeLike = all()): Promise<ITable> {
+    return this.view((await this.ids()).indexOf(parse(idRange)));
   }
 
   reduce<T, D extends IValueTypeDesc>(f: (row: IValueType[]) => T, thisArgument?: any, valuetype?: D, idtype?: IDType): IVector<T,D> {

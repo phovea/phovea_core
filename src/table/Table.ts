@@ -51,8 +51,8 @@ export default class Table extends ATable implements ITable {
    * @param j
    * @returns {*}
    */
-  at(i: number, j: number) {
-    return this.colData(this.col(j).column, rlist(i)).then((arr) => arr[0]);
+  async at(i: number, j: number) {
+    return (await this.colData(this.col(j).column, rlist(i)))[0];
   }
 
   queryView(name: string, args: any) {

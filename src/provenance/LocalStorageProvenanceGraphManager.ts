@@ -37,24 +37,22 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
     return Promise.resolve(LocalStorageGraph.load(desc, provenanceGraphFactory(), this.options.storage));
   }
 
-  get(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
-    return this.getGraph(desc).then((impl) => new ProvenanceGraph(desc, impl));
+  async get(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
+    return new ProvenanceGraph(desc, await this.getGraph(desc));
   }
 
-  clone(graph: GraphBase): Promise<ProvenanceGraph> {
+  async clone(graph: GraphBase): Promise<ProvenanceGraph> {
     const desc = this.createDesc();
-    return this.getGraph(desc).then((newGraph) => {
-      newGraph.restoreDump(graph.persist(), provenanceGraphFactory());
-      return new ProvenanceGraph(desc, newGraph);
-    });
+    const newGraph = await this.getGraph(desc);
+    newGraph.restoreDump(graph.persist(), provenanceGraphFactory());
+    return new ProvenanceGraph(desc, newGraph);
   }
 
-  import(json: any): Promise<ProvenanceGraph> {
+  async import(json: any): Promise<ProvenanceGraph> {
     const desc = this.createDesc();
-    return this.getGraph(desc).then((newGraph) => {
-      newGraph.restoreDump(json, provenanceGraphFactory());
-      return new ProvenanceGraph(desc, newGraph);
-    });
+    const newGraph = await this.getGraph(desc);
+    newGraph.restoreDump(json, provenanceGraphFactory());
+    return new ProvenanceGraph(desc, newGraph);
   }
 
   delete(desc: IProvenanceGraphDataDescription) {

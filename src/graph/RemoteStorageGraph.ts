@@ -29,12 +29,11 @@ export default class RemoteStoreGraph extends GraphBase {
     return r.load(factory);
   }
 
-  private load(factory: IGraphFactory) {
-    return sendAPI(`/dataset/graph/${this.desc.id}/data`).then((r) => {
-      this.loadImpl(r.nodes, r.edges, factory);
-      this.fire('sync_load,sync', --this.waitForSynced);
-      return this;
-    });
+  private async load(factory: IGraphFactory) {
+    const r: any = sendAPI(`/dataset/graph/${this.desc.id}/data`);
+    this.loadImpl(r.nodes, r.edges, factory);
+    this.fire('sync_load,sync', --this.waitForSynced);
+    return this;
   }
 
   private loadImpl(nodes: any[], edges: any[], factory: IGraphFactory) {
@@ -58,59 +57,55 @@ export default class RemoteStoreGraph extends GraphBase {
     return this.waitForSynced;
   }
 
-  addNode(n: GraphNode): this|Promise<this> {
+  async addNode(n: GraphNode): Promise<this> {
     super.addNode(n);
     n.on('setAttr', this.updateHandler);
 
     this.fire('sync_start_node,sync_start', ++this.waitForSynced, 'add_node', n);
-    return sendAPI(`/dataset/graph/${this.desc.id}/node`, {
+    await sendAPI(`/dataset/graph/${this.desc.id}/node`, {
       desc: JSON.stringify(n.persist())
-    }, 'POST').then(() => {
-      this.fire('sync_node,sync', --this.waitForSynced, n);
-      return this;
-    });
+    }, 'POST');
+    this.fire('sync_node,sync', --this.waitForSynced, n);
+    return this;
   }
 
-  updateNode(n: GraphNode): this|Promise<this> {
+  async updateNode(n: GraphNode): Promise<this> {
     super.updateNode(n);
     this.fire('sync_start_node,sync_start', ++this.waitForSynced, 'update_node', n);
-    return sendAPI(`/dataset/graph/${this.desc.id}/node/${n.id}`, {
+    await sendAPI(`/dataset/graph/${this.desc.id}/node/${n.id}`, {
       desc: JSON.stringify(n.persist())
-    }, 'PUT').then(() => {
-      this.fire('sync_node,sync', --this.waitForSynced, n);
-      return this;
-    });
+    }, 'PUT');
+    this.fire('sync_node,sync', --this.waitForSynced, n);
+    return this;
   }
 
-  removeNode(n: GraphNode): this|Promise<this> {
+  async removeNode(n: GraphNode): Promise<this> {
     if (!super.removeNode(n)) {
       return Promise.reject('invalid node');
     }
     n.off('setAttr', this.updateHandler);
     this.fire('sync_start_node,sync_start', ++this.waitForSynced, 'remove_node', n);
-    return sendAPI(`/dataset/graph/${this.desc.id}/node/${n.id}`, {}, 'DELETE').then(() => {
-      this.fire('sync_node,sync', --this.waitForSynced, n);
-      return this;
-    });
+    await sendAPI(`/dataset/graph/${this.desc.id}/node/${n.id}`, {}, 'DELETE');
+    this.fire('sync_node,sync', --this.waitForSynced, n);
+    return this;
   }
 
-  addEdge(edgeOrSource: GraphEdge | GraphNode, type?: string, t?: GraphNode): this|Promise<this> {
+  async addEdge(edgeOrSource: GraphEdge | GraphNode, type?: string, t?: GraphNode): Promise<this> {
     if (edgeOrSource instanceof GraphEdge) {
       super.addEdge(edgeOrSource);
       const e = <GraphEdge>edgeOrSource;
       e.on('setAttr', this.updateHandler);
       this.fire('sync_start_edge,sync_start', ++this.waitForSynced, 'add_edge', e);
-      return sendAPI(`/dataset/graph/${this.desc.id}/edge`, {
+      await sendAPI(`/dataset/graph/${this.desc.id}/edge`, {
         desc: JSON.stringify(e.persist())
-      }, 'POST').then(() => {
-        this.fire('sync_edge,sync', --this.waitForSynced, e);
-        return this;
-      });
+      }, 'POST');
+      this.fire('sync_edge,sync', --this.waitForSynced, e);
+      return this;
     }
     return super.addEdge(<GraphNode>edgeOrSource, type, t);
   }
 
-  removeEdge(e: GraphEdge): this|Promise<this> {
+  async removeEdge(e: GraphEdge): Promise<this> {
     if (!super.removeEdge(e)) {
       return Promise.reject('invalid edge');
     }
@@ -122,7 +117,7 @@ export default class RemoteStoreGraph extends GraphBase {
     });
   }
 
-  updateEdge(e: GraphEdge): this|Promise<this> {
+  async updateEdge(e: GraphEdge): Promise<this> {
     super.updateEdge(e);
     this.fire('sync_start_edge,sync_start', ++this.waitForSynced, 'update_edge', e);
     return sendAPI(`/dataset/graph/${this.desc.id}/edge/${e.id}`, {
