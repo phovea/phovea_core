@@ -42,11 +42,9 @@ export default class StratificationGroup extends SelectAble implements IStratifi
     return this.root.idtype;
   }
 
-  hist(bins?: number, range: RangeLike = all()): Promise<IHistogram> {
+  async hist(bins?: number, range: RangeLike = all()): Promise<IHistogram> {
     //FIXME
-    return this.range().then((r) => {
-      return rangeHist(r);
-    });
+    return rangeHist(await this.range());
   }
 
   vector() {
@@ -61,37 +59,32 @@ export default class StratificationGroup extends SelectAble implements IStratifi
     return this.root.origin();
   }
 
-  range() {
-    return this.rangeGroup().then((g) => {
-      return new CompositeRange1D(g.name, [g]);
-    });
+  async range() {
+    const g = await this.rangeGroup();
+    return new CompositeRange1D(g.name, [g]);
   }
 
-  idRange() {
-    return this.root.idRange().then((r) => {
-      const g = r.groups[this.groupIndex];
-      return new CompositeRange1D(g.name, [g]);
-    });
+  async idRange() {
+    const r = await this.root.idRange();
+    const g = r.groups[this.groupIndex];
+    return new CompositeRange1D(g.name, [g]);
   }
 
-  rangeGroup() {
-    return this.root.range().then((r) => {
-      return r.groups[this.groupIndex];
-    });
+  async rangeGroup() {
+    const r = await this.root.range();
+    return r.groups[this.groupIndex];
   }
 
-  names(range: RangeLike = all()) {
-    return this.rangeGroup().then((g) => {
-      const r = list(g).preMultiply(parse(range));
-      return this.root.names(r);
-    });
+  async names(range: RangeLike = all()) {
+    const g = this.rangeGroup();
+    const r = list(g).preMultiply(parse(range));
+    return this.root.names(r);
   }
 
-  ids(range: RangeLike = all()): Promise<Range> {
-    return this.rangeGroup().then((g) => {
-      const r = list(g).preMultiply(parse(range));
-      return this.root.ids(r);
-    });
+  async ids(range: RangeLike = all()): Promise<Range> {
+    const g = await this.rangeGroup();
+    const r = list(g).preMultiply(parse(range));
+    return this.root.ids(r);
   }
 
   idView(idRange: RangeLike = all()): Promise<any> {

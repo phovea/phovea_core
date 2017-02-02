@@ -81,33 +81,28 @@ export default class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends 
    * returns a promise for getting one cell
    * @param i
    */
-  at(i: number): Promise<T> {
-    return this.m.data(rlist(i)).then((d) => {
-      return this.f.call(this.thisArgument, d[0]);
-    });
+  async at(i: number): Promise<T> {
+    const d = await this.m.data(rlist(i));
+    return this.f.call(this.thisArgument, d[0]);
   }
 
   /**
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range?: RangeLike): Promise<T[]> {
-    return this.m.data(range).then((d) => {
-      return d.map(this.f, this.thisArgument);
-    });
+  async data(range?: RangeLike): Promise<T[]> {
+    return (await this.m.data(range)).map(this.f, this.thisArgument);
   }
 
-  sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
-    return this.data().then((d) => {
-      const indices = argSort(d, compareFn, thisArg);
-      return this.view(rlist(indices));
-    });
+  async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
+    const d = await this.data();
+    const indices = argSort(d, compareFn, thisArg);
+    return this.view(rlist(indices));
   }
 
-  filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
-    return this.data().then((d) => {
-      const indices = argFilter(d, callbackfn, thisArg);
-      return this.view(rlist(indices));
-    });
+  async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
+    const d = await this.data();
+    const indices = argFilter(d, callbackfn, thisArg);
+    return this.view(rlist(indices));
   }
 }

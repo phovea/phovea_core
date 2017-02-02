@@ -50,7 +50,7 @@ function cached(desc: IDataDescription, result: Promise<IDataType>) {
  * @param desc
  * @returns {*}
  */
-function transformEntry(desc: IDataDescription): Promise<IDataType> {
+async function transformEntry(desc: IDataDescription): Promise<IDataType> {
   if (desc === undefined) {
     return null;
   }
@@ -71,7 +71,7 @@ function transformEntry(desc: IDataDescription): Promise<IDataType> {
     return cached(desc, Promise.resolve(new DummyDataType(desc)));
   }
   //take the first matching one
-  return cached(desc, plugin[0].load().then((p) => p.factory(desc)));
+  return cached(desc, (await plugin[0].load()).factory(desc));
 }
 
 /**
@@ -79,22 +79,21 @@ function transformEntry(desc: IDataDescription): Promise<IDataType> {
  * @param filter optional filter either a function or a server side interpretable filter object
  * @returns {Promise<IDataType[]>}
  */
-export function list(filter?: ({[key: string]: string})|((d: IDataType) => boolean)): Promise<IDataType[]> {
+export async function list(filter?: ({[key: string]: string})|((d: IDataType) => boolean)): Promise<IDataType[]> {
   const f = (typeof filter === 'function') ? <(d: IDataType) => boolean>filter : null;
   const q = (typeof filter !== 'undefined' && typeof filter !== 'function') ? <any>filter : {};
 
-  let r: Promise<IDataType[]>;
+  let r: IDataType[];
 
   if (isOffline) {
-    r = getCachedEntries();
+    r = await getCachedEntries();
   } else {
     //load descriptions and create data out of them
-    r = getAPIJSON('/dataset/', q)
-      .then((descs: IDataDescription[]) => Promise.all(descs.map(transformEntry)));
+    r = (await getAPIJSON('/dataset/', q)).map(transformEntry);
   }
 
   if (f !== null) {
-    r = r.then((arr) => arr.filter(f));
+    r = (await r).filter(f);
   }
   return r;
 }
@@ -134,8 +133,8 @@ export function convertToTree(list: IDataType[]): INode {
 /**
  * returns a tree of all available datasets
  */
-export function tree(filter?: ({[key: string]: string})|((d: IDataType) => boolean)): Promise<INode> {
-  return list(filter).then(convertToTree);
+export async function tree(filter?: ({[key: string]: string})|((d: IDataType) => boolean)): Promise<INode> {
+  return convertToTree(await list(filter));
 }
 
 /**
@@ -143,18 +142,18 @@ export function tree(filter?: ({[key: string]: string})|((d: IDataType) => boole
  * @param query
  * @returns {any}
  */
-export function getFirst(query: {[key: string]: string} | string | RegExp): Promise<IDataType> {
+export async function getFirst(query: {[key: string]: string} | string | RegExp): Promise<IDataType> {
   if (typeof query === 'string' || query instanceof RegExp) {
     return getFirstByName(<string|RegExp>query);
   }
   const q = <any>query;
   q.limit = 1;
-  return list(q).then<IDataType>((result) => {
-    if (result.length === 0) {
-      return Promise.reject({error: 'nothing found, matching', args: q});
-    }
-    return Promise.resolve(result[0]);
-  });
+
+  const result = await list(q);
+  if (result.length === 0) {
+    return Promise.reject({error: 'nothing found, matching', args: q});
+  }
+  return Promise.resolve(result[0]);
 }
 
 /*function escapeRegExp(string){
@@ -180,11 +179,11 @@ function getFirstWithCache(name: string | RegExp, cache: Map<string, Promise<IDa
   });
 }
 
-function getById(id: string) {
+async function getById(id: string) {
   if (cacheById.has(id)) {
     return cacheById.get(id);
   }
-  return getAPIJSON(`/dataset/${id}/desc`).then(transformEntry);
+  return transformEntry(await getAPIJSON(`/dataset/${id}/desc`));
 }
 
 /**
@@ -192,13 +191,14 @@ function getById(id: string) {
  * @param persisted an id or persisted object containing the id
  * @returns {Promise<IDataType>}
  */
-export function get(persisted: any | string): Promise<IDataType> {
+export async function get(persisted: any | string): Promise<IDataType> {
   if (typeof persisted === 'string') {
     return getById(<string>persisted);
   }
   //resolve parent and then resolve it using restore item
   if (persisted.root) {
-    return get(persisted.root).then((parent) => parent ? parent.restore(persisted) : null);
+    const parent = await get(persisted.root);
+    return parent ? <IDataType>parent.restore(persisted) : null;
   } else {
     //can't restore non root and non data id
     return Promise.reject('cannot restore non root and non data id');
@@ -229,35 +229,33 @@ function prepareData(desc: any, file?: File) {
  * @param file
  * @returns {Promise<*>}
  */
-export function upload(data: any, file?: File): Promise<IDataType> {
+export async function upload(data: any, file?: File): Promise<IDataType> {
   data = prepareData(data, file);
-  return sendAPI('/dataset/', data, 'POST').then(transformEntry);
+  return transformEntry(await sendAPI('/dataset/', data, 'POST'));
 }
 
 /**
  * updates an existing dataset with a new description and optional file
  * @returns {Promise<*>} returns the update dataset
  */
-export function update(entry: IDataType, data: any, file?: File): Promise<IDataType> {
+export async function update(entry: IDataType, data: any, file?: File): Promise<IDataType> {
   data = prepareData(data, file);
-  return sendAPI(`/dataset/${entry.desc.id}`, data, 'PUT').then((desc: IDataDescription) => {
-    // clear existing cache
-    clearCache(entry);
-    //update with current one
-    return transformEntry(desc);
-  });
+  const desc = await sendAPI(`/dataset/${entry.desc.id}`, data, 'PUT');
+  // clear existing cache
+  clearCache(entry);
+  //update with current one
+  return transformEntry(desc);
 }
 
 /**
  * modifies an existing dataset with a new description and optional file, the difference to update is that this should be used for partial changes
  * @returns {Promise<*>} returns the update dataset
  */
-export function modify(entry: IDataType, data: any, file?: File): Promise<IDataType> {
+export async function modify(entry: IDataType, data: any, file?: File): Promise<IDataType> {
   data = prepareData(data, file);
-  return sendAPI(`/dataset/${entry.desc.id}`, data, 'POST').then((desc: IDataDescription) => {
-    clearCache(entry);
-    return transformEntry(desc);
-  });
+  const desc = await sendAPI(`/dataset/${entry.desc.id}`, data, 'POST');
+  clearCache(entry);
+  return transformEntry(desc);
 }
 
 /**
@@ -265,12 +263,12 @@ export function modify(entry: IDataType, data: any, file?: File): Promise<IDataT
  * @param entry
  * @returns {Promise<boolean>}
  */
-export function remove(entry: IDataType | IDataDescription): Promise<Boolean> {
+export async function remove(entry: IDataType | IDataDescription): Promise<Boolean> {
   const desc: IDataDescription = (<IDataType>entry).desc || <IDataDescription>entry;
-  return sendAPI(`/dataset/${desc.id}`, {}, 'DELETE').then(() => {
-    clearCache(desc);
-    return true;
-  });
+
+  await sendAPI(`/dataset/${desc.id}`, {}, 'DELETE');
+  clearCache(desc);
+  return true;
 }
 
 /**
@@ -344,10 +342,10 @@ export function convertTableToVectors(list: IDataType[]) {
  * @param tablesAsVectors whether tables should be converted to individual vectors
  * @returns {Promise<*>}
  */
-export function listAsTable(tablesAsVectors = false) {
-  let l = list();
+export async function listAsTable(tablesAsVectors = false) {
+  let l = await list();
   if (tablesAsVectors) {
-    l = l.then(convertTableToVectors);
+    l = convertTableToVectors(l);
   }
-  return l.then(convertToTable);
+  return convertToTable(l);
 }

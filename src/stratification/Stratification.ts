@@ -41,11 +41,9 @@ export default class Stratification extends ADataType<IStratificationDataDescrip
     return new StratificationGroup(this, group, this.groups[group]);
   }
 
-  hist(bins?: number, range?: Range): Promise<IHistogram> {
+  async hist(bins?: number, range?: Range): Promise<IHistogram> {
     //TODO
-    return this.range().then((r) => {
-      return rangeHist(r);
-    });
+    return rangeHist(await this.range());
   }
 
   vector() {
@@ -66,24 +64,23 @@ export default class Stratification extends ADataType<IStratificationDataDescrip
     return Promise.reject('no origin specified');
   }
 
-  range() {
-    return this.loader(this.desc).then((data) => data.range);
+  async range() {
+    return (await this.loader(this.desc)).range;
   }
 
-  idRange() {
-    return this.loader(this.desc).then((data) => {
-      const ids = data.rowIds.dim(0);
-      const range = data.range;
-      return ids.preMultiply(range, this.dim[0]);
-    });
+  async idRange() {
+    const data = await this.loader(this.desc);
+    const ids = data.rowIds.dim(0);
+    const range = data.range;
+    return ids.preMultiply(range, this.dim[0]);
   }
 
-  names(range: RangeLike = all()) {
-    return this.loader(this.desc).then((data) => parse(range).filter(data.rows, this.dim));
+  async names(range: RangeLike = all()) {
+    return parse(range).filter((await this.loader(this.desc)).rows, this.dim);
   }
 
-  ids(range: RangeLike = all()): Promise<Range> {
-    return this.loader(this.desc).then((data) => data.rowIds.preMultiply(parse(range), this.dim));
+  async ids(range: RangeLike = all()): Promise<Range> {
+    return (await this.loader(this.desc)).rowIds.preMultiply(parse(range), this.dim);
   }
 
   get idtypes() {

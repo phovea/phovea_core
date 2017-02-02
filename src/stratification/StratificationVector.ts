@@ -106,17 +106,15 @@ export default class StratificationVector extends AVector<string, ICategoricalVa
     return this.strat.size();
   }
 
-  sort(compareFn?: (a: string, b: string) => number, thisArg?: any): Promise<ICategoricalVector> {
-    return this.data().then((d) => {
-      const indices = argSort(d, compareFn, thisArg);
-      return this.view(rlist(indices));
-    });
+  async sort(compareFn?: (a: string, b: string) => number, thisArg?: any): Promise<ICategoricalVector> {
+    const d = await this.data();
+    const indices = argSort(d, compareFn, thisArg);
+    return this.view(rlist(indices));
   }
 
-  filter(callbackfn: (value: string, index: number) => boolean, thisArg?: any): Promise<ICategoricalVector> {
-    return this.data().then((d) => {
-      const indices = argFilter(d, callbackfn, thisArg);
-      return this.view(rlist(indices));
-    });
+  async  filter(callbackfn: (value: string, index: number) => boolean, thisArg?: any): Promise<ICategoricalVector> {
+    const d = await this.data();
+    const indices = argFilter(d, callbackfn, thisArg);
+    return this.view(rlist(indices));
   }
 }

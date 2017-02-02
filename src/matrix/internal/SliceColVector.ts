@@ -93,28 +93,28 @@ export default class SliceColVector<T, D extends IValueTypeDesc> extends AVector
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range: RangeLike = all()): Promise<T[]> {
+  async data(range: RangeLike = all()): Promise<T[]> {
     const rr = parse(range);
     const r = rlist(rr.dim(0), this.colRange);
-    return this.m.data(r).then((d) => {
-      if (d.length > 0 && Array.isArray(d[0])) {
-        return d.map((di) => di[0]);
-      }
-      return d;
-    });
+    const d = await this.m.data(r);
+    if (d.length === 0) {
+      return [];
+    }
+    if (Array.isArray(d[0])) {
+      return d.map((di) => di[0]);
+    }
+    return <any>d;
   }
 
-  sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T, D>> {
-    return this.data().then((d) => {
-      const indices = argSort(d, compareFn, thisArg);
-      return this.view(rlist(indices));
-    });
+  async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T, D>> {
+    const d = await this.data();
+    const indices = argSort(d, compareFn, thisArg);
+    return this.view(rlist(indices));
   }
 
-  filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T, D>> {
-    return this.data().then((d) => {
-      const indices = argFilter(d, callbackfn, thisArg);
-      return this.view(rlist(indices));
-    });
+  async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T, D>> {
+    const d = await this.data();
+    const indices = argFilter(d, callbackfn, thisArg);
+    return this.view(rlist(indices));
   }
 }

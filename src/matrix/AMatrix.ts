@@ -86,40 +86,40 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
     return new SliceColVector(this.root, col);
   }
 
-  stats(): Promise<IStatistics> {
+  async stats(): Promise<IStatistics> {
     const v = this.root.valuetype;
     if (v.type === VALUE_TYPE_INT || v.type === VALUE_TYPE_REAL) {
-      return this.data().then((d) => computeStats(...<any>d));
+      return computeStats(...<any>await this.data());
     }
     return Promise.reject('invalid value type: ' + v.type);
   }
 
-  hist(bins?: number, range: RangeLike = all(), containedIds = 0): Promise<IHistogram> {
+  async hist(bins?: number, range: RangeLike = all(), containedIds = 0): Promise<IHistogram> {
     const v = this.root.valuetype;
-    return this.data(range).then((d) => {
-      const flat = flatten(d, this.indices, containedIds);
-      switch (v.type) {
-        case VALUE_TYPE_CATEGORICAL:
-          const vc = <ICategoricalValueTypeDesc><any>v;
-          return categoricalHist<string>(<any[]>flat.data, flat.indices, flat.data.length, vc.categories.map((d) => typeof d === 'string' ? d : d.name),
-            vc.categories.map((d) => typeof d === 'string' ? d : d.name || d.label),
-            vc.categories.map((d) => typeof d === 'string' ? 'gray' : d.color || 'gray'));
-        case VALUE_TYPE_INT:
-        case VALUE_TYPE_REAL:
-          const vn = <INumberValueTypeDesc><any>v;
-          return hist(<any[]>flat.data, flat.indices, flat.data.length, bins ? bins : Math.round(Math.sqrt(this.length)), vn.range);
-        default:
-          return Promise.reject<IHistogram>('invalid value type: ' + v.type); //cant create hist for unique objects or other ones
-      }
-    });
+    const d = await this.data(range);
+    const flat = flatten(d, this.indices, containedIds);
+    switch (v.type) {
+      case VALUE_TYPE_CATEGORICAL:
+        const vc = <ICategoricalValueTypeDesc><any>v;
+        return categoricalHist<string>(<any[]>flat.data, flat.indices, flat.data.length, vc.categories.map((d) => typeof d === 'string' ? d : d.name),
+          vc.categories.map((d) => typeof d === 'string' ? d : d.name || d.label),
+          vc.categories.map((d) => typeof d === 'string' ? 'gray' : d.color || 'gray'));
+      case VALUE_TYPE_INT:
+      case VALUE_TYPE_REAL:
+        const vn = <INumberValueTypeDesc><any>v;
+        return hist(<any[]>flat.data, flat.indices, flat.data.length, bins ? bins : Math.round(Math.sqrt(this.length)), vn.range);
+      default:
+        return Promise.reject<IHistogram>('invalid value type: ' + v.type); //cant create hist for unique objects or other ones
+    };
   }
 
-  idView(idRange: RangeLike = all()): Promise<IMatrix<T, D>> {
+  async idView(idRange: RangeLike = all()): Promise<IMatrix<T, D>> {
     const r = parse(idRange);
     if (r.isAll) {
       return Promise.resolve(this.root);
     }
-    return this.ids().then((ids) => this.view(ids.indexOf(r)));
+    const ids = await this.ids();
+    return this.view(ids.indexOf(r));
   }
 
   reduce<U, UD extends IValueTypeDesc>(f: (row: T[]) => U, thisArgument?: any, valuetype?: UD, idtype?: IDType): IVector<U,UD> {

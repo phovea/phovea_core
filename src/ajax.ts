@@ -53,7 +53,7 @@ function parseType(expectedDataType: string, response: Response) {
  * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
  * @returns {Promise<any>}
  */
-export function send(url: string, data: any = {}, method = 'GET', expectedDataType = 'json'): Promise<any> {
+export async function send(url: string, data: any = {}, method = 'GET', expectedDataType = 'json'): Promise<any> {
   // for compatibility
   method = method.toUpperCase();
 
@@ -81,9 +81,8 @@ export function send(url: string, data: any = {}, method = 'GET', expectedDataTy
   }
 
   // there are no typings for fetch so far
-  return self.fetch(url, options)
-    .then(checkStatus)
-    .then(parseType.bind(null, expectedDataType));
+  const r = checkStatus(await self.fetch(url, options));
+  return parseType(expectedDataType, r);
 }
 /**
  * to get some ajax json file
