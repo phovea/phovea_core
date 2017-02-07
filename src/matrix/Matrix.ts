@@ -121,7 +121,7 @@ export function create<T, D extends IValueTypeDesc>(desc: IMatrixDataDescription
   if (typeof loader === 'function') {
     return new Matrix(desc, adapterOne2Two(<IMatrixLoader<T>>loader));
   }
-  return new Matrix(desc, loader ? loader : viaAPI2Loader());
+  return new Matrix(desc, loader ? <IMatrixLoader2<T>>loader : viaAPI2Loader());
 }
 
 
