@@ -32,7 +32,7 @@ export default class StateNode extends GraphNode {
     super.setAttr('description', value);
   }
 
-  static restore(p) {
+  static restore(p: any) {
     const r = new StateNode(p.attrs.name);
     return r.restore(p);
   }

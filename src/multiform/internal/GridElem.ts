@@ -9,8 +9,11 @@ import {Range} from '../../range';
 import {clearNode} from './index';
 import {IPlugin} from '../../plugin';
 
+/**
+ * @internal
+ */
 export default class GridElem implements IPersistable {
-  private actVis: IVisInstance;
+  actVis: IVisInstance;
   content: HTMLElement;
 
   constructor(public readonly range: Range, public readonly pos: number[], public readonly data: IDataType) {
@@ -51,7 +54,7 @@ export default class GridElem implements IPersistable {
     };
   }
 
-  restore(persisted: any) {
+  restore(persisted: any): any{
     //FIXME
     /*if (persisted.id) {
      var selected = search(this.visses, (e) => e.id === persisted.id);

@@ -24,7 +24,7 @@ export default class Matrix<T, D extends IValueTypeDesc> extends AMatrix<T, D> {
   readonly valuetype: D;
   readonly rowtype: IDType;
   readonly coltype: IDType;
-  private producttype_: ProductIDType;
+  private _producttype: ProductIDType;
 
   constructor(public readonly desc: IMatrixDataDescription<D>, private loader: IMatrixLoader2<T>) {
     super(null);
@@ -32,12 +32,12 @@ export default class Matrix<T, D extends IValueTypeDesc> extends AMatrix<T, D> {
     this.valuetype = desc.value;
     this.rowtype = resolveIDType(desc.rowtype);
     this.coltype = resolveIDType(desc.coltype);
-    this.producttype_ = resolveProduct(this.rowtype, this.coltype);
+    this._producttype = resolveProduct(this.rowtype, this.coltype);
     this.t = new TransposedMatrix(this);
   }
 
   get producttype() {
-    return this.producttype_;
+    return this._producttype;
   }
 
   get idtypes() {
@@ -140,22 +140,22 @@ export function asMatrix<T>(data: T[][], rows: string[], cols: string[], options
 /**
  * parses a given dataset and convert is to a matrix
  * @param data the data array
- * @param rows_or_options see options or the row ids of this matrix
- * @param cols_def the optional column ids
+ * @param rowsIdsOrOptions see options or the row ids of this matrix
+ * @param colIds the optional column ids
  * @param options options for defining the dataset description
  * @returns {IMatrix}
  */
-export function asMatrix<T>(data: T[][], rows_or_options?: any, cols_def?: string[], options: IAsMatrixOptions = {}): IMatrix<T,IValueTypeDesc> {
+export function asMatrix<T>(data: T[][], rowsIdsOrOptions?: any, colIds?: string[], options: IAsMatrixOptions = {}): IMatrix<T,IValueTypeDesc> {
   // first column if not defined, excluding 0,0
-  const rows = Array.isArray(rows_or_options) ? <string[]>rows_or_options : data.map((r) => r[0]).slice(1);
+  const rows = Array.isArray(rowsIdsOrOptions) ? <string[]>rowsIdsOrOptions : data.map((r) => r[0]).slice(1);
   // first row if not defined, excluding 0,0
-  const cols = cols_def ? cols_def : data[0].slice(1);
-  if (typeof rows_or_options === 'object') {
-    options = rows_or_options;
+  const cols = colIds ? colIds : data[0].slice(1);
+  if (typeof rowsIdsOrOptions === 'object') {
+    options = rowsIdsOrOptions;
   }
   options = options || {};
 
-  let realData: any[] = Array.isArray(rows_or_options) ? data : data.slice(1).map((r) => r.slice(1));
+  let realData: any[] = Array.isArray(rowsIdsOrOptions) ? data : data.slice(1).map((r) => r.slice(1));
 
   const valueType = guessValueTypeDesc([].concat.apply([], realData));
 

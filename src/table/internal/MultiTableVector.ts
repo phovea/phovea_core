@@ -9,10 +9,13 @@ import {IVector, IVectorDataDescription} from '../../vector';
 import {ITable} from '../ITable';
 import AVector from '../../vector/AVector';
 
+/**
+ * @internal
+ */
 export default class MultiTableVector<T, D extends IValueTypeDesc> extends AVector<T, D> implements IVector<T,D> {
   readonly desc: IVectorDataDescription<D>;
 
-  constructor(private table: ITable, private f: (row: IValueType[]) => T, private this_f = table, public readonly valuetype: D = null, private _idtype = table.idtype) {
+  constructor(private table: ITable, private f: (row: IValueType[]) => T, private thisArgument = table, public readonly valuetype: D = null, private _idtype = table.idtype) {
     super(null);
     this.desc = {
       name: table.desc.name + '-p',
@@ -73,33 +76,27 @@ export default class MultiTableVector<T, D extends IValueTypeDesc> extends AVect
    * returns a promise for getting one cell
    * @param i
    */
-  at(i: number): Promise<any> {
-    return this.table.data(rlist(i)).then((d) => {
-      return this.f.call(this.this_f, d[0]);
-    });
+  async at(i: number): Promise<any> {
+    return this.f.call(this.thisArgument, (await this.table.data(rlist(i)))[0]);
   }
 
   /**
    * returns a promise for getting the data as two dimensional array
    * @param range
    */
-  data(range?: RangeLike): Promise<T[]> {
-    return this.table.data(range).then((d) => {
-      return d.map(this.f, this.this_f);
-    });
+  async data(range?: RangeLike): Promise<T[]> {
+    return (await this.table.data(range)).map(this.f, this.thisArgument);
   }
 
-  sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
-    return this.data().then((d) => {
-      let indices = argSort(d, compareFn, thisArg);
-      return this.view(rlist(indices));
-    });
+  async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
+    const d = await this.data();
+    const indices = argSort(d, compareFn, thisArg);
+    return this.view(rlist(indices));
   }
 
-  filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
-    return this.data().then((d) => {
-      let indices = argFilter(d, callbackfn, thisArg);
-      return this.view(rlist(indices));
-    });
+  async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
+    const d = await this.data();
+    const indices = argFilter(d, callbackfn, thisArg);
+    return this.view(rlist(indices));
   }
 }

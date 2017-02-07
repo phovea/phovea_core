@@ -162,17 +162,17 @@ export default class Range {
     const ndim = this.ndim;
     const that = this;
     //recursive variant for just filtering the needed rows
-    function filterDim(i: number) {
+    const filterDim = (i: number): (d:any)=>any => {
       if (i >= ndim) { //out of range no filtering anymore
-        return (d) => d;
+        return (d: any) => d;
       }
       const d = that.dim(i);
       const next = filterDim(i + 1); //compute next transform
       const s = size ? size[i] : undefined;
-      return (elem) => { //if the value is an array, filter it else return the value
+      return (elem: any[]|any) => { //if the value is an array, filter it else return the value
         return Array.isArray(elem) ? d.filter(elem, s, next) : elem;
       };
-    }
+    };
 
     const f = filterDim(0);
 
@@ -275,7 +275,7 @@ export default class Range {
     const iter = (ids: number[]) => {
       const act = ids.length;
       if (act < ndim) {
-        let dim = this.dims[act];
+        const dim = this.dims[act];
         dim.iter(size ? size[act] : null).forEach((id) => {
           ids.push(id);
           iter(ids);

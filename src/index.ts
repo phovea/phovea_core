@@ -13,11 +13,12 @@ export {flagId, uniqueId, uniqueString} from './internal/unique';
 export {default as IdPool} from './internal/IdPool';
 import HashProperties from './internal/HashProperties';
 import PropertyHandler from './internal/PropertyHandler';
+import {__extends} from 'tslib';
 
 /**
  * version of the core
  */
-declare const __VERSION__;
+declare const __VERSION__: string;
 export const version = __VERSION__;
 
 /**
@@ -25,7 +26,7 @@ export const version = __VERSION__;
  * @type {boolean}
  */
 export let offline = false;
-declare const __APP_CONTEXT__;
+declare const __APP_CONTEXT__: string;
 
 /* tslint:disable:variable-name */
 /**
@@ -91,7 +92,7 @@ _init();
  * @returns {Object} a with extended b
  */
 export function mixin<T>(a: T, ...bs: any[]): T {
-  function extend(r, b) {
+  function extend(r: any, b: any) {
     Object.keys(b).forEach((key) => {
       const v = b[key];
       if (Object.prototype.toString.call(v) === '[object Object]') {
@@ -134,22 +135,18 @@ export function mod(n: number, m: number) {
  * @returns {function(): any}
  */
 export function bind(f: () => any, thisArg: any, ...args: any[]) {
-  return (...largs) => {
-    return f.apply(thisArg ? thisArg : this, args.concat(largs));
-  };
+  return f.bind(thisArg, ...args);
 }
 
 /**
  * getter generator by name or index
  * @deprecated too simple to write
  */
-export function getter(...index: number[]);
-export function getter(...attr: string[]);
-export function getter(...attr: any[]) {
+export function getter(...attr: (number|string)[]) {
   if (attr.length === 1) {
-    return (obj) => obj[attr[0]];
+    return (obj: any) => obj[attr[0]];
   }
-  return (obj) => attr.map((a) => obj[a]);
+  return (obj: any) => attr.map((a) => obj[a]);
 }
 
 /**
@@ -183,7 +180,7 @@ export function noop() {
  * @param r - the value to return
  * @returns {*}
  */
-export function constant(r) {
+export function constant(r: any) {
   if (typeof r === 'boolean' && r === true) {
     return constantTrue;
   }
@@ -220,7 +217,7 @@ export function constantFalse() {
 export function callable(obj: any, f: string) {
   //assert this.isPlainObject(obj);
   function CallAbleFactory() {
-    let that;
+    let that: any;
 
     function CallAble() {
       that[f].apply(that, Array.from(arguments));
@@ -285,7 +282,7 @@ export function onDOMNodeRemoved(node: Element|Element[], callback: () => void, 
     arr = <any[]>node;
   }
   arr.forEach((n) => {
-    function l(evt) {
+    function l(evt: Event) {
       //since this event bubbles check if it the right node
       let act = n;
       while (act) { //check if node or its parent are removed
@@ -310,20 +307,8 @@ export function onDOMNodeRemoved(node: Element|Element[], callback: () => void, 
  * @param subClass
  * @param baseClass
  */
-export function extendClass(subClass, baseClass) {
-  for (const p in baseClass) {
-    if (baseClass.hasOwnProperty(p)) {
-      subClass[p] = baseClass[p];
-    }
-  }
-  /* tslint:disable:no-unused-variable */
-  function __() {
-    this.constructor = subClass;
-  }
-
-  __.prototype = baseClass.prototype;
-  subClass.prototype = new __();
-  /* tslint:enable:no-unused-variable */
+export function extendClass(subClass: any, baseClass: any) {
+  __extends(subClass, baseClass);
 }
 
 
@@ -360,7 +345,7 @@ export const param = new PropertyHandler(location.search);
  * @param timeToDelay
  * @return {function(...[any]): undefined}
  */
-export function delayedCall(callback: () => void, timeToDelay = 100, thisCallback = this) {
+export function delayedCall(this: any, callback: () => void, timeToDelay = 100, thisCallback = this) {
   let tm = -1;
   return (...args: any[]) => {
     if (tm >= 0) {

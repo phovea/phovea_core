@@ -9,7 +9,7 @@
 import {Rect, rect} from './geom';
 
 export interface ILayoutElem {
-  setBounds(x: number, y: number, w: number, h: number): Promise<void>;
+  setBounds(x: number, y: number, w: number, h: number): Promise<void>|null;
 
   getBounds(): Rect;
 
@@ -64,7 +64,7 @@ export class ALayoutElem {
 
   layoutOption<T>(name: string, defaultValue: T = null): T {
     if (this.options.hasOwnProperty(name)) {
-      return this.options[name];
+      return (<any>this.options)[name];
     }
     return defaultValue;
   }
@@ -80,7 +80,7 @@ class HTMLLayoutElem extends ALayoutElem implements ILayoutElem {
     super(options);
   }
 
-  setBounds(x: number, y: number, w: number, h: number) {
+  setBounds(x: number, y: number, w: number, h: number): Promise<void>|null {
     const unit = this.layoutOption('unit', 'px'),
       style = this.node.style;
     style.left = x + unit;
@@ -200,7 +200,7 @@ export function flowLayout(horizontal: boolean, gap: number, padding = {top: 0, 
     // set all locations
     let xAccumulator = padding.left;
     let yAccumulator = padding.top;
-    const promises = [];
+    const promises : Promise<void>[] = [];
     elems.forEach((elem, i) => {
       const s = sizes[i];
       promises.push(elem.setBounds(xAccumulator, yAccumulator, s[0], s[1]));
@@ -217,7 +217,7 @@ export function flowLayout(horizontal: boolean, gap: number, padding = {top: 0, 
 }
 
 export function distributeLayout(horizontal: boolean, defaultValue: number, padding = noPadding) {
-  function setBounds(x, y, w: number, h: number, child: ILayoutElem, value: number) {
+  function setBounds(x: number, y: number, w: number, h: number, child: ILayoutElem, value: number) {
     if (horizontal) {
       return child.setBounds(x, y, value, grab(child.layoutOption('prefHeight', Number.NaN), h));
     } else {
@@ -253,7 +253,7 @@ export function distributeLayout(horizontal: boolean, defaultValue: number, padd
       }
     }
 
-    const promises = [];
+    const promises: Promise<any>[] = [];
     elems.forEach((elem) => {
       let fix = elem.layoutOption(horizontal ? 'prefWidth' : 'prefHeight', Number.NaN);
       if (isDefault(fix)) {
@@ -292,42 +292,41 @@ export function borderLayout(horizontal: boolean, gap: number, percentages: IPad
     w -= padding.left + padding.right;
     h -= padding.top + padding.bottom;
     let x = padding.top, y = padding.left, wc = w, hc = h;
-    const pos = {
-      top: [],
-      center: [],
-      left: [],
-      right: [],
-      bottom: []
-    };
+    const pos = new Map<string, ILayoutElem[]>();
+    pos.set('top', []);
+    pos.set('center', []);
+    pos.set('left', []);
+    pos.set('right', []);
+    pos.set('bottom', []);
     elems.forEach((elem) => {
       let border = elem.layoutOption('border', 'center');
-      if (!pos.hasOwnProperty(border)) {
+      if (!pos.has(border)) {
         border = 'center'; //invalid one
       }
-      pos[border].push(pos);
+      pos.get(border).push(elem);
     });
 
     const promises = [];
-    if (pos.top.length > 0) {
+    if (pos.get('top').length > 0) {
       y += h * percentages.top;
       hc -= h * percentages.top;
-      promises.push(flowLayout(true, gap)(pos.top, w, h * percentages.top, parent));
+      promises.push(flowLayout(true, gap)(pos.get('top'), w, h * percentages.top, parent));
     }
-    if (pos.bottom.length > 0) {
+    if (pos.get('bottom').length > 0) {
       hc -= h * percentages.bottom;
-      promises.push(flowLayout(true, gap)(pos.bottom, w, h * percentages.bottom, parent));
+      promises.push(flowLayout(true, gap)(pos.get('bottom'), w, h * percentages.bottom, parent));
     }
-    if (pos.left.length > 0) {
+    if (pos.get('left').length > 0) {
       x += w * percentages.left;
       wc -= w * percentages.left;
-      promises.push(flowLayout(false, gap)(pos.left, w * percentages.left, hc, parent));
+      promises.push(flowLayout(false, gap)(pos.get('left'), w * percentages.left, hc, parent));
     }
-    if (pos.right.length > 0) {
+    if (pos.get('right').length > 0) {
       wc -= w * percentages.right;
-      promises.push(flowLayout(false, gap)(pos.right, w * percentages.right, hc, parent));
+      promises.push(flowLayout(false, gap)(pos.get('right'), w * percentages.right, hc, parent));
     }
-    if (pos.center.length > 0) {
-      promises.push(flowLayout(true, gap)(pos.center, wc, hc, parent));
+    if (pos.get('center').length > 0) {
+      promises.push(flowLayout(true, gap)(pos.get('center'), wc, hc, parent));
     }
 
     return waitFor(promises);

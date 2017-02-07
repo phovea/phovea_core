@@ -26,6 +26,7 @@ import {IStratification} from '../stratification';
 import StratificationVector from './internal/StratificationVector';
 /**
  * base class for different Vector implementations, views, transposed,...
+ * @internal
  */
 export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
   constructor(protected root: IVector<T,D>) {
@@ -48,12 +49,13 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
     return new VectorView(this.root, parse(range));
   }
 
-  idView(idRange: RangeLike = all()): Promise<IVector<T,D>> {
-    return this.ids().then((ids) => this.view(ids.indexOf(parse(idRange))));
+  async idView(idRange: RangeLike = all()): Promise<IVector<T,D>> {
+    const ids = await this.ids();
+    return this.view(ids.indexOf(parse(idRange)));
   }
 
-  stats(): Promise<IStatistics> {
-    return this.data().then((d) => computeStats(d));
+  async stats(): Promise<IStatistics> {
+    return computeStats(await this.data());
   }
 
   get indices(): Range {
@@ -63,25 +65,24 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
   /**
    * return the range of this vector as a grouped range, depending on the type this might be a single group or multiple ones
    */
-  groups(): Promise<CompositeRange1D> {
+  async groups(): Promise<CompositeRange1D> {
     const v = this.root.valuetype;
     if (v.type === VALUE_TYPE_CATEGORICAL) {
       const vc = <ICategoricalValueTypeDesc><any>v;
-      return this.data().then((d) => {
-        const options: ICategorical2PartitioningOptions = {
-          name: this.root.desc.id
-        };
-        if (typeof vc.categories[0] !== 'string') {
-          const vcc = <ICategory[]>vc.categories;
-          if (vcc[0].color) {
-            options.colors = vcc.map((d) => d.color);
-          }
-          if (vcc[0].label) {
-            options.labels = vcc.map((d) => d.label);
-          }
+      const d = await this.data();
+      const options: ICategorical2PartitioningOptions = {
+        name: this.root.desc.id
+      };
+      if (typeof vc.categories[0] !== 'string') {
+        const vcc = <ICategory[]>vc.categories;
+        if (vcc[0].color) {
+          options.colors = vcc.map((d) => d.color);
         }
-        return categorical2partitioning(d, vc.categories.map((d) => typeof d === 'string' ? d : d.name), options);
-      });
+        if (vcc[0].label) {
+          options.labels = vcc.map((d) => d.label);
+        }
+      }
+      return categorical2partitioning(d, vc.categories.map((d) => typeof d === 'string' ? d : d.name), options);
     } else {
       return Promise.resolve(composite(this.root.desc.id, [asUngrouped(this.indices.dim(0))]));
     }
@@ -91,57 +92,54 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
     return this.asStratification();
   }
 
-  asStratification(): Promise<IStratification> {
-    return this.groups().then((range) => {
-      return new StratificationVector(this.root, range);
-    });
+  async asStratification(): Promise<IStratification> {
+    return new StratificationVector(this.root, await this.groups());
   }
 
-  hist(bins?: number, range: RangeLike = all()): Promise<IHistogram> {
+  async hist(bins?: number, range: RangeLike = all()): Promise<IHistogram> {
     const v = this.root.valuetype;
-    return this.data(range).then((d) => {
-      switch (v.type) {
-        case VALUE_TYPE_CATEGORICAL:
-          const vc = <ICategoricalValueTypeDesc><any>v;
-          return categoricalHist(d, this.indices.dim(0), d.length, vc.categories.map((d) => typeof d === 'string' ? d : d.name),
-            vc.categories.map((d) => typeof d === 'string' ? d : d.name || d.label),
-            vc.categories.map((d) => typeof d === 'string' ? 'gray' : d.color || 'gray'));
-        case VALUE_TYPE_REAL:
-        case VALUE_TYPE_INT:
-          const vn = <INumberValueTypeDesc><any>v;
-          return hist(d, this.indices.dim(0), d.length, bins ? bins : Math.round(Math.sqrt(this.length)), vn.range);
-        default:
-          return null; //cant create hist for unique objects or other ones
-      }
-    });
+    const d = await this.data(range);
+    switch (v.type) {
+      case VALUE_TYPE_CATEGORICAL:
+        const vc = <ICategoricalValueTypeDesc><any>v;
+        return categoricalHist(d, this.indices.dim(0), d.length, vc.categories.map((d) => typeof d === 'string' ? d : d.name),
+          vc.categories.map((d) => typeof d === 'string' ? d : d.name || d.label),
+          vc.categories.map((d) => typeof d === 'string' ? 'gray' : d.color || 'gray'));
+      case VALUE_TYPE_REAL:
+      case VALUE_TYPE_INT:
+        const vn = <INumberValueTypeDesc><any>v;
+        return hist(d, this.indices.dim(0), d.length, bins ? bins : Math.round(Math.sqrt(this.length)), vn.range);
+      default:
+        return null; //cant create hist for unique objects or other ones
+    }
   }
 
-  every(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<boolean> {
-    return this.data().then((d) => d.every(callbackfn, thisArg));
+  async every(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<boolean> {
+    return (await this.data()).every(callbackfn, thisArg);
   }
 
-  some(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<boolean> {
-    return this.data().then((d) => d.some(callbackfn, thisArg));
+  async some(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<boolean> {
+    return (await this.data()).some(callbackfn, thisArg);
   }
 
-  forEach(callbackfn: (value: T, index: number) => void, thisArg?: any): void {
-    this.data().then((d) => d.forEach(callbackfn, thisArg));
+  async forEach(callbackfn: (value: T, index: number) => void, thisArg?: any) {
+    (await this.data()).forEach(callbackfn, thisArg);
   }
 
-  reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U> {
+  async reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U> {
     function helper() {
       return callbackfn.apply(thisArg, Array.from(arguments));
     }
 
-    return this.data().then((d) => d.reduce(helper, initialValue));
+    return (await this.data()).reduce(helper, initialValue);
   }
 
-  reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U> {
+  async reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U> {
     function helper() {
       return callbackfn.apply(thisArg, Array.from(arguments));
     }
 
-    return this.data().then((d) => d.reduceRight(helper, initialValue));
+    return (await this.data()).reduceRight(helper, initialValue);
   }
 
   restore(persisted: any) {
@@ -158,12 +156,13 @@ export default AVector;
 
 /**
  * view on the vector restricted by a range
- * @param root underlying matrix
- * @param range range selection
- * @param t optional its transposed version
- * @constructor
+ * @internal
  */
 export class VectorView<T,D extends IValueTypeDesc> extends AVector<T,D> {
+  /**
+   * @param root underlying matrix
+   * @param range range selection
+   */
   constructor(root: IVector<T,D>, private range: Range) {
     super(root);
   }
@@ -224,18 +223,16 @@ export class VectorView<T,D extends IValueTypeDesc> extends AVector<T,D> {
    return this.range;
    }*/
 
-  sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
-    return this.data().then((d) => {
-      const indices = argSort(d, compareFn, thisArg);
-      return this.view(this.range.preMultiply(rlist(indices)));
-    });
+  async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
+    const d = await this.data();
+    const indices = argSort(d, compareFn, thisArg);
+    return this.view(this.range.preMultiply(rlist(indices)));
   }
 
-  filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
-    return this.data().then((d) => {
-      const indices = argFilter(d, callbackfn, thisArg);
-      return this.view(this.range.preMultiply(rlist(indices)));
-    });
+  async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
+    const d = await this.data();
+    const indices = argFilter(d, callbackfn, thisArg);
+    return this.view(this.range.preMultiply(rlist(indices)));
   }
 }
 

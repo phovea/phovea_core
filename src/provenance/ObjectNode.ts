@@ -204,7 +204,7 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
     return this;
   }
 
-  static restore(p) {
+  static restore(p: any) {
     const r = new ObjectNode<any>(null, p.attrs.name, p.attrs.category, p.attrs.hash || p.attrs.name + '_' + p.attrs.category);
     return r.restore(p);
   }

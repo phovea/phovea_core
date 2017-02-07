@@ -11,8 +11,8 @@ export default class Polygon extends AShape {
     super();
   }
 
-  push(x: number, y: number);
-  push(...points: Vector2D[]);
+  push(x: number, y: number): void;
+  push(...points: Vector2D[]): void;
   push() {
     if (arguments.length === 2 && typeof arguments[0] === 'number') {
       this.points.push(new Vector2D(arguments[0], arguments[1]));
@@ -25,7 +25,7 @@ export default class Polygon extends AShape {
     return `Polygon(${this.points.join(',')})`;
   }
 
-  protected shiftImpl(x, y) {
+  protected shiftImpl(x: number, y: number) {
     this.points.forEach((p) => {
       p.x += x;
       p.y += y;
@@ -37,31 +37,31 @@ export default class Polygon extends AShape {
   }
 
   aabb(): Rect {
-    let min_x = Number.POSITIVE_INFINITY, min_y = Number.POSITIVE_INFINITY, max_x = Number.NEGATIVE_INFINITY, max_y = Number.NEGATIVE_INFINITY;
+    let minX = Number.POSITIVE_INFINITY, minY = Number.POSITIVE_INFINITY, maxX = Number.NEGATIVE_INFINITY, maxY = Number.NEGATIVE_INFINITY;
     this.points.forEach((p) => {
-      if (p.x < min_x) {
-        min_x = p.x;
+      if (p.x < minX) {
+        minX = p.x;
       }
-      if (p.y < min_y) {
-        min_y = p.y;
+      if (p.y < minY) {
+        minY = p.y;
       }
-      if (p.x > max_x) {
-        max_x = p.x;
+      if (p.x > maxX) {
+        maxX = p.x;
       }
-      if (p.y > max_y) {
-        max_y = p.y;
+      if (p.y > maxY) {
+        maxY = p.y;
       }
     });
-    return new Rect(min_x, min_y, max_x - min_x, max_y - min_y);
+    return new Rect(minX, minY, maxX - minX, maxY - minY);
   }
 
   bs(): Circle {
     const centroid = this.centroid;
     let radius2 = 0;
     this.points.forEach((p) => {
-      let dx = p.x - centroid.x;
-      let dy = p.y - centroid.x;
-      let d = dx * dx + dy * dy;
+      const dx = p.x - centroid.x;
+      const dy = p.y - centroid.x;
+      const d = dx * dx + dy * dy;
       if (d > radius2) {
         radius2 = d;
       }
@@ -77,13 +77,12 @@ export default class Polygon extends AShape {
   pointInPolygon(point: Vector2D) {
     const length = this.points.length;
     let counter = 0;
-    let x_inter;
     let p1 = this.points[0];
     for (let i = 1; i <= length; i++) {
-      let p2 = this.points[i % length];
+      const p2 = this.points[i % length];
       if (point.y > Math.min(p1.y, p2.y) && point.y <= Math.max(p1.y, p2.y) && point.x <= Math.max(p1.x, p2.x) && p1.y !== p2.y) {
-        x_inter = (point.y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y) + p1.x;
-        if (p1.x === p2.x || point.x <= x_inter) {
+        const xInter = (point.y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y) + p1.x;
+        if (p1.x === p2.x || point.x <= xInter) {
           counter++;
         }
       }
@@ -106,16 +105,16 @@ export default class Polygon extends AShape {
   get centroid() {
     const length = this.points.length;
     const area6x = 6 * this.area;
-    let x_sum = 0;
-    let y_sum = 0;
+    let xSum = 0;
+    let ySum = 0;
     for (let i = 0; i < length; i++) {
       const p1 = this.points[i];
       const p2 = this.points[(i + 1) % length];
       const cross = (p1.x * p2.y - p2.x * p1.y);
-      x_sum += (p1.x + p2.x) * cross;
-      y_sum += (p1.y + p2.y) * cross;
+      xSum += (p1.x + p2.x) * cross;
+      ySum += (p1.y + p2.y) * cross;
     }
-    return new Vector2D(x_sum / area6x, y_sum / area6x);
+    return new Vector2D(xSum / area6x, ySum / area6x);
   }
 
   get isClockwise() {

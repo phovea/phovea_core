@@ -215,7 +215,7 @@ class AHistogram implements IHistogram {
   }
 
   pushAll(arr: IIterable<any>, indices?: Range1D, size?: number) {
-    const binindex = [], missingindex = [];
+    const binindex :number[][]= [], missingindex :number[]= [];
     for (let i = this.bins - 1; i >= 0; --i) {
       binindex.push([]);
     }

@@ -12,20 +12,29 @@ import {Range, parse} from '../range';
 import {IValueType} from '../datatype';
 import {IVectorDataDescription} from './IVector';
 
+/**
+ * @internal
+ */
 export interface IVectorLoaderResult<T> {
   readonly rowIds: Range;
   readonly rows: string[];
   readonly data: T[];
 }
 
+/**
+ * @internal
+ */
 export interface IVectorLoader<T> {
   (desc: IVectorDataDescription<any>): Promise<IVectorLoaderResult<T>>;
 }
 
 
-export function viaAPILoader() {
-  let _loader = undefined;
-  return (desc) => {
+/**
+ * @internal
+ */
+export function viaAPILoader<T>() {
+  let _loader: Promise<IVectorLoaderResult<T>> = undefined;
+  return (desc: IVectorDataDescription<any>) => {
     if (_loader) { //in the cache
       return _loader;
     }
@@ -36,16 +45,19 @@ export function viaAPILoader() {
   };
 }
 
-export function viaDataLoader(rows: string[], rowIds: number[], data: IValueType[]) {
-  let _data = undefined;
+/**
+ * @internal
+ */
+export function viaDataLoader<T>(rows: string[], rowIds: number[], data: IValueType[]) {
+  let _data: IVectorLoaderResult<T> = undefined;
   return () => {
     if (_data) { //in the cache
       return Promise.resolve(_data);
     }
     _data = {
       rowIds: parse(rowIds),
-      rows: rows,
-      data: data
+      rows,
+      data
     };
     return Promise.resolve(_data);
   };

@@ -81,7 +81,7 @@ export default class SlideNode extends GraphNode {
     return n ? <SlideNode>n.source : null;
   }
 
-  get slideIndex() {
+  get slideIndex(): number {
     const p = this.previous;
     return 1 + (p ? p.slideIndex : 0);
   }

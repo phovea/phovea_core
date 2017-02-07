@@ -12,6 +12,7 @@ import {IValueType, IValueTypeDesc} from '../datatype';
 
 /**
  * base class for different Table implementations, views, transposed,...
+ * @internal
  */
 export abstract class ATable extends SelectAble {
   constructor(protected root: ITable) {
@@ -36,16 +37,16 @@ export abstract class ATable extends SelectAble {
     return new TableView(this.root, parse(range));
   }
 
-  abstract colData(column: string, range?: RangeLike);
+  abstract colData<T>(column: string, range?: RangeLike): Promise<T[]>;
 
   abstract queryView(name: string, args: IQueryArgs): ITable;
 
-  idView(idRange: RangeLike = all()): Promise<ITable> {
-    return this.ids().then((ids) => this.view(ids.indexOf(parse(idRange))));
+  async idView(idRange: RangeLike = all()): Promise<ITable> {
+    return this.view((await this.ids()).indexOf(parse(idRange)));
   }
 
-  reduce<T, D extends IValueTypeDesc>(f: (row: IValueType[]) => T, this_f?: any, valuetype?: D, idtype?: IDType): IVector<T,D> {
-    return new MultiTableVector(this.root, f, this_f, valuetype, idtype);
+  reduce<T, D extends IValueTypeDesc>(f: (row: IValueType[]) => T, thisArgument?: any, valuetype?: D, idtype?: IDType): IVector<T,D> {
+    return new MultiTableVector(this.root, f, thisArgument, valuetype, idtype);
   }
 
   restore(persisted: any): IPersistable {
@@ -64,12 +65,9 @@ export abstract class ATable extends SelectAble {
 export default ATable;
 
 // circular dependency thus not extractable
+
 /**
- * view on the vector restricted by a range
- * @param root underlying matrix
- * @param range range selection
- * @param t optional its transposed version
- * @constructor
+ * @internal
  */
 export class TableView extends ATable implements ITable {
   constructor(root: ITable, private range: Range) {
@@ -101,12 +99,12 @@ export class TableView extends ATable implements ITable {
   }
 
   at(i: number, j: number) {
-    let inverted = this.range.invert([i, j], this.root.dim);
+    const inverted = this.range.invert([i, j], this.root.dim);
     return this.root.at(inverted[0], inverted[1]);
   }
 
   col(i: number) {
-    let inverted = this.range.invert([0, i], this.root.dim);
+    const inverted = this.range.invert([0, i], this.root.dim);
     return this.root.col(inverted[1]);
   }
 
@@ -118,8 +116,8 @@ export class TableView extends ATable implements ITable {
     return this.root.data(this.range.preMultiply(parse(range), this.root.dim));
   }
 
-  colData(column: string, range: RangeLike = all()) {
-    return this.root.colData(column, this.range.preMultiply(parse(range), this.root.dim));
+  colData<T>(column: string, range: RangeLike = all()) {
+    return this.root.colData<T>(column, this.range.preMultiply(parse(range), this.root.dim));
   }
 
   objects(range: RangeLike = all()) {

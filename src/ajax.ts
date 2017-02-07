@@ -53,7 +53,7 @@ function parseType(expectedDataType: string, response: Response) {
  * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
  * @returns {Promise<any>}
  */
-export function send(url: string, data: any = {}, method = 'GET', expectedDataType = 'json'): Promise<any> {
+export async function send(url: string, data: any = {}, method = 'GET', expectedDataType = 'json'): Promise<any> {
   // for compatibility
   method = method.toUpperCase();
 
@@ -74,16 +74,15 @@ export function send(url: string, data: any = {}, method = 'GET', expectedDataTy
     },
   };
   if (data && !(data instanceof FormData)) {
-    options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    (<any>options.headers)['Content-Type'] = 'application/x-www-form-urlencoded';
     options.body = encodeParams(data);
   } else if (data) {
     options.body = data;
   }
 
   // there are no typings for fetch so far
-  return self.fetch(url, options)
-    .then(checkStatus)
-    .then(parseType.bind(null, expectedDataType));
+  const r = checkStatus(await self.fetch(url, options));
+  return parseType(expectedDataType, r);
 }
 /**
  * to get some ajax json file
@@ -126,7 +125,7 @@ export function api2absURL(url: string, data: any = null) {
  * @param data
  * @returns {any}
  */
-export function encodeParams(data = null) {
+export function encodeParams(data :any = null) {
   if (data === null) {
     return null;
   }
@@ -137,7 +136,7 @@ export function encodeParams(data = null) {
   if (keys.length === 0) {
     return null;
   }
-  const s = [];
+  const s :string[] = [];
 
   function add(prefix: string, key: string, value: any) {
     if (Array.isArray(value)) {

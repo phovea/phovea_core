@@ -18,8 +18,8 @@ export interface IMultiForm extends IVisInstance {
   switchTo(index: number): Promise<IVisInstance|IVisInstance[]>;
   switchTo(vis: IVisPluginDesc): Promise<IVisInstance|IVisInstance[]>;
 
-  addIconVisChooser(toolbar: Element);
-  addSelectVisChooser(toolbar: Element);
+  addIconVisChooser(toolbar: Element): void;
+  addSelectVisChooser(toolbar: Element): void;
 }
 
 
@@ -45,7 +45,7 @@ export function addIconVisChooser(toolbar: HTMLElement, ...forms: IMultiForm[]) 
   const visses = toAvailableVisses(forms);
 
   visses.forEach((v) => {
-    let child = createNode(s, 'i');
+    const child = createNode(s, 'i');
     v.iconify(child);
     child.onclick = () => forms.forEach((f) => f.switchTo(v));
   });
@@ -57,7 +57,7 @@ export function addSelectVisChooser(toolbar: HTMLElement, ...forms: IMultiForm[]
   const visses = toAvailableVisses(forms);
 
   visses.forEach((v, i) => {
-    let child = createNode(s, 'option');
+    const child = createNode(s, 'option');
     child.setAttribute('value', String(i));
     child.textContent = v.name;
   });

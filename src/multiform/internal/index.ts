@@ -5,6 +5,9 @@
 
 import {IVisMetaData, IVisPluginDesc} from '../../vis';
 
+/**
+ * @internal
+ */
 export class ProxyMetaData implements IVisMetaData {
   constructor(private proxy: () => IVisMetaData) {
 
@@ -25,7 +28,9 @@ export class ProxyMetaData implements IVisMetaData {
     return p ? p.sizeDependsOnDataDimension : [false, false];
   }
 }
-
+/**
+ * @internal
+ */
 export function selectVis(initial: number|string|IVisPluginDesc, visses: IVisPluginDesc[]) {
   switch (typeof initial) {
     case 'number':
@@ -37,16 +42,20 @@ export function selectVis(initial: number|string|IVisPluginDesc, visses: IVisPlu
   }
 }
 
-
+/**
+ * @internal
+ */
 export function clearNode(parent: Element) {
   let node = parent.firstChild;
   while ((node = parent.firstChild) != null) {
     parent.removeChild(node);
   }
 }
-
+/**
+ * @internal
+ */
 export function createNode(parent: HTMLElement, type: string = 'div', clazz?: string) {
-  let node = parent.ownerDocument.createElement(type);
+  const node = parent.ownerDocument.createElement(type);
   if (clazz) {
     clazz.split(' ').forEach((c) => node.classList.add(c));
   }
