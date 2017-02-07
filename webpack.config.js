@@ -33,7 +33,7 @@ const webpackloaders = [
     test: /\.(png|jpg)$/,
     loader: 'url-loader',
     query: {
-      limit: 10000 //inline <= 10kb
+      limit: 10000, //inline <= 10kb
     }
   },
   {
@@ -164,7 +164,8 @@ function generateWebpack(options) {
       proxy: {
         '/api/*': {
           target: 'http://localhost:9000',
-          secure: false
+          secure: false,
+          ws: true
         },
         '/login': {
           target: 'http://localhost:9000',

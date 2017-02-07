@@ -12,12 +12,7 @@
       "es2015"
     ],
     "baseUrl": "../",
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "stripInternal": true
+    "noImplicitAny": false
   },
   "include": [
     "src/**/*.ts",
