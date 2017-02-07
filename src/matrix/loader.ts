@@ -55,13 +55,13 @@ function maskIt(desc: IMatrixDataDescription<any>) {
   return (v: number|number[]) => v;
 }
 
-export function viaAPI2Loader() {
+export function viaAPI2Loader(): IMatrixLoader2<any> {
   let rowIds: Promise<Range> = null,
     rows: Promise<string[]> = null,
     colIds: Promise<Range> = null,
     cols: Promise<string[]> = null,
     data: Promise<any[][]> = null,
-    hist: Promise<number[]> = null;
+    hist: Promise<IHistogram> = null;
   const r = {
     rowIds: (desc: IMatrixDataDescription<any>, range: Range) => {
       if (rowIds == null) {
