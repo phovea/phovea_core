@@ -27,7 +27,7 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
   }
 
   list() {
-    const lists = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
+    const lists : string[] = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
     const l = lists.map((id) => JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graph.' + id)));
     return Promise.resolve(l);
   }
@@ -37,24 +37,22 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
     return Promise.resolve(LocalStorageGraph.load(desc, provenanceGraphFactory(), this.options.storage));
   }
 
-  get(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
-    return this.getGraph(desc).then((impl) => new ProvenanceGraph(desc, impl));
+  async get(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
+    return new ProvenanceGraph(desc, await this.getGraph(desc));
   }
 
-  clone(graph: GraphBase): Promise<ProvenanceGraph> {
+  async clone(graph: GraphBase): Promise<ProvenanceGraph> {
     const desc = this.createDesc();
-    return this.getGraph(desc).then((newGraph) => {
-      newGraph.restoreDump(graph.persist(), provenanceGraphFactory());
-      return new ProvenanceGraph(desc, newGraph);
-    });
+    const newGraph = await this.getGraph(desc);
+    newGraph.restoreDump(graph.persist(), provenanceGraphFactory());
+    return new ProvenanceGraph(desc, newGraph);
   }
 
-  import(json: any): Promise<ProvenanceGraph> {
+  async import(json: any): Promise<ProvenanceGraph> {
     const desc = this.createDesc();
-    return this.getGraph(desc).then((newGraph) => {
-      newGraph.restoreDump(json, provenanceGraphFactory());
-      return new ProvenanceGraph(desc, newGraph);
-    });
+    const newGraph = await this.getGraph(desc);
+    newGraph.restoreDump(json, provenanceGraphFactory());
+    return new ProvenanceGraph(desc, newGraph);
   }
 
   delete(desc: IProvenanceGraphDataDescription) {
@@ -67,13 +65,13 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
   }
 
   private createDesc() {
-    const lists = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
+    const lists: string[] = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
     const id = this.options.prefix + (lists.length > 0 ? String(1 + Math.max(...lists.map((d) => parseInt(d.slice(this.options.prefix.length), 10)))) : '0');
     const desc: IProvenanceGraphDataDescription = {
       type: 'provenance_graph',
       name: 'Local Workspace#' + id,
       fqname: this.options.prefix + '.Provenance Graph #' + id,
-      id: id,
+      id,
       local: true,
       size: [0, 0],
       attrs: {

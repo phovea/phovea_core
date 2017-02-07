@@ -89,7 +89,7 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
         return [asUngrouped(dim)];
       }
     });
-    const grid = this.grid = [];
+    const grid: GridElem[] = this.grid = [];
 
     function product(level: number, range: Range1D[], pos: number[]) {
       if (level === dims.length) {
@@ -240,20 +240,18 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
     }
     const parentLoc = offset(this.content);
 
-    function relativePos(pos) {
+    function relativePos(pos: {x: number, y: number}) {
       return {
         x: pos.x - parentLoc.left,
         y: pos.y - parentLoc.top
       };
     }
 
-    function filterTo() {
-      const inElems = [];
-      let i: number, matched, g: GridElem;
+    const filterTo = () => {
+      const inElems: {g: GridElem, pos: {x: number, y: number}, r: Range}[]= [];
 
-      for (i = 0; i < this.grid.length; ++i) {
-        g = this.grid[i];
-        matched = g.subrange(range);
+      for (const g of this.grid) {
+        const matched = g.subrange(range);
 
         if (!matched.isNone) { //direct group hit
           inElems.push({
@@ -264,12 +262,12 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
         }
       }
       return inElems;
-    }
+    };
 
-    const inElems = filterTo.call(this);
+    const inElems = filterTo();
 
     if (inElems.length === 1) {
-      return inElems[0].g.actVis.locate(inElems[0].r).then((loc) => {
+      return inElems[0].g.actVis.locate(inElems[0].r).then((loc: AShape) => {
         return loc ? loc.shift(inElems[0].pos) : loc;
       });
     }
@@ -296,39 +294,39 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
     });
   }
 
-  locate() {
-    const p = this.actVisPromise || Promise.resolve(null), args = Array.from(arguments);
-    return p.then(function (visses) {
+  locate(...range: Range[]) {
+    const p = this.actVisPromise || Promise.resolve(null);
+    return p.then((visses) => {
       if (!visses) {
-        return Promise.resolve((arguments.length === 1 ? undefined : new Array(args.length)));
+        return Promise.resolve((range.length === 1 ? undefined : new Array(range.length)));
       }
       if (visses.length === 1) {
-        return visses[0].locate.apply(visses[0], args);
+        return visses[0].locate.apply(visses[0], range);
       } else {
         //multiple groups
-        if (arguments.length === 1) {
-          return this.locateGroup(arguments[0]);
+        if (range.length === 1) {
+          return this.locateGroup(range[0]);
         } else {
-          return Promise.all(args.map((arg) => this.locateGroup(arg)));
+          return Promise.all(range.map((arg) => this.locateGroup(arg)));
         }
       }
     });
   }
 
   locateById(...range: Range[]) {
-    const p = this.actVisPromise || Promise.resolve(null), args = Array.from(arguments);
-    return p.then(function (visses) {
+    const p = this.actVisPromise || Promise.resolve(null);
+    return p.then((visses) => {
       if (!visses) {
-        return Promise.resolve((arguments.length === 1 ? undefined : new Array(args.length)));
+        return Promise.resolve((range.length === 1 ? undefined : new Array(range.length)));
       }
       if (visses.length === 1) {
-        return visses[0].locateById.apply(visses[0], args);
+        return visses[0].locateById.apply(visses[0], range);
       } else {
         //multiple groups
-        if (args.length === 1) {
-          return this.locateGroupById(args[0]);
+        if (range.length === 1) {
+          return this.locateGroupById(range[0]);
         } else {
-          return Promise.all(args.map((arg) => this.locateGroupById(arg)));
+          return Promise.all(range.map((arg) => this.locateGroupById(arg)));
         }
       }
     });

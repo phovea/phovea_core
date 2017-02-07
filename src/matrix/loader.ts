@@ -42,26 +42,26 @@ export function adapterOne2Two<T>(loader: IMatrixLoader<T>): IMatrixLoader2<T> {
     rows: (desc: IMatrixDataDescription<any>, range: Range) => loader(desc).then((d) => range.dim(0).filter(d.rows, desc.size[0])),
     colIds: (desc: IMatrixDataDescription<any>, range: Range) => loader(desc).then((d) => range.preMultiply(d.colIds, desc.size)),
     cols: (desc: IMatrixDataDescription<any>, range: Range) => loader(desc).then((d) => range.dim(1).filter(d.cols, desc.size[1])),
-    ids: (desc: IMatrixDataDescription<any>, range: Range) => loader(desc).then((data) => range.preMultiply(data.ids, desc.size)),
-    at: (desc: IMatrixDataDescription<any>, i: number, j: number) => loader(desc).then((data) => data[i][j]),
+    ids: (desc: IMatrixDataDescription<any>, range: Range) => loader(desc).then((d) => range.preMultiply(d.ids, desc.size)),
+    at: (desc: IMatrixDataDescription<any>, i: number, j: number) => loader(desc).then((d) => d.data[i][j]),
     data: (desc: IMatrixDataDescription<any>, range: Range) => loader(desc).then((d) => range.filter(d.data, desc.size))
   };
 }
 
 function maskIt(desc: IMatrixDataDescription<any>) {
   if (desc.value.type === VALUE_TYPE_INT || desc.value.type === VALUE_TYPE_REAL) {
-    return (v) => mask(v, <INumberValueTypeDesc>desc.value);
+    return (v: number|number[]) => mask(v, <INumberValueTypeDesc>desc.value);
   }
-  return (v) => v;
+  return (v: number|number[]) => v;
 }
 
 export function viaAPI2Loader() {
-  let rowIds = null,
-    rows = null,
-    colIds = null,
-    cols = null,
-    data = null,
-    hist = null;
+  let rowIds: Promise<Range> = null,
+    rows: Promise<string[]> = null,
+    colIds: Promise<Range> = null,
+    cols: Promise<string[]> = null,
+    data: Promise<any[][]> = null,
+    hist: Promise<number[]> = null;
   const r = {
     rowIds: (desc: IMatrixDataDescription<any>, range: Range) => {
       if (rowIds == null) {
@@ -132,7 +132,7 @@ export function viaAPI2Loader() {
       return getAPIData(`/dataset/matrix/${desc.id}/raw`, {range: range.toString()}).then(maskIt(desc));
     },
     heatmapUrl: (desc: IMatrixDataDescription<any>, range: Range, options: IHeatMapUrlOptions) => {
-      let args: any = {
+      const args: any = {
         format: options.format || 'png',
         range: range.toString()
       };

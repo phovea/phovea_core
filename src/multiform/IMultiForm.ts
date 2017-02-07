@@ -18,8 +18,8 @@ export interface IMultiForm extends IVisInstance {
   switchTo(index: number): Promise<IVisInstance|IVisInstance[]>;
   switchTo(vis: IVisPluginDesc): Promise<IVisInstance|IVisInstance[]>;
 
-  addIconVisChooser(toolbar: Element);
-  addSelectVisChooser(toolbar: Element);
+  addIconVisChooser(toolbar: Element): void;
+  addSelectVisChooser(toolbar: Element): void;
 }
 
 

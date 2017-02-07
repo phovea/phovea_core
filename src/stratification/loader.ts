@@ -49,8 +49,8 @@ export function viaDataLoader(rows: string[], rowIds: number[], range: Composite
     if (!_data) { //in the cache
       _data = Promise.resolve({
         rowIds: rlist(rowIds),
-        rows: rows,
-        range: range
+        rows,
+        range
       });
     }
     return _data;

@@ -21,6 +21,7 @@ import AVector from './AVector';
 import {IVectorLoader, viaAPILoader, viaDataLoader, IVectorLoaderResult} from './loader';
 /**
  * root matrix implementation holding the data
+ * @internal
  */
 export default class Vector<T,D extends IValueTypeDesc> extends AVector<T,D> {
 
@@ -51,28 +52,27 @@ export default class Vector<T,D extends IValueTypeDesc> extends AVector<T,D> {
    * @param i
    * @returns {*}
    */
-  at(i: number) {
-    return this.load().then((d) => d.data[i]);
+  async at(i: number) {
+    return (await this.load()).data[i];
   }
 
-  data(range: RangeLike = all()) {
-    return this.load().then((data) => {
-      const d = parse(range).filter(data.data, this.dim);
-      if ((this.valuetype.type === VALUE_TYPE_REAL || this.valuetype.type === VALUE_TYPE_INT)) {
-        return mask(d, <INumberValueTypeDesc><any>this.valuetype);
-      }
-      return d;
-    });
+  async data(range: RangeLike = all()) {
+    const data = await this.load();
+    const d = parse(range).filter(data.data, this.dim);
+    if ((this.valuetype.type === VALUE_TYPE_REAL || this.valuetype.type === VALUE_TYPE_INT)) {
+      return mask(d, <INumberValueTypeDesc><any>this.valuetype);
+    }
+    return d;
   }
 
-  names(range: RangeLike = all()) {
-    return this.load().then((data) => {
-      return parse(range).filter(data.rows, this.dim);
-    });
+  async names(range: RangeLike = all()) {
+    const data = await this.load();
+    return parse(range).filter(data.rows, this.dim);
   }
 
-  ids(range: RangeLike = all()): Promise<Range> {
-    return this.load().then((data) => data.rowIds.preMultiply(parse(range), this.dim));
+  async ids(range: RangeLike = all()): Promise<Range> {
+    const data = await this.load();
+    return data.rowIds.preMultiply(parse(range), this.dim);
   }
 
   get idtypes() {
@@ -83,18 +83,16 @@ export default class Vector<T,D extends IValueTypeDesc> extends AVector<T,D> {
     return this.desc.size;
   }
 
-  sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
-    return this.data().then((d) => {
-      const indices = argSort(d, compareFn, thisArg);
-      return this.view(rlist(indices));
-    });
+  async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
+    const d = await this.data();
+    const indices = argSort(d, compareFn, thisArg);
+    return this.view(rlist(indices));
   }
 
-  filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
-    return this.data().then((d) => {
-      const indices = argFilter(d, callbackfn, thisArg);
-      return this.view(rlist(indices));
-    });
+  async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
+    const d = await this.data();
+    const indices = argFilter(d, callbackfn, thisArg);
+    return this.view(rlist(indices));
   }
 
   persist() {
@@ -104,6 +102,7 @@ export default class Vector<T,D extends IValueTypeDesc> extends AVector<T,D> {
 
 /**
  * module entry point for creating a datatype
+ * @internal
  * @param desc
  * @returns {IVector}
  */

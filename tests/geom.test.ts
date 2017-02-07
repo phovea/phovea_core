@@ -1,3 +1,4 @@
+/// <reference types="jasmine" />
 import {Circle, Rect, Ellipse, Polygon, Line, CORNER} from '../src/geom';
 import {Vector2D} from '../src/2D';
 
@@ -23,7 +24,7 @@ describe('Circle', () => {
   });
 
   describe('corner', () => {
-    function corner(label, expected) {
+    function corner(label: string, expected: string) {
       it(label, () => expect(circle.corner(CORNER[label]).toString()).toEqual(expected));
     }
     corner('NW', '0,0');
@@ -85,7 +86,7 @@ describe('Rect', () => {
   });
 
   describe('corner', () => {
-    function corner(label, expected) {
+    function corner(label: string, expected: string) {
       it(label, () => expect(rect.corner(CORNER[label]).toString()).toEqual(expected));
     }
     corner('NW', '0,0');
@@ -144,7 +145,7 @@ describe('Ellipse', () => {
   });
 
   describe('corner', () => {
-    function corner(label, expected) {
+    function corner(label: string, expected: string) {
       it(label, () => expect(ellipse.corner(CORNER[label]).toString()).toEqual(expected));
     }
     corner('NW', '0,0');
@@ -206,7 +207,7 @@ describe('Polygon', () => {
   });
 
   describe('corner', () => {
-    function corner(label, expected) {
+    function corner(label: string, expected: string) {
       it(label, () => expect(poly.corner(CORNER[label]).toString()).toEqual(expected));
     }
     corner('NW', '0,0');
@@ -271,7 +272,7 @@ describe('Line', () => {
   });
 
   describe('corner', () => {
-    function corner(label, expected) {
+    function corner(label: string, expected: string) {
       it(label, () => expect(line.corner(CORNER[label]).toString()).toEqual(expected));
     }
     corner('NW', '0,0');

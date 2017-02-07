@@ -17,8 +17,8 @@ export interface IProductSelectAble extends ISelectAble {
   producttype: ProductIDType;
   productSelections(type?: string): Promise<Range[]>;
 
-  selectProduct(range: RangeLike[], op?: SelectOperation);
-  selectProduct(type: string, range: RangeLike[], op?: SelectOperation);
+  selectProduct(range: RangeLike[], op?: SelectOperation): Promise<Range[]>;
+  selectProduct(type: string, range: RangeLike[], op?: SelectOperation): Promise<Range[]>;
 }
 
 export abstract class AProductSelectAble extends ASelectAble {
@@ -43,7 +43,7 @@ export abstract class AProductSelectAble extends ASelectAble {
       this.fire(ProductIDType.EVENT_SELECT_PRODUCT, type, act);
       this.fire(`${ProductIDType.EVENT_SELECT_PRODUCT}-${type}`, act);
     });
-  };
+  }
 
   abstract get producttype(): ProductIDType;
 
@@ -77,8 +77,8 @@ export abstract class AProductSelectAble extends ASelectAble {
     });
   }
 
-  selectProduct(range: RangeLike[], op?: SelectOperation);
-  selectProduct(type: string, range: RangeLike[], op?: SelectOperation);
+  selectProduct(range: RangeLike[], op?: SelectOperation): Promise<Range[]>;
+  selectProduct(type: string, range: RangeLike[], op?: SelectOperation): Promise<Range[]>;
   selectProduct() {
     const a = Array.from(arguments);
     const type = (typeof a[0] === 'string') ? a.shift() : defaultSelectionType,
@@ -87,20 +87,20 @@ export abstract class AProductSelectAble extends ASelectAble {
     return this.selectProductImpl(range, op, type);
   }
 
-  private selectProductImpl(cells: Range[], op = SelectOperation.SET, type: string = defaultSelectionType) {
+  private selectProductImpl(cells: Range[], op = SelectOperation.SET, type: string = defaultSelectionType): Promise<Range[]> {
     return this.ids().then((ids: Range) => {
       cells = cells.map((c) => ids.preMultiply(c));
-      this.producttype.select(type, cells, op);
+      return this.producttype.select(type, cells, op);
     });
   }
 
   /**
    * clear the specific selection (type) and dimension
    */
-  clear();
-  clear(type: string);
-  clear(dim: number);
-  clear(dim: number, type: string);
+  clear(): Promise<Range[]>;
+  clear(type: string): Promise<Range[]>;
+  clear(dim: number): Promise<Range[]>;
+  clear(dim: number, type: string): Promise<Range[]>;
   clear() {
     const a = Array.from(arguments);
     if (typeof a[0] === 'number') {

@@ -77,10 +77,10 @@ function parseNamedRange1D(code: string, act: number): IParseDimResult {
         act: r.act
       };
     case '{':
-      const groups = [];
+      const groups: Range1DGroup[] = [];
       while (code.charAt(act) !== '}') {
         r = parseNamedRange1D(code, act + 1);
-        groups.push(r.dim);
+        groups.push(<Range1DGroup>r.dim);
         act = r.act;
       }
       return {
@@ -90,7 +90,7 @@ function parseNamedRange1D(code: string, act: number): IParseDimResult {
     default: //ERROR
       return {
         dim: Range1D.all(),
-        act: act
+        act
       };
   }
 }
@@ -113,7 +113,7 @@ function parseRange1D(code: string, act: number): IParseDimResult {
       break;
     default:
       next = code.indexOf('}', act);
-      let n2 = code.indexOf(',', act);
+      const n2 = code.indexOf(',', act);
       if (next >= 0 && n2 >= 0) {
         next = Math.min(next, n2);
       } else if (next < 0) {

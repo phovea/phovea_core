@@ -16,6 +16,7 @@ import StratificationGroup from '../../stratification/StratificationGroup';
 
 /**
  * root matrix implementation holding the data
+ * @internal
  */
 export default class StratificationVector extends ADataType<IStratificationDataDescription> implements IStratification {
 
@@ -47,11 +48,9 @@ export default class StratificationVector extends ADataType<IStratificationDataD
     return new StratificationGroup(this, group, this.groups[group]);
   }
 
-  hist(bins?: number, range: RangeLike = all()): Promise<IHistogram> {
+  async hist(bins?: number, range: RangeLike = all()): Promise<IHistogram> {
     // FIXME unused parameter
-    return this.range().then((r) => {
-      return rangeHist(r);
-    });
+    return rangeHist(await this.range());
   }
 
   vector() {
@@ -70,10 +69,9 @@ export default class StratificationVector extends ADataType<IStratificationDataD
     return Promise.resolve(this.r);
   }
 
-  idRange() {
-    return this.ids().then((ids) => {
-      return ids.dim(0).preMultiply(this.r, this.dim[0]);
-    });
+  async idRange() {
+    const ids = await this.ids();
+    return ids.dim(0).preMultiply(this.r, this.dim[0]);
   }
 
   names(range: RangeLike = all()) {
@@ -97,7 +95,7 @@ export default class StratificationVector extends ADataType<IStratificationDataD
   }
 
   get ngroups() {
-    return this.ngroups;
+    return this.groups.length;
   }
 
   get dim() {

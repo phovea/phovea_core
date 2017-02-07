@@ -22,7 +22,7 @@ export enum SelectOperation {
  * converts the given mouse event to a select operation
  * @param event the mouse event to examine
  */
-export function toSelectOperation(event: any);
+export function toSelectOperation(event: MouseEvent): SelectOperation;
 /**
  * converts the given key modifiers to select operation
  * @param ctryKey
@@ -30,7 +30,7 @@ export function toSelectOperation(event: any);
  * @param shiftKey
  * @param metaKey
  */
-export function toSelectOperation(ctryKey: boolean, altKey: boolean, shiftKey: boolean, metaKey: boolean);
+export function toSelectOperation(ctryKey: boolean, altKey: boolean, shiftKey: boolean, metaKey: boolean): SelectOperation;
 export function toSelectOperation(event: any) {
   let ctryKeyDown, shiftDown, altDown, metaDown;
   if (typeof event === 'boolean') {
@@ -61,8 +61,8 @@ export interface IIDType extends IEventHandler, IPersistable {
 
   selectionTypes(): string[];
 
-  clear();
-  clear(type: string);
+  clear(): void;
+  clear(type: string): void;
 }
 
 

@@ -9,7 +9,6 @@ import ProvenanceGraph, {
   IProvenanceGraphDataDescription
 } from './ProvenanceGraph';
 import GraphBase from '../graph/GraphBase';
-import GraphProxy from '../graph/GraphProxy';
 import {retrieve} from '../session';
 
 function getCurrentUser() {
@@ -25,24 +24,23 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     mixin(this.options, options);
   }
 
-  list() {
-    return listData((d) => d.desc.type === 'graph' && (<any>d.desc).attrs.graphtype === 'provenance_graph' && (<any>d.desc).attrs.of === this.options.application).then((d) => d.map((di) => di.desc));
+  async list() {
+    return (await listData((d) => d.desc.type === 'graph' && (<any>d.desc).attrs.graphtype === 'provenance_graph' && (<any>d.desc).attrs.of === this.options.application)).map((di) => di.desc);
   }
 
-  getGraph(desc: IProvenanceGraphDataDescription): Promise<GraphBase> {
-    return getData(desc.id)
-      .then((graph: GraphProxy) => graph.impl(provenanceGraphFactory()));
+  async getGraph(desc: IProvenanceGraphDataDescription): Promise<GraphBase> {
+    return (<any>(await getData(desc.id))).impl(provenanceGraphFactory());
   }
 
-  get(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
-    return this.getGraph(desc).then((impl: GraphBase) => new ProvenanceGraph(desc, impl));
+  async get(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
+    return new ProvenanceGraph(desc, await this.getGraph(desc));
   }
 
   delete(desc: IProvenanceGraphDataDescription) {
     return removeData(desc);
   }
 
-  import(json: any): Promise<ProvenanceGraph> {
+  async import(json: any): Promise<ProvenanceGraph> {
     const desc: any = {
       type: 'graph',
       attrs: {
@@ -57,12 +55,11 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
       nodes: json.nodes,
       edges: json.edges
     };
-    return upload(desc)
-      .then((graph: GraphProxy) => graph.impl(provenanceGraphFactory()))
-      .then((impl: GraphBase) => new ProvenanceGraph(<IProvenanceGraphDataDescription>impl.desc, impl));
+    const impl: GraphBase = (<any>(await upload(desc))).impl(provenanceGraphFactory());
+    return new ProvenanceGraph(<IProvenanceGraphDataDescription>impl.desc, impl);
   }
 
-  create() {
+  async create() {
     const desc: IProvenanceGraphDataDescription = {
       id: undefined,
       type: 'graph',
@@ -77,8 +74,8 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
       ts: Date.now(),
       description: ''
     };
-    return upload(desc)
-      .then((graph: GraphProxy) => graph.impl(provenanceGraphFactory()))
-      .then((impl: GraphBase) => new ProvenanceGraph(<IProvenanceGraphDataDescription>impl.desc, impl));
+
+    const impl: GraphBase = (<any>(await upload(desc))).impl(provenanceGraphFactory());
+    return new ProvenanceGraph(<IProvenanceGraphDataDescription>impl.desc, impl);
   }
 }

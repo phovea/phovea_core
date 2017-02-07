@@ -8,8 +8,8 @@
  */
 
 export interface IEventHandler {
-  on(events, handler);
-  off(events, handler);
+  on(events: string|{[key: string]: IEventListener}, handler?: IEventListener): void;
+  off(events: string|{[key: string]: IEventListener}, handler?: IEventListener): void;
 }
 
 export interface IDataBinding {
@@ -37,10 +37,10 @@ export interface IEvent {
    */
   readonly args: any[];
 
-  isPropagationStopped();
-  stopPropagation();
-  isImmediatePropagationStopped();
-  stopImmediatePropagation();
+  isPropagationStopped(): boolean;
+  stopPropagation(): void;
+  isImmediatePropagationStopped(): boolean;
+  stopImmediatePropagation(): void;
 }
 
 export interface IEventListener {

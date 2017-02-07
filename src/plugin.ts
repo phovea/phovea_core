@@ -79,16 +79,19 @@ function push(type: string, idOrLoader: string | (() => any), descOrLoader: any,
     factory: 'create',
     description: '',
     version: '1.0.0',
-    load: () => Promise.resolve(loader()).then((instance) => ({desc: p, factory: instance[p.factory]}))
+    load: async (): Promise<IPlugin> => {
+      const instance= await Promise.resolve(loader());
+      return {desc: p, factory: instance[p.factory]};
+    }
   }, typeof descOrLoader === 'function' ? desc : descOrLoader);
 
   registry.push(p);
 }
 
 export interface IRegistry {
-  push(type: string, loader: () => any, desc?: any);
-  push(type: string, id: string, loader: () => any, desc?: any);
-  push(type: string, idOrLoader: string | (() => any), descOrLoader: any, desc?: any);
+  push(type: string, loader: () => any, desc?: any): void;
+  push(type: string, id: string, loader: () => any, desc?: any): void;
+  push(type: string, idOrLoader: string | (() => any), descOrLoader: any, desc?: any): void;
 }
 
 

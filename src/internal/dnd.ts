@@ -9,8 +9,8 @@
  * @param type
  * @returns {any}
  */
-export function hasDnDType(e, type) {
-  const types = e.dataTransfer.types;
+export function hasDnDType(e: DragEvent, type: string) {
+  const types: any= e.dataTransfer.types;
 
   /*
    * In Chrome datatransfer.types is an Array,
@@ -34,7 +34,7 @@ export function hasDnDType(e, type) {
  * @param e
  * @returns {boolean|RegExpMatchArray}
  */
-export function copyDnD(e) {
+export function copyDnD(e: DragEvent) {
   const dT = e.dataTransfer;
   return (e.ctrlKey && dT.effectAllowed.match(/copy/gi)) || (!dT.effectAllowed.match(/move/gi));
 }
@@ -42,7 +42,7 @@ export function copyDnD(e) {
  * updates the drop effect accoriding to the current copyDnD state
  * @param e
  */
-export function updateDropEffect(e) {
+export function updateDropEffect(e: DragEvent) {
   const dT = e.dataTransfer;
   if (copyDnD(e)) {
     dT.dropEffect = 'copy';

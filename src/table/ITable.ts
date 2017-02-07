@@ -12,7 +12,7 @@ import {Range, RangeLike} from '../range';
 import {IDType} from '../idtype';
 import {IDataType, IValueType, IValueTypeDesc, IDataDescription, createDefaultDataDesc} from '../datatype';
 import {IVector} from '../vector';
-import {IAnyVector} from "../vector/IVector";
+import {IAnyVector} from '../vector/IVector';
 
 export interface IQueryArgs {
   [key: string]: number|string;
@@ -83,7 +83,7 @@ export interface ITable extends IDataType {
    * @param valuetype the new value type by default the same as matrix valuetype
    * @param idtype the new vlaue type by default the same as matrix rowtype
    */
-  reduce<T, D extends IValueTypeDesc>(f: (row: any[]) => T, this_f?: any, valuetype?: D, idtype?: IDType): IVector<T, D>;
+  reduce<T, D extends IValueTypeDesc>(f: (row: any[]) => T, thisArgument?: any, valuetype?: D, idtype?: IDType): IVector<T, D>;
   /**
    * returns a promise for getting one cell
    * @param i

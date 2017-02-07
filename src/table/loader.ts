@@ -8,6 +8,9 @@ import {Range, parse, range} from '../range';
 import {IValueType, VALUE_TYPE_INT, VALUE_TYPE_REAL, INumberValueTypeDesc, mask} from '../datatype';
 import {IQueryArgs, ITableDataDescription, ITableColumn} from './ITable';
 
+/**
+ * @internal
+ */
 export interface ITableLoader {
   (desc: ITableDataDescription): Promise<{
     rowIds: Range;
@@ -16,6 +19,9 @@ export interface ITableLoader {
   }>;
 }
 
+/**
+ * @internal
+ */
 export interface ITableLoader2 {
   rowIds(desc: ITableDataDescription, range: Range): Promise<Range>;
   rows(desc: ITableDataDescription, range: Range): Promise<string[]>;
@@ -25,6 +31,9 @@ export interface ITableLoader2 {
   view(desc: ITableDataDescription, name: string, args: any): ITableLoader;
 }
 
+/**
+ * @internal
+ */
 export function adapterOne2Two(loader: ITableLoader): ITableLoader2 {
   return {
     rowIds: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => range.preMultiply(d.rowIds, desc.size)),
@@ -39,8 +48,15 @@ export function adapterOne2Two(loader: ITableLoader): ITableLoader2 {
 }
 
 
+/**
+ * @internal
+ */
 export function viaAPIViewLoader(name: string, args: IQueryArgs): ITableLoader {
-  let _loader = undefined;
+  let _loader: Promise<{
+    rowIds: Range;
+    rows: string[];
+    objs: any[];
+  }> = undefined;
   return (desc) => {
     if (!_loader) { //in the cache
       _loader = getAPIJSON(`/dataset/table/${desc.id}/view/${name}`, args).then((data) => {
@@ -74,12 +90,15 @@ function maskObjects(arr: IValueType[], desc: ITableDataDescription) {
 }
 
 
+/**
+ * @internal
+ */
 export function viaAPI2Loader(): ITableLoader2 {
-  let rowIds = null,
-    rows = null,
-    cols: any = {},
-    objs = null,
-    data = null;
+  const cols: any = {};
+  let rowIds: Promise<Range> = null,
+    rows: Promise<string[]> = null,
+    objs: Promise<any[]> = null,
+    data: Promise<any[][]> = null;
   const r: ITableLoader2 = {
     rowIds: (desc: ITableDataDescription, range: Range) => {
       if (rowIds == null) {
@@ -91,7 +110,7 @@ export function viaAPI2Loader(): ITableLoader2 {
       if (rows == null) {
         rows = getAPIJSON(`/dataset/table/${desc.id}/rows`);
       }
-      return rows.then((d) => range.dim(0).filter(d, desc.size[0]));
+      return rows.then((d: string[]) => range.dim(0).filter(d, desc.size[0]));
     },
     objs: (desc: ITableDataDescription, range: Range) => {
       if (range.isAll) {
@@ -132,7 +151,7 @@ export function viaAPI2Loader(): ITableLoader2 {
         return cols[column];
       }
       if (cols[column] != null) { //already loading all
-        return cols[column].then((d) => range.filter(d, (<any>desc).size));
+        return cols[column].then((d: any[]) => range.filter(d, (<any>desc).size));
       }
       //server side slicing
       return getAPIData(`/dataset/table/${desc.id}/col/${column}`, {range: range.toString()}).then((data) => maskCol(data, colDesc));
@@ -142,30 +161,33 @@ export function viaAPI2Loader(): ITableLoader2 {
   return r;
 }
 
-function toFlat(data: any[][], vecs: ITableColumn<any>[]) {
+function toFlat(data: any[], vecs: ITableColumn<any>[]) {
   return data.map((row) => vecs.map((col) => row[col.name]));
 }
 
-// TODO
+
+/**
+ * @internal
+ */
 export function viaDataLoader(data: any[], nameProperty: any) {
   let _data: any = undefined;
-  return (desc) => {
+  return (desc: any) => {
     if (_data) { //in the cache
       return Promise.resolve(_data);
     }
-    const name: (any) => string = typeof(nameProperty) === 'function' ? nameProperty : (d) => d[nameProperty.toString()];
+    const name: (d: any) => string = typeof(nameProperty) === 'function' ? nameProperty : (d) => d[nameProperty.toString()];
 
-    function toGetter(col) {
+    function toGetter(col: any) {
       if (col.getter) {
         return col.getter;
       }
-      return (d) => d[col.column || col.name];
+      return (d: any) => d[col.column || col.name];
     }
 
-    const getters = desc.columns.map(toGetter);
+    const getters: ((d: any) => any)[] = desc.columns.map(toGetter);
     const objs = data.map((row) => {
-      const r = {_: row};
-      desc.columns.forEach((col, i) => {
+      const r: any = {_: row};
+      desc.columns.forEach((col: any, i: number) => {
         r[col.name] = getters[i](row);
       });
       return r;
@@ -173,8 +195,8 @@ export function viaDataLoader(data: any[], nameProperty: any) {
     const rows = data.map(name);
     _data = {
       rowIds: desc.rowassigner ? desc.rowassigner.map(rows) : range(0, data.length),
-      rows: rows,
-      objs: objs,
+      rows,
+      objs,
       data: getters.map((getter) => data.map(getter))
     };
     return Promise.resolve(_data);

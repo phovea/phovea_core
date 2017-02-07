@@ -187,7 +187,7 @@ export default class Range1D {
     const l = this.iter(size).asList();
     const mapImpl = (sub: Range1D) => {
       const s = sub.iter(l.length);
-      const r = [];
+      const r: number[]= [];
       s.forEach((i) => {
         if (i >= 0 && i < l.length) { //check for out of range
           r.push(l[i]);
@@ -242,7 +242,7 @@ export default class Range1D {
     }
     const it1 = this.iter(size).asList();
     const it2 = other.iter(size);
-    const r = [];
+    const r: number[] = [];
     it2.forEach((i) => {
       if (it1.indexOf(i) >= 0) {
         r.push(i);
@@ -269,7 +269,7 @@ export default class Range1D {
     }
     const it1 = this.iter(size);
     const it2 = without.iter(size).asList();
-    const r = [];
+    const r: number[] = [];
     it1.forEach((i) => {
       if (it2.indexOf(i) < 0) {
         r.push(i);
@@ -358,9 +358,9 @@ export default class Range1D {
       return Range1D.all();
     }
     //
-    let mapImpl;
+    let mapImpl: (d: number, result: number[])=>void;
     if (this.isIdentityRange) {
-      let end = this.arr[0].to;
+      const end = this.arr[0].to;
       mapImpl = (d, result) => {
         if (d >= 0 && d < end) {
           result.push(d);
@@ -378,12 +378,12 @@ export default class Range1D {
     if (typeof (<ICompositeRange1D>r).fromLikeComposite === 'function') {
       const csub = <ICompositeRange1D>r;
       return csub.fromLikeComposite(csub.groups.map((g) => {
-        const result = [];
+        const result: number[]= [];
         g.forEach((d) => mapImpl(d, result));
         return g.fromLike(result);
       }));
     } else {
-      const result = [];
+      const result: number[] = [];
       r.forEach((d) => mapImpl(d, result));
       return r.fromLike(result);
     }
@@ -395,7 +395,7 @@ export default class Range1D {
    * @param size the total size for resolving negative indices
    * @returns {*}
    */
-  filter(data: any[], size?: number, transform: (any) => any = (d) => d) {
+  filter(data: any[], size?: number, transform: (v: any) => any = (d) => d) {
     if (this.isAll) {
       return data.map(transform);
     }
