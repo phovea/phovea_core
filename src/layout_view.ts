@@ -36,7 +36,7 @@ export interface IView extends ILayoutElem, IEventHandler {
 export abstract class AView extends EventHandler implements IView {
   private _layoutOptions: any = {};
 
-  abstract setBounds(x: number, y: number, w: number, h: number);
+  abstract setBounds(x: number, y: number, w: number, h: number): Promise<void>|any;
 
   abstract getBounds(): Rect;
 

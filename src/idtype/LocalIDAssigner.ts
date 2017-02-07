@@ -22,8 +22,8 @@ export default class LocalIDAssigner {
   unmap(ids: number[]) {
     const keys = Object.keys(this.lookup);
     return ids.map((id) => {
-      for (let k in keys) {
-        if (this.lookup[k] === id) {
+      for (const k in keys) {
+        if (this.lookup.get(k) === id) {
           return k;
         }
       }

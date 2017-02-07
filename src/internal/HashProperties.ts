@@ -9,7 +9,7 @@ import PropertyHandler from './PropertyHandler';
 export default class HashProperties extends PropertyHandler {
   private updated = () => {
     this.parse(location.hash);
-  };
+  }
 
   constructor() {
     super();

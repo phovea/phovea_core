@@ -44,6 +44,7 @@ export function indexOf<T>(arr: T[], f: (v: T) => boolean): number {
  * converts the given arguments object into an array
  * @param args
  * @deprecated use Array.from(arguments) instead
+ * @internal
  * @returns {*|Array}
  */
 export function argList(args: IArguments) {
@@ -59,7 +60,7 @@ export function argList(args: IArguments) {
  * @param n
  * @returns {any[]}
  */
-function indexRange(n: number) {
+function indexRange(n: number): number[] {
   //http://stackoverflow.com/questions/3746725/create-a-javascript-array-containing-1-n
   return Array.apply(null, {length: n}).map(Number.call, Number);
 }
@@ -72,7 +73,7 @@ function indexRange(n: number) {
  */
 export function argSort<T>(arr: T[], compareFn?: (a: T, b: T) => number, thisArg?: any): number[] {
   const indices = indexRange(arr.length);
-  return indices.sort((a, b) => {
+  return indices.sort((a: any, b: any) => {
     return compareFn.call(thisArg, arr[a], arr[b]);
   });
 }
@@ -86,7 +87,7 @@ export function argSort<T>(arr: T[], compareFn?: (a: T, b: T) => number, thisArg
  */
 export function argFilter<T>(arr: T[], callbackfn: (value: T, index: number) => boolean, thisArg?: any): number[] {
   const indices = indexRange(arr.length);
-  return indices.filter((value, index) => {
+  return indices.filter((value: number, index: number) => {
     return callbackfn.call(thisArg, arr[value], index);
   });
 }

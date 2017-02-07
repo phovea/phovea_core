@@ -11,7 +11,7 @@ import {mixin} from '../index';
 import {RangeLike, CompositeRange1D} from '../range';
 import {IDType, IDTypeLike} from '../idtype';
 import {
-  IHistAbleDataType, IValueTypeDesc, IValueType, IDataDescription, createDefaultDataDesc,
+  IHistAbleDataType, IValueTypeDesc, IDataDescription, createDefaultDataDesc,
   INumberValueTypeDesc, ICategoricalValueTypeDesc
 } from '../datatype';
 import {IStratification} from '../stratification/IStratification';

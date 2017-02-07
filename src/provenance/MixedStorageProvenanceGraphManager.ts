@@ -1,12 +1,10 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import {IDataDescription} from '../datatype';
 import ProvenanceGraph, {IProvenanceGraphManager, IProvenanceGraphDataDescription} from './ProvenanceGraph';
 import LocalStorageProvenanceGraphManager from './LocalStorageProvenanceGraphManager';
 import RemoteStorageProvenanceGraphManager from './RemoteStorageProvenanceGraphManager';
 import GraphBase from '../graph/GraphBase';
-import {IGraphDataDescription} from "../graph/GraphBase";
 
 export default class MixedStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private remote: RemoteStorageProvenanceGraphManager;
@@ -53,8 +51,8 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
     }
   }
 
-  cloneLocal(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
-    return this.getGraph(desc).then((g) => this.local.clone(g));
+  async cloneLocal(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
+    return this.local.clone(await this.getGraph(desc));
   }
 
   importLocal(json: any) {

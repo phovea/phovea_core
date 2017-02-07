@@ -44,16 +44,16 @@ export class Intersection {
     return this.status === 'Intersection';
   }
 
-  appendPoint(point) {
+  appendPoint(point: Vector2D) {
     this.status = 'Intersection';
     this.points.push(point);
   }
 
-  appendPoints(points) {
+  appendPoints(points: Vector2D[]) {
     if (points.length > 0) {
       this.status = 'Intersection';
     }
-    this.points.push.apply(this.points, points);
+    this.points.push(...points);
   }
 
   get length() {
@@ -97,10 +97,11 @@ export class Intersection {
           method = 'intersect' + ip2.name + ip1.name;
           params = ip2.params.concat(ip1.params);
         }
-        if (typeof Intersection[method] !== 'function') {
+        const intersectionAny = <any>Intersection;
+        if (typeof intersectionAny[method] !== 'function') {
           throw new Error('Intersection not available: ' + method);
         }
-        result = Intersection[method].apply(null, params);
+        result = intersectionAny[method].apply(null, params);
       }
     } else {
       result = new Intersection();
@@ -113,31 +114,28 @@ export class Intersection {
   }
 
   static intersectBezier2Bezier2(a1: Vector2D, a2: Vector2D, a3: Vector2D, b1: Vector2D, b2: Vector2D, b3: Vector2D) {
-    let a, b;
-    let c12, c11, c10;
-    let c22, c21, c20;
     const TOLERANCE = 1e-4;
     const result = new Intersection();
-    a = a2.multiply(-2);
-    c12 = a1.add(a.add(a3));
+    let a = a2.multiply(-2);
+    const c12 = a1.add(a.add(a3));
     a = a1.multiply(-2);
-    b = a2.multiply(2);
-    c11 = a.add(b);
-    c10 = new Vector2D(a1.x, a1.y);
+    let b = a2.multiply(2);
+    const c11 = a.add(b);
+    const c10 = new Vector2D(a1.x, a1.y);
     a = b2.multiply(-2);
-    c22 = b1.add(a.add(b3));
+    const c22 = b1.add(a.add(b3));
     a = b1.multiply(-2);
     b = b2.multiply(2);
-    c21 = a.add(b);
-    c20 = new Vector2D(b1.x, b1.y);
-    a = c12.x * c11.y - c11.x * c12.y;
-    b = c22.x * c11.y - c11.x * c22.y;
+    const c21 = a.add(b);
+    const c20 = new Vector2D(b1.x, b1.y);
+    const af = c12.x * c11.y - c11.x * c12.y;
+    const bf = c22.x * c11.y - c11.x * c22.y;
     const c = c21.x * c11.y - c11.x * c21.y;
     const d = c11.x * (c10.y - c20.y) + c11.y * (-c10.x + c20.x);
     const e = c22.x * c12.y - c12.x * c22.y;
     const f = c21.x * c12.y - c12.x * c21.y;
     const g = c12.x * (c10.y - c20.y) + c12.y * (-c10.x + c20.x);
-    const poly = new Polynomial(-e * e, -2 * e * f, a * b - f * f - 2 * e * g, a * c - 2 * f * g, a * d - g * g);
+    const poly = new Polynomial(-e * e, -2 * e * f, af * bf - f * f - 2 * e * g, af * c - 2 * f * g, af * d - g * g);
     const roots = poly.getRoots();
     for (const s of roots) {
       if (0 <= s && s <= 1) {
@@ -160,7 +158,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectBezier2Bezier3(a1: Vector2D, a2, a3, b1, b2, b3, b4) {
+  static intersectBezier2Bezier3(a1: Vector2D, a2: Vector2D, a3: Vector2D, b1: Vector2D, b2: Vector2D, b3: Vector2D, b4: Vector2D) {
     let a, b, c, d;
     let c12, c11, c10;
     let c23, c22, c21, c20;
@@ -222,11 +220,11 @@ export class Intersection {
     return result;
   }
 
-  static intersectBezier2Circle(p1, p2, p3, c, r) {
+  static intersectBezier2Circle(p1: Vector2D, p2: Vector2D, p3: Vector2D, c: Vector2D, r: number) {
     return Intersection.intersectBezier2Ellipse(p1, p2, p3, c, r, r);
   }
 
-  static intersectBezier2Ellipse(p1, p2, p3, ec, rx, ry) {
+  static intersectBezier2Ellipse(p1: Vector2D, p2: Vector2D, p3: Vector2D, ec: Vector2D, rx: number, ry: number) {
     let a, b;
     let c2, c1, c0;
     const result = new Intersection();
@@ -247,7 +245,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectBezier2Line(p1, p2, p3, a1, a2) {
+  static intersectBezier2Line(p1: Vector2D, p2: Vector2D, p3: Vector2D, a1: Vector2D, a2: Vector2D) {
     let a, b;
     let c2, c1, c0;
     let cl;
@@ -285,7 +283,7 @@ export class Intersection {
     return result;
   }
 
-  intersectBezier2Polygon(p1, p2, p3, points) {
+  intersectBezier2Polygon(p1: Vector2D, p2: Vector2D, p3: Vector2D, points: Vector2D[]) {
     const result = new Intersection();
     const length = points.length;
     for (let i = 0; i < length; i++) {
@@ -297,7 +295,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectBezier2Rectangle(p1, p2, p3, r1, r2) {
+  static intersectBezier2Rectangle(p1: Vector2D, p2: Vector2D, p3: Vector2D, r1: Vector2D, r2: Vector2D) {
     const min = r1.min(r2);
     const max = r1.max(r2);
     const topRight = new Vector2D(max.x, min.y);
@@ -314,7 +312,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectBezier3Bezier3(a1, a2, a3, a4, b1, b2, b3, b4) {
+  static intersectBezier3Bezier3(a1: Vector2D, a2: Vector2D, a3: Vector2D, a4: Vector2D, b1: Vector2D, b2: Vector2D, b3: Vector2D, b4: Vector2D) {
     let a, b, c, d;
     let c13, c12, c11, c10;
     let c23, c22, c21, c20;
@@ -401,11 +399,11 @@ export class Intersection {
     return result;
   }
 
-  static intersectBezier3Circle(p1, p2, p3, p4, c, r) {
+  static intersectBezier3Circle(p1: Vector2D, p2: Vector2D, p3: Vector2D, p4: Vector2D, c: Vector2D, r: number) {
     return Intersection.intersectBezier3Ellipse(p1, p2, p3, p4, c, r, r);
   }
 
-  static intersectBezier3Ellipse(p1, p2, p3, p4, ec, rx, ry) {
+  static intersectBezier3Ellipse(p1: Vector2D, p2: Vector2D, p3: Vector2D, p4: Vector2D, ec: Vector2D, rx: number, ry: number) {
     let a, b, c, d;
     let c3, c2, c1, c0;
     const result = new Intersection();
@@ -434,7 +432,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectBezier3Line(p1, p2, p3, p4, a1, a2) {
+  static intersectBezier3Line(p1: Vector2D, p2: Vector2D, p3: Vector2D, p4: Vector2D, a1: Vector2D, a2: Vector2D) {
     let a, b, c, d;
     let c3, c2, c1, c0;
     let cl;
@@ -484,7 +482,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectBezier3Polygon(p1, p2, p3, p4, points) {
+  static intersectBezier3Polygon(p1: Vector2D, p2: Vector2D, p3: Vector2D, p4: Vector2D, points: Vector2D[]) {
     const result = new Intersection();
     const length = points.length;
     for (let i = 0; i < length; i++) {
@@ -496,7 +494,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectBezier3Rectangle(p1, p2, p3, p4, r1, r2) {
+  static intersectBezier3Rectangle(p1: Vector2D, p2: Vector2D, p3: Vector2D, p4: Vector2D, r1: Vector2D, r2: Vector2D) {
     const min = r1.min(r2);
     const max = r1.max(r2);
     const topRight = new Vector2D(max.x, min.y);
@@ -513,7 +511,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectCircleCircle(c1, r1, c2, r2) {
+  static intersectCircleCircle(c1: Vector2D, r1: number, c2: Vector2D, r2: number) {
     let result;
     const rMax = r1 + r2;
     const rMin = Math.abs(r1 - r2);
@@ -534,11 +532,11 @@ export class Intersection {
     return result;
   }
 
-  static intersectCircleEllipse(cc, r, ec, rx, ry) {
+  static intersectCircleEllipse(cc: Vector2D, r: number, ec: Vector2D, rx: number, ry: number) {
     return Intersection.intersectEllipseEllipse(cc, r, r, ec, rx, ry);
   }
 
-  static intersectCircleLine(c, r, a1, a2) {
+  static intersectCircleLine(c: Vector2D, r: number, a1: Vector2D, a2: Vector2D) {
     let result;
     const a = (a2.x - a1.x) * (a2.x - a1.x) + (a2.y - a1.y) * (a2.y - a1.y);
     const b = 2 * ((a2.x - a1.x) * (a1.x - c.x) + (a2.y - a1.y) * (a1.y - c.y));
@@ -571,7 +569,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectCirclePolygon(c, r, points) {
+  static intersectCirclePolygon(c: Vector2D, r: number, points: Vector2D[]) {
     const result = new Intersection();
     const length = points.length;
     let inter;
@@ -589,7 +587,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectCircleRectangle(c, r, r1, r2) {
+  static intersectCircleRectangle(c: Vector2D, r: number, r1: Vector2D, r2: Vector2D) {
     const min = r1.min(r2);
     const max = r1.max(r2);
     const topRight = new Vector2D(max.x, min.y);
@@ -611,7 +609,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectEllipseEllipse(c1, rx1, ry1, c2, rx2, ry2) {
+  static intersectEllipseEllipse(c1: Vector2D, rx1: number, ry1: number, c2: Vector2D, rx2: number, ry2: number) {
     const a = [ry1 * ry1, 0, rx1 * rx1, -2 * ry1 * ry1 * c1.x, -2 * rx1 * rx1 * c1.y, ry1 * ry1 * c1.x * c1.x + rx1 * rx1 * c1.y * c1.y - rx1 * rx1 * ry1 * ry1];
     const b = [ry2 * ry2, 0, rx2 * rx2, -2 * ry2 * ry2 * c2.x, -2 * rx2 * rx2 * c2.y, ry2 * ry2 * c2.x * c2.x + rx2 * rx2 * c2.y * c2.y - rx2 * rx2 * ry2 * ry2];
     const yPoly = Intersection.bezout(a, b);
@@ -636,7 +634,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectEllipseLine(c, rx, ry, a1, a2) {
+  static intersectEllipseLine(c: Vector2D, rx: number, ry: number, a1: Vector2D, a2: Vector2D) {
     let result;
     const origin = new Vector2D(a1.x, a1.y);
     const dir = Vector2D.fromPoints(a1, a2);
@@ -646,8 +644,8 @@ export class Intersection {
     const mDiff = new Vector2D(diff.x / (rx * rx), diff.y / (ry * ry));
     const a = dir.dot(mDir);
     const b = dir.dot(mDiff);
-    c = diff.dot(mDiff) - 1.0;
-    const d = b * b - a * c;
+    const cdot = diff.dot(mDiff) - 1.0;
+    const d = b * b - a * cdot;
     if (d < 0) {
       result = new Intersection('Outside');
     } else if (d > 0) {
@@ -681,7 +679,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectEllipsePolygon(c, rx, ry, points) {
+  static intersectEllipsePolygon(c: Vector2D, rx: number, ry: number, points: Vector2D[]) {
     const result = new Intersection();
     const length = points.length;
     for (let i = 0; i < length; i++) {
@@ -693,7 +691,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectEllipseRectangle(c, rx, ry, r1, r2) {
+  static intersectEllipseRectangle(c: Vector2D, rx: number, ry: number, r1: Vector2D, r2: Vector2D) {
     const min = r1.min(r2);
     const max = r1.max(r2);
     const topRight = new Vector2D(max.x, min.y);
@@ -710,7 +708,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectLineLine(a1, a2, b1, b2) {
+  static intersectLineLine(a1: Vector2D, a2: Vector2D, b1: Vector2D, b2: Vector2D) {
     let result;
     const uaT = (b2.x - b1.x) * (a1.y - b1.y) - (b2.y - b1.y) * (a1.x - b1.x);
     const ubT = (a2.x - a1.x) * (a1.y - b1.y) - (a2.y - a1.y) * (a1.x - b1.x);
@@ -734,7 +732,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectLinePolygon(a1, a2, points) {
+  static intersectLinePolygon(a1: Vector2D, a2: Vector2D, points: Vector2D[]) {
     const result = new Intersection();
     const length = points.length;
     for (let i = 0; i < length; i++) {
@@ -746,7 +744,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectLineRectangle(a1, a2, r1, r2) {
+  static intersectLineRectangle(a1: Vector2D, a2: Vector2D, r1: Vector2D, r2: Vector2D) {
     const min = r1.min(r2);
     const max = r1.max(r2);
     const topRight = new Vector2D(max.x, min.y);
@@ -763,7 +761,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectPolygonPolygon(points1, points2) {
+  static intersectPolygonPolygon(points1: Vector2D[], points2: Vector2D[]) {
     const result = new Intersection();
     const length = points1.length;
     for (let i = 0; i < length; i++) {
@@ -775,7 +773,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectPolygonRectangle(points, r1, r2) {
+  static intersectPolygonRectangle(points: Vector2D[], r1: Vector2D, r2: Vector2D) {
     const min = r1.min(r2);
     const max = r1.max(r2);
     const topRight = new Vector2D(max.x, min.y);
@@ -792,7 +790,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectRayRay(a1, a2, b1, b2) {
+  static intersectRayRay(a1: Vector2D, a2: Vector2D, b1: Vector2D, b2: Vector2D) {
     let result;
     const uaT = (b2.x - b1.x) * (a1.y - b1.y) - (b2.y - b1.y) * (a1.x - b1.x);
     const ubT = (a2.x - a1.x) * (a1.y - b1.y) - (a2.y - a1.y) * (a1.x - b1.x);
@@ -811,7 +809,7 @@ export class Intersection {
     return result;
   }
 
-  static intersectRectangleRectangle(a1, a2, b1, b2) {
+  static intersectRectangleRectangle(a1: Vector2D, a2: Vector2D, b1: Vector2D, b2: Vector2D) {
     const min = a1.min(a2);
     const max = a1.max(a2);
     const topRight = new Vector2D(max.x, min.y);
@@ -828,7 +826,7 @@ export class Intersection {
     return result;
   }
 
-  static bezout(e1, e2) {
+  static bezout(e1: number[], e2: number[]) {
     const AB = e1[0] * e2[1] - e2[0] * e1[1];
     const AC = e1[0] * e2[2] - e2[0] * e1[2];
     const AD = e1[0] * e2[3] - e2[0] * e1[3];
@@ -1007,7 +1005,7 @@ export class Vector2D {
     return new Vector2D(-this.y, this.x);
   }
 
-  static fromPoints(p1, p2): Vector2D {
+  static fromPoints(p1: {x: number, y: number}, p2: {x: number, y: number}): Vector2D {
     return new Vector2D(p2.x - p1.x, p2.y - p1.y);
   }
 }
@@ -1024,7 +1022,7 @@ class Polynomial {
     }
   }
 
-  eval(x) {
+  eval(x: number) {
     let result = 0;
     for (let i = this.coefs.length - 1; i >= 0; i--) {
       result = result * x + this.coefs[i];
@@ -1032,7 +1030,7 @@ class Polynomial {
     return result;
   }
 
-  multiply(that) {
+  multiply(that: Polynomial) {
     const result = new Polynomial();
     let i;
     for (i = 0; i <= this.getDegree() + that.getDegree(); i++) {
@@ -1046,7 +1044,7 @@ class Polynomial {
     return result;
   }
 
-  divide_scalar(scalar) {
+  divide_scalar(scalar: number) {
     for (let i = 0; i < this.coefs.length; i++) {
       this.coefs[i] /= scalar;
     }
@@ -1062,7 +1060,7 @@ class Polynomial {
     }
   }
 
-  bisection(min, max) {
+  bisection(min: number, max: number) {
     let minValue = this.eval(min);
     let maxValue = this.eval(max);
     let result;
@@ -1134,7 +1132,7 @@ class Polynomial {
   }
 
   getRoots() {
-    let result;
+    let result: number[];
     this.simplify();
     switch (this.getDegree()) {
       case 0:
@@ -1158,7 +1156,7 @@ class Polynomial {
     return result;
   }
 
-  getRootsInInterval(min, max) {
+  getRootsInInterval(min: number, max: number) {
     const roots = [];
     let i;
     let root;
@@ -1196,7 +1194,7 @@ class Polynomial {
   }
 
   getLinearRoot() {
-    const result = [];
+    const result: number[] = [];
     const a = this.coefs[1];
     if (a !== 0) {
       result.push(-this.coefs[0] / a);
@@ -1205,7 +1203,7 @@ class Polynomial {
   }
 
   getQuadraticRoots() {
-    const results = [];
+    const results: number[] = [];
     if (this.getDegree() === 2) {
       const a = this.coefs[2];
       const b = this.coefs[1] / a;
@@ -1223,7 +1221,7 @@ class Polynomial {
   }
 
   getCubicRoots() {
-    const results = [];
+    const results: number[] = [];
     let disrim;
     if (this.getDegree() === 3) {
       const c3 = this.coefs[3];
@@ -1278,7 +1276,7 @@ class Polynomial {
   }
 
   getQuarticRoots() {
-    const results = [];
+    const results: number[] = [];
     if (this.getDegree() === 4) {
       const c4 = this.coefs[4];
       const c3 = this.coefs[3] / c4;
@@ -1357,7 +1355,7 @@ export class Path {
   static COMMAND = 0;
   static NUMBER = 1;
   static EOD = 2;
-  static PARAMS = {
+  static PARAMS : {[key: string]: string[]}= {
     A: ['rx', 'ry', 'x-axis-rotation', 'large-arc-flag', 'sweep-flag', 'x', 'y'],
     a: ['rx', 'ry', 'x-axis-rotation', 'large-arc-flag', 'sweep-flag', 'x', 'y'],
     C: ['x1', 'y1', 'x2', 'y2', 'x', 'y'],
@@ -1376,8 +1374,8 @@ export class Path {
     t: ['x', 'y'],
     V: ['y'],
     v: ['y'],
-    Z: [],
-    z: []
+    Z: <string[]>[],
+    z: <string[]>[]
   };
 
   private segments: IPathSegment[];
@@ -1387,12 +1385,12 @@ export class Path {
     this.parseData(path);
   }
 
-  appendPathSegment(segment) {
+  appendPathSegment(segment: IPathSegment) {
     segment.previous = this.segments[this.segments.length - 1];
     this.segments.push(segment);
   }
 
-  parseData(d) {
+  parseData(d: string) {
     const tokens = this.tokenize(d);
     let index = 0;
     let token = tokens[index];
@@ -1497,7 +1495,7 @@ export class Path {
     }
   }
 
-  tokenize(d) {
+  tokenize(d: string) {
     const tokens = [];
     while (d !== '') {
       if (d.match(/^([ \t\r\n,]+)/)) {
@@ -1539,7 +1537,7 @@ interface IPathSegment extends IShape {
 class AbsolutePathSegment implements IPathSegment {
   points: Vector2D[] = [];
 
-  constructor(public command: string, params, public owner: Path, public previous: IPathSegment) {
+  constructor(public command: string, params: string[], public owner: Path, public previous: IPathSegment) {
     let index = 0;
     while (index < params.length) {
       this.points.push(new Vector2D(parseFloat(params[index]), parseFloat(params[index + 1])));
@@ -1572,7 +1570,7 @@ class AbsoluteArcPath extends AbsolutePathSegment {
   arcFlag: number;
   sweepFlag: number;
 
-  constructor(params, owner, previous) {
+  constructor(params: string[], owner: Path, previous: IPathSegment) {
     super('A', params.slice(params.length - 2), owner, previous);
     this.rx = parseFloat(params.shift());
     this.ry = parseFloat(params.shift());
@@ -1633,7 +1631,7 @@ class AbsoluteArcPath extends AbsolutePathSegment {
   }
 }
 class AbsoluteCurveto2 extends AbsolutePathSegment {
-  constructor(params, owner, previous) {
+  constructor(params: string[], owner: Path, previous: IPathSegment) {
     super('Q', params, owner, previous);
   }
 
@@ -1646,7 +1644,7 @@ class AbsoluteCurveto2 extends AbsolutePathSegment {
   }
 }
 class AbsoluteCurveto3 extends AbsolutePathSegment {
-  constructor(params, owner, previous) {
+  constructor(params: string[], owner: Path, previous: IPathSegment) {
     super('C', params, owner, previous);
   }
 
@@ -1659,8 +1657,8 @@ class AbsoluteCurveto3 extends AbsolutePathSegment {
   }
 }
 class AbsoluteHLineto extends AbsolutePathSegment {
-  constructor(params, owner, previous) {
-    super('H', [params.pop(), previous.lastPoint.y], owner, previous);
+  constructor(params: string[], owner: Path, previous: IPathSegment) {
+    super('H', [params.pop(), String(previous.lastPoint.y)], owner, previous);
   }
 
   toString() {
@@ -1672,7 +1670,7 @@ class AbsoluteHLineto extends AbsolutePathSegment {
   }
 }
 class AbsoluteLineto extends AbsolutePathSegment {
-  constructor(params, owner, previous) {
+  constructor(params: string[], owner: Path, previous: IPathSegment) {
     super('L', params, owner, previous);
   }
 
@@ -1689,7 +1687,7 @@ class AbsoluteLineto extends AbsolutePathSegment {
   }
 }
 class AbsoluteMoveto extends AbsolutePathSegment {
-  constructor(params, owner, previous) {
+  constructor(params: string[], owner: Path, previous: IPathSegment) {
     super('M', params, owner, previous);
   }
 
@@ -1698,7 +1696,7 @@ class AbsoluteMoveto extends AbsolutePathSegment {
   }
 }
 class AbsoluteSmoothCurveto2 extends AbsolutePathSegment {
-  constructor(params, owner, previous) {
+  constructor(params: string[], owner: Path, previous: IPathSegment) {
     super('T', params, owner, previous);
   }
 
@@ -1720,7 +1718,7 @@ class AbsoluteSmoothCurveto2 extends AbsolutePathSegment {
   }
 }
 class AbsoluteSmoothCurveto3 extends AbsolutePathSegment {
-  constructor(params, owner, previous) {
+  constructor(params: string[], owner: Path, previous: IPathSegment) {
     super('S', params, owner, previous);
   }
 
@@ -1749,7 +1747,7 @@ class AbsoluteSmoothCurveto3 extends AbsolutePathSegment {
 class RelativePathSegment implements IPathSegment {
   points: Vector2D[] = [];
 
-  constructor(public command: string, params, public owner: Path, public previous: IPathSegment) {
+  constructor(public command: string, params: string[], public owner: Path, public previous: IPathSegment) {
     const lastPoint = this.previous ? this.previous.lastPoint : new Vector2D(0, 0);
     let index = 0;
     while (index < params.length) {
@@ -1783,7 +1781,7 @@ class RelativePathSegment implements IPathSegment {
 }
 
 class RelativeClosePath extends RelativePathSegment {
-  constructor(params, owner, previous) {
+  constructor(params: string[], owner: Path, previous: IPathSegment) {
     super('z', params, owner, previous);
   }
 
@@ -1805,7 +1803,7 @@ class RelativeClosePath extends RelativePathSegment {
   }
 }
 class RelativeCurveto2 extends RelativePathSegment {
-  constructor(params, owner, previous) {
+  constructor(params: string[], owner: Path, previous: IPathSegment) {
     super('q', params, owner, previous);
   }
 
@@ -1818,7 +1816,7 @@ class RelativeCurveto2 extends RelativePathSegment {
   }
 }
 class RelativeCurveto3 extends RelativePathSegment {
-  constructor(params, owner, previous) {
+  constructor(params: string[], owner: Path, previous: IPathSegment) {
     super('c', params, owner, previous);
   }
 
@@ -1831,7 +1829,7 @@ class RelativeCurveto3 extends RelativePathSegment {
   }
 }
 class RelativeLineto extends RelativePathSegment {
-  constructor(params, owner, previous) {
+  constructor(params: string[], owner: Path, previous: IPathSegment) {
     super('l', params, owner, previous);
   }
 
@@ -1851,7 +1849,7 @@ class RelativeLineto extends RelativePathSegment {
 }
 class RelativeMoveto extends RelativePathSegment {
 
-  constructor(params, owner, previous) {
+  constructor(params: string[], owner: Path, previous: IPathSegment) {
     super('m', params, owner, previous);
   }
 
@@ -1860,7 +1858,7 @@ class RelativeMoveto extends RelativePathSegment {
   }
 }
 class RelativeSmoothCurveto2 extends RelativePathSegment {
-  constructor(params, owner, previous) {
+  constructor(params: string[], owner: Path, previous: IPathSegment) {
     super('t', params, owner, previous);
   }
 
@@ -1883,7 +1881,7 @@ class RelativeSmoothCurveto2 extends RelativePathSegment {
 }
 
 class RelativeSmoothCurveto3 extends RelativePathSegment {
-  constructor(params, owner, previous) {
+  constructor(params: string[], owner: Path, previous: IPathSegment) {
     super('s', params, owner, previous);
   }
 

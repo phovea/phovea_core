@@ -18,6 +18,7 @@ import {ITableLoader, ITableLoader2, adapterOne2Two, viaAPI2Loader, viaDataLoade
 
 /**
  * root matrix implementation holding the data
+ * @internal
  */
 export default class Table extends ATable implements ITable {
   private vectors: TableVector<any, IValueTypeDesc>[];
@@ -50,8 +51,8 @@ export default class Table extends ATable implements ITable {
    * @param j
    * @returns {*}
    */
-  at(i: number, j: number) {
-    return this.colData(this.col(j).column, rlist(i)).then((arr) => arr[0]);
+  async at(i: number, j: number) {
+    return (await this.colData(this.col(j).column, rlist(i)))[0];
   }
 
   queryView(name: string, args: any) {
@@ -140,7 +141,7 @@ export interface IAsTableOptions {
 
 function asTableImpl(columns: ITableColumn<any>[], rows: string[], objs: any[], data: IValueType[][], options: IAsTableOptions = {}) {
   const desc = mixin(createDefaultTableDesc(), {
-    columns: columns,
+    columns,
     size: [rows.length, columns.length]
   }, options);
 
@@ -148,9 +149,9 @@ function asTableImpl(columns: ITableColumn<any>[], rows: string[], objs: any[], 
   const loader: ITableLoader = () => {
     const r = {
       rowIds: rowAssigner(rows),
-      rows: rows,
-      objs: objs,
-      data: data
+      rows,
+      objs,
+      data
     };
     return Promise.resolve(r);
   };

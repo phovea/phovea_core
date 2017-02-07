@@ -59,8 +59,9 @@ export default class TransposedMatrix<T, D extends IValueTypeDesc> extends AMatr
     return [this.rowtype, this.coltype];
   }
 
-  ids(range: RangeLike = all()) {
-    return this.t.ids(range ? parse(range).swap() : undefined).then((ids) => ids.swap());
+  async ids(range: RangeLike = all()) {
+    const ids = await this.t.ids(range ? parse(range).swap() : undefined);
+    return ids.swap();
   }
 
   cols(range: RangeLike = all()): Promise<string[]> {
@@ -100,8 +101,8 @@ export default class TransposedMatrix<T, D extends IValueTypeDesc> extends AMatr
     return this.t.at(j, i);
   }
 
-  data(range: RangeLike = all()) {
-    return this.t.data(range ? parse(range).swap() : undefined).then((data: T[][]) => transpose(data));
+  async data(range: RangeLike = all()) {
+    return transpose(await this.t.data(range ? parse(range).swap() : undefined));
   }
 
   hist(bins?: number, range: RangeLike = all(), containedIds = 0): Promise<IHistogram> {

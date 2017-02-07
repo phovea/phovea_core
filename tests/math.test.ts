@@ -1,7 +1,8 @@
+/// <reference types="jasmine" />
 import {computeStats} from '../src/math';
 
 describe('computeStats', () => {
-  function expectStats(input, expected) {
+  function expectStats(input: number[], expected: any) {
     describe('stats ' + input, () => {
       const stats = computeStats(input);
       it('max', () => expect(stats.max).toEqual(expected.max));

@@ -26,13 +26,13 @@ import IDType from './IDType';
 //  return pairs.map((a) => rlist(...a));
 //}
 
-function overlaps(r: Range, with_: Range, ndim: number) {
-  if (with_.ndim === 0) {
+function overlaps(r: Range, withRange: Range, ndim: number) {
+  if (withRange.ndim === 0) {
     return true; //catch all
   }
   for (let i = 0; i < Math.min(r.ndim, ndim); ++i) {
-    let ri = r.dim(i);
-    let wi = with_.dim(i);
+    const ri = r.dim(i);
+    const wi = withRange.dim(i);
     if (wi.isAll || ri.isAll) {
       return true;
     }
@@ -49,7 +49,7 @@ function removeCells(b: Range[], without: Range[], ndim: number) {
   if (without.length === 0) {
     return b;
   }
-  let r: Range[] = [];
+  const r: Range[] = [];
   b.forEach((bi) => {
     if (without.some((w) => w.eq(bi))) {
       //skip
@@ -74,7 +74,7 @@ export default class ProductIDType extends EventHandler implements IIDType {
   private selectionListener = (event: IEvent, type: string, act: Range, added: Range, removed: Range) => {
     this.fire(`${ProductIDType.EVENT_SELECT_DIM},${ProductIDType.EVENT_SELECT_PRODUCT}`, this.elems.indexOf(<IDType>event.currentTarget), type, act, added, removed);
     this.fire(`${ProductIDType.EVENT_SELECT_DIM}-${type},${ProductIDType.EVENT_SELECT_PRODUCT}-${type}`, this.elems.indexOf(<IDType>event.currentTarget), act, added, removed);
-  };
+  }
 
   constructor(public readonly elems: IDType[], public readonly internal = false) {
     super();
@@ -109,7 +109,7 @@ export default class ProductIDType extends EventHandler implements IIDType {
   }
 
   persist() {
-    let s = {};
+    const s: any = {};
     this.sel.forEach((v, type) => s[type] = v.map((r) => r.toString()));
     return {
       sel: s
@@ -187,10 +187,10 @@ export default class ProductIDType extends EventHandler implements IIDType {
    * select the given range as
    * @param range
    */
-  select(range: RangeLike[]);
-  select(range: RangeLike[], op: SelectOperation);
-  select(type: string, range: RangeLike[]);
-  select(type: string, range: RangeLike[], op: SelectOperation);
+  select(range: RangeLike[]): Range[];
+  select(range: RangeLike[], op: SelectOperation): Range[];
+  select(type: string, range: RangeLike[]): Range[];
+  select(type: string, range: RangeLike[], op: SelectOperation): Range[];
   select() {
     const a = Array.from(arguments);
     const type = (typeof a[0] === 'string') ? a.shift() : defaultSelectionType,
@@ -204,36 +204,36 @@ export default class ProductIDType extends EventHandler implements IIDType {
 
     const b = this.selections(type);
 
-    let new_: Range[] = [];
+    let newRange: Range[] = [];
 
     switch (op) {
       case SelectOperation.SET:
-        new_ = rcells;
+        newRange = rcells;
         break;
       case SelectOperation.ADD:
-        new_ = b.concat(rcells);
+        newRange = b.concat(rcells);
         break;
       case SelectOperation.REMOVE:
-        new_ = removeCells(b, rcells, this.elems.length);
+        newRange = removeCells(b, rcells, this.elems.length);
         break;
     }
     //if (b.eq(new_)) {
     //  return b;
     //}
-    this.sel[type] = new_;
+    this.sel.set(type, newRange);
 
     //individual selection per dimension
-    const perDimSelections = this.toPerDim(new_);
+    const perDimSelections = this.toPerDim(newRange);
     this.disable();
     this.elems.forEach((e, i) => e.select(type, perDimSelections[i]));
     this.enable();
 
     const added = op !== SelectOperation.REMOVE ? rcells : [];
     const removed = (op === SelectOperation.ADD ? [] : (op === SelectOperation.SET ? b : rcells));
-    this.fire(IDType.EVENT_SELECT, type, new_, added, removed, b);
-    this.fire(ProductIDType.EVENT_SELECT_PRODUCT, -1, type, new_, added, removed, b);
-    this.fire(`${IDType.EVENT_SELECT}-${type}`, new_, added, removed, b);
-    this.fire(`${ProductIDType.EVENT_SELECT_PRODUCT}-${type}`, -1, new_, added, removed, b);
+    this.fire(IDType.EVENT_SELECT, type, newRange, added, removed, b);
+    this.fire(ProductIDType.EVENT_SELECT_PRODUCT, -1, type, newRange, added, removed, b);
+    this.fire(`${IDType.EVENT_SELECT}-${type}`, newRange, added, removed, b);
+    this.fire(`${ProductIDType.EVENT_SELECT_PRODUCT}-${type}`, -1, newRange, added, removed, b);
     return b;
   }
 

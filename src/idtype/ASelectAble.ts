@@ -15,64 +15,64 @@ import IDType from './IDType';
 export interface ISelectAble extends IEventHandler {
   ids(range?: RangeLike): Promise<Range>;
 
-  fromIdRange(idRange?: RangeLike);
+  fromIdRange(idRange?: RangeLike): Promise<Range>;
 
   readonly idtypes: IDType[];
 
-  selections(type?: string);
+  selections(type?: string): Promise<Range>;
 
-  select(range: RangeLike);
-  select(range: RangeLike, op: SelectOperation);
-  select(type: string, range: RangeLike);
-  select(type: string, range: RangeLike, op: SelectOperation);
-  select(dim: number, range: RangeLike);
-  select(dim: number, range: RangeLike, op: SelectOperation);
-  select(dim: number, type: string, range: RangeLike);
-  select(dim: number, type: string, range: RangeLike, op: SelectOperation);
+  select(range: RangeLike): Promise<Range>;
+  select(range: RangeLike, op: SelectOperation): Promise<Range>;
+  select(type: string, range: RangeLike): Promise<Range>;
+  select(type: string, range: RangeLike, op: SelectOperation): Promise<Range>;
+  select(dim: number, range: RangeLike): Promise<Range>;
+  select(dim: number, range: RangeLike, op: SelectOperation): Promise<Range>;
+  select(dim: number, type: string, range: RangeLike): Promise<Range>;
+  select(dim: number, type: string, range: RangeLike, op: SelectOperation): Promise<Range>;
 
   /**
    * clear the specific selection (type) and dimension
    */
-  clear();
-  clear(type: string);
-  clear(dim: number);
-  clear(dim: number, type: string);
+  clear(): Promise<any>;
+  clear(type: string): Promise<any>;
+  clear(dim: number): Promise<any>;
+  clear(dim: number, type: string): Promise<any>;
 }
 
+interface ISingleSelectionListener {
+  (event: any, type: string, act: Range, added: Range, removed: Range): void;
+}
 
 export abstract class ASelectAble extends EventHandler implements ISelectAble {
   static readonly EVENT_SELECT = IDType.EVENT_SELECT;
 
   private numSelectListeners = 0;
-  private selectionListeners = [];
-  private singleSelectionListener = (event: any, type: string, act: Range, added: Range, removed: Range) => {
-    this.ids().then((ids: Range) => {
-      //filter to the right ids and convert to indices format
-      //given all ids convert the selected ids to the indices in the data type
-      act = ids.indexOf(act);
-      added = ids.indexOf(added);
-      removed = ids.indexOf(removed);
-      if (act.isNone && added.isNone && removed.isNone) {
-        return;
-      }
-      //ensure the right number of dimensions
-      fillWithNone(act, ids.ndim);
-      fillWithNone(added, ids.ndim);
-      fillWithNone(removed, ids.ndim);
+  private selectionListeners: ISingleSelectionListener[] = [];
+  private singleSelectionListener = async (event: any, type: string, act: Range, added: Range, removed: Range) => {
+    const ids = await this.ids();
+    //filter to the right ids and convert to indices format
+    //given all ids convert the selected ids to the indices in the data type
+    act = ids.indexOf(act);
+    added = ids.indexOf(added);
+    removed = ids.indexOf(removed);
+    if (act.isNone && added.isNone && removed.isNone) {
+      return;
+    }
+    //ensure the right number of dimensions
+    fillWithNone(act, ids.ndim);
+    fillWithNone(added, ids.ndim);
+    fillWithNone(removed, ids.ndim);
 
-      this.fire(ASelectAble.EVENT_SELECT, type, act, added, removed);
-      this.fire(`${ASelectAble.EVENT_SELECT}-${type}`, act, added, removed);
-    });
-  };
-  private selectionCache = [];
+    this.fire(ASelectAble.EVENT_SELECT, type, act, added, removed);
+    this.fire(`${ASelectAble.EVENT_SELECT}-${type}`, act, added, removed);
+  }
+  private selectionCache: {act: Range, added: Range, removed: Range}[] = [];
   private accumulateEvents = -1;
 
   abstract ids(range?: RangeLike): Promise<Range>;
 
-  fromIdRange(idRange: RangeLike = all()) {
-    return this.ids().then((ids) => {
-      return ids.indexOf(parse(idRange));
-    });
+  async fromIdRange(idRange: RangeLike = all()) {
+    return (await this.ids()).indexOf(parse(idRange));
   }
 
   get idtypes(): IDType[] {
@@ -81,9 +81,7 @@ export abstract class ASelectAble extends EventHandler implements ISelectAble {
 
   private selectionListener(idtype: IDType, index: number, total: number) {
     return (event: any, type: string, act: Range, added: Range, removed: Range) => {
-      this.selectionCache[index] = {
-        act: act, added: added, removed: removed
-      };
+      this.selectionCache[index] = {act, added, removed};
       if (this.accumulateEvents < 0 || (++this.accumulateEvents) === total) {
         this.fillAndSend(type, index);
       }
@@ -104,9 +102,9 @@ export abstract class ASelectAble extends EventHandler implements ISelectAble {
       };
     });
 
-    let act = join(full.map((entry) => entry.act));
-    let added = join(full.map((entry) => entry.added));
-    let removed = join(full.map((entry) => entry.removed));
+    const act = join(full.map((entry) => entry.act));
+    const added = join(full.map((entry) => entry.added));
+    const removed = join(full.map((entry) => entry.removed));
 
     this.selectionCache = [];
     this.accumulateEvents = -1; //reset
@@ -144,21 +142,20 @@ export abstract class ASelectAble extends EventHandler implements ISelectAble {
     return super.off(events, handler);
   }
 
-  selections(type = defaultSelectionType) {
-    return this.ids().then((ids: Range) => {
-      const r = join(this.idtypes.map((idtype) => idtype.selections(type)));
-      return ids.indexRangeOf(r);
-    });
+  async selections(type = defaultSelectionType) {
+    const ids = await this.ids();
+    const r = join(this.idtypes.map((idtype) => idtype.selections(type)));
+    return ids.indexRangeOf(r);
   }
 
-  select(range: RangeLike);
-  select(range: RangeLike, op: SelectOperation);
-  select(type: string, range: RangeLike);
-  select(type: string, range: RangeLike, op: SelectOperation);
-  select(dim: number, range: RangeLike);
-  select(dim: number, range: RangeLike, op: SelectOperation);
-  select(dim: number, type: string, range: RangeLike);
-  select(dim: number, type: string, range: RangeLike, op: SelectOperation);
+  select(range: RangeLike): Promise<Range>;
+  select(range: RangeLike, op: SelectOperation): Promise<Range>;
+  select(type: string, range: RangeLike): Promise<Range>;
+  select(type: string, range: RangeLike, op: SelectOperation): Promise<Range>;
+  select(dim: number, range: RangeLike): Promise<Range>;
+  select(dim: number, range: RangeLike, op: SelectOperation): Promise<Range>;
+  select(dim: number, type: string, range: RangeLike): Promise<Range>;
+  select(dim: number, type: string, range: RangeLike, op: SelectOperation): Promise<Range>;
   select() {
     const a = Array.from(arguments);
     const dim = (typeof a[0] === 'number') ? +a.shift() : -1,
@@ -168,37 +165,37 @@ export abstract class ASelectAble extends EventHandler implements ISelectAble {
     return this.selectImpl(range, op, type, dim);
   }
 
-  private selectImpl(range: Range, op = SelectOperation.SET, type: string = defaultSelectionType, dim = -1) {
-    return this.ids().then((ids: Range) => {
-      const types = this.idtypes;
-      if (dim === -1) {
-        range = ids.preMultiply(range);
-        this.accumulateEvents = 0;
-        const r = join(range.split().map((r, i) => types[i].select(type, r, op)));
-        if (this.accumulateEvents > 0) { //one event has not been fires, so do it manually
-          this.fillAndSend(type, -1);
-        }
-        while (r.ndim < types.length) {
-          r.dim(r.ndim); //create intermediate ones
-        }
-        return ids.indexRangeOf(r);
-      } else {
-        //just a single dimension
-        ids = ids.split()[dim];
-        range = ids.preMultiply(range);
-        types[dim].select(type, range, op);
-        return ids.indexRangeOf(range);
+  private async selectImpl(range: Range, op = SelectOperation.SET, type: string = defaultSelectionType, dim = -1): Promise<Range> {
+    const types = this.idtypes;
+    let ids = await this.ids();
+
+    if (dim === -1) {
+      range = ids.preMultiply(range);
+      this.accumulateEvents = 0;
+      const r = join(range.split().map((r, i) => types[i].select(type, r, op)));
+      if (this.accumulateEvents > 0) { //one event has not been fires, so do it manually
+        this.fillAndSend(type, -1);
       }
-    });
+      while (r.ndim < types.length) {
+        r.dim(r.ndim); //create intermediate ones
+      }
+      return ids.indexRangeOf(r);
+    } else {
+      //just a single dimension
+      ids = ids.split()[dim];
+      range = ids.preMultiply(range);
+      types[dim].select(type, range, op);
+      return ids.indexRangeOf(range);
+    }
   }
 
   /**
    * clear the specific selection (type) and dimension
    */
-  clear();
-  clear(type: string);
-  clear(dim: number);
-  clear(dim: number, type: string);
+  clear(): Promise<any>;
+  clear(type: string): Promise<any>;
+  clear(dim: number): Promise<any>;
+  clear(dim: number, type: string): Promise<any>;
   clear() {
     const a = Array.from(arguments);
     const dim = (typeof a[0] === 'number') ? +a.shift() : -1;

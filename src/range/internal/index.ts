@@ -16,15 +16,15 @@ export interface IRangeElem {
   readonly isSingle: boolean;
   size(size?: number): number;
   clone(): IRangeElem;
-  invert(index: number, size?: number);
+  invert(index: number, size?: number): number;
   readonly __iterator__: IIterator<number>;
   iter(size?: number): IIterator<number>;
-  toString();
+  toString(): string;
   readonly from: number;
   readonly step: number;
   readonly to: number;
   reverse(): IRangeElem;
-  contains(value: number, size?: number);
+  contains(value: number, size?: number): boolean;
 }
 
 export function fix(v: number, size: number) {

@@ -76,14 +76,14 @@ export default class GraphBase extends AGraph implements IGraph {
     return this;
   }
 
-  addEdge(e_or_s: GraphEdge | GraphNode, type?: string, t?: GraphNode): this|Promise<this> {
-    if (e_or_s instanceof GraphEdge) {
-      let e = <GraphEdge>e_or_s;
+  addEdge(edgeOrSource: GraphEdge | GraphNode, type?: string, t?: GraphNode): this|Promise<this> {
+    if (edgeOrSource instanceof GraphEdge) {
+      const e = <GraphEdge>edgeOrSource;
       this.edges.push(e);
       this.fire('add_edge', e, e.type, e.source, e.target);
-      return;
+      return this;
     }
-    return this.addEdge(new GraphEdge(type, <GraphNode>e_or_s, t));
+    return this.addEdge(new GraphEdge(type, <GraphNode>edgeOrSource, t));
   }
 
   updateEdge(e: GraphEdge): this|Promise<this> {
@@ -103,14 +103,14 @@ export default class GraphBase extends AGraph implements IGraph {
     return this;
   }
 
-  clear(): this|Promise<this> {
+  clear(): Promise<this> {
     this.nodes.splice(0, this.nodes.length);
     this.edges.splice(0, this.edges.length);
-    return this;
+    return Promise.resolve(this);
   }
 
   persist() {
-    let r: any = {
+    const r: any = {
       root: this.desc.id
     };
     r.nodes = this.nodes.map((s) => s.persist());

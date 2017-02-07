@@ -10,10 +10,9 @@
 import {mixin} from '../index';
 import {Range, RangeLike, CompositeRange1D} from '../range';
 import {IDataType, IDataDescription, createDefaultDataDesc} from '../datatype';
-import {IVector} from '../vector';
 import {IDType} from '../idtype';
 import {IHistogram} from '../math';
-import {ICategoricalVector} from "../vector/IVector";
+import {ICategoricalVector} from '../vector/IVector';
 
 export interface IGroup {
   readonly name: string;
@@ -56,8 +55,8 @@ export interface IStratification extends IDataType {
   vector(): Promise<ICategoricalVector>;
   asVector(): Promise<ICategoricalVector>;
 
-  names();
-  names(range: RangeLike);
+  names(): Promise<string[]>;
+  names(range: RangeLike): Promise<string[]>;
 
   ids(): Promise<Range>;
   ids(range: RangeLike): Promise<Range>;

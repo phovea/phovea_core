@@ -66,7 +66,7 @@ export default class Rect extends AShape {
     this.h = val - this.y;
   }
 
-  protected shiftImpl(x, y) {
+  protected shiftImpl(x: number, y: number) {
     this.x += x;
     this.y += y;
   }
