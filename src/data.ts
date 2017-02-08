@@ -83,17 +83,17 @@ export async function list(filter?: ({[key: string]: string})|((d: IDataType) =>
   const f = (typeof filter === 'function') ? <(d: IDataType) => boolean>filter : null;
   const q = (typeof filter !== 'undefined' && typeof filter !== 'function') ? <any>filter : {};
 
-  let r: IDataType[];
+  let r: Promise<IDataType[]>;
 
   if (isOffline) {
-    r = await getCachedEntries();
+    r = getCachedEntries();
   } else {
     //load descriptions and create data out of them
-    r = (await getAPIJSON('/dataset/', q)).map(transformEntry);
+    r = getAPIJSON('/dataset/', q).then(transformEntry);
   }
 
   if (f !== null) {
-    r = (await r).filter(f);
+    r = r.then((d) => d.filter(f));
   }
   return r;
 }
