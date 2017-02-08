@@ -89,7 +89,7 @@ export async function list(filter?: ({[key: string]: string})|((d: IDataType) =>
     r = getCachedEntries();
   } else {
     //load descriptions and create data out of them
-    r = getAPIJSON('/dataset/', q).then(transformEntry);
+    r = getAPIJSON('/dataset/', q).then((r) => Promise.all(r.map(transformEntry)));
   }
 
   if (f !== null) {
