@@ -17,7 +17,8 @@ export {
   register,
   restore,
   resolve,
-  resolveProduct
+  resolveProduct,
+  isInternalIDType
 } from './manager'
 export {default as SelectAble, ISelectAble} from './ASelectAble';
 export {

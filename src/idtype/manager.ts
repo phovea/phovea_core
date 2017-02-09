@@ -108,3 +108,13 @@ export function restore(persisted: any) {
 export function clearSelection(type = defaultSelectionType) {
   cache.forEach((v) => v.clear(type));
 }
+
+
+/**
+ * whether the given idtype is an internal one or not, i.e. the internal flag is set or it starts with an underscore
+ * @param idtype
+ * @return {boolean}
+ */
+export function isInternalIDType(idtype: IIDType) {
+  return idtype.internal || idtype.id.startsWith('_');
+}
