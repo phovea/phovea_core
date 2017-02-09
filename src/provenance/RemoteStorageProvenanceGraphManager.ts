@@ -55,8 +55,8 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
       nodes: json.nodes,
       edges: json.edges
     };
-    const impl: GraphBase = (<any>(await upload(desc))).impl(provenanceGraphFactory());
-    return new ProvenanceGraph(<IProvenanceGraphDataDescription>impl.desc, impl);
+    const impl: Promise<GraphBase> = (<any>(await upload(desc))).impl(provenanceGraphFactory());
+    return impl.then((i) => new ProvenanceGraph(<IProvenanceGraphDataDescription>i.desc, i));
   }
 
   async create() {
@@ -75,7 +75,7 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
       description: ''
     };
 
-    const impl: GraphBase = (<any>(await upload(desc))).impl(provenanceGraphFactory());
-    return new ProvenanceGraph(<IProvenanceGraphDataDescription>impl.desc, impl);
+    const impl: Promise<GraphBase> = (<any>(await upload(desc))).impl(provenanceGraphFactory());
+    return impl.then((i) => new ProvenanceGraph(<IProvenanceGraphDataDescription>i.desc, i));
   }
 }
