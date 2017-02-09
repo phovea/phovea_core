@@ -130,6 +130,11 @@ export interface IVisInstance extends IPersistable, IEventHandler, ILocateAble {
   readonly rawSize: [number, number];
 
   /**
+   * flag whether the vis if fully built, if not wait for the 'ready' event
+   */
+  readonly isBuilt: boolean;
+
+  /**
    * returns the current transformation
    */
   transform(): ITransform;

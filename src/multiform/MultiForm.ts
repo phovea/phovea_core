@@ -208,7 +208,13 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
           return null;
         }
         this.actVis = plugin.factory(this.data, this.content, mixin({}, this.options.all, this.options[vis.id] || {}));
-        this.actVis.on('ready', () => this.markReady());
+        if (this.actVis.isBuilt) {
+          this.markReady();
+        } else {
+          this.actVis.on('ready', () => {
+            this.markReady();
+          });
+        }
         this.fire('changed', vis, bak);
         return this.actVis;
       });
