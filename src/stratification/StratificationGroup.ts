@@ -3,7 +3,10 @@
  */
 
 
-import {Range, RangeLike, CompositeRange1D, all, list, Range1DGroup, parse} from '../range';
+import {RangeLike, all, list, parse} from '../range';
+import Range from '../range/Range';
+import Range1DGroup from '../range/Range1DGroup';
+import CompositeRange1D from '../range/CompositeRange1D';
 import {IDataType} from '../datatype';
 import {SelectAble} from '../idtype';
 import {ICategoricalVector} from '../vector';

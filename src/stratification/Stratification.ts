@@ -8,7 +8,9 @@
  */
 
 import {mixin} from '../index';
-import {parse, RangeLike, Range, CompositeRange1D, all} from '../range';
+import {parse, RangeLike, all} from '../range';
+import Range from '../range/Range';
+import CompositeRange1D from '../range/CompositeRange1D';
 import {resolve as resolveIDType, createLocalAssigner} from '../idtype';
 import {ADataType, IDataType, VALUE_TYPE_CATEGORICAL, ICategory} from '../datatype';
 import {getFirstByFQName} from '../data';

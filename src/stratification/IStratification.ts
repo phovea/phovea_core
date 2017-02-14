@@ -8,9 +8,11 @@
  */
 
 import {mixin} from '../index';
-import {Range, RangeLike, CompositeRange1D} from '../range';
+import {RangeLike} from '../range';
+import Range from '../range/Range';
+import CompositeRange1D from '../range/CompositeRange1D';
 import {IDataType, IDataDescription, createDefaultDataDesc} from '../datatype';
-import {IDType} from '../idtype';
+import IDType from '../idtype/IDType';
 import {IHistogram} from '../math';
 import {ICategoricalVector} from '../vector/IVector';
 

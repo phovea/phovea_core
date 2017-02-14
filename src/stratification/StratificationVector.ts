@@ -8,7 +8,8 @@
  */
 
 import {argFilter, argSort} from '../index';
-import {parse, RangeLike, list as rlist, CompositeRange1D, all} from '../range';
+import {parse, RangeLike, list as rlist, all} from '../range';
+import CompositeRange1D from '../range/CompositeRange1D';
 import {ICategoricalValueTypeDesc, VALUE_TYPE_CATEGORICAL} from '../datatype';
 import {ICategoricalVector, IVectorDataDescription} from '../vector';
 import AVector from '../vector/AVector';

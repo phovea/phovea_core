@@ -8,7 +8,9 @@
  */
 
 import {getAPIJSON} from '../ajax';
-import {parse, Range1DGroup, composite, Range, list as rlist, CompositeRange1D} from '../range';
+import {parse, Range1DGroup, composite, list as rlist} from '../range';
+import Range from '../range/Range';
+import CompositeRange1D from '../range/CompositeRange1D';
 import {IStratificationDataDescription} from './IStratification';
 
 export interface ILoadedStratification {
