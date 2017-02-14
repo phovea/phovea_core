@@ -3,6 +3,7 @@
  */
 
 import {mixin} from '../index';
+import {Range} from '../range';
 import {IDType, IDTypeLike} from '../idtype';
 import {
   IDataType, IValueTypeDesc, IDataDescription, createDefaultDataDesc,
@@ -18,6 +19,10 @@ export interface IAtomValue<T> {
 export interface IAtomDataDescription<D extends IValueTypeDesc> extends IDataDescription {
   readonly value: D;
   readonly idtype: IDTypeLike;
+}
+
+export interface IInlinedAtomDataDescription<T, D extends IValueTypeDesc> extends IAtomDataDescription<D> {
+  readonly data: IAtomValue<T>;
 }
 
 export interface IAtom<T, D extends IValueTypeDesc> extends IDataType {
