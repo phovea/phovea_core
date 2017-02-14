@@ -3,8 +3,10 @@
  */
 
 import {IPersistable} from '../index';
-import {Range, all, parse, RangeLike} from '../range';
-import {SelectAble, resolve as idtypes_resolve, IDType} from '../idtype';
+import {all, parse, RangeLike} from '../range';
+import Range from '../range/Range';
+import {SelectAble, resolve as idtypes_resolve} from '../idtype';
+import IDType from '../idtype/IDType';
 import {IVector} from '../vector';
 import {ITable, IQueryArgs} from './ITable';
 import MultiTableVector from './internal/MultiTableVector';

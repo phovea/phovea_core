@@ -8,7 +8,8 @@
  */
 
 import {IPersistable, mixin} from '../index';
-import {Range, all, list as rlist, parse, RangeLike} from '../range';
+import {all, list as rlist, parse, RangeLike} from '../range';
+import Range from '../range/Range';
 import {resolve as idtypes_resolve, createLocalAssigner} from '../idtype';
 import {IValueType, VALUE_TYPE_INT, VALUE_TYPE_REAL, guessValueTypeDesc, IValueTypeDesc} from '../datatype';
 import {ITable, ITableColumn, ITableDataDescription, createDefaultTableDesc} from './ITable';
@@ -106,7 +107,6 @@ export default class Table extends ATable implements ITable {
 
 /**
  * module entry point for creating a datatype
- * @param desc
  * @returns {ITable}
  */
 export function create(desc: ITableDataDescription, loader?: ITableLoader): ITable {
