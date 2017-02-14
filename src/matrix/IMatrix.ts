@@ -80,7 +80,7 @@ export interface IMatrix<T, D extends IValueTypeDesc> extends IHistAbleDataType<
    * @param valuetype the new value type by default the same as matrix valuetype
    * @param idtype the new vlaue type by default the same as matrix rowtype
    */
-  reduce<U, UD extends IValueTypeDesc>(f: (row: T[]) => U, this_f?: any, valuetype?: UD, idtype?: IDType): IVector<U, UD>;
+  reduce<U, UD extends IValueTypeDesc>(f: (row: T[]) => U, thisArgument?: any, valuetype?: UD, idtype?: IDType): IVector<U, UD>;
   /**
    * transposed version of this matrix
    */
