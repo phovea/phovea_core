@@ -7,7 +7,9 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {all, list as rlist, Range, RangeLike, range, CompositeRange1D, asUngrouped, composite, parse} from '../range';
+import {all, list as rlist, RangeLike, range, asUngrouped, composite, parse} from '../range';
+import Range from '../range/Range';
+import CompositeRange1D from '../range/CompositeRange1D';
 import {argSort, argFilter} from '../index';
 import {SelectAble} from '../idtype';
 import {

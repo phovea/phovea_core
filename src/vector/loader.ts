@@ -8,7 +8,8 @@
  */
 
 import {getAPIJSON} from '../ajax';
-import {Range, parse} from '../range';
+import {parse} from '../range';
+import Range from '../range/Range';
 import {IValueType} from '../datatype';
 import {IVectorDataDescription} from './IVector';
 

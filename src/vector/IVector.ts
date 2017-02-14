@@ -8,13 +8,15 @@
  */
 
 import {mixin} from '../index';
-import {RangeLike, CompositeRange1D} from '../range';
-import {IDType, IDTypeLike} from '../idtype';
+import {RangeLike} from '../range';
+import CompositeRange1D from '../range/CompositeRange1D';
+import {IDTypeLike} from '../idtype';
+import IDType from '../idtype/IDType';
 import {
   IHistAbleDataType, IValueTypeDesc, IDataDescription, createDefaultDataDesc,
   INumberValueTypeDesc, ICategoricalValueTypeDesc
 } from '../datatype';
-import {IStratification} from '../stratification/IStratification';
+import IStratification from '../stratification/IStratification';
 import {IStatistics, IHistogram} from '../math';
 
 export interface IVectorDataDescription<D extends IValueTypeDesc> extends IDataDescription {

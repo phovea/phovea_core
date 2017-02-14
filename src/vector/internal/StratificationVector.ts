@@ -7,7 +7,9 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {all, Range, RangeLike, CompositeRange1D} from '../../range';
+import {all, RangeLike} from '../../range';
+import CompositeRange1D from '../../range/CompositeRange1D';
+import Range from '../../range/Range';
 import {IDataType, ADataType, IValueTypeDesc,} from '../../datatype';
 import {IHistogram, rangeHist} from '../../math';
 import {IVector} from '../IVector';
