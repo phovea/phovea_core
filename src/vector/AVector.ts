@@ -226,13 +226,13 @@ export class VectorView<T,D extends IValueTypeDesc> extends AVector<T,D> {
   async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
     const d = await this.data();
     const indices = argSort(d, compareFn, thisArg);
-    return this.view(this.range.preMultiply(rlist(indices)));
+    return this.view(rlist(indices));
   }
 
   async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
     const d = await this.data();
     const indices = argFilter(d, callbackfn, thisArg);
-    return this.view(this.range.preMultiply(rlist(indices)));
+    return this.view(rlist(indices));
   }
 }
 
