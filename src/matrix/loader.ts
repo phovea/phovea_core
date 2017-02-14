@@ -8,7 +8,8 @@
  */
 
 import {getAPIJSON, api2absURL, getAPIData} from '../ajax';
-import {list as rlist, Range, all, join, parse} from '../range';
+import {list as rlist, all, join, parse} from '../range';
+import Range from '../range/Range';
 import {mask, INumberValueTypeDesc, VALUE_TYPE_INT, VALUE_TYPE_REAL} from '../datatype';
 import {IHistogram, wrapHist} from '../math';
 import {IMatrixDataDescription, IHeatMapUrlOptions} from './IMatrix';

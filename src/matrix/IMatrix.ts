@@ -7,8 +7,10 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {Range, RangeLike} from '../range';
-import {IProductSelectAble, IDType} from '../idtype';
+import {RangeLike} from '../range';
+import Range from '../range/Range';
+import {IProductSelectAble} from '../idtype';
+import IDType from '../idtype/IDType';
 import {
   IHistAbleDataType, IValueTypeDesc, IDataDescription, createDefaultDataDesc as createDefaultBaseDesc,
   INumberValueTypeDesc, ICategoricalValueTypeDesc

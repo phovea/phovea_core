@@ -7,11 +7,14 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {Range, RangeLike, all, parse, join} from '../range';
+import {RangeLike, all, parse, join} from '../range';
+import Range from '../range/Range';
 import {IValueTypeDesc, VALUE_TYPE_REAL, VALUE_TYPE_INT, guessValueTypeDesc} from '../datatype';
 import {IHistogram} from '../math';
 import {mixin} from '../index';
-import {IDType, ProductIDType, resolve as resolveIDType, resolveProduct, createLocalAssigner} from '../idtype';
+import {resolve as resolveIDType, resolveProduct, createLocalAssigner} from '../idtype';
+import IDType from '../idtype/IDType';
+import ProductIDType from '../idtype/ProductIDType';
 import {IMatrix, IMatrixDataDescription, IHeatMapUrlOptions, createDefaultMatrixDesc} from './IMatrix';
 import AMatrix from './AMatrix';
 import TransposedMatrix from './internal/TransposedMatrix';

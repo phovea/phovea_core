@@ -8,7 +8,8 @@
  */
 
 import {argSort, argFilter} from '../../index';
-import {list as rlist, RangeLike, Range, all, parse, Range1D} from '../../range';
+import {list as rlist, RangeLike, all, parse, Range1D} from '../../range';
+import Range from '../../range/Range';
 import {IValueTypeDesc} from '../../datatype';
 import {IVector, IVectorDataDescription} from '../../vector';
 import AVector from '../../vector/AVector';
