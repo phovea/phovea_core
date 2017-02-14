@@ -71,7 +71,7 @@ async function transformEntry(desc: IDataDescription): Promise<IDataType> {
     return cached(desc, Promise.resolve(new DummyDataType(desc)));
   }
   //take the first matching one
-  return cached(desc, (await plugin[0].load()).factory(desc));
+  return cached(desc, plugin[0].load().then((d) =>d.factory(desc)));
 }
 
 /**
