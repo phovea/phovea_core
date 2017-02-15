@@ -23,6 +23,11 @@ export interface ITableColumn<D extends IValueTypeDesc> {
   description?: string;
   value: D;
   getter?(row: any): any;
+  /**
+   * the accessor for the column
+   * @default =name
+   */
+  column?: string;
 }
 
 export declare type IAnyTableColumn = ITableColumn<any>;

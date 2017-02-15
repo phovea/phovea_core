@@ -25,7 +25,10 @@ export default class VectorTable extends ATable implements ITable {
     const d = <any>desc;
     d.idtype = ref.idtype;
     d.size = [vectors[0].length, vectors.length];
-    d.columns = vectors.map((v) => v.desc);
+    d.columns = vectors.map((v) => {
+      v.desc.column = v.desc.column || v.desc.name;
+      return v.desc;
+    });
     this.desc = d;
     this.idtype = vectors[0].idtype;
   }
@@ -55,7 +58,7 @@ export default class VectorTable extends ATable implements ITable {
   }
 
   colData(column: string, range: RangeLike = all()) {
-    return this.vectors.find((d) => d.desc.name === column).data(range);
+    return this.vectors.find((d) => d.desc.column === column).data(range);
   }
 
   objects(range: RangeLike = all()) {
