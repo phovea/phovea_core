@@ -3,7 +3,7 @@
  */
 
 import {mixin} from '../';
-import Store from './store';
+import Store from './Store';
 import {list as listPlugins, load as loadPlugins} from '../plugin';
 
 export interface ITabSyncerOptions {
@@ -55,8 +55,8 @@ export default class TabSyncer {
     this.store.setValue(TabSyncer.TAB_LIST, list);
   }
 
-  private static handleChange(event: any, key: string, new_: any, old: any, url: string) {
-    console.log('change in local storage', key, new_, old, url);
+  private static handleChange(event: any, key: string, newValue: any, oldValue: any, url: string) {
+    console.log('change in local storage', key, newValue, oldValue, url);
   }
 
   private unregisterTab(url: string) {

@@ -4,8 +4,9 @@
 
 import {mixin} from '../';
 import Store from './Store';
-import {IDType, list as listIDTypes, defaultSelectionType} from '../idtype';
-import {Range} from '../range';
+import {list as listIDTypes, defaultSelectionType} from '../idtype';
+import IDType from '../idtype/IDType';
+import Range from '../range/Range';
 import {on as globalOn} from '../event';
 
 const PREFIX = 'selection-idtype-';
@@ -26,9 +27,9 @@ function syncIDType(store: Store, idType: IDType, options: ISelectionSyncerOptio
       // sync just the latest state
       store.setValue(key, selection.toString());
     });
-    store.on(key, (event, new_: string) => {
+    store.on(key, (event: any, newValue: string) => {
       disable = true; //don't track on changes
-      idType.select(type, new_);
+      idType.select(type, newValue);
       disable = false;
     });
   });
@@ -46,7 +47,7 @@ export function create(store: Store, options?: ISelectionSyncerOptions) {
   toSync.forEach((idType) => syncIDType(store, <IDType>idType, options));
 
   // watch new ones
-  globalOn('register.idtype', (event, idType: IDType) => {
+  globalOn('register.idtype', (event: any, idType: IDType) => {
     if (options.filter(idType)) {
       syncIDType(store, idType, options);
     }
