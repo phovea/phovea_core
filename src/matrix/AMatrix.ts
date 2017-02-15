@@ -8,8 +8,10 @@
  */
 
 import {IPersistable} from '../index';
-import {Range, RangeLike, all, range, parse} from '../range';
-import {resolve as resolveIDType, IDType} from '../idtype';
+import {RangeLike, all, range, parse} from '../range';
+import Range from '../range/Range';
+import {resolve as resolveIDType} from '../idtype';
+import IDType from '../idtype/IDType';
 import AProductSelectAble from '../idtype/AProductSelectAble';
 import {
   VALUE_TYPE_CATEGORICAL, VALUE_TYPE_INT, VALUE_TYPE_REAL, ICategoricalValueTypeDesc, INumberValueTypeDesc,
@@ -110,7 +112,7 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
         return hist(<any[]>flat.data, flat.indices, flat.data.length, bins ? bins : Math.round(Math.sqrt(this.length)), vn.range);
       default:
         return Promise.reject<IHistogram>('invalid value type: ' + v.type); //cant create hist for unique objects or other ones
-    };
+    }
   }
 
   async idView(idRange: RangeLike = all()): Promise<IMatrix<T, D>> {

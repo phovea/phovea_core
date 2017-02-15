@@ -63,8 +63,8 @@ export default class Range1D {
         r.push(RangeElem.single(indices[start]));
       } else {
         //+1 since end is excluded
-        //fix while just +1 -1 is allowed
-        if (Math.abs(deltas[start]) === 1) {
+        //fix while just +1 is allowed and -1 is not allowed
+        if (deltas[start] === 1) {
           r.push(RangeElem.range(indices[start], indices[act - 1] + deltas[start], deltas[start]));
         } else {
           for (i = start; i < act; i++) {

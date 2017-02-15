@@ -7,9 +7,11 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {all, list as rlist, Range, RangeLike, range, CompositeRange1D, asUngrouped, composite, parse} from '../range';
+import {all, list as rlist, RangeLike, range, asUngrouped, composite, parse} from '../range';
+import Range from '../range/Range';
+import CompositeRange1D from '../range/CompositeRange1D';
 import {argSort, argFilter} from '../index';
-import {SelectAble} from '../idtype';
+import {SelectAble, resolve as resolveIDType, IDType} from '../idtype';
 import {
   categorical2partitioning,
   ICategorical2PartitioningOptions,
@@ -24,6 +26,8 @@ import {computeStats, IStatistics, IHistogram, categoricalHist, hist} from '../m
 import {IVector} from './IVector';
 import {IStratification} from '../stratification';
 import StratificationVector from './internal/StratificationVector';
+import ProjectedAtom from './internal/ProjectedAtom';
+import IAtom,{IAtomValue} from '../atom/IAtom';
 /**
  * base class for different Vector implementations, views, transposed,...
  * @internal
@@ -142,9 +146,18 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
     return (await this.data()).reduceRight(helper, initialValue);
   }
 
+  reduceAtom<U, UD extends IValueTypeDesc>(f: (data: T[], ids: Range, names: string[]) => IAtomValue<U>, thisArgument?: any, valuetype?: UD, idtype?: IDType): IAtom<U,UD> {
+    const r: IVector<T,D> = <IVector<T,D>>(<any>this);
+    return new ProjectedAtom(r, f, thisArgument, valuetype, idtype);
+  }
+
   restore(persisted: any) {
     let r: IVector<T,D> = <IVector<T,D>>(<any>this);
-    if (persisted && persisted.range) { //some view onto it
+    if (persisted && persisted.f) {
+      /* tslint:disable:no-eval */
+      return this.reduceAtom(eval(persisted.f), this, persisted.valuetype, persisted.idtype ? resolveIDType(persisted.idtype) : undefined);
+      /* tslint:enable:no-eval */
+    } else if (persisted && persisted.range) { //some view onto it
       r = r.view(parse(persisted.range));
     }
     return r;
@@ -226,13 +239,13 @@ export class VectorView<T,D extends IValueTypeDesc> extends AVector<T,D> {
   async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
     const d = await this.data();
     const indices = argSort(d, compareFn, thisArg);
-    return this.view(this.range.preMultiply(rlist(indices)));
+    return this.view(rlist(indices));
   }
 
   async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
     const d = await this.data();
     const indices = argFilter(d, callbackfn, thisArg);
-    return this.view(this.range.preMultiply(rlist(indices)));
+    return this.view(rlist(indices));
   }
 }
 
