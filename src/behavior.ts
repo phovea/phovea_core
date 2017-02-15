@@ -14,15 +14,16 @@ import {EventHandler} from './event';
  * utility logic for zooming a vis instance
  */
 export class ZoomLogic extends EventHandler {
-  constructor(public v: IVisInstance, public meta: IVisMetaData) {
+  constructor(public readonly v: IVisInstance, public readonly meta: IVisMetaData) {
     super();
   }
 
   zoomIn() {
-    return this.zoom(1,1);
+    return this.zoom(1, 1);
   }
+
   zoomOut() {
-    return this.zoom(-1,-1);
+    return this.zoom(-1, -1);
   }
 
   /**
@@ -31,13 +32,14 @@ export class ZoomLogic extends EventHandler {
    * @param zoomY
    * @returns {any}
    */
-  zoom (zoomX: number, zoomY : number) {
+  zoom(zoomX: number, zoomY: number) {
     if (!this.v) {
       return null;
     }
-    function toDelta(x) {
+    function toDelta(x: number) {
       return x > 0 ? 0.2 : (x < 0 ? -0.2 : 0);
     }
+
     const old = this.v.transform();
     const deltaX = toDelta(zoomX);
     const deltaY = toDelta(zoomY);
@@ -62,13 +64,13 @@ export class ZoomLogic extends EventHandler {
    * @param zoomY
    * @returns {any}
    */
-  zoomSet(zoomX : number, zoomY : number) {
+  zoomSet(zoomX: number, zoomY: number) {
     if (!this.v) {
       return null;
     }
     const old = this.v.transform();
-    var s = [zoomX, zoomY];
-    switch((this.meta ? this.meta.scaling : 'free')) {
+    const s: [number, number] = [zoomX, zoomY];
+    switch ((this.meta ? this.meta.scaling : 'free')) {
       case 'width-only':
         s[1] = old.scale[1];
         break;
@@ -83,10 +85,10 @@ export class ZoomLogic extends EventHandler {
       s[1] = 0.001;
     }
     if ((this.meta && this.meta.scaling === 'aspect')) { //same aspect ratio use min scale
-      s[0] = s[1] = Math.min.apply(Math,s);
+      s[0] = s[1] = Math.min(...s);
     }
     this.fire('zoom', {
-      scale : s,
+      scale: s,
       rotate: old.rotate
     }, old);
     return this.v.transform(s, old.rotate);
@@ -98,12 +100,12 @@ export class ZoomLogic extends EventHandler {
    * @param h
    * @returns {any}
    */
-  zoomTo(w : number, h : number) {
+  zoomTo(w: number, h: number) {
     if (!this.v) {
       return null;
     }
     const ori = this.v.rawSize;
-    return this.zoomSet(w / ori[0], h/ori[1]);
+    return this.zoomSet(w / ori[0], h / ori[1]);
   }
 }
 
@@ -111,9 +113,9 @@ export class ZoomLogic extends EventHandler {
  * addition to ZoomLogic taking care of mouse wheel operations on the vis instance
  */
 export class ZoomBehavior extends ZoomLogic {
-  constructor(private node: Element, v: IVisInstance, meta : IVisMetaData) {
+  constructor(node: Element, v: IVisInstance, meta: IVisMetaData) {
     super(v, meta);
-    node.addEventListener('mousewheel', (event : any) => {
+    node.addEventListener('mousewheel', (event: any) => {
       if (!this.v) {
         return;
       }
@@ -121,7 +123,7 @@ export class ZoomBehavior extends ZoomLogic {
       const shiftKey = event.shiftKey; //y
       const altKey = event.altKey; //x
       const m = event.wheelDelta;
-      this.zoom(m * (ctrlKey || altKey ? 1: 0), m * (ctrlKey || shiftKey ? 1 : 0));
+      this.zoom(m * (ctrlKey || altKey ? 1 : 0), m * (ctrlKey || shiftKey ? 1 : 0));
       if (ctrlKey || shiftKey || altKey) {
         event.preventDefault();
       }

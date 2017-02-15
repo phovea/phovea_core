@@ -1,3 +1,4 @@
+/// <reference types="jasmine" />
 import {argFilter, argSort, bounds, mod, version, uniqueId, uniqueString, resolveIn, randomId, flagId} from '../src';
 
 describe('argFilter', () => {
@@ -42,10 +43,10 @@ describe('uniqueString', () => {
 
 describe('resolveIn', () => {
   it('200ms', (done) => {
-    var past = Date.now();
+    const past = Date.now();
     resolveIn(200).then(function() {
-      var present = Date.now();
-      var actual = present - past;
+      const present = Date.now();
+      const actual = present - past;
       expect(actual).toBeGreaterThanOrEqual(200);
       done();
     });

@@ -11,7 +11,7 @@
  * Use the browser's sessionStorage
  * @type {Storage}
  */
-const context:Storage = sessionStorage;
+const context: Storage = sessionStorage;
 
 /**
  * Store any value for a given key and returns the previous stored value.
@@ -21,7 +21,7 @@ const context:Storage = sessionStorage;
  * @returns {any}
  */
 export function store(key: string, value: any) {
-  var bak = context.getItem(key);
+  const bak = context.getItem(key);
   context.setItem(key, JSON.stringify(value));
   return bak;
 }
@@ -47,9 +47,9 @@ export function has(key: string) {
  * Returns the value for the given key if it exists in the session.
  * Otherwise returns the `default_` parameter, which is by default `null`.
  * @param key
- * @param default_
+ * @param defaultValue
  * @returns {T}
  */
-export function retrieve<T>(key: string, default_ : T = null) : T {
-  return has(key) ? JSON.parse(context.getItem(key)) : default_;
+export function retrieve<T>(key: string, defaultValue: T = null): T {
+  return has(key) ? JSON.parse(context.getItem(key)) : defaultValue;
 }

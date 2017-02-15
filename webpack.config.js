@@ -13,7 +13,8 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const buildInfo = require('./buildInfo.js');
 
 const now = new Date();
-const buildId = `${now.getUTCFullYear()}${now.getUTCMonth()}${now.getUTCDate()}-${now.getUTCHours()}${now.getUTCMinutes()}${now.getUTCSeconds()}`;
+const prefix = (n) => n < 10 ? ('0' + n) : n.toString();
+const buildId = `${now.getUTCFullYear()}${prefix(now.getUTCMonth())}${prefix(now.getUTCDate())}-${prefix(now.getUTCHours())}${prefix(now.getUTCMinutes())}${prefix(now.getUTCSeconds())}`;
 pkg.version = pkg.version.replace('SNAPSHOT', buildId);
 
 const year = (new Date()).getFullYear();
@@ -78,7 +79,7 @@ function testPhoveaModule(moduleName, request) {
 function testPhoveaModules(modules) {
   return (context, request, callback) => {
     for (let i = 0; i < modules.length; ++i) {
-      var r = testPhoveaModule(modules[i], request);
+      const r = testPhoveaModule(modules[i], request);
       if (r) {
         return callback(null, r);
       }
@@ -87,9 +88,9 @@ function testPhoveaModules(modules) {
   };
 }
 
-// use ueber registry file if available
-const isUeberContext = fs.existsSync(resolve(__dirname, '..', 'phovea_registry.js'));
-const registryFile = isUeberContext ? '../phovea_registry.js' : './phovea_registry.js';
+// use workspace registry file if available
+const isWorkspaceContext = fs.existsSync(resolve(__dirname, '..', 'phovea_registry.js'));
+const registryFile = isWorkspaceContext ? '../phovea_registry.js' : './phovea_registry.js';
 const actBuildInfoFile = `file-loader?name=buildInfo.json!${buildInfo.tmpFile()}`;
 
 /**
@@ -102,7 +103,7 @@ function injectRegistry(entry) {
   if (typeof entry === 'string') {
     return [registryFile, actBuildInfoFile].concat(entry);
   } else {
-    var transformed = {};
+    const transformed = {};
     Object.keys(entry).forEach((eentry) => {
       transformed[eentry] = [registryFile, actBuildInfoFile].concat(entry[eentry]);
     });
@@ -114,7 +115,7 @@ function injectRegistry(entry) {
  * generate a webpack configuration
  */
 function generateWebpack(options) {
-  var base = {
+  let base = {
     entry: injectRegistry(options.entries),
     output: {
       path: resolve(__dirname, 'build'),
@@ -125,8 +126,8 @@ function generateWebpack(options) {
       // Add `.ts` and `.tsx` as a resolvable extension.
       extensions: ['.webpack.js', '.web.js', '.ts', '.tsx', '.js'],
       alias: Object.assign({}, options.libs || {}),
-      //fallback to the directory above if they are siblings just in the ueber context
-      modules: isUeberContext ? [
+      //fallback to the directory above if they are siblings just in the workspace context
+      modules: isWorkspaceContext ? [
         resolve(__dirname, '../'),
         'node_modules'
       ] : ['node_modules']
@@ -138,12 +139,16 @@ function generateWebpack(options) {
       }),
       //define magic constants that are replaced
       new webpack.DefinePlugin({
+        'process.env': {
+          'NODE_ENV': JSON.stringify(options.isProduction ? 'production': 'development')
+        },
         __VERSION__: JSON.stringify(pkg.version),
         __LICENSE__: JSON.stringify(pkg.license),
         __BUILD_ID__: buildId,
         __DEBUG__: options.isDev || options.isTest,
         __TEST__: options.isTest,
-        __PRODUCTION__: options.isProduction
+        __PRODUCTION__: options.isProduction,
+        __APP_CONTEXT__: JSON.stringify('/')
       }),
       new webpack.optimize.MinChunkSizePlugin({
         minChunkSize: 10000 //at least 10.000 characters
@@ -159,7 +164,8 @@ function generateWebpack(options) {
       proxy: {
         '/api/*': {
           target: 'http://localhost:9000',
-          secure: false
+          secure: false,
+          ws: true
         },
         '/login': {
           target: 'http://localhost:9000',
@@ -177,10 +183,11 @@ function generateWebpack(options) {
       contentBase: resolve(__dirname, 'build')
     }
   };
+
   if (options.library) {
+    let libName = /phovea_.*/.test(pkg.name) ? ['phovea', pkg.name.slice(7)] : pkg.name;
     //generate a library, i.e. output the last entry element
     //create library name
-    var libName = /phovea_.*/.test(pkg.name) ? ['phovea', pkg.name.slice(7)] : pkg.name;
     if (options.moduleBundle) {
       libName = 'phovea';
     }
@@ -210,8 +217,8 @@ function generateWebpack(options) {
   }
   if (!options.bundle || options.isApp) {
     //extract the included css file to own file
-    var p = new ExtractTextPlugin({
-      filename: 'style' + (options.min && !options.nosuffix ? '.min' : '') + '.css',
+    let p = new ExtractTextPlugin({
+      filename: (options.isApp || options.moduleBundle ? 'style' : pkg.name)  + (options.min && !options.nosuffix ? '.min' : '') + '.css',
       allChunks: true // there seems to be a bug in dynamically loaded chunk styles are not loaded, workaround: extract all styles from all chunks
     });
     base.plugins.push(p);
@@ -294,7 +301,7 @@ function generateWebpackConfig(env) {
   //single generation
   if (isDev) {
     return generateWebpack(base);
-  } else if (type === 'app') { //isProduction app
+  } else if (type.startsWith('app')) { //isProduction app
     return generateWebpack(Object.assign({}, base, {
         min: true,
         nosuffix: true

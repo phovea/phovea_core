@@ -8,13 +8,13 @@
  */
 
 export interface IEventHandler {
-  on(events, handler);
-  off(events, handler);
+  on(events: string|{[key: string]: IEventListener}, handler?: IEventListener): void;
+  off(events: string|{[key: string]: IEventListener}, handler?: IEventListener): void;
 }
 
 export interface IDataBinding {
-  data(key : string) : any;
-  data(key : string, value: any) : any;
+  data(key: string): any;
+  data(key: string, value: any): any;
 }
 
 /**
@@ -24,29 +24,35 @@ export interface IEvent {
   /**
    * type of the event
    */
-  type: string;
-  currentTarget: IEventHandler;
-  target: IEventHandler;
-  delegateTarget: IEventHandler;
-  timeStamp: Date;
-  args: any[];
+  readonly type: string;
+  readonly currentTarget: IEventHandler;
+  readonly target: IEventHandler;
+  readonly delegateTarget: IEventHandler;
+  /**
+   * creation date
+   */
+  readonly timeStamp: Date;
+  /**
+   * additional arguments given to the event
+   */
+  readonly args: any[];
 
-  isPropagationStopped();
-  stopPropagation();
-  isImmediatePropagationStopped();
-  stopImmediatePropagation();
+  isPropagationStopped(): boolean;
+  stopPropagation(): void;
+  isImmediatePropagationStopped(): boolean;
+  stopImmediatePropagation(): void;
 }
 
 export interface IEventListener {
-  (event: IEvent, ...args:any[]) : void;
+  (event: IEvent, ...args: any[]): void;
 }
 
 class Event implements IEvent {
-  timeStamp = new Date();
+  readonly timeStamp = new Date();
   private stopped = false;
   private stopedPropagation = false;
 
-  constructor(public type: string, public args: any[], public target: IEventHandler, public delegateTarget : IEventHandler) {
+  constructor(public readonly type: string, public readonly args: any[], public readonly target: IEventHandler, public readonly delegateTarget: IEventHandler) {
 
   }
 
@@ -57,50 +63,57 @@ class Event implements IEvent {
   isImmediatePropagationStopped() {
     return this.stopped;
   }
+
   stopImmediatePropagation() {
     this.stopped = true;
   }
+
   isPropagationStopped() {
     return this.stopedPropagation;
   }
+
   stopPropagation() {
     this.stopedPropagation = true;
   }
 }
 
 class SingleEventHandler {
-  private listeners : IEventListener[] = [];
-  constructor(public type: string) {
+  private listeners: IEventListener[] = [];
+
+  constructor(public readonly type: string) {
     //nothing else to do
   }
 
   push(listener: IEventListener) {
     this.listeners.push(listener);
   }
+
   remove(listener: IEventListener) {
-    var i = this.listeners.indexOf(listener);
+    const i = this.listeners.indexOf(listener);
     if (i >= 0) {
-      this.listeners.splice(i,1);
+      this.listeners.splice(i, 1);
       return true;
     }
     return false;
   }
+
   fire(event: IEvent) {
     if (this.listeners.length === 0) {
       return false;
     }
-    var largs = [event].concat(event.args);
+    const largs = [event].concat(event.args);
     if (this.listeners.length === 1) {
       this.listeners[0].apply(event, largs);
     } else {
       //work on a copy in case the number changes
-      var l = this.listeners.slice(), ll = l.length;
-      for (var i = 0; i < ll && !event.isImmediatePropagationStopped(); ++i) {
+      const l = this.listeners.slice(), ll = l.length;
+      for (let i = 0; i < ll && !event.isImmediatePropagationStopped(); ++i) {
         l[i].apply(event, largs);
       }
     }
     return true;
   }
+
   get length() {
     return this.listeners.length;
   }
@@ -114,33 +127,31 @@ function propagateEvent(event: IEvent, target: IEventHandler) {
 }
 
 export interface IEventListener {
-  (event: IEvent, ...args: any[]) : any;
+  (event: IEvent, ...args: any[]): any;
 }
 /**
- * EventHandler base class, in the backend JQuery is used
+ * EventHandler base class
  */
 export class EventHandler implements IEventHandler {
-  // TODO convert to Map
-  private handlers : any = {};
+  static readonly MULTI_EVENT_SEPARATOR = ',';
+  private readonly handlers = new Map<string, SingleEventHandler>();
 
   /**
    * register a global event handler
-   * @param events
-   * @param handler
+   * @param events either one event string (multiple are supported using , as separator) or a map of event handlers
+   * @param handler the handler in case of a given string
    */
-  on(events: string, handler: IEventListener): IEventHandler;
-  on(events: { [key: string] : IEventListener }): IEventHandler;
-  on(events: string|{ [key: string] : IEventListener }, handler? : IEventListener) {
+  on(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
     if (typeof events === 'string') {
-      events.split(',').forEach((event) => {
-        if (!this.handlers.hasOwnProperty(event)) {
-          this.handlers[event] = new SingleEventHandler(event);
+      events.split(EventHandler.MULTI_EVENT_SEPARATOR).forEach((event) => {
+        if (!this.handlers.has(event)) {
+          this.handlers.set(event, new SingleEventHandler(event));
         }
-        this.handlers[event].push(handler);
+        this.handlers.get(event).push(handler);
       });
     } else {
       Object.keys(events).forEach((event) => {
-        let h = events[event];
+        const h = events[event];
         this.on(event, h);
       });
     }
@@ -152,22 +163,20 @@ export class EventHandler implements IEventHandler {
    * @param events
    * @param handler
    */
-  off(events: string, handler: IEventListener): IEventHandler;
-  off(events: { [key: string] : IEventListener }): IEventHandler;
-  off(events: string|{ [key: string] : IEventListener }, handler? : IEventListener) {
+  off(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
     if (typeof events === 'string') {
-      events.split(',').forEach((event) => {
-        if (this.handlers.hasOwnProperty(event)) {
-          let h:SingleEventHandler = this.handlers[event];
+      events.split(EventHandler.MULTI_EVENT_SEPARATOR).forEach((event) => {
+        if (this.handlers.has(event)) {
+          const h: SingleEventHandler = this.handlers.get(event);
           h.remove(handler);
           if (h.length === 0) {
-            delete this.handlers[event];
+            this.handlers.delete(event);
           }
         }
       });
     } else {
       Object.keys(events).forEach((event) => {
-        let h = events[event];
+        const h = events[event];
         this.off(event, h);
       });
     }
@@ -176,12 +185,12 @@ export class EventHandler implements IEventHandler {
 
 
   /**
-   * list all registered Events
+   * list for each registered event the number of listeners
    */
-  list() {
-    const r = {};
-    Object.keys(this.handlers).forEach((type) => {
-      r[type] = this.handlers[type].length;
+  list(): {[key: string]: number} {
+    const r: {[key: string]: number} = {};
+    this.handlers.forEach((handler, type) => {
+      r[type] = handler.length;
     });
     return r;
   }
@@ -189,19 +198,19 @@ export class EventHandler implements IEventHandler {
 
   /**
    * fires an event
-   * @param event
-   * @param args
+   * @param events name(s) of the event
+   * @param args additional arguments
    */
   fire(events: string, ...args: any[]) {
-    events.split(',').forEach((event) => {
+    events.split(EventHandler.MULTI_EVENT_SEPARATOR).forEach((event) => {
       this.fireEvent(createEvent(event, args, this));
     });
     return this;
   }
 
   private fireEvent(event: Event) {
-    if (this.handlers.hasOwnProperty(event.type)) {
-      let h : SingleEventHandler = this.handlers[event.type];
+    if (this.handlers.has(event.type)) {
+      const h: SingleEventHandler = this.handlers.get(event.type);
       return h.fire(event);
     }
     return false;
@@ -213,7 +222,7 @@ export class EventHandler implements IEventHandler {
    * @param events
    */
   propagate(progatee: IEventHandler, ...events: string[]) {
-    progatee.on(events.join(','), (event: IEvent) => {
+    progatee.on(events.join(EventHandler.MULTI_EVENT_SEPARATOR), (event: IEvent) => {
       if (!event.isPropagationStopped()) {
         this.fireEvent(propagateEvent(event, this));
       }

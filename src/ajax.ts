@@ -3,18 +3,22 @@
  * Copyright (c) The Caleydo Team. All rights reserved.
  * Licensed under the new BSD license, available at http://caleydo.org/license
  **************************************************************************** */
+// to resolve the window extensions
+/// <reference types="whatwg-fetch" />
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
 import {offline as isOffline, server_url, server_json_suffix} from '.';
 
 class AjaxError extends Error {
-  constructor(public response: any, message?: string) {
+  constructor(public readonly response: Response, message?: string) {
     super(message ? message : response.statusText);
+    // Set the prototype explicitly. needed for Typescript 2.1
+    Object.setPrototypeOf(this, AjaxError.prototype);
   }
 }
 
-function checkStatus(response) {
+function checkStatus(response: Response) {
   if (response.ok) {
     return response;
   } else {
@@ -22,7 +26,7 @@ function checkStatus(response) {
   }
 }
 
-function parseType(expectedDataType: string, response) {
+function parseType(expectedDataType: string, response: Response) {
   switch (expectedDataType.trim().toLowerCase()) {
     case 'json':
     case 'application/json':
@@ -49,7 +53,7 @@ function parseType(expectedDataType: string, response) {
  * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
  * @returns {Promise<any>}
  */
-export function send(url: string, data: any = {}, method = 'GET', expectedDataType = 'json'): Promise<any> {
+export async function send(url: string, data: any = {}, method = 'GET', expectedDataType = 'json'): Promise<any> {
   // for compatibility
   method = method.toUpperCase();
 
@@ -62,24 +66,23 @@ export function send(url: string, data: any = {}, method = 'GET', expectedDataTy
     }
   }
 
-  const options: any = {
+  const options: RequestInit = {
     credentials: 'same-origin',
-    method: method,
+    method,
     headers: {
       'Accept': 'application/json'
     },
   };
   if (data && !(data instanceof FormData)) {
-    options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    (<any>options.headers)['Content-Type'] = 'application/x-www-form-urlencoded';
     options.body = encodeParams(data);
   } else if (data) {
     options.body = data;
   }
 
   // there are no typings for fetch so far
-  return (<any>self).fetch(url, options)
-    .then(checkStatus)
-    .then(parseType.bind(null, expectedDataType));
+  const r = checkStatus(await self.fetch(url, options));
+  return parseType(expectedDataType, r);
 }
 /**
  * to get some ajax json file
@@ -98,7 +101,7 @@ export function getJSON(url: string, data: any = {}): Promise<any> {
  * @returns {any}
  */
 export function getData(url: string, data: any = {}, expectedDataType = 'json'): Promise<any> {
-  return send(url, data, 'get', expectedDataType);
+  return send(url, data, 'GET', expectedDataType);
 }
 
 /**
@@ -119,36 +122,35 @@ export function api2absURL(url: string, data: any = null) {
 
 /**
  * convert a given object to url data similar to JQuery
- * @param url
  * @param data
  * @returns {any}
  */
-export function encodeParams(data = null) {
+export function encodeParams(data :any = null) {
   if (data === null) {
     return null;
   }
   if (typeof data === 'string') {
     return encodeURIComponent(data);
   }
-  var keys = Object.keys(data);
+  const keys = Object.keys(data);
   if (keys.length === 0) {
     return null;
   }
-  var s = [];
+  const s :string[] = [];
 
-  function add(prefix, key, value) {
+  function add(prefix: string, key: string, value: any) {
     if (Array.isArray(value)) {
       value.forEach((v, i) => {
         if (typeof v === 'object') {
-          add(prefix, key + '[' + i + ']', v);
+          add(prefix, `${key}[${i}]`, v);
         } else {
           //primitive values uses the same key
-          add(prefix, key + '[]', v);
+          add(prefix, `${key}[]`, v);
         }
       });
     } else if (typeof value === 'object') {
       Object.keys(value).forEach((v) => {
-        add(prefix, key + '[' + v + ']', value[v]);
+        add(prefix, `${key}[${v}]`, value[v]);
       });
     } else {
       s.push(encodeURIComponent(prefix + key) + '=' + encodeURIComponent(value));
@@ -169,6 +171,12 @@ function defaultOfflineGenerator() {
   return Promise.reject('offline');
 }
 
+/**
+ * handler in case phovea is set to be in offline mode
+ * @param generator
+ * @param data
+ * @returns {Promise<OfflineGenerator>}
+ */
 function offline(generator: OfflineGenerator, data: any = {}) {
   return Promise.resolve(typeof generator === 'function' ? generator(data) : generator);
 }
@@ -179,9 +187,10 @@ function offline(generator: OfflineGenerator, data: any = {}) {
  * @param data arguments
  * @param method http method
  * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
+ * @param offlineGenerator in case phovea is set to be offline
  * @returns {Promise<any>}
  */
-export function sendAPI(url: string, data: any = {}, method = 'get', expectedDataType = 'json', offlineGenerator: OfflineGenerator = defaultOfflineGenerator): Promise<any> {
+export function sendAPI(url: string, data: any = {}, method = 'GET', expectedDataType = 'json', offlineGenerator: OfflineGenerator = defaultOfflineGenerator): Promise<any> {
   if (isOffline) {
     return offline(offlineGenerator, data);
   }
@@ -192,6 +201,7 @@ export function sendAPI(url: string, data: any = {}, method = 'get', expectedDat
  * api version of getJSON
  * @param url api relative url
  * @param data arguments
+ * @param offlineGenerator in case of offline flag is set what should be returned
  * @returns {Promise<any>}
  */
 export function getAPIJSON(url: string, data: any = {}, offlineGenerator: OfflineGenerator = defaultOfflineGenerator): Promise<any> {
@@ -206,6 +216,7 @@ export function getAPIJSON(url: string, data: any = {}, offlineGenerator: Offlin
  * @param url api relative url
  * @param data arguments
  * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
+ * @param offlineGenerator in case of offline flag is set what should be returned
  * @returns {Promise<any>}
  */
 export function getAPIData(url: string, data: any = {}, expectedDataType = 'json', offlineGenerator: OfflineGenerator = () => defaultOfflineGenerator): Promise<any> {
