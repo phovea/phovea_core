@@ -14,7 +14,7 @@ import {
   IHistAbleDataType, IValueTypeDesc, IDataDescription, createDefaultDataDesc,
   INumberValueTypeDesc, ICategoricalValueTypeDesc
 } from '../datatype';
-import {IStratification} from '../stratification/IStratification';
+import IStratification from '../stratification/IStratification';
 import {IStatistics, IHistogram} from '../math';
 import {IAtom, IAtomValue} from '../atom/IAtom';
 

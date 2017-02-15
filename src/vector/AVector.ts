@@ -7,7 +7,9 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {all, list as rlist, Range, RangeLike, range, CompositeRange1D, asUngrouped, composite, parse} from '../range';
+import {all, list as rlist, RangeLike, range, asUngrouped, composite, parse} from '../range';
+import Range from '../range/Range';
+import CompositeRange1D from '../range/CompositeRange1D';
 import {argSort, argFilter} from '../index';
 import {SelectAble, resolve as resolveIDType, IDType} from '../idtype';
 import {
@@ -237,13 +239,13 @@ export class VectorView<T,D extends IValueTypeDesc> extends AVector<T,D> {
   async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
     const d = await this.data();
     const indices = argSort(d, compareFn, thisArg);
-    return this.view(this.range.preMultiply(rlist(indices)));
+    return this.view(rlist(indices));
   }
 
   async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
     const d = await this.data();
     const indices = argFilter(d, callbackfn, thisArg);
-    return this.view(this.range.preMultiply(rlist(indices)));
+    return this.view(rlist(indices));
   }
 }
 

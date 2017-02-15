@@ -10,10 +10,15 @@
 
 import {mixin} from '../index';
 import {argSort, argFilter} from '../index';
-import {all, Range, RangeLike, list as rlist, parse} from '../range';
+import {all, RangeLike, list as rlist, parse} from '../range';
+import Range from '../range/Range';
 import {resolve, createLocalAssigner} from '../idtype';
 import {
-  mask, INumberValueTypeDesc, VALUE_TYPE_INT, VALUE_TYPE_REAL, guessValueTypeDesc,
+  mask,
+  INumberValueTypeDesc,
+  VALUE_TYPE_INT,
+  VALUE_TYPE_REAL,
+  guessValueTypeDesc,
   IValueTypeDesc
 } from '../datatype';
 import {IVector, IVectorDataDescription, createDefaultVectorDesc} from './IVector';
