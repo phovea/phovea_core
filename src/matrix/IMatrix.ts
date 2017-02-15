@@ -7,8 +7,10 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {Range, RangeLike} from '../range';
-import {IProductSelectAble, IDType} from '../idtype';
+import {RangeLike} from '../range';
+import Range from '../range/Range';
+import {IProductSelectAble} from '../idtype';
+import IDType from '../idtype/IDType';
 import {
   IHistAbleDataType, IValueTypeDesc, IDataDescription, createDefaultDataDesc as createDefaultBaseDesc,
   INumberValueTypeDesc, ICategoricalValueTypeDesc
@@ -76,11 +78,11 @@ export interface IMatrix<T, D extends IValueTypeDesc> extends IHistAbleDataType<
   /**
    * reduces the current matrix to a vector using the given reduce function
    * @param f the reduce function
-   * @param this_f the this context for the function default the matrix
+   * @param thisArgument the this context for the function default the matrix
    * @param valuetype the new value type by default the same as matrix valuetype
    * @param idtype the new vlaue type by default the same as matrix rowtype
    */
-  reduce<U, UD extends IValueTypeDesc>(f: (row: T[]) => U, this_f?: any, valuetype?: UD, idtype?: IDType): IVector<U, UD>;
+  reduce<U, UD extends IValueTypeDesc>(f: (row: T[]) => U, thisArgument?: any, valuetype?: UD, idtype?: IDType): IVector<U, UD>;
   /**
    * transposed version of this matrix
    */
