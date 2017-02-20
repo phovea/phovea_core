@@ -235,7 +235,6 @@ export default class Range1D {
       return other.clone();
     }
     const r = this._union(other, size).sort(); // sorted after making union
-    console.log(r)
     return other.fromLike(r);
   }
 
@@ -252,8 +251,7 @@ export default class Range1D {
     if (other.isAll || this.isNone) {
       return other.clone();
     }
-    const r = this._union(other, size);
-        console.log(r)// simply append the indices without sorting
+    const r = this._union(other, size); // simply append the indices without sorting
     return this.fromLike(r);
   }
 
