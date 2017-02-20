@@ -94,6 +94,22 @@ export default class Range {
     return r;
   }
 
+
+  concat(other: Range, size?: number[]) {
+    if (this.isAll || other.isNone) {
+      return this.clone();
+    }
+    if (other.isAll || this.isNone) {
+      return other.clone();
+    }
+    const r = new Range();
+    this.dims.forEach((d, i) => {
+      r.dims[i] = d.concat(other.dim(i), size ? size[i] : undefined);
+    });
+    return r;
+  }
+
+
   /**
    * logical intersection between two ranges
    * @param other
@@ -162,7 +178,7 @@ export default class Range {
     const ndim = this.ndim;
     const that = this;
     //recursive variant for just filtering the needed rows
-    const filterDim = (i: number): (d:any)=>any => {
+    const filterDim = (i: number): (d: any) => any => {
       if (i >= ndim) { //out of range no filtering anymore
         return (d: any) => d;
       }
