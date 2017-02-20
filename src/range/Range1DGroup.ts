@@ -20,7 +20,7 @@ export default class Range1DGroup extends Range1D {
   }
 
    concat(other: Range1D, size?: number): Range1DGroup {
-    const r = super.union(other, size);
+    const r = super.concat(other, size);
     return new Range1DGroup(this.name, this.color, r);
   }
 

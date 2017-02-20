@@ -203,23 +203,6 @@ export default class Range1D {
     }
   }
 
-  /**
-   * merge list of two ranges
-   * @param other
-   * @param size
-   * @returns {number[]}
-   * @private
-   */
-  private _union(other: Range1D, size?: number): number[] {
-    const r = this.iter(size).asList();
-    const it2 = other.iter(size);
-    it2.forEach((i) => {
-      if (r.indexOf(i) < 0) {
-        r.push(i);
-      }
-    });
-    return r;
-  }
 
   /**
    * sorted logical union between two ranges
@@ -234,8 +217,14 @@ export default class Range1D {
     if (other.isAll || this.isNone) {
       return other.clone();
     }
-    const r = this._union(other, size).sort(); // sorted after making union
-    return other.fromLike(r);
+    const r = this.iter(size).asList();
+    const it2 = other.iter(size);
+    it2.forEach((i) => {
+      if (r.indexOf(i) < 0) {
+        r.push(i);
+      }
+    });
+    return other.fromLike(r.sort());
   }
 
   /**
@@ -244,6 +233,7 @@ export default class Range1D {
    * @param size
    * @returns {Range1D}
    */
+
   concat(other: Range1D, size?: number): Range1D {
     if (this.isAll || other.isNone) {
       return this.clone();
@@ -251,10 +241,13 @@ export default class Range1D {
     if (other.isAll || this.isNone) {
       return other.clone();
     }
-    const r = this._union(other, size); // simply append the indices without sorting
+    const r = this.iter(size).asList();
+    const it2 = other.iter(size);
+    it2.forEach((i) => {
+      r.push(i);
+    });
     return this.fromLike(r);
   }
-
 
   /**
    * logical intersection between two ranges

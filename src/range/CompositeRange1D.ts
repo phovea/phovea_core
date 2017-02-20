@@ -37,10 +37,9 @@ export default class CompositeRange1D extends Range1D implements ICompositeRange
   }
 
   concat(other: Range1D, size?: number) {
-    const r = this.groups.length > 1 ? super.union(other, size) : undefined;
-    return new CompositeRange1D(this.name, this.groups.map((g) => <Range1DGroup>g.union(other, size)), r);
+    const r = this.groups.length > 1 ? super.concat(other, size) : undefined;
+    return new CompositeRange1D(this.name, this.groups.map((g) => <Range1DGroup>g.concat(other, size)), r);
   }
-
 
   intersect(other: Range1D, size?: number) {
     const r = this.groups.length > 1 ? super.intersect(other, size) : undefined;
