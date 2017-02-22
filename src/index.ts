@@ -275,13 +275,13 @@ export const fix_id = fixId;
  */
 export function onDOMNodeRemoved(node: Element|Element[], callback: () => void, thisArg?: any) {
   let arr: any[];
-  const body = document.getElementsByTagName('body')[0];
   if (!Array.isArray(node)) {
     arr = [node];
   } else {
     arr = <any[]>node;
   }
   arr.forEach((n) => {
+    const body = n.ownerDocument.body;
     function l(evt: Event) {
       //since this event bubbles check if it the right node
       let act = n;
@@ -368,9 +368,10 @@ export function offset(element: Element) {
     return {left: 0, top: 0, width: 0, height: 0};
   }
   const obj = element.getBoundingClientRect();
+  const w = element.ownerDocument.defaultView;
   return {
-    left: obj.left + window.pageXOffset,
-    top: obj.top + window.pageYOffset,
+    left: obj.left + w.pageXOffset,
+    top: obj.top + w.pageYOffset,
     width: obj.width,
     height: obj.height
   };

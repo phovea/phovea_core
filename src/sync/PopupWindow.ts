@@ -50,10 +50,11 @@ export default class PopupProxy<T extends INodeVis> {
           <script src="//cdn.polyfill.io/v2/polyfill.min.js"></script>
           ${links.join('\n')}
       </head>
-      <body class="popup-content">
+      <body>
+          <main id="popup-content"></main>
           <script>
             if ('${callbackFunction}' in window.opener) {
-              window.opener.${callbackFunction}(document.body);
+              window.opener.${callbackFunction}(document.getElementById('popup-content'));
             }
           </script>
       </body>
