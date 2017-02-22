@@ -15,7 +15,7 @@ export interface IPopupProxyOptions {
 }
 
 
-export class PopupProxy<T extends INodeVis> {
+export default class PopupProxy<T extends INodeVis> {
   private current: T;
   private popup: Window;
 
@@ -36,9 +36,9 @@ export class PopupProxy<T extends INodeVis> {
   }
 
 
-  private buildPopup() {
+  private buildPopup(callbackFunction: string) {
     const serializer = new XMLSerializer();
-    const links = Array.from(document.head.querySelectorAll('link')).map((link: HTMLLinkElement) => serializer.serializeToString(link));
+    const links = Array.from(document.head.querySelectorAll('link')).map((link: HTMLLinkElement) => `<link href="${link.href}" rel="${link.rel}" type="${link.type}" />`);
     const template = `<!doctype html>
       <html>
       <head>
@@ -51,6 +51,11 @@ export class PopupProxy<T extends INodeVis> {
           ${links.join('\n')}
       </head>
       <body class="popup-content">
+          <script>
+            if ('${callbackFunction}' in window.opener) {
+              window.opener.${callbackFunction}(document.body);
+            }
+          </script>
       </body>
     </html>`;
 
@@ -82,14 +87,14 @@ export class PopupProxy<T extends INodeVis> {
     }
     this.parent.classList.add('as-popup');
     this.current = null;
-    this.popup = self.open(this.buildPopup(), this.options.name, `width=${rect.width},height=${rect.height},toolbar=0,menubar=0,location=0`);
-    this.popup.onunload = () => this.close();
-    const document = this.popup.document;
-    if (document.readyState === 'ready') {
-      this.build(document.body);
-    } else {
-      document.onload = () => this.build(document.body);
-    }
+    // use a callback function similar to jsonp, don't know why the popup state if overridden
+    const name = 'popupCallback' + randomId(8);
+    (<any>window)[name] = (popupBody) => {
+      this.build(popupBody);
+      delete (<any>window)[name];
+    };
+    this.popup = self.open(this.buildPopup(name), this.options.name, `width=${rect.width}, height=${rect.height}, left=${rect.left}, top=${rect.top}`);
+    this.popup.onbeforeunload = () => this.close();
   }
 }
 
