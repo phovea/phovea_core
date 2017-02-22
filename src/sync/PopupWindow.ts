@@ -51,7 +51,7 @@ export default class PopupProxy<T extends INodeVis> {
           ${links.join('\n')}
       </head>
       <body>
-          <main id="popup-content"></main>
+          <main id="popup-content" style="width: 100%; height: 100%"></main>
           <script>
             if ('${callbackFunction}' in window.opener) {
               window.opener.${callbackFunction}(document.getElementById('popup-content'));
@@ -94,7 +94,7 @@ export default class PopupProxy<T extends INodeVis> {
       this.build(popupBody);
       delete (<any>window)[name];
     };
-    this.popup = self.open(this.buildPopup(name), this.options.name, `width=${rect.width}, height=${rect.height}, left=${rect.left}, top=${rect.top}`);
+    this.popup = self.open(this.buildPopup(name), this.options.name, `width=${rect.width}, height=${rect.height}, left=${rect.left}, top=${rect.top}, location=no`);
     this.popup.onbeforeunload = () => this.close();
   }
 }
