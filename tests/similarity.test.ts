@@ -52,7 +52,7 @@ describe('Token Tree', () => {
   });
 
   it('root has child1', () => {
-    return expect(root.hasChild(child1)).toBeTruthy();
+    return expect(root.has(child1.name)).toBeTruthy();
   });
 
   it('root contains child2', () => {

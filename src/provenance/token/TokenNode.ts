@@ -10,20 +10,21 @@ export class TokenNode {
   public value:string = '';
   public weight:number = 1;
 
-  private _children: Set<TokenNode> = new Set();
+  private _children: Map<string, TokenNode> = new Map();
 
   constructor(public name: string, public parent: TokenNode) {
     if (parent) {
-      parent.addChild(this);
+      parent.addChild(name, this);
     }
   }
 
   /**
    * Appends a child node to the current node
+   * @param name
    * @param child
    */
-  addChild(child:TokenNode) {
-    this._children.add(child);
+  addChild(name:string, child:TokenNode) {
+    this._children.set(name, child);
   }
 
   /**
@@ -31,16 +32,16 @@ export class TokenNode {
    * @returns {Set<TokenNode>}
    */
   children():TokenNode[] {
-    return Array.from(this._children);
+    return Array.from(this._children.values());
   }
 
   /**
    * Checks if this node has a given node as immediate child
-   * @param child
+   * @param name
    * @returns {boolean}
    */
-  hasChild(child:TokenNode) {
-    return this._children.has(child);
+  has(name:string) {
+    return this._children.has(name);
   }
 
   /**
