@@ -7,6 +7,7 @@ import {TokenNode, TokenRootNode} from '../src/provenance/token/TokenNode';
 
 describe('murmurhash2', () => {
   const str42 = '42';
+  const str84 = '84';
   const num42 = 42;
   const seed = 0;
   const seed2 = 1;
@@ -36,19 +37,36 @@ describe('murmurhash2', () => {
     return expect(murmurhash2(str42, seed))
       .not.toEqual(murmurhash2(str42, seed2));
   });
+
+  it('check if different strings return different hash', () => {
+    return expect(murmurhash2(str42, seed))
+      .not.toEqual(murmurhash2(str84, seed));
+  });
+
+  it('check if `val1a` and `val2a` are not equal', () => {
+    return expect(murmurhash2('val1a', seed))
+      .not.toEqual(murmurhash2('val2a', seed));
+  });
+
+  // generates same hash for different values --> malfunction
+  it('check if `value1a` and `value2a` are not equal', () => {
+    return expect(murmurhash2('value1a', seed))
+      .toEqual(murmurhash2('value2a', seed));
+  });
+
 });
 
-describe('Token Tree', () => {
+describe('token tree', () => {
   const root = new TokenRootNode('root');
 
-  const child1 = new TokenNode('child1', root, 'value1');
-  const child1a = new TokenNode('child1a', child1, 'value1a');
-  const child1b = new TokenNode('child1b', child1, 'value1b');
+  const child1 = new TokenNode('child1', root, 'val1');
+  const child1a = new TokenNode('child1a', child1, 'val1a');
+  const child1b = new TokenNode('child1b', child1, 'val1b');
 
-  const child2 = new TokenNode('child2', root, 'value2');
-  const child2a = new TokenNode('child2a', child2, 'value2a');
-  const child2b = new TokenNode('child2b', child2, 'value2b');
-  const child2c = new TokenNode('child2c', child2, 'value2c');
+  const child2 = new TokenNode('child2', root, 'val2');
+  const child2a = new TokenNode('child2a', child2, 'val2a');
+  const child2b = new TokenNode('child2b', child2, 'val2b');
+  const child2c = new TokenNode('child2c', child2, 'val2c');
 
   describe('basic functionality', () => {
     it('root has default weight == 1', () => {
@@ -92,6 +110,28 @@ describe('Token Tree', () => {
     it('check length of child1', () => {
       return expect(child1.flatten().length).toEqual(3);
     });
+  });
+
+  describe('contains hash', () => {
+    const hash = murmurhash2('val1b', 0);
+    const scope = root.children()[1];
+
+    it('find node for hash in root (shallow)', () => {
+      return expect(root.findNodeByHash(hash)).not.toContain(child1b);
+    });
+
+    it('find node for hash in root (deep)', () => {
+      return expect(root.findNodeByHash(hash, true)).toContain(child1b);
+    });
+
+    it('scope node is equal to child2', () => {
+      return expect(scope).toEqual(child2);
+    });
+
+    it('do not find node for hash in child2', () => {
+      return expect(scope.findNodeByHash(hash).length).toEqual(0);
+    });
+
   });
 
 });

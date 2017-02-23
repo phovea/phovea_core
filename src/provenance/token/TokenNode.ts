@@ -82,6 +82,20 @@ export class TokenNode {
   toHash():string {
     return murmurhash2(this.value, 0);
   }
+
+  /**
+   *
+   * @param hash
+   * @param deep
+   * @returns {TokenNode[]}
+   */
+  findNodeByHash(hash:string, deep:boolean = false):TokenNode[] {
+    let scope = this.children();
+    if(deep) {
+      scope = this.flatten();
+    }
+    return scope.filter((d) => d.toHash() === hash);
+  }
 }
 
 export class TokenRootNode extends TokenNode {
