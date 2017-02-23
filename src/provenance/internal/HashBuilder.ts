@@ -92,7 +92,7 @@ export class HashBuilder {
  * @param {number} seed Positive integer only
  * @return {number} 32-bit positive integer hash
  */
-function murmurhash2_32_gc(str, seed) {
+export function murmurhash2_32_gc(str, seed) {
   /*jshint bitwise:false */
   /*tslint:disable:no-bitwise */
   str = String(str); // cast everything to a string
