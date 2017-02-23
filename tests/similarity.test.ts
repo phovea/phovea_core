@@ -40,27 +40,58 @@ describe('murmurhash2', () => {
 
 describe('Token Tree', () => {
   const root = new TokenRootNode('root');
-  const child1 = new TokenNode('child1', root);
-  const child2 = new TokenNode('child2', root);
 
-  it('root has default weight == 1', () => {
-    return expect(root.weight).toEqual(1);
+  const child1 = new TokenNode('child1', root, 'value1');
+  const child1a = new TokenNode('child1a', child1, 'value1a');
+  const child1b = new TokenNode('child1b', child1, 'value1b');
+
+  const child2 = new TokenNode('child2', root, 'value2');
+  const child2a = new TokenNode('child2a', child2, 'value2a');
+  const child2b = new TokenNode('child2b', child2, 'value2b');
+  const child2c = new TokenNode('child2c', child2, 'value2c');
+
+  describe('basic functionality', () => {
+    it('root has default weight == 1', () => {
+      return expect(root.weight).toEqual(1);
+    });
+
+    it('root has empty value', () => {
+      return expect(root.value).toEqual('');
+    });
+
+    it('root has child1', () => {
+      return expect(root.has(child1.name)).toBeTruthy();
+    });
+
+    it('root contains child2', () => {
+      return expect(root.children()).toContain(child2);
+    });
+
+    it('root not contains child2a', () => {
+      return expect(root.children()).not.toContain(child2a);
+    });
+
+    it('check fqname for child1', () => {
+      return expect(child1.fqname).toEqual('child1.root');
+    });
   });
 
-  it('root has empty value', () => {
-    return expect(root.value).toEqual('');
-  });
+  describe('flatten tree', () => {
+    it('check if list contains self', () => {
+      return expect(root.flatten()).toContain(root);
+    });
 
-  it('root has child1', () => {
-    return expect(root.has(child1.name)).toBeTruthy();
-  });
+    it('check length of root', () => {
+      return expect(root.flatten().length).toEqual(8);
+    });
 
-  it('root contains child2', () => {
-    return expect(root.children()).toContain(child2);
-  });
+    it('check for child2b', () => {
+      return expect(root.flatten()).toContain(child2a);
+    });
 
-  it('check fqname for child1', () => {
-    return expect(child1.fqname).toEqual('child1.root');
+    it('check length of child1', () => {
+      return expect(child1.flatten().length).toEqual(3);
+    });
   });
 
 });

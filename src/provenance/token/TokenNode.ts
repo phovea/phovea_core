@@ -7,12 +7,17 @@ import {murmurhash2} from '../internal/MurmurHash2';
 
 export class TokenNode {
 
-  public value:string = '';
   public weight:number = 1;
 
   private _children: Map<string, TokenNode> = new Map();
 
-  constructor(public name: string, public parent: TokenNode) {
+  /**
+   * Creates a token node
+   * @param name
+   * @param parent
+   * @param value
+   */
+  constructor(public name: string, public parent: TokenNode, public value = '') {
     if (parent) {
       parent.addChild(name, this);
     }
@@ -33,6 +38,20 @@ export class TokenNode {
    */
   children():TokenNode[] {
     return Array.from(this._children.values());
+  }
+
+  /**
+   * Run through all child nodes recursively and return it as list
+   * The list includes also the current node
+   * @returns {TokenNode[]}
+   */
+  flatten():TokenNode[] {
+    function flatten(root:TokenNode, r:TokenNode[] = []):TokenNode[] {
+      r.push(root);
+      root.children().forEach((child) => flatten(child, r));
+      return r;
+    }
+    return flatten(this);
   }
 
   /**
