@@ -95,6 +95,7 @@ export class HashBuilder {
 function murmurhash2_32_gc(str, seed) {
   /*jshint bitwise:false */
   /*tslint:disable:no-bitwise */
+  str = String(str); // cast everything to a string
   let l = str.length;
   let h = seed ^ l;
   let i = 0;
