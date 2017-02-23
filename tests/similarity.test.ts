@@ -56,7 +56,7 @@ describe('Token Tree', () => {
   });
 
   it('root contains child2', () => {
-    return expect(Array.from(root.children())).toContain(child2);
+    return expect(root.children()).toContain(child2);
   });
 
   it('check fqname for child1', () => {
