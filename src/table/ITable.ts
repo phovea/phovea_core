@@ -27,12 +27,22 @@ export interface ITableColumn<D extends IValueTypeDesc> {
 
 export declare type IAnyTableColumn = ITableColumn<any>;
 
+/**
+ * The description, i.e., the metadata for the table (name, idtype, etc.)
+ */
 export interface ITableDataDescription extends IDataDescription {
   readonly idtype: string;
   readonly size: number[];
   readonly columns: IAnyTableColumn[];
 }
 
+/**
+ * A table is a data structure made up of rows and columns. In a table, the elements within a column are always
+ * of the same data type; the data types between different columns can vary. For example, the first row in a
+ * table can be categorical, the second can be integers, the third can be IDs, etc.
+ *
+ * If your columns are of the same type, use Matrix instead.
+ */
 export interface ITable extends IDataType {
   readonly desc: ITableDataDescription;
 
@@ -69,7 +79,7 @@ export interface ITable extends IDataType {
   rowIds(range?: RangeLike): Promise<Range>;
 
   /**
-   * creates a new view on this matrix specified by the given range
+   * creates a new view on this table specified by the given range
    * @param range
    */
   view(range?: RangeLike): ITable;
@@ -96,6 +106,11 @@ export interface ITable extends IDataType {
    */
   data(range?: RangeLike): Promise<IValueType[][]>;
 
+  /**
+   * Returns the data of the named column as an array of an array with data
+   * @param column the name of the column to retrieve the data from
+   * @param range a range operator; optional
+   */
   colData<T>(column: string, range?: RangeLike): Promise<T[]>;
 
   /**

@@ -5,6 +5,11 @@
  **************************************************************************** */
 /**
  * Created by Samuel Gratzl on 04.08.2014.
+ *
+ * This file provides access functions for dataset stored on a server, including functions to list all datasets,
+ * to retrieve datasets by names, id types, ids, etc.
+ *
+ * See IDataDescriptionMetaData in datatype.ts for various legal parameters
  */
 import {offline as isOffline, fixId, randomId} from './index';
 import {getAPIJSON, sendAPI} from './ajax';
@@ -138,7 +143,7 @@ export async function tree(filter?: ({[key: string]: string})|((d: IDataType) =>
 }
 
 /**
- * returns the first dataset matching the given query
+ * Returns the first dataset matching the given query
  * @param query
  * @returns {any}
  */
@@ -179,6 +184,11 @@ function getFirstWithCache(name: string | RegExp, cache: Map<string, Promise<IDa
   });
 }
 
+/**
+ * Returns a dataset based on a specific ID.
+ * @param id the ID, as defined in IDataDescriptionData#id
+ * @returns {Promise<any>}
+ */
 async function getById(id: string) {
   if (cacheById.has(id)) {
     return cacheById.get(id);
