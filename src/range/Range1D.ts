@@ -12,6 +12,10 @@ export interface ICompositeRange1D extends Range1D {
   fromLikeComposite(groups: Range1DGroup[]): Range1D;
 }
 
+function sortNumeric(a: number, b: number) {
+  return a - b;
+}
+
 export default class Range1D {
   private readonly arr: IRangeElem[];
 
@@ -222,7 +226,7 @@ export default class Range1D {
         r.push(i);
       }
     });
-    return other.fromLike(r.sort());
+    return other.fromLike(r.sort(sortNumeric));
   }
 
   /**
@@ -248,7 +252,7 @@ export default class Range1D {
         r.push(i);
       }
     });
-    return other.fromLike(r.sort());
+    return other.fromLike(r.sort(sortNumeric));
   }
 
   toSet(size?: number) {
@@ -275,7 +279,7 @@ export default class Range1D {
         r.push(i);
       }
     });
-    return Range1D.from(r.sort());
+    return Range1D.from(r.sort(sortNumeric));
   }
 
   /**
@@ -468,7 +472,7 @@ export default class Range1D {
    * @param cmp
    * @return {Range1D}
    */
-  sort(cmp: (a: number, b: number) => number = (a, b) => a - b): Range1D {
+  sort(cmp: (a: number, b: number) => number = sortNumeric): Range1D {
     const arr = this.iter().asList();
     const r = arr.sort(cmp);
     return this.fromLike(r);
@@ -476,7 +480,7 @@ export default class Range1D {
 
   private removeDuplicates(size?: number): Range1D {
     let arr = this.iter().asList();
-    arr = arr.sort();
+    arr = arr.sort(sortNumeric);
     arr = arr.filter((di, i) => di !== arr[i - 1]); //same value as before, remove
     return Range1D.from(arr);
   }
