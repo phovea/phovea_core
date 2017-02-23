@@ -3,12 +3,11 @@
  */
 
 import {murmurhash2} from '../src/provenance/internal/MurmurHash2';
-import {TokenNode} from '../src/provenance/token/TokenNode';
+import {TokenNode, TokenRootNode} from '../src/provenance/token/TokenNode';
 
 describe('murmurhash2', () => {
   const str42 = '42';
   const num42 = 42;
-  const hashFor42 = '10011000101001111000010010110';
   const seed = 0;
   const seed2 = 1;
 
@@ -20,7 +19,7 @@ describe('murmurhash2', () => {
 
   it('compare generated hash to static value', () => {
     return expect(murmurhash2(str42, seed))
-      .toEqual(hashFor42);
+      .toEqual('10011000101001111000010010110');
   });
 
   it('check reproducibility of hash', () => {
@@ -39,17 +38,29 @@ describe('murmurhash2', () => {
   });
 });
 
-describe('TokenNode', () => {
+describe('Token Tree', () => {
+  const root = new TokenRootNode('root');
+  const child1 = new TokenNode('child1', root);
+  const child2 = new TokenNode('child2', root);
 
-  const tokenNode = new TokenNode('key', 'value');
-  const hashForValue = '11100001110101100100000010110101';
-
-  it('default weight is 1', () => {
-    return expect(tokenNode.weight).toEqual(1);
+  it('root has default weight == 1', () => {
+    return expect(root.weight).toEqual(1);
   });
 
-  it('compare hash to static value', () => {
-    return expect(tokenNode.toHash()).toEqual(hashForValue);
+  it('root has empty value', () => {
+    return expect(root.value).toEqual('');
+  });
+
+  it('root has child1', () => {
+    return expect(root.hasChild(child1)).toBeTruthy();
+  });
+
+  it('root contains child2', () => {
+    return expect(Array.from(root.children())).toContain(child2);
+  });
+
+  it('check fqname for child1', () => {
+    return expect(child1.fqname).toEqual('child1.root');
   });
 
 });
