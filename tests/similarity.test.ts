@@ -3,6 +3,7 @@
  */
 
 import {murmurhash2} from '../src/provenance/internal/MurmurHash2';
+import {TokenNode} from '../src/provenance/token/TokenNode';
 
 describe('murmurhash2', () => {
   const str42 = '42';
@@ -38,4 +39,17 @@ describe('murmurhash2', () => {
   });
 });
 
+describe('TokenNode', () => {
 
+  const tokenNode = new TokenNode('key', 'value');
+  const hashForValue = '11100001110101100100000010110101';
+
+  it('default weight is 1', () => {
+    return expect(tokenNode.weight).toEqual(1);
+  });
+
+  it('compare hash to static value', () => {
+    return expect(tokenNode.toHash()).toEqual(hashForValue);
+  });
+
+});
