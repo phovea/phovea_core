@@ -105,7 +105,7 @@ function fromNumber(p: number) {
  * by default only the creator has all permissions
  * @type {number}
  */
-export const DEFAULT_PERMISSION = 700;
+export const DEFAULT_PERMISSION = 744;
 
 export interface ISecureItem {
   /**
@@ -117,7 +117,7 @@ export interface ISecureItem {
    */
   readonly group?: string;
   /**
-   * detailed permissions, by default 755
+   * detailed permissions, by default 744
    */
   readonly permissions?: number;
 }
