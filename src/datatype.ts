@@ -11,8 +11,9 @@ import {IPersistable, extendClass, mixin, uniqueString} from './index';
 import {ISelectAble, SelectAble, IDType} from './idtype';
 import {extent, IHistogram} from './math';
 import {all, none, Range1D, RangeLike, Range1DGroup, composite, Range, CompositeRange1D} from './range';
+import {ISecureItem, currentUserNameOrAnonymous} from './security';
 
-export interface IDataDescriptionMetaData {
+export interface IDataDescriptionMetaData extends ISecureItem {
   /**
    * the type of the datatype, e.g. matrix, vector, stratification, ...
    */
@@ -30,24 +31,10 @@ export interface IDataDescriptionMetaData {
   readonly fqname: string;
 
   readonly [extras: string]: any;
-
-  /**
-   * creator of this dataset, i.e, the owner
-   */
-  readonly creator: string;
-  /**
-   * group for which this dataset is shared
-   */
-  readonly group?: string;
   /**
    * creation time stamp
    */
   readonly ts: number;
-
-  /**
-   * unix permissions
-   */
-  readonly permission?: number;
 }
 /**
  * basic description elements
@@ -346,7 +333,7 @@ export function createDefaultDataDesc(namespace = 'localData'): IDataDescription
     name: id,
     fqname: id,
     description: '',
-    creator: 'Anonymous',
+    creator: currentUserNameOrAnonymous(),
     ts: Date.now()
   };
 }
