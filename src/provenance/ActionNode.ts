@@ -44,7 +44,7 @@ export class ActionMetaData {
   }
 }
 
-export function meta(name: string, category: string = cat.data, operation: string = op.update, timestamp: number = Date.now(), user: string = getCurrentUser()) {
+export function meta(name: string, category: string = cat.data, operation: string = op.update, timestamp: number = Date.now(), user: string = currentUserNameOrAnonymous()) {
   return new ActionMetaData(category, operation, name, timestamp, user);
 }
 
