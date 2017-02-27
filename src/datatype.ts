@@ -31,8 +31,23 @@ export interface IDataDescriptionMetaData {
 
   readonly [extras: string]: any;
 
+  /**
+   * creator of this dataset, i.e, the owner
+   */
   readonly creator: string;
+  /**
+   * group for which this dataset is shared
+   */
+  readonly group?: string;
+  /**
+   * creation time stamp
+   */
   readonly ts: number;
+
+  /**
+   * unix permissions
+   */
+  readonly permission?: number;
 }
 /**
  * basic description elements
