@@ -15,7 +15,7 @@ import {
   INumberValueTypeDesc, ICategoricalValueTypeDesc
 } from '../datatype';
 import IStratification from '../stratification/IStratification';
-import {IStatistics, IHistogram} from '../math';
+import {IAdvancedStatistics, IHistogram} from '../math';
 import {IAtom, IAtomValue} from '../atom/IAtom';
 
 export interface IVectorDataDescription<D extends IValueTypeDesc> extends IDataDescription {
@@ -54,9 +54,8 @@ export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<
 
   /**
    * returns this vector statistics
-   * TODO should also support range?
    */
-  stats(): Promise<IStatistics>;
+  stats(range?: RangeLike): Promise<IAdvancedStatistics>;
 
   /**
    * computes a histogram of this vector

@@ -22,7 +22,7 @@ import {
   VALUE_TYPE_INT,
   VALUE_TYPE_REAL, IValueTypeDesc
 } from '../datatype';
-import {computeStats, IStatistics, IHistogram, categoricalHist, hist} from '../math';
+import {computeAdvancedStats, IAdvancedStatistics, IHistogram, categoricalHist, hist} from '../math';
 import {IVector} from './IVector';
 import {IStratification} from '../stratification';
 import StratificationVector from './internal/StratificationVector';
@@ -58,8 +58,11 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
     return this.view(ids.indexOf(parse(idRange)));
   }
 
-  async stats(): Promise<IStatistics> {
-    return computeStats(await this.data());
+  async stats(range: RangeLike = all()): Promise<IAdvancedStatistics> {
+    if (this.root.valuetype.type !== VALUE_TYPE_INT && this.root.valuetype.type !== VALUE_TYPE_REAL) {
+      throw new Error('cannot compute statistics for value type: '+this.root.valuetype.type);
+    }
+    return computeAdvancedStats(await this.data(range));
   }
 
   get indices(): Range {
