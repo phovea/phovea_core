@@ -13,10 +13,10 @@ import {IProductSelectAble} from '../idtype';
 import IDType from '../idtype/IDType';
 import {
   IHistAbleDataType, IValueTypeDesc, IDataDescription, createDefaultDataDesc as createDefaultBaseDesc,
-  INumberValueTypeDesc, ICategoricalValueTypeDesc
+  INumberValueTypeDesc, ICategoricalValueTypeDesc, IStatsAbleDataType
 } from '../datatype';
 import {IVector} from '../vector';
-import {IHistogram, IStatistics} from '../math';
+import {IHistogram, IStatistics, IAdvancedStatistics} from '../math';
 import {mixin} from '../index';
 
 export const IDTYPE_ROW = 0;
@@ -44,7 +44,7 @@ export interface IMatrixDataDescription<D extends IValueTypeDesc> extends IDataD
   size: [number, number];
 }
 
-export interface IMatrix<T, D extends IValueTypeDesc> extends IHistAbleDataType<D>, IProductSelectAble {
+export interface IMatrix<T, D extends IValueTypeDesc> extends IHistAbleDataType<D>, IProductSelectAble, IStatsAbleDataType<D> {
   readonly desc: IMatrixDataDescription<D>;
   /**
    * number of rows
@@ -115,7 +115,8 @@ export interface IMatrix<T, D extends IValueTypeDesc> extends IHistAbleDataType<
    */
   data(range?: RangeLike): Promise<T[][]>;
 
-  stats(): Promise<IStatistics>;
+  stats(range?: RangeLike): Promise<IStatistics>;
+  statsAdvanced(range?: RangeLike): Promise<IAdvancedStatistics>;
 
   hist(bins?: number, range?: RangeLike, containedIds?: number): Promise<IHistogram>;
 

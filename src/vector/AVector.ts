@@ -22,12 +22,20 @@ import {
   VALUE_TYPE_INT,
   VALUE_TYPE_REAL, IValueTypeDesc
 } from '../datatype';
-import {computeAdvancedStats, IAdvancedStatistics, IHistogram, categoricalHist, hist} from '../math';
+import {
+  computeAdvancedStats,
+  IAdvancedStatistics,
+  IHistogram,
+  categoricalHist,
+  hist,
+  IStatistics,
+  computeStats
+} from '../math';
 import {IVector} from './IVector';
 import {IStratification} from '../stratification';
 import StratificationVector from './internal/StratificationVector';
 import ProjectedAtom from './internal/ProjectedAtom';
-import IAtom,{IAtomValue} from '../atom/IAtom';
+import IAtom, {IAtomValue} from '../atom/IAtom';
 /**
  * base class for different Vector implementations, views, transposed,...
  * @internal
@@ -58,9 +66,16 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
     return this.view(ids.indexOf(parse(idRange)));
   }
 
-  async stats(range: RangeLike = all()): Promise<IAdvancedStatistics> {
+  async stats(range: RangeLike = all()): Promise<IStatistics> {
     if (this.root.valuetype.type !== VALUE_TYPE_INT && this.root.valuetype.type !== VALUE_TYPE_REAL) {
-      throw new Error('cannot compute statistics for value type: '+this.root.valuetype.type);
+      return Promise.reject('invalid value type: ' + this.root.valuetype.type);
+    }
+    return computeStats(await this.data(range));
+  }
+
+  async statsAdvanced(range: RangeLike = all()): Promise<IAdvancedStatistics> {
+    if (this.root.valuetype.type !== VALUE_TYPE_INT && this.root.valuetype.type !== VALUE_TYPE_REAL) {
+      return Promise.reject('invalid value type: ' + this.root.valuetype.type);
     }
     return computeAdvancedStats(await this.data(range));
   }

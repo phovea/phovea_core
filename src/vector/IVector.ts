@@ -12,10 +12,10 @@ import {RangeLike, CompositeRange1D, Range} from '../range';
 import {IDType, IDTypeLike} from '../idtype';
 import {
   IHistAbleDataType, IValueTypeDesc, IDataDescription, createDefaultDataDesc,
-  INumberValueTypeDesc, ICategoricalValueTypeDesc
+  INumberValueTypeDesc, ICategoricalValueTypeDesc, IStatsAbleDataType
 } from '../datatype';
 import IStratification from '../stratification/IStratification';
-import {IAdvancedStatistics, IHistogram} from '../math';
+import {IAdvancedStatistics, IHistogram, IStatistics} from '../math';
 import {IAtom, IAtomValue} from '../atom/IAtom';
 
 export interface IVectorDataDescription<D extends IValueTypeDesc> extends IDataDescription {
@@ -24,7 +24,7 @@ export interface IVectorDataDescription<D extends IValueTypeDesc> extends IDataD
   readonly size: number;
 }
 
-export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<D> {
+export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<D>, IStatsAbleDataType<D> {
   readonly desc: IVectorDataDescription<D>;
   /**
    * id type
@@ -55,7 +55,8 @@ export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<
   /**
    * returns this vector statistics
    */
-  stats(range?: RangeLike): Promise<IAdvancedStatistics>;
+  stats(range?: RangeLike): Promise<IStatistics>;
+  statsAdvanced(range?: RangeLike): Promise<IAdvancedStatistics>;
 
   /**
    * computes a histogram of this vector

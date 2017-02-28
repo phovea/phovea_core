@@ -9,7 +9,7 @@
 
 import {IPersistable, extendClass, mixin, uniqueString} from './index';
 import {ISelectAble, SelectAble, IDType} from './idtype';
-import {extent, IHistogram} from './math';
+import {extent, IHistogram, IAdvancedStatistics, IStatistics} from './math';
 import {all, none, Range1D, RangeLike, Range1DGroup, composite, Range, CompositeRange1D} from './range';
 
 export interface IDataDescriptionMetaData {
@@ -129,6 +129,13 @@ export function assignData(node: Element, data: IDataType) {
 export interface IHistAbleDataType<D extends IValueTypeDesc> extends IDataType {
   valuetype: D;
   hist(nbins?: number): Promise<IHistogram>;
+  readonly length: number;
+}
+
+export interface IStatsAbleDataType<D extends IValueTypeDesc> extends IDataType {
+  valuetype: D;
+  stats(): Promise<IStatistics>;
+  statsAdvanced(): Promise<IAdvancedStatistics>;
   readonly length: number;
 }
 
