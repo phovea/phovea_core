@@ -81,6 +81,7 @@ export function list(): Range {
   } else if (typeof arguments[0] === 'number') { //single slice mode
     const r = new Range();
     r.dim(0).setList(Array.from(arguments));
+    return r;
   } else if (arguments[0] instanceof Range1D) {
     return new Range(Array.from(arguments));
   }
