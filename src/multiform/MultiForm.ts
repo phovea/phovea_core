@@ -16,7 +16,6 @@ import {
 import {IMultiForm, IMultiFormOptions, addSelectVisChooser, addIconVisChooser} from './IMultiForm';
 import {createNode, ProxyMetaData, clearNode, selectVis} from './internal';
 import {Range} from '../range';
-import {action} from '../provenance/ActionNode';
 
 /**
  * a simple multi form class using a select to switch
