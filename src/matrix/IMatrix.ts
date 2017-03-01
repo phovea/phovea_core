@@ -71,6 +71,9 @@ export interface IMatrix<T, D extends IValueTypeDesc> extends IHistAbleDataType<
    */
   view(range?: RangeLike): IMatrix<T,D>;
 
+
+  idView(idRange?: RangeLike): Promise<IMatrix<T,D>>;
+
   slice(col: number): IVector<T,D>;
 
   //view(filter: string): Promise<IMatrix>;

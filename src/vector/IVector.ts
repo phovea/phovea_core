@@ -41,6 +41,8 @@ export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<
    * @param range optional subset
    */
   view(range?: RangeLike): IVector<T,D>;
+
+  idView(idRange?: RangeLike): Promise<IVector<T,D>>;
   /**
    * returns a promise for getting one cell
    * @param i at a specific position

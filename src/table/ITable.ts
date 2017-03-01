@@ -76,6 +76,8 @@ export interface ITable extends IDataType {
 
   queryView(name: string, args: IQueryArgs): ITable;
 
+  idView(idRange?: RangeLike): Promise<ITable>;
+
   /**
    * reduces the current matrix to a vector using the given reduce function
    * @param f the reduce function
