@@ -68,7 +68,7 @@ export function list(): IIDType[] {
 
 
 /**
- * see list but with also the server side available ones
+ * Get a list of all IIDTypes available on both the server and the client.
  * @returns {any}
  */
 export async function listAll(): Promise<IIDType[]> {

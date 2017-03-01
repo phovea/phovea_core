@@ -25,7 +25,7 @@ import {IVector, IVectorDataDescription, createDefaultVectorDesc} from './IVecto
 import AVector from './AVector';
 import {IVectorLoader, viaAPILoader, viaDataLoader, IVectorLoaderResult} from './loader';
 /**
- * root matrix implementation holding the data
+ * Base vector implementation holding the data.
  * @internal
  */
 export default class Vector<T,D extends IValueTypeDesc> extends AVector<T,D> {
