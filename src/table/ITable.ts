@@ -38,7 +38,7 @@ export interface ITableDataDescription extends IDataDescription {
 
 /**
  * A table is a data structure made up of rows and columns. In a table, the elements within a column are always
- * of the same data type; the data types between different columns can vary. For example, the first row in a
+ * of the same data type; the data types between different columns can vary. For example, the first column in a
  * table can be categorical, the second can be integers, the third can be IDs, etc.
  *
  * If your columns are of the same type, use Matrix instead.
@@ -107,7 +107,7 @@ export interface ITable extends IDataType {
   data(range?: RangeLike): Promise<IValueType[][]>;
 
   /**
-   * Returns the data of the named column as an array of an array with data
+   * Returns the data of the named column as an array with the data
    * @param column the name of the column to retrieve the data from
    * @param range a range operator; optional
    */

@@ -6,7 +6,7 @@
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  *
- * This file provides access functions for dataset stored on a server, including functions to list all datasets,
+ * This module provides access functions for dataset stored on a server, including functions to list all datasets,
  * to retrieve datasets by names, id types, ids, etc.
  *
  * See IDataDescriptionMetaData in datatype.ts for various legal parameters
