@@ -79,7 +79,9 @@ export interface ITable extends IDataType {
   rowIds(range?: RangeLike): Promise<Range>;
 
   /**
-   * creates a new view on this table specified by the given range
+   * Creates a new view on this table specified by the given range. A view implements the ITable interface yet is still
+   * backed by the data from the original table.
+   *
    * @param range
    */
   view(range?: RangeLike): ITable;
