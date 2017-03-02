@@ -38,7 +38,7 @@ export abstract class ATable extends SelectAble implements IInternalAccess {
     return new TableView(this.root, parse(range));
   }
 
-  abstract colData<T>(column: string, range?: RangeLike): Promise<T[]>;
+  abstract dataOfColumn<T>(column: string, range?: RangeLike): Promise<T[]>;
 
   abstract queryView(name: string, args: IQueryArgs): ITable;
 
@@ -118,7 +118,7 @@ export class TableView extends ATable implements ITable {
   }
 
   colData<T>(column: string, range: RangeLike = all()) {
-    return this.dataForColumn(column, range);
+    return this.dataOfColumn(column, range);
   }
 
   dataOfColumn<T>(column: string, range: RangeLike = all()) {
