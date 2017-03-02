@@ -118,7 +118,7 @@ export class TableView extends ATable implements ITable {
   }
 
   colData<T>(column: string, range: RangeLike = all()) {
-    return this.dataForColumn(column, range);
+    return this.dataOfColumn(column, range);
   }
 
   dataOfColumn<T>(column: string, range: RangeLike = all()) {
