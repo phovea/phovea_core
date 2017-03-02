@@ -16,7 +16,6 @@ import {
 import {IMultiForm, IMultiFormOptions, addSelectVisChooser, addIconVisChooser} from './IMultiForm';
 import {createNode, ProxyMetaData, clearNode, selectVis} from './internal';
 import {Range} from '../range';
-import {action} from '../provenance/ActionNode';
 
 /**
  * a simple multi form class using a select to switch
@@ -135,8 +134,6 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
         };
         this.actVis.on('transform', t);
         const r = this.actVis.transform(scale, rotate);
-        this.options.all.heightTo = this.actVis.size[1];
-        this.options.all.width = this.actVis.size[0];
         this.actVis.off('transform', t);
         return r;
       }
@@ -144,8 +141,6 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
     if (this.actVisPromise && arguments.length > 0) {
       //2nd try
       this.actVisPromise.then((v) => this.transform(scale, rotate));
-      this.options.all.heightTo =this.actVis.size[1];
-      this.options.all.width = this.actVis.size[0];
     }
     return {
       scale: <[number, number]>[1, 1],
