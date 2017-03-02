@@ -118,7 +118,8 @@ export interface ITable extends IDataType {
   colData<T>(column: string, range?: RangeLike): Promise<T[]>;
 
   /**
-   * returns a promise for getting the data as an array of objects
+   * returns a promise for getting the data as an array of objects, where each object has
+   * fields corresponding to the columns
    * @param range
    */
   objects(range?: RangeLike): Promise<any[]>;

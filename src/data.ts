@@ -185,7 +185,7 @@ function getFirstWithCache(name: string | RegExp, cache: Map<string, Promise<IDa
 }
 
 /**
- * Returns a dataset based on a specific ID.
+ * Returns a promise for getting dataset based on a specific ID.
  * @param id the ID, as defined in IDataDescriptionData#id
  * @returns {Promise<any>}
  */
@@ -197,8 +197,8 @@ async function getById(id: string) {
 }
 
 /**
- * returns a promise for getting a specific dataset
- * @param persisted an id or persisted object containing the id
+ * Returns a promise for getting a specific dataset
+ * @param a persisted id or persisted object containing the id
  * @returns {Promise<IDataType>}
  */
 export async function get(persisted: any | string): Promise<IDataType> {

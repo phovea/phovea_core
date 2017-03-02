@@ -131,6 +131,9 @@ function toList(objs: any[], cols: string[]) {
   return objs.map((obj) => cols.map((c) => obj[c]));
 }
 
+/**
+ * Interface for the parsing options for a table
+ */
 export interface IAsTableOptions {
   name?: string;
   idtype?: string;
@@ -176,6 +179,13 @@ export function asTableFromArray(data: any[][], options: IAsTableOptions = {}): 
   return asTableImpl(columns, rows, objs, realData, options);
 }
 
+/**
+ * Creates a new table from an array of arrays of data and an optional options data structure.
+ * TODO: explain the relationship of this function and the "magic" JSON file.
+ * @param data
+ * @param options TODO - explain what these options are
+ * @returns {Table}
+ */
 export function asTable(data: any[], options: IAsTableOptions = {}): ITable {
   const keyProperty = options.keyProperty || '_id';
 
