@@ -8,8 +8,9 @@
  */
 
 import {mixin} from '../index';
-import {Range, RangeLike} from '../range';
-import {IDType} from '../idtype';
+import {RangeLike} from '../range';
+import Range from '../range/Range';
+import IDType from '../idtype/IDType';
 import {IDataType, IValueType, IValueTypeDesc, IDataDescription, createDefaultDataDesc} from '../datatype';
 import {IVector} from '../vector';
 import {IAnyVector} from '../vector/IVector';
@@ -81,7 +82,7 @@ export interface ITable extends IDataType {
   /**
    * reduces the current matrix to a vector using the given reduce function
    * @param f the reduce function
-   * @param this_f the this context for the function default the matrix
+   * @param thisArgument the this context for the function default the matrix
    * @param valuetype the new value type by default the same as matrix valuetype
    * @param idtype the new vlaue type by default the same as matrix rowtype
    */
@@ -98,6 +99,11 @@ export interface ITable extends IDataType {
    */
   data(range?: RangeLike): Promise<IValueType[][]>;
 
+  /**
+   * @deprecated
+   * @param column
+   * @param range
+   */
   colData<T>(column: string, range?: RangeLike): Promise<T[]>;
 
   /**

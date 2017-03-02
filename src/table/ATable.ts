@@ -9,13 +9,14 @@ import {IVector} from '../vector';
 import {ITable, IQueryArgs} from './ITable';
 import MultiTableVector from './internal/MultiTableVector';
 import {IValueType, IValueTypeDesc} from '../datatype';
+import {IInternalAccess} from './internal';
 
 /**
  * base class for different Table implementations, views, transposed,...
  * @internal
  */
-export abstract class ATable extends SelectAble {
-  constructor(protected root: ITable) {
+export abstract class ATable extends SelectAble implements IInternalAccess {
+  constructor(protected root: ITable & IInternalAccess) {
     super();
   }
 
@@ -70,7 +71,7 @@ export default ATable;
  * @internal
  */
 export class TableView extends ATable implements ITable {
-  constructor(root: ITable, private range: Range) {
+  constructor(root: ITable & IInternalAccess, private range: Range) {
     super(root);
     this.range = range;
   }
@@ -117,9 +118,13 @@ export class TableView extends ATable implements ITable {
   }
 
   colData<T>(column: string, range: RangeLike = all()) {
+    return this.dataForColumn(column, range);
+  }
+
+  dataOfColumn<T>(column: string, range: RangeLike = all()) {
     // since we directly accessing the column by name there is no need for the column part of the range
     const rowRange = this.range.dim(0).preMultiply(parse(range).dim(0), this.root.dim[0]);
-    return this.root.colData<T>(column, new Range([rowRange]));
+    return this.root.dataOfColumn<T>(column, new Range([rowRange]));
   }
 
   objects(range: RangeLike = all()) {
