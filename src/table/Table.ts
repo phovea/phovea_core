@@ -15,6 +15,7 @@ import {ITable, ITableColumn, ITableDataDescription, createDefaultTableDesc} fro
 import ATable from './ATable';
 import TableVector from './internal/TableVector';
 import {ITableLoader, ITableLoader2, adapterOne2Two, viaAPI2Loader, viaDataLoader} from './loader';
+import {IInternalAccess} from './internal';
 
 /**
  * root matrix implementation holding the data
@@ -64,6 +65,10 @@ export default class Table extends ATable implements ITable {
   }
 
   colData(column: string, range: RangeLike = all()) {
+    return this.dataOfColumn(column, range);
+  }
+
+  dataOfColumn(column: string, range: RangeLike = all()) {
     return this.loader.col(this.desc, column, parse(range));
   }
 
