@@ -117,7 +117,9 @@ export class TableView extends ATable implements ITable {
   }
 
   colData<T>(column: string, range: RangeLike = all()) {
-    return this.root.colData<T>(column, this.range.preMultiply(parse(range), this.root.dim));
+    // since we directly accessing the column by name there is no need for the column part of the range
+    const rowRange = this.range.dim(0).preMultiply(parse(range).dim(0), this.root.dim[0]);
+    return this.root.colData<T>(column, new Range([rowRange]));
   }
 
   objects(range: RangeLike = all()) {
