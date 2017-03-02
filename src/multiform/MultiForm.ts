@@ -135,8 +135,8 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
         };
         this.actVis.on('transform', t);
         const r = this.actVis.transform(scale, rotate);
-        this.options.all.heightTo = this.actVis.rawSize[1] * (scale[1]||1);
-        this.options.all.width = this.actVis.rawSize[0] * (scale[0]||1);
+        this.options.all.heightTo = this.actVis.size[1];
+        this.options.all.width = this.actVis.size[0];
         this.actVis.off('transform', t);
         return r;
       }
@@ -144,8 +144,8 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
     if (this.actVisPromise && arguments.length > 0) {
       //2nd try
       this.actVisPromise.then((v) => this.transform(scale, rotate));
-      this.options.all.heightTo = this.actVis.rawSize[1] * (scale[1]||1);
-      this.options.all.width = this.actVis.rawSize[0] * (scale[0]||1);
+      this.options.all.heightTo =this.actVis.size[1];
+      this.options.all.width = this.actVis.size[0];
     }
     return {
       scale: <[number, number]>[1, 1],
