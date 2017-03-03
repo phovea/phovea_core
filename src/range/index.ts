@@ -22,7 +22,7 @@ export {default as Range1DGroup} from './Range1DGroup';
 export function range(from: number, to?: number, step?: number): Range;
 /**
  * Creates a new multidimensional range.
- * @param ranges  Each array can contain up to three indices, the first is read as 'from',
+ * @param ranges Each array can contain up to three indices, the first is read as 'from',
  * the second as 'to' and the third as 'step'.
  */
 export function range(...ranges: number[][]): Range;
@@ -48,21 +48,15 @@ export function range() {
   }
   return r;
 }
-
 /**
- * TODO document
- * @param ranges
+ * Joins the specified ranges into a multidimensional range. If no ranges are provides as parameter,
+ * returns a new range that includes all elements.
+ * @param ranges the ranges to be joined. If the supplied range is a multidimensional range,
+ * then the first one is used, the rest is ignored
+ * @return a multidimensional range
  */
 export function join(ranges: Range[]): Range;
-/**
- * TODO document
- * @param ranges
- */
 export function join(...ranges: Range[]): Range;
-/**
- * TODO document
- * @returns {any}
- */
 export function join() {
   if (arguments.length === 0) {
     return all();
@@ -74,6 +68,10 @@ export function join() {
   return new Range(ranges.map((r: Range) => r.dim(0)));
 }
 
+/**
+ * TODO: document
+ * @param dimsOrIndicesOrIndexArray
+ */
 export function list(...dimsOrIndicesOrIndexArray: (Range1D | number[] | number)[]): Range;
 export function list(dims: Range1D[]): Range;
 export function list(): Range {
