@@ -83,12 +83,21 @@ export interface ITable extends IDataType {
    * Creates a new view on this table specified by the given range. A view implements the ITable interface yet is still
    * backed by the data from the original table.
    *
-   * @param range
+   * @param range TODO what are the legal properties of a range? What if I pass a 1D range? If I pass a 2D range, which one refers to columns, which one refers to rows?
    */
   view(range?: RangeLike): ITable;
 
+  /**
+   * TODO: document
+   * @param name
+   * @param args
+   */
   queryView(name: string, args: IQueryArgs): ITable;
 
+  /**
+   * TODO: document
+   * @param idRange
+   */
   idView(idRange?: RangeLike): Promise<ITable>;
 
   /**

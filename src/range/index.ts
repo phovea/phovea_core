@@ -12,20 +12,6 @@ export {default as Range1D} from './Range1D';
 export {default as CompositeRange1D} from './CompositeRange1D';
 export {default as Range1DGroup} from './Range1DGroup';
 
-export function asUngrouped(range: Range1D) {
-  return new Range1DGroup('unnamed', 'gray', range);
-}
-
-export function composite(name: string, groups: Range1DGroup[]) {
-  return new CompositeRange1D(name, groups);
-}
-
-/**
- * test if the given object is a range
- */
-export function is(obj: any) {
-  return obj instanceof Range;
-}
 
 /**
  * Creates a new range starting at from and optionally up to 'to' and optionally with a step
@@ -35,8 +21,9 @@ export function is(obj: any) {
  */
 export function range(from: number, to?: number, step?: number): Range;
 /**
- * TODO Unclear what this does - document
- * @param ranges
+ * Creates a new multidimensional range.
+ * @param ranges  Each array can contain up to three indices, the first is read as 'from',
+ * the second as 'to' and the third as 'step'.
  */
 export function range(...ranges: number[][]): Range;
 /**
@@ -61,8 +48,21 @@ export function range() {
   }
   return r;
 }
+
+/**
+ * TODO document
+ * @param ranges
+ */
 export function join(ranges: Range[]): Range;
+/**
+ * TODO document
+ * @param ranges
+ */
 export function join(...ranges: Range[]): Range;
+/**
+ * TODO document
+ * @returns {any}
+ */
 export function join() {
   if (arguments.length === 0) {
     return all();
@@ -102,6 +102,21 @@ export function list(): Range {
   return none();
 }
 
+
+export function asUngrouped(range: Range1D) {
+  return new Range1DGroup('unnamed', 'gray', range);
+}
+
+export function composite(name: string, groups: Range1DGroup[]) {
+  return new CompositeRange1D(name, groups);
+}
+
+/**
+ * Tests if the given object is a range
+ */
+export function is(obj: any) {
+  return obj instanceof Range;
+}
 
 /**
  * something that can be parsed as a range
