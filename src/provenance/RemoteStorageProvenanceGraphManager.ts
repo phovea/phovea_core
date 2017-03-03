@@ -40,6 +40,10 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     return removeData(desc);
   }
 
+  async clone(graph: GraphBase, desc: any = {}): Promise<ProvenanceGraph> {
+    return this.import(graph.persist(), desc);
+  }
+
   async import(json: any, desc: any = {}): Promise<ProvenanceGraph> {
     const pdesc: any = mixin({
       type: 'graph',
