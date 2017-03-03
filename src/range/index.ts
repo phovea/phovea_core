@@ -49,11 +49,11 @@ export function range() {
   return r;
 }
 /**
- * Joins the specified ranges into a multidimensional range. If no ranges are provides as parameter,
+ * Joins the specified ranges into a multidimensional range. If no ranges are provided as parameter,
  * returns a new range that includes all elements.
  * @param ranges the ranges to be joined. If the supplied range is a multidimensional range,
- * then the first one is used, the rest is ignored
- * @return a multidimensional range
+ * then the first one is used, the rest is ignored.
+ * @return a multidimensional range.
  */
 export function join(ranges: Range[]): Range;
 export function join(...ranges: Range[]): Range;
