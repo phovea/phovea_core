@@ -27,8 +27,22 @@ export function is(obj: any) {
   return obj instanceof Range;
 }
 
+/**
+ * Creates a new range starting at from and optionally up to 'to' and optionally with a step
+ * @param from the index where the range starts (included)
+ * @param to the index where the range ends (excluded), defaults to the end of the data structure
+ * @param step the step size, defaults to 1
+ */
 export function range(from: number, to?: number, step?: number): Range;
+/**
+ * TODO Unclear what this does - document
+ * @param ranges
+ */
 export function range(...ranges: number[][]): Range;
+/**
+ * Creates a new range that includes all elements in the data structure
+ * @returns {any}
+ */
 export function range() {
   if (arguments.length === 0) {
     return all();
