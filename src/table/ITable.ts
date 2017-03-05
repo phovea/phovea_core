@@ -52,10 +52,17 @@ export interface ITable extends IDataType {
   cols(range?: RangeLike): IAnyVector[];
 
   /**
-   * return the specific column
+   * return the specific column by index
    * @param i
    */
   col<T, D extends IValueTypeDesc>(i: number): IVector<T, D>;
+
+  /**
+   * return the first column specified by the name
+   * @param columnName the name of the column
+   * @return the column as an IVector or null if no such column exists.
+   */
+  getCol<T, D extends IValueTypeDesc>(columnName: string): IVector<T, D>;
 
   /**
    * returns the row names
@@ -87,12 +94,14 @@ export interface ITable extends IDataType {
    * @param idtype the new vlaue type by default the same as matrix rowtype
    */
   reduce<T, D extends IValueTypeDesc>(f: (row: any[]) => T, thisArgument?: any, valuetype?: D, idtype?: IDType): IVector<T, D>;
+
   /**
    * returns a promise for getting one cell
    * @param i
    * @param j
    */
   at(i: number, j: number): Promise<IValueType>;
+
   /**
    * returns a promise for getting the data as two dimensional array
    * @param range
@@ -101,10 +110,10 @@ export interface ITable extends IDataType {
 
   /**
    * @deprecated
-   * @param column
+   * @param columnName
    * @param range
    */
-  colData<T>(column: string, range?: RangeLike): Promise<T[]>;
+  colData<T>(columnName: string, range?: RangeLike): Promise<T[]>;
 
   /**
    * returns a promise for getting the data as an array of objects

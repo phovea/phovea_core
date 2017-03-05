@@ -42,6 +42,16 @@ export default class Table extends ATable implements ITable {
     return this.vectors[i];
   }
 
+  getCol(colName: string) {
+    for (const vector of this.vectors) {
+      if (vector.desc.name === colName) {
+        return vector;
+      }
+    }
+    return null;
+  }
+
+
   cols(range: RangeLike = all()) {
     return parse(range).filter(this.vectors, [this.ncol]);
   }

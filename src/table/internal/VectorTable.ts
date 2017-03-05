@@ -38,6 +38,15 @@ export default class VectorTable extends ATable implements ITable {
     return this.vectors[i];
   }
 
+  getCol(colName: string) {
+    for (const vector of this.vectors) {
+      if (vector.desc.name === colName) {
+        return vector;
+      }
+    }
+    return null;
+  }
+
   cols(range: RangeLike = all()) {
     return parse(range).filter(this.vectors, [this.ncol]);
   }
@@ -61,7 +70,6 @@ export default class VectorTable extends ATable implements ITable {
   dataOfColumn(column: string, range: RangeLike = all()) {
     return this.vectors.find((d) => d.desc.name === column).data(range);
   }
-
 
 
   objects(range: RangeLike = all()) {

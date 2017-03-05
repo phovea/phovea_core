@@ -32,6 +32,7 @@ export abstract class ATable extends SelectAble implements IInternalAccess {
     return this.dim[1];
   }
 
+
   abstract size(): number[];
 
   view(range: RangeLike = all()): ITable {
@@ -108,6 +109,14 @@ export class TableView extends ATable implements ITable {
     const inverted = this.range.invert([0, i], this.root.dim);
     return this.root.col(inverted[1]);
   }
+
+
+  getCol(colName: string) {
+    // TODO unsure whether this returns a properly filtered column view
+    // TODO check whether this column is actually in this view
+    return this.root.getCol(colName);
+  }
+
 
   cols(range: RangeLike = all()) {
     return this.root.cols(this.range.swap().preMultiply(parse(range), this.root.dim));
