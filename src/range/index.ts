@@ -21,7 +21,7 @@ export {default as Range1DGroup} from './Range1DGroup';
  */
 export function range(from: number, to?: number, step?: number): Range;
 /**
- * Creates a new multidimensional range.
+ * Creates a new multidimensional range using step functions.
  * @param ranges Each array can contain up to three indices, the first is read as 'from',
  * the second as 'to' and the third as 'step'.
  */
