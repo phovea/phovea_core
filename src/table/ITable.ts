@@ -58,9 +58,9 @@ export interface ITable extends IDataType {
   col<T, D extends IValueTypeDesc>(i: number): IVector<T, D>;
 
   /**
-   * return the first column specified by the name
+   * Returns the first column that matches the specified name
    * @param columnName the name of the column
-   * @return the column as an IVector or null if no such column exists.
+   * @return the column as an IVector or undefined if no such column exists.
    */
   getCol<T, D extends IValueTypeDesc>(columnName: string): IVector<T, D>;
 
