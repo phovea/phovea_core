@@ -1,5 +1,5 @@
 /// <reference types="jasmine" />
-import {parse} from '../src/range';
+import {parse} from '../../src/range';
 
 describe('parse', () => {
   function parseCheck(code: string, output: string) {
@@ -21,5 +21,5 @@ describe('parse', () => {
   it('comma tab set', parseCheck('1,\t(1,4)', '1,(1,4)'));
   it('comma space range', parseCheck('(1:3), (1:3)', '(1:3),(1:3)'));
 
-  it('syntax error', parseCheck(':::::', '(NaN:NaN:NaN)')); // TODO: BUG! (Should throw error.)
+  it('syntax error', () => expect(parse.bind(null, ':::::')).toThrow());
 });
