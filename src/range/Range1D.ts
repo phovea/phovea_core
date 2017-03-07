@@ -303,9 +303,11 @@ export default class Range1D {
     if (this.isNone) {
       return -1; //not mapped
     }
+    // find the range element that contain the index-th element
     let s = this.arr[0].size(size);
     let act = 0, total: number = s;
-    while (total > index && act < this.length) {
+    const nElems = this.arr.length-1;
+    while (total < index && act < nElems) {
       act++;
       s = this.arr[act].size(size);
       total += s;
@@ -313,7 +315,7 @@ export default class Range1D {
     if (act >= this.arr.length) {
       return -1; //not mapped
     }
-    return this.arr[act - 1].invert(index - total + s, size);
+    return this.arr[act].invert(index - total + s, size);
   }
 
   indexOf(indices: number[]): number[];
