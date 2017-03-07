@@ -121,6 +121,4 @@ describe('RangeElem', () => {
     it('"a"', () => expect(RangeElem.parse.bind(RangeElem, 'a')).toThrow());
     it('"0:a"', () => expect(RangeElem.parse.bind(RangeElem, '0:a')).toThrow());
   });
-
-  // TODO further tests
 });
