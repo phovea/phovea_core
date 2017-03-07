@@ -27,8 +27,14 @@ export function is(obj: any) {
   return obj instanceof Range;
 }
 
+export interface IRangeSlice {
+  from: number;
+  to?: number;
+  step?: number;
+}
+
 export function range(from: number, to?: number, step?: number): Range;
-export function range(...ranges: number[][]): Range;
+export function range(...ranges: (number[]|IRangeSlice)[]): Range;
 export function range() {
   if (arguments.length === 0) {
     return all();
@@ -41,8 +47,12 @@ export function range() {
       }
       r.dim(i).setSlice(arr[0], arr[1], arr[2]);
     });
-  }
-  if (typeof arguments[0] === 'number') { //single slice mode
+  } else if (Object.prototype.toString.call(arguments[0]) === '[object Object]') {
+    // slice object mode
+    Array.from(arguments).forEach((slice: IRangeSlice, i) => {
+      r.dim(i).setSlice(slice.from, slice.to, slice.step);
+    });
+  } else if (typeof arguments[0] === 'number') { //single slice mode
     r.dim(0).setSlice(arguments[0], arguments[1], arguments[2]);
   }
   return r;
