@@ -28,12 +28,22 @@ export interface ITableColumn<D extends IValueTypeDesc> {
 
 export declare type IAnyTableColumn = ITableColumn<any>;
 
+/**
+ * The description, i.e., the metadata for the table (name, idtype, etc.)
+ */
 export interface ITableDataDescription extends IDataDescription {
   readonly idtype: string;
   readonly size: number[];
   readonly columns: IAnyTableColumn[];
 }
 
+/**
+ * A table is a data structure made up of rows and columns. In a table, the elements within a column are always
+ * of the same data type; the data types between different columns can vary. For example, the first column in a
+ * table can be categorical, the second can be integers, the third can be IDs, etc.
+ *
+ * If your columns are of the same type, use Matrix instead.
+ */
 export interface ITable extends IDataType {
   readonly desc: ITableDataDescription;
 
@@ -70,13 +80,24 @@ export interface ITable extends IDataType {
   rowIds(range?: RangeLike): Promise<Range>;
 
   /**
-   * creates a new view on this matrix specified by the given range
-   * @param range
+   * Creates a new view on this table specified by the given range. A view implements the ITable interface yet is still
+   * backed by the data from the original table.
+   *
+   * @param range TODO what are the legal properties of a range? What if I pass a 1D range? If I pass a 2D range, which one refers to columns, which one refers to rows?
    */
   view(range?: RangeLike): ITable;
 
+  /**
+   * TODO: document
+   * @param name
+   * @param args
+   */
   queryView(name: string, args: IQueryArgs): ITable;
 
+  /**
+   * TODO: document
+   * @param idRange
+   */
   idView(idRange?: RangeLike): Promise<ITable>;
 
   /**
@@ -100,14 +121,16 @@ export interface ITable extends IDataType {
   data(range?: RangeLike): Promise<IValueType[][]>;
 
   /**
+   * Returns the data of the named column as an array with the data
+   * @param column the name of the column to retrieve the data from
+   * @param range a range operator; optional
    * @deprecated
-   * @param column
-   * @param range
    */
   colData<T>(column: string, range?: RangeLike): Promise<T[]>;
 
   /**
-   * returns a promise for getting the data as an array of objects
+   * returns a promise for getting the data as an array of objects, where each object has
+   * fields corresponding to the columns
    * @param range
    */
   objects(range?: RangeLike): Promise<any[]>;
