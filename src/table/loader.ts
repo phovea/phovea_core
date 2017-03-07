@@ -31,6 +31,24 @@ export interface ITableLoader2 {
   view(desc: ITableDataDescription, name: string, args: any): ITableLoader;
 }
 
+function filterObjects(objs: any[], range: Range, desc: ITableDataDescription) {
+  if (range.isAll) {
+    return objs;
+  }
+  objs = range.dim(0).filter(objs, desc.size[0]);
+  if (range.ndim > 1 && !range.dim(1).isAll) {
+    // filter the columns by index
+    const toKeep = range.dim(1).filter(desc.columns, desc.columns.length);
+    const toKeepNames = toKeep.map((col) => col.column || col.name);
+    return objs.map((obj) => {
+      const r: any = {};
+      toKeepNames.forEach((key) => r[key] = obj[key]);
+      return r;
+    });
+  }
+  return objs;
+}
+
 /**
  * @internal
  */
@@ -39,7 +57,7 @@ export function adapterOne2Two(loader: ITableLoader): ITableLoader2 {
     rowIds: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => range.preMultiply(d.rowIds, desc.size)),
     rows: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => range.dim(0).filter(d.rows, desc.size[0])),
     col: (desc: ITableDataDescription, column: string, range: Range) => loader(desc).then((d) => range.filter(d.objs.map((d) => d[column]), desc.size)),
-    objs: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => range.filter(d.objs, desc.size)),
+    objs: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => filterObjects(d.objs, range, desc)),
     data: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => range.filter(toFlat(d.objs, desc.columns), desc.size)),
     view: (desc: ITableDataDescription, name: string, args: any) => {
       throw new Error('not implemented');
@@ -151,7 +169,7 @@ export function viaAPI2Loader(): ITableLoader2 {
         return cols[column];
       }
       if (cols[column] != null) { //already loading all
-        return cols[column].then((d: any[]) => range.filter(d, (<any>desc).size));
+        return cols[column].then((d: any[]) => filterObjects(d, range, desc));
       }
       //server side slicing
       return getAPIData(`/dataset/table/${desc.id}/col/${column}`, {range: range.toString()}).then((data) => maskCol(data, colDesc));
