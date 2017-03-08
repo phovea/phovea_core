@@ -184,7 +184,7 @@ export function asTableFromArray(data: any[][], options: IAsTableOptions = {}): 
 export function asTable(data: any[], options: IAsTableOptions = {}): ITable {
   const keyProperty = options.keyProperty || '_id';
 
-  const rows = data.map((r, i) => String(r[keyProperty]) || String(i));
+  const rows = data.map((r, i) => String(r[keyProperty] || i));
   const cols = Object.keys(data[0]);
   const objs = data;
   const realData = toList(objs, cols);
