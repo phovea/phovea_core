@@ -46,12 +46,6 @@ export default class Table extends ATable implements ITable {
     return parse(range).filter(this.vectors, [this.ncol]);
   }
 
-  /**
-   * access at a specific position
-   * @param i
-   * @param j
-   * @returns {*}
-   */
   async at(i: number, j: number) {
     return (await this.colData(this.col(j).column, rlist(i)))[0];
   }
@@ -76,10 +70,6 @@ export default class Table extends ATable implements ITable {
     return this.loader.objs(this.desc, parse(range));
   }
 
-  /**
-   * return the row ids of the matrix
-   * @returns {*}
-   */
   rows(range: RangeLike = all()): Promise<string[]> {
     return this.loader.rows(this.desc, parse(range));
   }

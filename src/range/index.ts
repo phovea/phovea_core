@@ -21,7 +21,45 @@ export {default as Range1DGroup} from './Range1DGroup';
  * however, discouraged to be used by external modules.
  *
  * Ranges can be directly created using the constructors, or can be created using the helper functions in this file.
+ *
+ * Many functions also accept a RangeLike that is parsed automatically into a proper range.
  */
+
+
+/**
+ * Something that can be parsed as a range:
+ * Either a proper range, an array (of an array) of numbers (treated as indices), or a string. See parser.ts for
+ * rules on string ranges.
+ */
+export type RangeLike = Range | number[] | number[][] | string;
+
+/**
+ * Interprets the parameter options and returns an appropriate range
+ *
+ * If it is null, returns a new range with all elements.
+ * If the RangeLike is a range, then the range is returned unchanged.
+ * If it is an array, the numbers in the array are treated as indices for a range.
+ * If it is a string, the range is parsed according to the grammar defined in parser.ts
+ *
+ * @param arange something like a range
+ * @returns {Range}
+ */
+export function parse(arange: RangeLike = null) {
+  if (arange === null) {
+    return all();
+  }
+  if (arange instanceof Range) {
+    return <Range>arange;
+  }
+  if (Array.isArray(arange)) {
+    if (Array.isArray(arange[0])) {
+      return list(...<number[][]>arange);
+    }
+    return list(<number[]>arange);
+  }
+  //join given array as string combined with ,
+  return parseRange(Array.from(arguments).map(String).join(','));
+}
 
 
 /**
@@ -105,8 +143,6 @@ export function list(): Range {
   return none();
 }
 
-
-
 /**
  * Joins the specified ranges into a multidimensional range. If no ranges are provided as parameter,
  * returns a new range that includes all elements.
@@ -126,7 +162,6 @@ export function join() {
   }
   return new Range(ranges.map((r: Range) => r.dim(0)));
 }
-
 
 /**
  * TODO document
@@ -155,33 +190,10 @@ export function is(obj: any) {
 }
 
 /**
- * something that can be parsed as a range
+ * TODO document
+ * @param dimIndices
+ * @return {any}
  */
-export type RangeLike = Range | number[] | number[][] | string;
-
-/**
- * parses the given encoded string created by toString to a range object
- * @param arange something like a range
- * @returns {Range}
- */
-export function parse(arange: RangeLike = null) {
-
-  if (arange === null) {
-    return all();
-  }
-  if (arange instanceof Range) {
-    return <Range>arange;
-  }
-  if (Array.isArray(arange)) {
-    if (Array.isArray(arange[0])) {
-      return list(...<number[][]>arange);
-    }
-    return list(<number[]>arange);
-  }
-  //join given array as string combined with ,
-  return parseRange(Array.from(arguments).map(String).join(','));
-}
-
 export function cell(...dimIndices: number[]) {
   return new Range(dimIndices.map(Range1D.single));
 }
