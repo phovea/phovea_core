@@ -12,23 +12,30 @@ export {default as Range1D} from './Range1D';
 export {default as CompositeRange1D} from './CompositeRange1D';
 export {default as Range1DGroup} from './Range1DGroup';
 
-export function asUngrouped(range: Range1D) {
-  return new Range1DGroup('unnamed', 'gray', range);
-}
 
-export function composite(name: string, groups: Range1DGroup[]) {
-  return new CompositeRange1D(name, groups);
+export interface IRangeSlice {
+  from: number;
+  to?: number;
+  step?: number;
 }
 
 /**
- * test if the given object is a range
+ * Creates a new range starting at from and optionally up to 'to' and optionally with a step
+ * @param from the index where the range starts (included)
+ * @param to the index where the range ends (excluded), defaults to the end of the data structure
+ * @param step the step size, defaults to 1
  */
-export function is(obj: any) {
-  return obj instanceof Range;
-}
-
 export function range(from: number, to?: number, step?: number): Range;
-export function range(...ranges: number[][]): Range;
+/**
+ * Creates a new multidimensional range using step functions.
+ * @param ranges Each array can contain up to three indices, the first is read as 'from',
+ * the second as 'to' and the third as 'step'.
+ */
+export function range(...ranges: (number[]|IRangeSlice)[]): Range;
+/**
+ * Creates a new range that includes all elements in the data structure
+ * @returns {any}
+ */
 export function range() {
   if (arguments.length === 0) {
     return all();
@@ -41,12 +48,23 @@ export function range() {
       }
       r.dim(i).setSlice(arr[0], arr[1], arr[2]);
     });
-  }
-  if (typeof arguments[0] === 'number') { //single slice mode
+  } else if (Object.prototype.toString.call(arguments[0]) === '[object Object]') {
+    // slice object mode
+    Array.from(arguments).forEach((slice: IRangeSlice, i) => {
+      r.dim(i).setSlice(slice.from, slice.to, slice.step);
+    });
+  } else if (typeof arguments[0] === 'number') { //single slice mode
     r.dim(0).setSlice(arguments[0], arguments[1], arguments[2]);
   }
   return r;
 }
+/**
+ * Joins the specified ranges into a multidimensional range. If no ranges are provided as parameter,
+ * returns a new range that includes all elements.
+ * @param ranges the ranges to be joined. If the supplied range is a multidimensional range,
+ * then the first one is used, the rest is ignored.
+ * @return a multidimensional range.
+ */
 export function join(ranges: Range[]): Range;
 export function join(...ranges: Range[]): Range;
 export function join() {
@@ -60,6 +78,10 @@ export function join() {
   return new Range(ranges.map((r: Range) => r.dim(0)));
 }
 
+/**
+ * TODO: document
+ * @param dimsOrIndicesOrIndexArray
+ */
 export function list(...dimsOrIndicesOrIndexArray: (Range1D | number[] | number)[]): Range;
 export function list(dims: Range1D[]): Range;
 export function list(): Range {
@@ -81,12 +103,28 @@ export function list(): Range {
   } else if (typeof arguments[0] === 'number') { //single slice mode
     const r = new Range();
     r.dim(0).setList(Array.from(arguments));
+    return r;
   } else if (arguments[0] instanceof Range1D) {
     return new Range(Array.from(arguments));
   }
   return none();
 }
 
+
+export function asUngrouped(range: Range1D) {
+  return new Range1DGroup('unnamed', 'gray', range);
+}
+
+export function composite(name: string, groups: Range1DGroup[]) {
+  return new CompositeRange1D(name, groups);
+}
+
+/**
+ * Tests if the given object is a range
+ */
+export function is(obj: any) {
+  return obj instanceof Range;
+}
 
 /**
  * something that can be parsed as a range

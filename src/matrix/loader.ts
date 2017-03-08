@@ -10,7 +10,7 @@
 import {getAPIJSON, api2absURL, getAPIData} from '../ajax';
 import {list as rlist, Range, all, join, parse} from '../range';
 import {mask, INumberValueTypeDesc, VALUE_TYPE_INT, VALUE_TYPE_REAL} from '../datatype';
-import {IHistogram, wrapHist} from '../math';
+import {IHistogram, wrapHist, IAdvancedStatistics, computeAdvancedStats} from '../math';
 import {IMatrixDataDescription, IHeatMapUrlOptions} from './IMatrix';
 
 export interface IMatrixLoader<T> {
@@ -33,6 +33,7 @@ export interface IMatrixLoader2<T> {
   at(desc: IMatrixDataDescription<any>, i: number, j: number): Promise<T>;
   data(desc: IMatrixDataDescription<any>, range: Range): Promise<T[][]>;
   numericalHist?(desc: IMatrixDataDescription<any>, range: Range, bins?: number): Promise<IHistogram>;
+  numericalStats?(desc: IMatrixDataDescription<any>, range: Range): Promise<IAdvancedStatistics>;
   heatmapUrl?(desc: IMatrixDataDescription<any>, range: Range, options: IHeatMapUrlOptions): string;
 }
 
@@ -61,7 +62,8 @@ export function viaAPI2Loader(): IMatrixLoader2<any> {
     colIds: Promise<Range> = null,
     cols: Promise<string[]> = null,
     data: Promise<any[][]> = null,
-    hist: Promise<IHistogram> = null;
+    hist: Promise<IHistogram> = null,
+    stats: Promise<IAdvancedStatistics> = null;
   const r = {
     rowIds: (desc: IMatrixDataDescription<any>, range: Range) => {
       if (rowIds == null) {
@@ -96,9 +98,21 @@ export function viaAPI2Loader(): IMatrixLoader2<any> {
       const split = range.split();
       return Promise.all([r.rowIds(desc, split[0] || all()), r.colIds(desc, split[1] || all())]).then(join);
     },
+    numericalStats: (desc: IMatrixDataDescription<any>, range: Range): Promise<IAdvancedStatistics> => {
+      if (range.isAll) {
+        if (stats == null) {
+          stats = getAPIJSON(`/dataset/matrix/${desc.id}/stats`);
+        }
+        return stats;
+      }
+      const args: any = {
+        range: range.toString()
+      };
+      return getAPIJSON(`/dataset/matrix/${desc.id}/stats`, args);
+    },
     numericalHist: (desc: IMatrixDataDescription<any>, range: Range, bins: number = NaN) => {
       const valueRange = (<INumberValueTypeDesc>desc.value).range;
-      if (range.isAll && isNaN(bins)) {
+      if (range.isAll) {
         if (hist == null) {
           hist = getAPIJSON(`/dataset/matrix/${desc.id}/hist`).then((hist: number[]) => wrapHist(hist, valueRange));
         }

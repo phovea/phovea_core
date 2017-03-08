@@ -58,8 +58,14 @@ export default class VectorTable extends ATable implements ITable {
   }
 
   colData(column: string, range: RangeLike = all()) {
-    return this.vectors.find((d) => d.desc.column === column).data(range);
+    return this.dataOfColumn(column, range);
   }
+
+  dataOfColumn(column: string, range: RangeLike = all()) {
+    return this.vectors.find((d) => d.desc.name === column).data(range);
+  }
+
+
 
   objects(range: RangeLike = all()) {
     return Promise.all(this.vectors.map((v) => v.data(range))).then((arr: any[][]) => {

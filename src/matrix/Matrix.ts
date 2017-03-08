@@ -9,7 +9,7 @@
 
 import {Range, RangeLike, all, parse, join} from '../range';
 import {IValueTypeDesc, VALUE_TYPE_REAL, VALUE_TYPE_INT, guessValueTypeDesc} from '../datatype';
-import {IHistogram} from '../math';
+import {IHistogram, IAdvancedStatistics, IStatistics} from '../math';
 import {mixin} from '../index';
 import {IDType, ProductIDType, resolve as resolveIDType, resolveProduct, createLocalAssigner} from '../idtype';
 import {IMatrix, IMatrixDataDescription, IHeatMapUrlOptions, createDefaultMatrixDesc} from './IMatrix';
@@ -17,7 +17,7 @@ import AMatrix from './AMatrix';
 import TransposedMatrix from './internal/TransposedMatrix';
 import {IMatrixLoader, IMatrixLoader2, viaAPI2Loader, adapterOne2Two} from './loader';
 /**
- * root matrix implementation holding the data
+ * Base matrix implementation holding the data
  */
 export default class Matrix<T, D extends IValueTypeDesc> extends AMatrix<T, D> {
   readonly t: IMatrix<T, D>;
@@ -93,6 +93,22 @@ export default class Matrix<T, D extends IValueTypeDesc> extends AMatrix<T, D> {
     }
     // compute
     return super.hist(bins, range, containedIds);
+  }
+
+  stats(range: RangeLike = all()): Promise<IStatistics> {
+    if (this.loader.numericalStats && (this.valuetype.type === VALUE_TYPE_REAL || this.valuetype.type === VALUE_TYPE_INT)) { // use loader for hist
+      return this.loader.numericalStats(this.desc, parse(range));
+    }
+    // compute
+    return super.stats(range);
+  }
+
+  statsAdvanced(range: RangeLike = all()): Promise<IAdvancedStatistics> {
+    if (this.loader.numericalStats && (this.valuetype.type === VALUE_TYPE_REAL || this.valuetype.type === VALUE_TYPE_INT)) { // use loader for hist
+      return this.loader.numericalStats(this.desc, parse(range));
+    }
+    // compute
+    return super.statsAdvanced(range);
   }
 
   size() {

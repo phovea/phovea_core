@@ -12,10 +12,10 @@ import {RangeLike, CompositeRange1D, Range} from '../range';
 import {IDType, IDTypeLike} from '../idtype';
 import {
   IHistAbleDataType, IValueTypeDesc, IDataDescription, createDefaultDataDesc,
-  INumberValueTypeDesc, ICategoricalValueTypeDesc
+  INumberValueTypeDesc, ICategoricalValueTypeDesc, IStatsAbleDataType
 } from '../datatype';
 import IStratification from '../stratification/IStratification';
-import {IStatistics, IHistogram} from '../math';
+import {IAdvancedStatistics, IHistogram, IStatistics} from '../math';
 import {IAtom, IAtomValue} from '../atom/IAtom';
 
 export interface IVectorDataDescription<D extends IValueTypeDesc> extends IDataDescription {
@@ -24,7 +24,10 @@ export interface IVectorDataDescription<D extends IValueTypeDesc> extends IDataD
   readonly size: number;
 }
 
-export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<D> {
+/**
+ * A vector is a 1-dimensional datastructure where all elements are of the same datatype.
+ */
+export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<D>, IStatsAbleDataType<D> {
   readonly desc: IVectorDataDescription<D>;
   /**
    * id type
@@ -41,6 +44,8 @@ export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<
    * @param range optional subset
    */
   view(range?: RangeLike): IVector<T,D>;
+
+  idView(idRange?: RangeLike): Promise<IVector<T,D>>;
   /**
    * returns a promise for getting one cell
    * @param i at a specific position
@@ -54,9 +59,9 @@ export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<
 
   /**
    * returns this vector statistics
-   * TODO should also support range?
    */
-  stats(): Promise<IStatistics>;
+  stats(range?: RangeLike): Promise<IStatistics>;
+  statsAdvanced(range?: RangeLike): Promise<IAdvancedStatistics>;
 
   /**
    * computes a histogram of this vector
