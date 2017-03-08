@@ -28,6 +28,12 @@ export interface IStatistics {
   readonly skewness: number;
 }
 
+export interface IAdvancedStatistics extends IStatistics {
+  readonly median: number;
+  readonly q1: number;
+  readonly q3: number;
+}
+
 
 export interface IIterable<T> {
   forEach(callbackfn: (value: T) => void, thisArg?: any): void;
@@ -136,9 +142,40 @@ class Statistics implements IStatistics {
   }
 }
 
+class AdvancedStatistics extends Statistics implements IAdvancedStatistics {
+  constructor(public readonly median: number, public readonly q1: number, public readonly q3: number) {
+    super();
+  }
+}
+
 export function computeStats(...arr: IIterable<number>[]): IStatistics {
   const r = new Statistics();
   arr.forEach((a) => a.forEach(r.push, r));
+  return r;
+}
+
+function quantile(arr: number[], percentile: number) {
+  const n = arr.length;
+  if (n === 0) {
+    return NaN;
+  }
+  if (n < 2 || percentile <= 0) {
+    return arr[0];
+  }
+  if (percentile >= 1) {
+    return arr[n-1];
+  }
+  const target = percentile * (n - 1);
+  const targetIndex = Math.floor(target);
+  const a = arr[targetIndex], b = arr[targetIndex + 1];
+  return a + (b - a) * (target - targetIndex);
+}
+
+export function computeAdvancedStats(arr: number[]): IAdvancedStatistics {
+  arr = arr.slice().sort((a,b) => a - b);
+
+  const r = new AdvancedStatistics(quantile(arr, 0.5), quantile(arr, 0.25), quantile(arr, 0.75));
+  arr.forEach((a) => r.push(a));
   return r;
 }
 

@@ -5,14 +5,19 @@
  **************************************************************************** */
 /**
  * Created by Samuel Gratzl on 04.08.2014.
+ *
+ * This file defines interfaces for various data types and their metadata.
  */
 
 import {IPersistable, extendClass, mixin, uniqueString} from './index';
 import {ISelectAble, SelectAble, IDType} from './idtype';
-import {extent, IHistogram} from './math';
+import {extent, IHistogram, IAdvancedStatistics, IStatistics} from './math';
 import {all, none, Range1D, RangeLike, Range1DGroup, composite, Range, CompositeRange1D} from './range';
 import {ISecureItem, currentUserNameOrAnonymous} from './security';
 
+/**
+ * Interface defining metadata for a dataset.
+ */
 export interface IDataDescriptionMetaData extends ISecureItem {
   /**
    * the type of the datatype, e.g. matrix, vector, stratification, ...
@@ -47,7 +52,7 @@ export interface IDataDescription extends IDataDescriptionMetaData {
 }
 
 /**
- * basic data type interface
+ * Basic data type interface
  */
 export interface IDataType extends ISelectAble, IPersistable {
   /**
@@ -131,6 +136,13 @@ export function assignData(node: Element, data: IDataType) {
 export interface IHistAbleDataType<D extends IValueTypeDesc> extends IDataType {
   valuetype: D;
   hist(nbins?: number): Promise<IHistogram>;
+  readonly length: number;
+}
+
+export interface IStatsAbleDataType<D extends IValueTypeDesc> extends IDataType {
+  valuetype: D;
+  stats(): Promise<IStatistics>;
+  statsAdvanced(): Promise<IAdvancedStatistics>;
   readonly length: number;
 }
 
@@ -337,3 +349,5 @@ export function createDefaultDataDesc(namespace = 'localData'): IDataDescription
     ts: Date.now()
   };
 }
+
+

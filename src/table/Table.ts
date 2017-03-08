@@ -15,6 +15,7 @@ import {ITable, ITableColumn, ITableDataDescription, createDefaultTableDesc} fro
 import ATable from './ATable';
 import TableVector from './internal/TableVector';
 import {ITableLoader, ITableLoader2, adapterOne2Two, viaAPI2Loader, viaDataLoader} from './loader';
+import {IInternalAccess} from './internal';
 
 /**
  * root matrix implementation holding the data
@@ -64,6 +65,10 @@ export default class Table extends ATable implements ITable {
   }
 
   colData(column: string, range: RangeLike = all()) {
+    return this.dataOfColumn(column, range);
+  }
+
+  dataOfColumn(column: string, range: RangeLike = all()) {
     return this.loader.col(this.desc, column, parse(range));
   }
 
@@ -131,6 +136,9 @@ function toList(objs: any[], cols: string[]) {
   return objs.map((obj) => cols.map((c) => obj[c]));
 }
 
+/**
+ * Interface for the parsing options for a table
+ */
 export interface IAsTableOptions {
   name?: string;
   idtype?: string;
@@ -176,6 +184,13 @@ export function asTableFromArray(data: any[][], options: IAsTableOptions = {}): 
   return asTableImpl(columns, rows, objs, realData, options);
 }
 
+/**
+ * Creates a new table from an array of arrays of data and an optional options data structure.
+ * TODO: explain the relationship of this function and the "magic" JSON file.
+ * @param data
+ * @param options TODO - explain what these options are
+ * @returns {Table}
+ */
 export function asTable(data: any[], options: IAsTableOptions = {}): ITable {
   const keyProperty = options.keyProperty || '_id';
 
