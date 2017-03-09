@@ -26,6 +26,8 @@ export default class Table extends ATable implements ITable {
 
   constructor(public readonly desc: ITableDataDescription, private loader: ITableLoader2) {
     super(null);
+    // set default column
+    desc.columns.forEach((col) => col.column = col.column || col.name);
     this.root = this;
     this.vectors = desc.columns.map((cdesc, i) => new TableVector(this, i, cdesc));
   }
@@ -164,6 +166,7 @@ export function asTableFromArray(data: any[][], options: IAsTableOptions = {}): 
   const columns = cols.map((col, i) => {
     return {
       name: col,
+      column: col,
       value: guessValueTypeDesc(tableData.map((row) => row[i]))
     };
   });
@@ -192,6 +195,7 @@ export function asTable(data: any[], options: IAsTableOptions = {}): ITable {
   const columns = cols.map((col, i) => {
     return {
       name: col,
+      column: col,
       value: guessValueTypeDesc(realData.map((row) => row[i]))
     };
   });

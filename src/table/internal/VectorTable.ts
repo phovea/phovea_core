@@ -25,7 +25,10 @@ export default class VectorTable extends ATable implements ITable {
     const d = <any>desc;
     d.idtype = ref.idtype;
     d.size = [vectors[0].length, vectors.length];
-    d.columns = vectors.map((v) => v.desc);
+    d.columns = vectors.map((v) => {
+      v.desc.column = v.desc.column || v.desc.name;
+      return v.desc;
+    });
     this.desc = d;
     this.idtype = vectors[0].idtype;
   }
