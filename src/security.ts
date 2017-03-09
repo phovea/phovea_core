@@ -34,7 +34,7 @@ export function isLoggedIn() {
  * stores the given user information
  * @param user
  */
-export function login(user: {name: string}) {
+export function login(user: IUser) {
   store('logged_in', true);
   store('username', user.name);
   store('user', user);
