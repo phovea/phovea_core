@@ -71,9 +71,9 @@ export function ref<T>(v: T, name: string, category = cat.data, hash = name + '_
   return {
     v: Promise.resolve(v),
     value: v,
-    name: name,
-    category: category,
-    hash: hash
+    name,
+    category,
+    hash
   };
 }
 
@@ -87,16 +87,16 @@ function persistData(v: any): any {
     return null;
   }
   if (v instanceof Element) {
-    let e = <Element>v,
+    const e = <Element>v,
       id = e.getAttribute('id');
-    return {type: 'element', id: id};
+    return {type: 'element', id};
   }
   if (isDataType(v)) {
-    let e = <IDataType>v;
+    const e = <IDataType>v;
     return {type: 'dataset', id: e.desc.id, persist: e.persist()};
   }
   if (typeof v === 'string' || typeof v === 'number') {
-    return {type: 'primitive', v: v};
+    return {type: 'primitive', v};
   }
   return null;
 }

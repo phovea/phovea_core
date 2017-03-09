@@ -180,7 +180,7 @@ export function viaAPI2Loader(): ITableLoader2 {
 }
 
 function toFlat(data: any[], vecs: ITableColumn<any>[]) {
-  return data.map((row) => vecs.map((col) => row[col.name]));
+  return data.map((row) => vecs.map((col) => row[col.column]));
 }
 
 
@@ -199,14 +199,14 @@ export function viaDataLoader(data: any[], nameProperty: any) {
       if (col.getter) {
         return col.getter;
       }
-      return (d: any) => d[col.column || col.name];
+      return (d: any) => d[col.column];
     }
 
     const getters: ((d: any) => any)[] = desc.columns.map(toGetter);
     const objs = data.map((row) => {
       const r: any = {_: row};
       desc.columns.forEach((col: any, i: number) => {
-        r[col.name] = getters[i](row);
+        r[col.column] = getters[i](row);
       });
       return r;
     });

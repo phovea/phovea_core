@@ -13,6 +13,58 @@ export {default as CompositeRange1D} from './CompositeRange1D';
 export {default as Range1DGroup} from './Range1DGroup';
 
 
+/**
+ * Ranges define which elements of a data structure should be considered. They are useful for slicing the relevant
+ * aspects out of a dataset. Ranges can be defined with from/to/step operators or by using explicit indices.
+ *
+ * The current range implementation also understands string-based range definitions, such as '(0,10,2)', which are,
+ * however, discouraged to be used by external modules.
+ *
+ * Ranges can be directly created using the constructors, or can be created using the helper functions in this file.
+ *
+ * Many functions also accept a RangeLike that is parsed automatically into a proper range.
+ */
+
+
+/**
+ * Something that can be parsed as a range:
+ * Either a proper range, an array (of an array) of numbers (treated as indices), or a string. See parser.ts for
+ * rules on string ranges.
+ */
+export type RangeLike = Range | number[] | number[][] | string;
+
+/**
+ * Interprets the parameter options and returns an appropriate range
+ *
+ * If it is null, returns a new range with all elements.
+ * If the RangeLike is a range, then the range is returned unchanged.
+ * If it is an array, the numbers in the array are treated as indices for a range.
+ * If it is a string, the range is parsed according to the grammar defined in parser.ts
+ *
+ * @param arange something like a range
+ * @returns {Range}
+ */
+export function parse(arange: RangeLike = null) {
+  if (arange === null) {
+    return all();
+  }
+  if (arange instanceof Range) {
+    return <Range>arange;
+  }
+  if (Array.isArray(arange)) {
+    if (Array.isArray(arange[0])) {
+      return list(...<number[][]>arange);
+    }
+    return list(<number[]>arange);
+  }
+  //join given array as string combined with ,
+  return parseRange(Array.from(arguments).map(String).join(','));
+}
+
+
+/**
+ * A basic interface used to conveniently create ranges
+ */
 export interface IRangeSlice {
   from: number;
   to?: number;
@@ -29,7 +81,7 @@ export function range(from: number, to?: number, step?: number): Range;
 /**
  * Creates a new multidimensional range using step functions.
  * @param ranges Each array can contain up to three indices, the first is read as 'from',
- * the second as 'to' and the third as 'step'.
+ * the second as 'to' and the third as 'step'. IRangeSlice explicitly defines from/to/step.
  */
 export function range(...ranges: (number[]|IRangeSlice)[]): Range;
 /**
@@ -58,28 +110,9 @@ export function range() {
   }
   return r;
 }
-/**
- * Joins the specified ranges into a multidimensional range. If no ranges are provided as parameter,
- * returns a new range that includes all elements.
- * @param ranges the ranges to be joined. If the supplied range is a multidimensional range,
- * then the first one is used, the rest is ignored.
- * @return a multidimensional range.
- */
-export function join(ranges: Range[]): Range;
-export function join(...ranges: Range[]): Range;
-export function join() {
-  if (arguments.length === 0) {
-    return all();
-  }
-  let ranges = arguments[0];
-  if (!Array.isArray(ranges)) { //array mode
-    ranges = Array.from(arguments);
-  }
-  return new Range(ranges.map((r: Range) => r.dim(0)));
-}
 
 /**
- * TODO: document
+ * Creates a new range from a list of indices
  * @param dimsOrIndicesOrIndexArray
  */
 export function list(...dimsOrIndicesOrIndexArray: (Range1D | number[] | number)[]): Range;
@@ -110,11 +143,41 @@ export function list(): Range {
   return none();
 }
 
+/**
+ * Joins the specified ranges into a multidimensional range. If no ranges are provided as parameter,
+ * returns a new range that includes all elements.
+ * @param ranges the ranges to be joined. If the supplied range is a multidimensional range,
+ * then the first one is used, the rest is ignored.
+ * @return a multidimensional range.
+ */
+export function join(ranges: Range[]): Range;
+export function join(...ranges: Range[]): Range;
+export function join() {
+  if (arguments.length === 0) {
+    return all();
+  }
+  let ranges = arguments[0];
+  if (!Array.isArray(ranges)) { //array mode
+    ranges = Array.from(arguments);
+  }
+  return new Range(ranges.map((r: Range) => r.dim(0)));
+}
 
+/**
+ * TODO document
+ * @param range
+ * @return {Range1DGroup}
+ */
 export function asUngrouped(range: Range1D) {
   return new Range1DGroup('unnamed', 'gray', range);
 }
 
+/**
+ * TODO document
+ * @param name
+ * @param groups
+ * @return {CompositeRange1D}
+ */
 export function composite(name: string, groups: Range1DGroup[]) {
   return new CompositeRange1D(name, groups);
 }
@@ -127,33 +190,10 @@ export function is(obj: any) {
 }
 
 /**
- * something that can be parsed as a range
+ * TODO document
+ * @param dimIndices
+ * @return {any}
  */
-export type RangeLike = Range | number[] | number[][] | string;
-
-/**
- * parses the given encoded string created by toString to a range object
- * @param arange something like a range
- * @returns {Range}
- */
-export function parse(arange: RangeLike = null) {
-
-  if (arange === null) {
-    return all();
-  }
-  if (arange instanceof Range) {
-    return <Range>arange;
-  }
-  if (Array.isArray(arange)) {
-    if (Array.isArray(arange[0])) {
-      return list(...<number[][]>arange);
-    }
-    return list(<number[]>arange);
-  }
-  //join given array as string combined with ,
-  return parseRange(Array.from(arguments).map(String).join(','));
-}
-
 export function cell(...dimIndices: number[]) {
   return new Range(dimIndices.map(Range1D.single));
 }

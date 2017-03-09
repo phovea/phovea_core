@@ -24,6 +24,11 @@ export interface ITableColumn<D extends IValueTypeDesc> {
   description?: string;
   value: D;
   getter?(row: any): any;
+  /**
+   * the accessor for the column
+   * @default =name
+   */
+  column?: string;
 }
 
 export declare type IAnyTableColumn = ITableColumn<any>;
@@ -56,21 +61,21 @@ export interface ITable extends IDataType {
   readonly idtype: IDType;
 
   /**
-   * returns the chosen columns
+   * Returns the chosen columns
    * @param range optional subset
    */
   cols(range?: RangeLike): IAnyVector[];
 
   /**
-   * return the specific column
+   * Return the specific column
    * @param i
    */
   col<T, D extends IValueTypeDesc>(i: number): IVector<T, D>;
 
   /**
    * returns the row names
-   * returns a promise for getting the row names of the matrix
-   * @param range optional subset
+   * returns a promise for getting the row names of the table
+   * @param range optional subset.
    */
   rows(range?: RangeLike): Promise<string[]>;
   /**
@@ -83,7 +88,11 @@ export interface ITable extends IDataType {
    * Creates a new view on this table specified by the given range. A view implements the ITable interface yet is still
    * backed by the data from the original table.
    *
-   * @param range TODO what are the legal properties of a range? What if I pass a 1D range? If I pass a 2D range, which one refers to columns, which one refers to rows?
+   * When passing a single (1D range) the range applies to the rows.
+   * When passing a 2D range, the row-range is in the first, the col-range in the
+   * second range.
+   *
+   * @param range
    */
   view(range?: RangeLike): ITable;
 
@@ -108,14 +117,20 @@ export interface ITable extends IDataType {
    * @param idtype the new vlaue type by default the same as matrix rowtype
    */
   reduce<T, D extends IValueTypeDesc>(f: (row: any[]) => T, thisArgument?: any, valuetype?: D, idtype?: IDType): IVector<T, D>;
+
   /**
    * returns a promise for getting one cell
    * @param i
    * @param j
    */
   at(i: number, j: number): Promise<IValueType>;
+
   /**
-   * returns a promise for getting the data as two dimensional array
+   * Returns a promise for getting the data as two dimensional array.
+   *
+   * When passing a single (1D range) the range applies to the rows.
+   * When passing a 2D range, the row-range is in the first, the col-range in the
+   * second range.
    * @param range
    */
   data(range?: RangeLike): Promise<IValueType[][]>;
@@ -129,8 +144,12 @@ export interface ITable extends IDataType {
   colData<T>(column: string, range?: RangeLike): Promise<T[]>;
 
   /**
-   * returns a promise for getting the data as an array of objects, where each object has
-   * fields corresponding to the columns
+   * Returns a promise for getting the data as an array of objects, where each object has
+   * fields corresponding to the columns.
+   *
+   * When passing a single (1D range) the range applies to the rows.
+   * When passing a 2D range, the row-range is in the first, the col-range in the
+   * second range.
    * @param range
    */
   objects(range?: RangeLike): Promise<any[]>;
