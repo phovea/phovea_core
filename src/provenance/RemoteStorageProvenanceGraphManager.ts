@@ -9,11 +9,7 @@ import ProvenanceGraph, {
   IProvenanceGraphDataDescription
 } from './ProvenanceGraph';
 import GraphBase from '../graph/GraphBase';
-import {retrieve} from '../session';
-
-function getCurrentUser() {
-  return retrieve('username', 'Anonymous');
-}
+import {currentUserNameOrAnonymous} from '../security';
 
 export default class RemoteStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private options = {
@@ -52,7 +48,7 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
         of: this.options.application
       },
       name: 'Workspace for ' + this.options.application,
-      creator: getCurrentUser(),
+      creator: currentUserNameOrAnonymous(),
       ts: Date.now(),
       description: '',
 
@@ -73,7 +69,7 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
       },
       name: 'Workspace for ' + this.options.application,
       fqname: 'provenance_graphs/Workspace for ' + this.options.application,
-      creator: getCurrentUser(),
+      creator: currentUserNameOrAnonymous(),
       size: <[number, number]>[0, 0],
       ts: Date.now(),
       description: ''

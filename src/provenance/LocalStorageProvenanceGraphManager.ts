@@ -7,13 +7,9 @@ import ProvenanceGraph, {
   provenanceGraphFactory,
   IProvenanceGraphDataDescription
 } from './ProvenanceGraph';
-import {retrieve} from '../session';
 import GraphBase from '../graph/GraphBase';
 import LocalStorageGraph from '../graph/LocalStorageGraph';
-
-function getCurrentUser() {
-  return retrieve('username', 'Anonymous');
-}
+import {currentUserNameOrAnonymous} from '../security';
 
 export default class LocalStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private options = {
@@ -78,7 +74,7 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
         graphtype: 'provenance_graph',
         of: this.options.application
       },
-      creator: getCurrentUser(),
+      creator: currentUserNameOrAnonymous(),
       ts: Date.now(),
       description: ''
     }, overrides);
