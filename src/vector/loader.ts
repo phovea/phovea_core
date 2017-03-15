@@ -10,7 +10,7 @@
 import {getAPIJSON} from '../ajax';
 import {parse} from '../range';
 import Range from '../range/Range';
-import {IValueType} from '../datatype';
+import {IValueType, mask} from '../datatype';
 import {IVectorDataDescription} from './IVector';
 
 /**
@@ -41,6 +41,7 @@ export function viaAPILoader<T>() {
     }
     return _loader = getAPIJSON('/dataset/' + desc.id).then((data) => {
       data.rowIds = parse(data.rowIds);
+      data.data = mask(data.data, desc.value);
       return data;
     });
   };

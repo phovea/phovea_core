@@ -90,7 +90,7 @@ export function viaAPIViewLoader(name: string, args: IQueryArgs): ITableLoader {
 
 function maskCol<T>(arr: T[], col: ITableColumn<any>): T[] {
   //mask data
-  if (col.value && 'missing' in col.value && (col.value.type === VALUE_TYPE_INT || col.value.type === VALUE_TYPE_REAL)) {
+  if (col.value && (col.value.type === VALUE_TYPE_INT || col.value.type === VALUE_TYPE_REAL)) {
     return <any>mask(<any>arr, <INumberValueTypeDesc><any>col.value);
   }
   return arr;
@@ -98,7 +98,7 @@ function maskCol<T>(arr: T[], col: ITableColumn<any>): T[] {
 
 function maskObjects(arr: IValueType[], desc: ITableDataDescription) {
   //mask data
-  const maskAble = desc.columns.filter((col) => col.value && 'missing' in col.value && (col.value.type === VALUE_TYPE_INT || col.value.type === VALUE_TYPE_REAL));
+  const maskAble = desc.columns.filter((col) => col.value && (col.value.type === VALUE_TYPE_INT || col.value.type === VALUE_TYPE_REAL));
   if (maskAble.length > 0) {
     arr.forEach((row) => {
       maskAble.forEach((col) => row[col.name] = mask(row[col.name], <INumberValueTypeDesc>col.value));
@@ -157,11 +157,11 @@ export function viaAPI2Loader(): ITableLoader2 {
       return r.objs(desc, range).then((objs) => toFlat(objs, desc.columns));
     },
     col: (desc: ITableDataDescription, column: string, range: Range) => {
-      const colDesc = (<any>desc).columns.find((c: any) => c.name === column);
+      const colDesc = (<any>desc).columns.find((c: any) => c.column === column || c.name === column);
       if (range.isAll) {
         if (cols[column] == null) {
           if (objs === null) {
-            cols[column] = getAPIJSON(`/dataset/table/${desc.id}/col/${column}`).then((data) => mask(data, colDesc));
+            cols[column] = getAPIJSON(`/dataset/table/${desc.id}/col/${column}`).then((data) => maskCol(data, colDesc));
           } else {
             cols[column] = objs.then((objs) => objs.map((row) => row[column]));
           }
