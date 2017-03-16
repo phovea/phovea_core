@@ -28,3 +28,13 @@ export default class VectorNameVector extends ANameVector<IAnyVector> implements
     return this.base.length;
   }
 }
+
+/**
+ * converts the name of the given vector as a string vector
+ * @param vector
+ * @return {IStringVector}
+ */
+export function asNameVector(vector: IAnyVector): IStringVector {
+  return new VectorNameVector(vector);
+}
+

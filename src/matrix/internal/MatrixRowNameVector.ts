@@ -35,3 +35,13 @@ export default class MatrixRowNameVector extends ANameVector<IAnyMatrix> impleme
     };
   }
 }
+
+
+/**
+ * converts the rows of the given matrix as a string vector
+ * @param matrix
+ * @return {IStringVector}
+ */
+export function asNameVector(matrix: IAnyMatrix): IStringVector {
+  return new MatrixRowNameVector(matrix);
+}

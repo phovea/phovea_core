@@ -28,3 +28,14 @@ export default class StratificationNameVector extends ANameVector<IStratificatio
     return this.base.length;
   }
 }
+
+
+/**
+ * converts the rows of the given stratification as a string vector
+ * @param stratification
+ * @return {IStringVector}
+ */
+export function asNameVector(stratification: IStratification): IStringVector {
+  return new StratificationNameVector(stratification);
+}
+

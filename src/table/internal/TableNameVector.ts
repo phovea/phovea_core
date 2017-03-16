@@ -28,3 +28,13 @@ export default class TableNameVector extends ANameVector<ITable> implements IStr
     return this.base.nrow;
   }
 }
+
+
+/**
+ * converts the rows of the given table as a string vector
+ * @param table
+ * @return {IStringVector}
+ */
+export function asNameVector(table: ITable): IStringVector {
+  return new TableNameVector(table);
+}

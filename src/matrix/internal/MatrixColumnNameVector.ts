@@ -35,3 +35,13 @@ export default class MatrixColumnNameVector extends ANameVector<IAnyMatrix> impl
     };
   }
 }
+
+
+/**
+ * converts the cols of the given matrix as a string vector
+ * @param matrix
+ * @return {IStringVector}
+ */
+export function asNameVector(matrix: IAnyMatrix): IStringVector {
+  return new MatrixColumnNameVector(matrix);
+}

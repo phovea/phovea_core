@@ -3,7 +3,7 @@
  */
 import {AVector} from '../AVector';
 import {IStringValueTypeDesc, IDataType} from '../../datatype';
-import {IVector, IAnyVector, IVectorDataDescription} from '../';
+import {IVector, IVectorDataDescription} from '../';
 import {RangeLike, parse, all, list as rlist} from '../../range';
 import {argSort, argFilter} from '../../';
 import IDType from '../../idtype/IDType';
