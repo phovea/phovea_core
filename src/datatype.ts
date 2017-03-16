@@ -218,8 +218,12 @@ function maskImpl(arr: number|number[], missing: number) {
 }
 
 export function mask(arr: number|number[], desc: INumberValueTypeDesc) {
-  if (desc.type === 'int' && 'missing' in desc) {
+  if (desc.type === VALUE_TYPE_INT && 'missing' in desc) {
     return maskImpl(arr, desc.missing);
+  }
+  if (desc.type === VALUE_TYPE_INT || desc.type === VALUE_TYPE_REAL) {
+    // replace null values with Number.NaN
+    return maskImpl(arr, null);
   }
   return arr;
 }
