@@ -27,4 +27,11 @@ export default class MatrixRowNameVector extends ANameVector<IAnyMatrix> impleme
   size() {
     return this.base.nrow;
   }
+
+  persist() {
+    return {
+      root: this.base.persist(),
+      names: 'row'
+    };
+  }
 }

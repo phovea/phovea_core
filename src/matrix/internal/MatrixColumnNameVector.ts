@@ -27,4 +27,11 @@ export default class MatrixColumnNameVector extends ANameVector<IAnyMatrix> impl
   size() {
     return this.base.ncol;
   }
+
+  persist() {
+    return {
+      root: this.base.persist(),
+      names: 'column'
+    };
+  }
 }

@@ -43,7 +43,7 @@ export abstract class ANameVector<T extends IDataType> extends AVector<string, I
     return [this.idtype];
   }
 
-  persist() {
+  persist(): any {
     return {
       root: this.base.persist(),
       names: true
