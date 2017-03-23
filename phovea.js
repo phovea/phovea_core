@@ -16,5 +16,9 @@ module.exports = function(registry) {
   registry.push('datatype', 'stratification', function() { return System.import('./src/stratification/Stratification'); }, {});
 
   registry.push('datatype', 'graph', function() { return System.import('./src/graph/GraphProxy'); }, {});
+
+  registry.push('datatype', 'atom', function() { return System.import('./src/atom/Atom'); }, {});
+
+  registry.push('tabSyncer', 'selection', function() { return System.import('./src/sync/SelectionSyncer'); }, {});
 };
 

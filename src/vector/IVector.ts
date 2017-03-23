@@ -8,16 +8,15 @@
  */
 
 import {mixin} from '../index';
-import {RangeLike} from '../range';
-import CompositeRange1D from '../range/CompositeRange1D';
-import {IDTypeLike} from '../idtype';
-import IDType from '../idtype/IDType';
+import {RangeLike, CompositeRange1D, Range} from '../range';
+import {IDType, IDTypeLike} from '../idtype';
 import {
   IHistAbleDataType, IValueTypeDesc, IDataDescription, createDefaultDataDesc,
-  INumberValueTypeDesc, ICategoricalValueTypeDesc
+  INumberValueTypeDesc, ICategoricalValueTypeDesc, IStatsAbleDataType
 } from '../datatype';
 import IStratification from '../stratification/IStratification';
-import {IStatistics, IHistogram} from '../math';
+import {IAdvancedStatistics, IHistogram, IStatistics} from '../math';
+import {IAtom, IAtomValue} from '../atom/IAtom';
 
 export interface IVectorDataDescription<D extends IValueTypeDesc> extends IDataDescription {
   readonly value: D;
@@ -25,7 +24,10 @@ export interface IVectorDataDescription<D extends IValueTypeDesc> extends IDataD
   readonly size: number;
 }
 
-export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<D> {
+/**
+ * A vector is a 1-dimensional datastructure where all elements are of the same datatype.
+ */
+export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<D>, IStatsAbleDataType<D> {
   readonly desc: IVectorDataDescription<D>;
   /**
    * id type
@@ -42,6 +44,8 @@ export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<
    * @param range optional subset
    */
   view(range?: RangeLike): IVector<T,D>;
+
+  idView(idRange?: RangeLike): Promise<IVector<T,D>>;
   /**
    * returns a promise for getting one cell
    * @param i at a specific position
@@ -55,9 +59,9 @@ export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<
 
   /**
    * returns this vector statistics
-   * TODO should also support range?
    */
-  stats(): Promise<IStatistics>;
+  stats(range?: RangeLike): Promise<IStatistics>;
+  statsAdvanced(range?: RangeLike): Promise<IAdvancedStatistics>;
 
   /**
    * computes a histogram of this vector
@@ -132,6 +136,15 @@ export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<
    */
   reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U>;
 
+
+  /**
+   * reduces the current vector to an atom using the given reduce function
+   * @param f the reduce function
+   * @param thisArgument the this context for the function default the matrix
+   * @param valuetype the new value type by default the same as matrix valuetype
+   * @param idtype the new vlaue type by default the same as matrix rowtype
+   */
+  reduceAtom<U, UD extends IValueTypeDesc>(f: (data: T[], ids: Range, names: string[]) => IAtomValue<U>, thisArgument?: any, valuetype?: UD, idtype?: IDType): IAtom<U, UD>;
 
   /**
    * return the range of this vector as a grouped range, depending on the type this might be a single group or multiple ones

@@ -18,7 +18,7 @@ import {
   IValueTypeDesc
 } from '../datatype';
 import {IVector} from '../vector';
-import {IStatistics, IHistogram, computeStats, hist, categoricalHist} from '../math';
+import {IStatistics, IHistogram, computeStats, hist, categoricalHist, IAdvancedStatistics, computeAdvancedStats} from '../math';
 import {IMatrix, IHeatMapUrlOptions} from './IMatrix';
 import SliceColVector from './internal/SliceColVector';
 import ProjectedVector from './internal/ProjectedVector';
@@ -88,10 +88,18 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
     return new SliceColVector(this.root, col);
   }
 
-  async stats(): Promise<IStatistics> {
+  async stats(range: RangeLike = all()): Promise<IStatistics> {
     const v = this.root.valuetype;
     if (v.type === VALUE_TYPE_INT || v.type === VALUE_TYPE_REAL) {
-      return computeStats(...<any>await this.data());
+      return computeStats(...<any>await this.data(range));
+    }
+    return Promise.reject('invalid value type: ' + v.type);
+  }
+
+  async statsAdvanced(range: RangeLike = all()): Promise<IAdvancedStatistics> {
+    const v = this.root.valuetype;
+    if (v.type === VALUE_TYPE_INT || v.type === VALUE_TYPE_REAL) {
+      return computeAdvancedStats([].concat(...<any>await this.data(range)));
     }
     return Promise.reject('invalid value type: ' + v.type);
   }
@@ -112,7 +120,7 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
         return hist(<any[]>flat.data, flat.indices, flat.data.length, bins ? bins : Math.round(Math.sqrt(this.length)), vn.range);
       default:
         return Promise.reject<IHistogram>('invalid value type: ' + v.type); //cant create hist for unique objects or other ones
-    };
+    }
   }
 
   async idView(idRange: RangeLike = all()): Promise<IMatrix<T, D>> {
@@ -215,6 +223,14 @@ export class MatrixView<T, D extends IValueTypeDesc> extends AMatrix<T, D> {
 
   hist(bins?: number, range: RangeLike = all(), containedIds = 0): Promise<IHistogram> {
     return this.root.hist(bins, this.range.preMultiply(parse(range), this.root.dim), containedIds);
+  }
+
+  stats(range: RangeLike = all()): Promise<IStatistics> {
+    return this.root.stats(this.range.preMultiply(parse(range), this.root.dim));
+  }
+
+  statsAdvanced(range: RangeLike = all()): Promise<IAdvancedStatistics> {
+    return this.root.statsAdvanced(this.range.preMultiply(parse(range), this.root.dim));
   }
 
   heatmapUrl(range = all(), options: IHeatMapUrlOptions = {}) {

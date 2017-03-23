@@ -5,14 +5,20 @@
  **************************************************************************** */
 /**
  * Created by Samuel Gratzl on 04.08.2014.
+ *
+ * This file defines interfaces for various data types and their metadata.
  */
 
 import {IPersistable, extendClass, mixin, uniqueString} from './index';
 import {ISelectAble, SelectAble, IDType} from './idtype';
-import {extent, IHistogram} from './math';
+import {extent, IHistogram, IAdvancedStatistics, IStatistics} from './math';
 import {all, none, Range1D, RangeLike, Range1DGroup, composite, Range, CompositeRange1D} from './range';
+import {ISecureItem, currentUserNameOrAnonymous} from './security';
 
-export interface IDataDescriptionMetaData {
+/**
+ * Interface defining metadata for a dataset.
+ */
+export interface IDataDescriptionMetaData extends ISecureItem {
   /**
    * the type of the datatype, e.g. matrix, vector, stratification, ...
    */
@@ -30,8 +36,9 @@ export interface IDataDescriptionMetaData {
   readonly fqname: string;
 
   readonly [extras: string]: any;
-
-  readonly creator: string;
+  /**
+   * creation time stamp
+   */
   readonly ts: number;
 }
 /**
@@ -45,7 +52,7 @@ export interface IDataDescription extends IDataDescriptionMetaData {
 }
 
 /**
- * basic data type interface
+ * Basic data type interface
  */
 export interface IDataType extends ISelectAble, IPersistable {
   /**
@@ -132,6 +139,13 @@ export interface IHistAbleDataType<D extends IValueTypeDesc> extends IDataType {
   readonly length: number;
 }
 
+export interface IStatsAbleDataType<D extends IValueTypeDesc> extends IDataType {
+  valuetype: D;
+  stats(): Promise<IStatistics>;
+  statsAdvanced(): Promise<IAdvancedStatistics>;
+  readonly length: number;
+}
+
 
 /**
  * dummy data type just holding the description
@@ -204,8 +218,12 @@ function maskImpl(arr: number|number[], missing: number) {
 }
 
 export function mask(arr: number|number[], desc: INumberValueTypeDesc) {
-  if (desc.type === 'int' && 'missing' in desc) {
+  if (desc.type === VALUE_TYPE_INT && 'missing' in desc) {
     return maskImpl(arr, desc.missing);
+  }
+  if (desc.type === VALUE_TYPE_INT || desc.type === VALUE_TYPE_REAL) {
+    // replace null values with Number.NaN
+    return maskImpl(arr, null);
   }
   return arr;
 }
@@ -331,7 +349,9 @@ export function createDefaultDataDesc(namespace = 'localData'): IDataDescription
     name: id,
     fqname: id,
     description: '',
-    creator: 'Anonymous',
+    creator: currentUserNameOrAnonymous(),
     ts: Date.now()
   };
 }
+
+

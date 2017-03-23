@@ -13,10 +13,10 @@ import {IProductSelectAble} from '../idtype';
 import IDType from '../idtype/IDType';
 import {
   IHistAbleDataType, IValueTypeDesc, IDataDescription, createDefaultDataDesc as createDefaultBaseDesc,
-  INumberValueTypeDesc, ICategoricalValueTypeDesc
+  INumberValueTypeDesc, ICategoricalValueTypeDesc, IStatsAbleDataType
 } from '../datatype';
 import {IVector} from '../vector';
-import {IHistogram, IStatistics} from '../math';
+import {IHistogram, IStatistics, IAdvancedStatistics} from '../math';
 import {mixin} from '../index';
 
 export const IDTYPE_ROW = 0;
@@ -44,7 +44,7 @@ export interface IMatrixDataDescription<D extends IValueTypeDesc> extends IDataD
   size: [number, number];
 }
 
-export interface IMatrix<T, D extends IValueTypeDesc> extends IHistAbleDataType<D>, IProductSelectAble {
+export interface IMatrix<T, D extends IValueTypeDesc> extends IHistAbleDataType<D>, IProductSelectAble, IStatsAbleDataType<D> {
   readonly desc: IMatrixDataDescription<D>;
   /**
    * number of rows
@@ -71,6 +71,9 @@ export interface IMatrix<T, D extends IValueTypeDesc> extends IHistAbleDataType<
    */
   view(range?: RangeLike): IMatrix<T,D>;
 
+
+  idView(idRange?: RangeLike): Promise<IMatrix<T,D>>;
+
   slice(col: number): IVector<T,D>;
 
   //view(filter: string): Promise<IMatrix>;
@@ -78,11 +81,11 @@ export interface IMatrix<T, D extends IValueTypeDesc> extends IHistAbleDataType<
   /**
    * reduces the current matrix to a vector using the given reduce function
    * @param f the reduce function
-   * @param this_f the this context for the function default the matrix
+   * @param thisArgument the this context for the function default the matrix
    * @param valuetype the new value type by default the same as matrix valuetype
    * @param idtype the new vlaue type by default the same as matrix rowtype
    */
-  reduce<U, UD extends IValueTypeDesc>(f: (row: T[]) => U, this_f?: any, valuetype?: UD, idtype?: IDType): IVector<U, UD>;
+  reduce<U, UD extends IValueTypeDesc>(f: (row: T[]) => U, thisArgument?: any, valuetype?: UD, idtype?: IDType): IVector<U, UD>;
   /**
    * transposed version of this matrix
    */
@@ -115,7 +118,8 @@ export interface IMatrix<T, D extends IValueTypeDesc> extends IHistAbleDataType<
    */
   data(range?: RangeLike): Promise<T[][]>;
 
-  stats(): Promise<IStatistics>;
+  stats(range?: RangeLike): Promise<IStatistics>;
+  statsAdvanced(range?: RangeLike): Promise<IAdvancedStatistics>;
 
   hist(bins?: number, range?: RangeLike, containedIds?: number): Promise<IHistogram>;
 

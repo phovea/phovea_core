@@ -11,7 +11,7 @@ import {all, list as rlist, RangeLike, range, asUngrouped, composite, parse} fro
 import Range from '../range/Range';
 import CompositeRange1D from '../range/CompositeRange1D';
 import {argSort, argFilter} from '../index';
-import {SelectAble} from '../idtype';
+import {SelectAble, resolve as resolveIDType, IDType} from '../idtype';
 import {
   categorical2partitioning,
   ICategorical2PartitioningOptions,
@@ -22,10 +22,20 @@ import {
   VALUE_TYPE_INT,
   VALUE_TYPE_REAL, IValueTypeDesc
 } from '../datatype';
-import {computeStats, IStatistics, IHistogram, categoricalHist, hist} from '../math';
+import {
+  computeAdvancedStats,
+  IAdvancedStatistics,
+  IHistogram,
+  categoricalHist,
+  hist,
+  IStatistics,
+  computeStats
+} from '../math';
 import {IVector} from './IVector';
 import {IStratification} from '../stratification';
 import StratificationVector from './internal/StratificationVector';
+import ProjectedAtom from './internal/ProjectedAtom';
+import IAtom, {IAtomValue} from '../atom/IAtom';
 /**
  * base class for different Vector implementations, views, transposed,...
  * @internal
@@ -56,8 +66,18 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
     return this.view(ids.indexOf(parse(idRange)));
   }
 
-  async stats(): Promise<IStatistics> {
-    return computeStats(await this.data());
+  async stats(range: RangeLike = all()): Promise<IStatistics> {
+    if (this.root.valuetype.type !== VALUE_TYPE_INT && this.root.valuetype.type !== VALUE_TYPE_REAL) {
+      return Promise.reject('invalid value type: ' + this.root.valuetype.type);
+    }
+    return computeStats(await this.data(range));
+  }
+
+  async statsAdvanced(range: RangeLike = all()): Promise<IAdvancedStatistics> {
+    if (this.root.valuetype.type !== VALUE_TYPE_INT && this.root.valuetype.type !== VALUE_TYPE_REAL) {
+      return Promise.reject('invalid value type: ' + this.root.valuetype.type);
+    }
+    return computeAdvancedStats(await this.data(range));
   }
 
   get indices(): Range {
@@ -144,9 +164,18 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
     return (await this.data()).reduceRight(helper, initialValue);
   }
 
+  reduceAtom<U, UD extends IValueTypeDesc>(f: (data: T[], ids: Range, names: string[]) => IAtomValue<U>, thisArgument?: any, valuetype?: UD, idtype?: IDType): IAtom<U,UD> {
+    const r: IVector<T,D> = <IVector<T,D>>(<any>this);
+    return new ProjectedAtom(r, f, thisArgument, valuetype, idtype);
+  }
+
   restore(persisted: any) {
     let r: IVector<T,D> = <IVector<T,D>>(<any>this);
-    if (persisted && persisted.range) { //some view onto it
+    if (persisted && persisted.f) {
+      /* tslint:disable:no-eval */
+      return this.reduceAtom(eval(persisted.f), this, persisted.valuetype, persisted.idtype ? resolveIDType(persisted.idtype) : undefined);
+      /* tslint:enable:no-eval */
+    } else if (persisted && persisted.range) { //some view onto it
       r = r.view(parse(persisted.range));
     }
     return r;

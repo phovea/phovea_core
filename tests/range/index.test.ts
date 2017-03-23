@@ -1,5 +1,5 @@
 /// <reference types="jasmine" />
-import {parse} from '../src/range';
+import {parse} from '../../src/range';
 
 describe('parse', () => {
   function parseCheck(code: string, output: string) {
@@ -21,21 +21,5 @@ describe('parse', () => {
   it('comma tab set', parseCheck('1,\t(1,4)', '1,(1,4)'));
   it('comma space range', parseCheck('(1:3), (1:3)', '(1:3),(1:3)'));
 
-  it('syntax error', parseCheck(':::::', '(NaN:NaN:NaN)')); // TODO: BUG! (Should throw error.)
+  it('syntax error', () => expect(parse.bind(null, ':::::')).toThrow());
 });
-
-// TODO: Add at least one test for range.CompositeRange1D
-// TODO: Add at least one test for range.Range
-// TODO: Add at least one test for range.Range1D
-// TODO: Add at least one test for range.Range1DGroup
-// TODO: Add at least one test for range.RangeElem
-// TODO: Add at least one test for range.SingleRangeElem
-// TODO: Add at least one test for range.all
-// TODO: Add at least one test for range.asUngrouped
-// TODO: Add at least one test for range.cell
-// TODO: Add at least one test for range.composite
-// TODO: Add at least one test for range.is
-// TODO: Add at least one test for range.join
-// TODO: Add at least one test for range.list
-// TODO: Add at least one test for range.none
-// TODO: Add at least one test for range.range

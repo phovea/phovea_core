@@ -13,7 +13,7 @@ import {IMatrix, IHeatMapUrlOptions} from '../IMatrix';
 import AMatrix, {MatrixView} from '../AMatrix';
 import SliceRowVector from './SliceRowVector';
 import {IVector} from '../../vector';
-import {IHistogram} from '../../math';
+import {IHistogram, IAdvancedStatistics, IStatistics} from '../../math';
 
 /**
  * view on the underlying matrix as transposed version
@@ -107,6 +107,14 @@ export default class TransposedMatrix<T, D extends IValueTypeDesc> extends AMatr
 
   hist(bins?: number, range: RangeLike = all(), containedIds = 0): Promise<IHistogram> {
     return this.t.hist(bins, range ? parse(range).swap() : undefined, 1 - containedIds);
+  }
+
+  stats(range: RangeLike = all()): Promise<IStatistics> {
+    return this.t.stats(range ? parse(range).swap() : undefined);
+  }
+
+  statsAdvanced(range: RangeLike = all()): Promise<IAdvancedStatistics> {
+    return this.t.statsAdvanced(range ? parse(range).swap() : undefined);
   }
 
   heatmapUrl(range: RangeLike = all(), options: IHeatMapUrlOptions = {}) {

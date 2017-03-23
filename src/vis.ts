@@ -235,7 +235,8 @@ export class AVisInstance extends EventHandler {
   destroy() {
     // nothing to destroy
     const n = (<any>this).node;
-    if (n && n.parentNode && !(window.event && window.event.type === 'DOMNodeRemoved' && window.event.target === n)) {
+    const w = n ? n.ownerDocument.defaultView : null;
+    if (n && n.parentNode && !(w && w.event && w.event.type === 'DOMNodeRemoved' && w.event.target === n)) {
       n.parentNode.removeChild(n);
     }
     this.fire('destroyed');

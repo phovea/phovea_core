@@ -215,4 +215,26 @@ export default class IDType extends EventHandler implements IIDType {
     r.dim(0).forEach((name) => out.push(this.id2nameCache.get(name)));
     return out;
   }
+
+  /**
+   * search for all matching ids for a given pattern
+   * @param pattern
+   * @param limit maximal number of results
+   * @return {Promise<void>}
+   */
+  async search(pattern: string, limit = 10): Promise<IDPair[]> {
+   const result: IDPair[] = await getAPIJSON(`/idtype/${this.id}/search`, {q: pattern, limit});
+    // cache results
+    result.forEach((pair) => {
+      this.id2nameCache.set(pair.id, pair.name);
+      this.name2idCache.set(pair.name, pair.id);
+    });
+    return result;
+  }
+}
+
+
+export interface IDPair {
+  readonly name: string;
+  readonly id: number;
 }
