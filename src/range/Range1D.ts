@@ -4,7 +4,7 @@
 
 import {IRangeElem} from './internal';
 import RangeElem from './internal/RangeElem';
-import {IIterator, Iterator, forList, concat} from '../iterator';
+import {concat, forEach, RangeIterator} from './internal/iter';
 import Range1DGroup from './Range1DGroup';
 
 export interface ICompositeRange1D extends Range1D {
@@ -16,7 +16,7 @@ function sortNumeric(a: number, b: number) {
   return a - b;
 }
 
-export default class Range1D {
+export default class Range1D implements Iterable<number> {
   private readonly arr: IRangeElem[];
 
   constructor(arg?: Range1D|IRangeElem[]) {
@@ -188,11 +188,11 @@ export default class Range1D {
       return sub.clone();
     }
     //TODO optimize
-    const l = this.iter(size).asList();
+    const l = Array.from(this.iter(size));
     const mapImpl = (sub: Range1D) => {
       const s = sub.iter(l.length);
       const r: number[]= [];
-      s.forEach((i) => {
+      forEach(s, (i) => {
         if (i >= 0 && i < l.length) { //check for out of range
           r.push(l[i]);
         }
@@ -219,9 +219,9 @@ export default class Range1D {
     if (other.isAll || this.isNone) {
       return other.clone();
     }
-    const r = this.iter(size).asList();
+    const r = Array.from(this.iter(size));
     const it2 = other.iter(size);
-    it2.forEach((i) => {
+    forEach(it2, (i) => {
       if (r.indexOf(i) < 0) {
         r.push(i);
       }
@@ -244,10 +244,10 @@ export default class Range1D {
     if (other.isAll) {
       return this.clone();
     }
-    const it1 = this.iter(size).asList();
+    const it1 = Array.from(this.iter(size));
     const it2 = other.iter(size);
     const r: number[] = [];
-    it2.forEach((i) => {
+    forEach(it2, (i) => {
       if (it1.indexOf(i) >= 0) {
         r.push(i);
       }
@@ -272,9 +272,9 @@ export default class Range1D {
       return Range1D.none();
     }
     const it1 = this.iter(size);
-    const it2 = without.iter(size).asList();
+    const it2 = Array.from(without.iter(size));
     const r: number[] = [];
-    it1.forEach((i) => {
+    forEach(it1, (i) => {
       if (it2.indexOf(i) < 0) {
         r.push(i);
       }
@@ -335,7 +335,7 @@ export default class Range1D {
       return this.indexRangeOf(arguments[0], arguments[1]);
     }
     let arr: number[];
-    const base = this.iter().asList();
+    const base = Array.from(this.iter());
     if (arguments.length === 1) {
       if (typeof arguments[0] === 'number') {
         return base.indexOf(<number>arguments[0]);
@@ -373,7 +373,7 @@ export default class Range1D {
         }
       };
     } else {
-      const arr = this.iter().asList();
+      const arr = Array.from(this.iter());
       mapImpl = (d, result) => {
         const i = arr.indexOf(d);
         if (i >= 0) {
@@ -407,17 +407,17 @@ export default class Range1D {
     }
     const it = this.iter(size);
     //optimization
-    if (it.byOne && it instanceof Iterator) {
-      return data.slice((<Iterator><any>it).from, (<Iterator><any>it).to).map(transform);
+    if (it instanceof RangeIterator && it.step === 1) {
+      return data.slice((<RangeIterator>it).from, (<RangeIterator>it).to).map(transform);
       //} else if (it.byMinusOne) {
       //  var d = data.slice();
       //  d.reverse();
       //  return d;
     } else {
       const r = [];
-      while (it.hasNext()) {
-        r.push(transform(data[it.next()]));
-      }
+      forEach(it, (v) =>  {
+        r.push(transform(data[v]));
+      });
       return r;
     }
   }
@@ -426,20 +426,19 @@ export default class Range1D {
    * creates an iterator of this range
    * @param size the underlying size for negative indices
    */
-  iter(size?: number): IIterator<number> {
+  iter(size?: number): IterableIterator<number> {
     if (this.isList) {
-      return forList(this.arr.map((d) => (<any>d).from));
+      return this.arr.map((d) => d.from)[Symbol.iterator]();
     }
-    const its: IIterator<number>[] = this.arr.map((d) => d.iter(size));
-    return concat.apply(null, its);
+    return concat(...this.arr.map((d) => d.iter(size)));
   }
 
-  get __iterator__() {
+  [Symbol.iterator]() {
     return this.iter();
   }
 
   asList(size?: number): number[] {
-    return this.iter(size).asList();
+    return Array.from(this.iter(size));
   }
 
   get first() {
@@ -462,7 +461,7 @@ export default class Range1D {
    * @param thisArg
    */
   forEach(callbackfn: (value: number, index: number) => void, thisArg?: any): void {
-    return this.iter().forEach(callbackfn, thisArg);
+    forEach(this.iter(), callbackfn, thisArg);
   }
 
   contains(value: number, size?: number): boolean {
@@ -475,13 +474,13 @@ export default class Range1D {
    * @return {Range1D}
    */
   sort(cmp: (a: number, b: number) => number = sortNumeric): Range1D {
-    const arr = this.iter().asList();
+    const arr = Array.from(this.iter());
     const r = arr.sort(cmp);
     return this.fromLike(r);
   }
 
   private removeDuplicates(size?: number): Range1D {
-    let arr = this.iter().asList();
+    let arr = Array.from(this.iter());
     arr = arr.sort(sortNumeric);
     arr = arr.filter((di, i) => di !== arr[i - 1]); //same value as before, remove
     return Range1D.from(arr);

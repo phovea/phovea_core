@@ -3,7 +3,7 @@
  */
 
 import {IRangeElem, fix} from './index';
-import {single, IIterator} from '../../iterator';
+import {single} from './iter';
 
 export default class SingleRangeElem implements IRangeElem {
   constructor(public readonly from: number) {
@@ -49,11 +49,11 @@ export default class SingleRangeElem implements IRangeElem {
     return fix(this.from, size) + index;
   }
 
-  iter(size?: number): IIterator<number> {
+  iter(size?: number): IterableIterator<number> {
     return single(fix(this.from, size));
   }
 
-  get __iterator__() {
+  [Symbol.iterator]() {
     return this.iter();
   }
 

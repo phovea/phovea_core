@@ -3,7 +3,7 @@
  */
 
 import {IRangeElem, fix} from './index';
-import {range as iRange, IIterator} from '../../iterator';
+import {range} from './iter';
 import SingleRangeElem from './SingleRangeElem';
 
 export default class RangeElem implements IRangeElem {
@@ -49,7 +49,7 @@ export default class RangeElem implements IRangeElem {
     if (this.step === 1) {
       return Math.max(t - f, 0);
     } else if (this.step === -1) {
-      if(this.to === -1) {
+      if (this.to === -1) {
         return Math.max(f - -1, 0);
       }
       return Math.max(f - t, 0);
@@ -89,15 +89,15 @@ export default class RangeElem implements IRangeElem {
    * creates an iterator of this range
    * @param size the underlying size for negative indices
    */
-  iter(size?: number): IIterator<number> {
+  iter(size?: number): IterableIterator<number> {
     if (this.step < 0 && this.to === -1) {
       // keep negative to have 0 included
-      return iRange(fix(this.from, size), -1, this.step);
+      return range(fix(this.from, size), -1, this.step);
     }
-    return iRange(fix(this.from, size), fix(this.to, size), this.step);
+    return range(fix(this.from, size), fix(this.to, size), this.step);
   }
 
-  get __iterator__() {
+  [Symbol.iterator]() {
     return this.iter();
   }
 
@@ -115,7 +115,7 @@ export default class RangeElem implements IRangeElem {
     } else if (this.step === +1) { //+1
       return (value >= f) && (value < t);
     } else {
-      return this.iter(size).asList().indexOf(value) >= 0;
+      return Array.from(this.iter(size)).indexOf(value) >= 0;
     }
   }
 
@@ -137,7 +137,7 @@ export default class RangeElem implements IRangeElem {
     if (code.length === 0) {
       return RangeElem.all();
     }
-    const parseElem = (v: string, defaultValue= NaN) => {
+    const parseElem = (v: string, defaultValue = NaN) => {
       v = v.trim();
       if (v === '' && !isNaN(defaultValue)) {
         return defaultValue;
@@ -149,7 +149,7 @@ export default class RangeElem implements IRangeElem {
       return n;
     };
     const parts = code.split(':');
-    switch(parts.length) {
+    switch (parts.length) {
       case 1:
         return RangeElem.single(parseElem(parts[0]));
       case 2:
@@ -161,4 +161,3 @@ export default class RangeElem implements IRangeElem {
     }
   }
 }
-
