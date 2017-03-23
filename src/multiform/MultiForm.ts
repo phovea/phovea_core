@@ -37,7 +37,7 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
 
   private readonly _metaData: IVisMetaData = new ProxyMetaData(() => this.actDesc);
 
-  constructor(public readonly data: IDataType, parent: HTMLElement, private options: IMultiFormOptions = {}) {
+  constructor(public readonly data: IDataType, parent: HTMLElement, public options: IMultiFormOptions = {}) {
     super();
     this.options = mixin({
       initialVis: 0,
