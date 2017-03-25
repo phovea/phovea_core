@@ -36,7 +36,7 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
 
   private readonly _metaData: IVisMetaData = new ProxyMetaData(() => this.actDesc);
 
-  constructor(public readonly data: IDataType, parent: HTMLElement, private options: IMultiFormOptions = {}) {
+  constructor(public readonly data: IDataType, parent: HTMLElement, public options: IMultiFormOptions = {}) {
     super();
     this.options = mixin({
       initialVis: 0,
@@ -144,7 +144,7 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
     if (this.actVisPromise && arguments.length > 0) {
       //2nd try
       this.actVisPromise.then((v) => this.transform(scale, rotate));
-      this.options.all.heightTo =this.actVis.size[1];
+      this.options.all.heightTo = this.actVis.size[1];
       this.options.all.width = this.actVis.size[0];
     }
     return {
