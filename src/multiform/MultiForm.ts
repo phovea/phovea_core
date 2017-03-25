@@ -27,7 +27,6 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
    * list of all possibles vis techniques
    */
   readonly visses: IVisPluginDesc[];
-  brushed: boolean = false;
 
   private actVis: IVisInstance;
   private actVisPromise: Promise<any>;
