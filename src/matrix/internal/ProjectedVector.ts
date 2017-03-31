@@ -17,7 +17,7 @@ import {IMatrix} from '../IMatrix';
 /**
  * a simple projection of a matrix columns to a vector
  */
-export default class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends IValueTypeDesc> extends AVector<T,D> implements IVector<T,D> {
+export default class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends IValueTypeDesc> extends AVector<T, D> implements IVector<T, D> {
   readonly desc: IVectorDataDescription<D>;
 
   constructor(private m: IMatrix<M, MD>, private f: (row: M[]) => T, private thisArgument = m, public readonly valuetype: D = <any>m.valuetype, private _idtype = m.rowtype) {
@@ -47,7 +47,7 @@ export default class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends 
   }
 
   restore(persisted: any) {
-    let r: IVector<T,D> = this;
+    let r: IVector<T, D> = this;
     if (persisted && persisted.range) { //some view onto it
       r = r.view(parse(persisted.range));
     }
@@ -94,13 +94,13 @@ export default class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends 
     return (await this.m.data(range)).map(this.f, this.thisArgument);
   }
 
-  async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
+  async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T, D>> {
     const d = await this.data();
     const indices = argSort(d, compareFn, thisArg);
     return this.view(rlist(indices));
   }
 
-  async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
+  async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T, D>> {
     const d = await this.data();
     const indices = argFilter(d, callbackfn, thisArg);
     return this.view(rlist(indices));
