@@ -91,7 +91,7 @@ export function register(id: string, idtype: IDType|ProductIDType): IDType|Produ
 }
 
 export function persist() {
-  let r: any = {};
+  const r: any = {};
 
   cache.forEach((v, id) => {
     r[id] = v.persist();
