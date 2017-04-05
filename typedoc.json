@@ -2,7 +2,6 @@
   "mode": "modules",
   "out": "./build/docs",
   "theme": "minimal",
-  "ignoreCompilerErrors": true,
   "experimentalDecorators": true,
   "emitDecoratorMetadata": true,
   "preserveConstEnums": true,
