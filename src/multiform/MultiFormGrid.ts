@@ -74,7 +74,7 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
       filter: () => true
     }, options);
     this.node = createNode(parent, 'div', 'multiformgrid');
-    assignData(parent, data);
+    assignData(this.node, data);
     assignVis(this.node, this);
     //find all suitable plugins
     this.visses = listVisses(data).filter(this.options.filter);
