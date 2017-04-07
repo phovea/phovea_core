@@ -18,13 +18,21 @@ import {
   IValueTypeDesc
 } from '../datatype';
 import {IVector} from '../vector';
-import {IStatistics, IHistogram, computeStats, hist, categoricalHist, IAdvancedStatistics, computeAdvancedStats} from '../math';
+import {
+  IStatistics,
+  IHistogram,
+  computeStats,
+  hist,
+  categoricalHist,
+  IAdvancedStatistics,
+  computeAdvancedStats
+} from '../math';
 import {IMatrix, IHeatMapUrlOptions} from './IMatrix';
 import SliceColVector from './internal/SliceColVector';
 import ProjectedVector from './internal/ProjectedVector';
 
 function flatten<T>(arr: T[][], indices: Range, select: number = 0) {
-  let r: T[]= [];
+  let r: T[] = [];
   const dim = [arr.length, arr[0].length];
   if (select === 0) {
     r = r.concat.apply(r, arr);
@@ -132,7 +140,7 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
     return this.view(ids.indexOf(r));
   }
 
-  reduce<U, UD extends IValueTypeDesc>(f: (row: T[]) => U, thisArgument?: any, valuetype?: UD, idtype?: IDType): IVector<U,UD> {
+  reduce<U, UD extends IValueTypeDesc>(f: (row: T[]) => U, thisArgument?: any, valuetype?: UD, idtype?: IDType): IVector<U, UD> {
     return new ProjectedVector(this.root, f, thisArgument, valuetype, idtype);
   }
 
@@ -210,6 +218,11 @@ export class MatrixView<T, D extends IValueTypeDesc> extends AMatrix<T, D> {
 
   size() {
     return this.range.size(this.root.dim);
+  }
+
+  //To use the reduce in the matrix view instead of taking data from parent.
+  reduce<U, UD extends IValueTypeDesc>(f: (row: T[]) => U, thisArgument?: any, valuetype?: UD, idtype?: IDType): IVector<U, UD> {
+    return new ProjectedVector(this, f, thisArgument, valuetype, idtype);
   }
 
   at(i: number, j: number) {
