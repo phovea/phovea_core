@@ -46,7 +46,7 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
       filter: () => true
     }, options);
     this.node = createNode(parent, 'div', 'multiform');
-    assignData(parent, data);
+    assignData(this.node, data);
     assignVis(this.node, this);
     //find all suitable plugins
     this.visses = listVisses(data).filter(this.options.filter);
