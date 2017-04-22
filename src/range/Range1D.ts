@@ -191,7 +191,7 @@ export default class Range1D {
     const l = this.iter(size).asList();
     const mapImpl = (sub: Range1D) => {
       const s = sub.iter(l.length);
-      const r: number[]= [];
+      const r: number[] = [];
       s.forEach((i) => {
         if (i >= 0 && i < l.length) { //check for out of range
           r.push(l[i]);
@@ -207,10 +207,12 @@ export default class Range1D {
     }
   }
 
+
   /**
-   * logical union between two ranges
+   * sorted logical union between two ranges
    * @param other
-   * @returns {RangeDim}
+   * @param size
+   * @returns {Range1D}
    */
   union(other: Range1D, size?: number): Range1D {
     if (this.isAll || other.isNone) {
@@ -227,6 +229,28 @@ export default class Range1D {
       }
     });
     return other.fromLike(r.sort(sortNumeric));
+  }
+
+  /**
+   * concatenate this range (first) with another range (second) without sorting
+   * @param other
+   * @param size
+   * @returns {Range1D}
+   */
+
+  concat(other: Range1D, size?: number): Range1D {
+    if (this.isAll || other.isNone) {
+      return this.clone();
+    }
+    if (other.isAll || this.isNone) {
+      return other.clone();
+    }
+    const r = this.iter(size).asList();
+    const it2 = other.iter(size);
+    it2.forEach((i) => {
+      r.push(i);
+    });
+    return this.fromLike(r);
   }
 
   /**
@@ -362,7 +386,7 @@ export default class Range1D {
       return Range1D.all();
     }
     //
-    let mapImpl: (d: number, result: number[])=>void;
+    let mapImpl: (d: number, result: number[]) => void;
     if (this.isIdentityRange) {
       const end = this.arr[0].to;
       mapImpl = (d, result) => {
@@ -382,7 +406,7 @@ export default class Range1D {
     if (typeof (<ICompositeRange1D>r).fromLikeComposite === 'function') {
       const csub = <ICompositeRange1D>r;
       return csub.fromLikeComposite(csub.groups.map((g) => {
-        const result: number[]= [];
+        const result: number[] = [];
         g.forEach((d) => mapImpl(d, result));
         return g.fromLike(result);
       }));

@@ -19,6 +19,11 @@ export default class Range1DGroup extends Range1D {
     return new Range1DGroup(this.name, this.color, r);
   }
 
+   concat(other: Range1D, size?: number): Range1DGroup {
+    const r = super.concat(other, size);
+    return new Range1DGroup(this.name, this.color, r);
+  }
+
   intersect(other: Range1D, size?: number): Range1DGroup {
     const r = super.intersect(other, size);
     return new Range1DGroup(this.name, this.color, r);
