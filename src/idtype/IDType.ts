@@ -231,6 +231,17 @@ export default class IDType extends EventHandler implements IIDType {
     });
     return result;
   }
+
+  /**
+   * search for all matching ids for a given pattern
+   * @param pattern
+   * @param limit maximal number of results
+   * @return {Promise<void>}
+   */
+  searchMapping(pattern: string, toIDType: string|IDType, limit = 10): Promise<{match: string, to: string}[]> {
+    const target = resolve(toIDType);
+    return getAPIJSON(`/idtype/${this.id}/${target.id}/search`, {q: pattern, limit});
+  }
 }
 
 
