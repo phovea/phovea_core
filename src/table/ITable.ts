@@ -47,6 +47,17 @@ export interface ITableDataDescription extends IDataDescription {
  * of the same data type; the data types between different columns can vary. For example, the first column in a
  * table can be categorical, the second can be integers, the third can be IDs, etc.
  *
+ * Tables support creating ITableViews that represent a subset of the table, but look and feel exactly like a
+ * proper table. A table view is backed by the data from the original table.
+ *
+ * A table uses three different methods to identify a row:
+ *  * an index from 0 to max - this is valid only for the current table view
+ *  * a globally unique ID - this remains consistent when the table is filtered to a TableView.
+ *  * a row name - a string, as specified in the id column in the source data - this remains consistent when the table is filtered to a TableView.
+ *
+ * UniqueIDs are represented by ranges, row names by arrays of strings.
+ * To convert between row names and UniqueIDs, use the idtype member.
+ *
  * If your columns are of the same type, use Matrix instead.
  */
 export interface ITable extends IDataType {
@@ -56,7 +67,7 @@ export interface ITable extends IDataType {
   readonly nrow: number;
 
   /**
-   * id type
+   * ID type for the rows. Use this to, e.g., convert between row names and unique row IDs.
    */
   readonly idtype: IDType;
 
@@ -73,19 +84,21 @@ export interface ITable extends IDataType {
   col<T, D extends IValueTypeDesc>(i: number): IVector<T, D>;
 
   /**
-   * returns the row names
-   * returns a promise for getting the row names of the table
+   * Returns a promise for getting the row names (string-based row IDs) of the table as an array. The returned IDs
+   * remain consistent also in filtered views.
    * @param range optional subset.
    */
   rows(range?: RangeLike): Promise<string[]>;
+
   /**
-   * returns the row ids
+   * Returns a promise for getting a range of IDs (not indices). These IDs remain consistent also in filtered views.
    * @param range optional subset
    */
   rowIds(range?: RangeLike): Promise<Range>;
 
   /**
-   * Creates a new view on this table specified by the given range. A view implements the ITable interface yet is still
+   * Creates a new view on this table specified by the given range of indices. A view implements the ITable interface
+   * yet is still
    * backed by the data from the original table.
    *
    * When passing a single (1D range) the range applies to the rows.
@@ -104,7 +117,12 @@ export interface ITable extends IDataType {
   queryView(name: string, args: IQueryArgs): ITable;
 
   /**
-   * TODO: document
+   * Creates a new view on this table specified by the given range of IDs. A view implements the ITable interface yet is
+   * still backed by the data from the original table.
+   *
+   * When passing a single (1D range) the range applies to the rows.
+   * When passing a 2D range, the row-range is in the first, the col-range in the
+   * second range.
    * @param idRange
    */
   idView(idRange?: RangeLike): Promise<ITable>;
