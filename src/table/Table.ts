@@ -26,6 +26,8 @@ export default class Table extends ATable implements ITable {
 
   constructor(public readonly desc: ITableDataDescription, private loader: ITableLoader2) {
     super(null);
+    // set default column
+    desc.columns.forEach((col) => col.column = col.column || col.name);
     this.root = this;
     this.vectors = desc.columns.map((cdesc, i) => new TableVector(this, i, cdesc));
   }
@@ -46,12 +48,6 @@ export default class Table extends ATable implements ITable {
     return parse(range).filter(this.vectors, [this.ncol]);
   }
 
-  /**
-   * access at a specific position
-   * @param i
-   * @param j
-   * @returns {*}
-   */
   async at(i: number, j: number) {
     return (await this.colData(this.col(j).column, rlist(i)))[0];
   }
@@ -76,10 +72,6 @@ export default class Table extends ATable implements ITable {
     return this.loader.objs(this.desc, parse(range));
   }
 
-  /**
-   * return the row ids of the matrix
-   * @returns {*}
-   */
   rows(range: RangeLike = all()): Promise<string[]> {
     return this.loader.rows(this.desc, parse(range));
   }
@@ -136,6 +128,9 @@ function toList(objs: any[], cols: string[]) {
   return objs.map((obj) => cols.map((c) => obj[c]));
 }
 
+/**
+ * Interface for the parsing options for a table
+ */
 export interface IAsTableOptions {
   name?: string;
   idtype?: string;
@@ -171,6 +166,7 @@ export function asTableFromArray(data: any[][], options: IAsTableOptions = {}): 
   const columns = cols.map((col, i) => {
     return {
       name: col,
+      column: col,
       value: guessValueTypeDesc(tableData.map((row) => row[i]))
     };
   });
@@ -181,10 +177,17 @@ export function asTableFromArray(data: any[][], options: IAsTableOptions = {}): 
   return asTableImpl(columns, rows, objs, realData, options);
 }
 
+/**
+ * Creates a new table from an array of arrays of data and an optional options data structure.
+ * TODO: explain the relationship of this function and the "magic" JSON file.
+ * @param data
+ * @param options TODO - explain what these options are
+ * @returns {Table}
+ */
 export function asTable(data: any[], options: IAsTableOptions = {}): ITable {
   const keyProperty = options.keyProperty || '_id';
 
-  const rows = data.map((r, i) => String(r[keyProperty]) || String(i));
+  const rows = data.map((r, i) => String(r[keyProperty] || i));
   const cols = Object.keys(data[0]);
   const objs = data;
   const realData = toList(objs, cols);
@@ -192,6 +195,7 @@ export function asTable(data: any[], options: IAsTableOptions = {}): ITable {
   const columns = cols.map((col, i) => {
     return {
       name: col,
+      column: col,
       value: guessValueTypeDesc(realData.map((row) => row[i]))
     };
   });

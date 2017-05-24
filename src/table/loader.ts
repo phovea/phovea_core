@@ -31,6 +31,24 @@ export interface ITableLoader2 {
   view(desc: ITableDataDescription, name: string, args: any): ITableLoader;
 }
 
+function filterObjects(objs: any[], range: Range, desc: ITableDataDescription) {
+  if (range.isAll) {
+    return objs;
+  }
+  objs = range.dim(0).filter(objs, desc.size[0]);
+  if (range.ndim > 1 && !range.dim(1).isAll) {
+    // filter the columns by index
+    const toKeep = range.dim(1).filter(desc.columns, desc.columns.length);
+    const toKeepNames = toKeep.map((col) => col.column || col.name);
+    return objs.map((obj) => {
+      const r: any = {};
+      toKeepNames.forEach((key) => r[key] = obj[key]);
+      return r;
+    });
+  }
+  return objs;
+}
+
 /**
  * @internal
  */
@@ -39,7 +57,7 @@ export function adapterOne2Two(loader: ITableLoader): ITableLoader2 {
     rowIds: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => range.preMultiply(d.rowIds, desc.size)),
     rows: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => range.dim(0).filter(d.rows, desc.size[0])),
     col: (desc: ITableDataDescription, column: string, range: Range) => loader(desc).then((d) => range.filter(d.objs.map((d) => d[column]), desc.size)),
-    objs: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => range.filter(d.objs, desc.size)),
+    objs: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => filterObjects(d.objs, range, desc)),
     data: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => range.filter(toFlat(d.objs, desc.columns), desc.size)),
     view: (desc: ITableDataDescription, name: string, args: any) => {
       throw new Error('not implemented');
@@ -72,7 +90,7 @@ export function viaAPIViewLoader(name: string, args: IQueryArgs): ITableLoader {
 
 function maskCol<T>(arr: T[], col: ITableColumn<any>): T[] {
   //mask data
-  if (col.value && 'missing' in col.value && (col.value.type === VALUE_TYPE_INT || col.value.type === VALUE_TYPE_REAL)) {
+  if (col.value && (col.value.type === VALUE_TYPE_INT || col.value.type === VALUE_TYPE_REAL)) {
     return <any>mask(<any>arr, <INumberValueTypeDesc><any>col.value);
   }
   return arr;
@@ -80,7 +98,7 @@ function maskCol<T>(arr: T[], col: ITableColumn<any>): T[] {
 
 function maskObjects(arr: IValueType[], desc: ITableDataDescription) {
   //mask data
-  const maskAble = desc.columns.filter((col) => col.value && 'missing' in col.value && (col.value.type === VALUE_TYPE_INT || col.value.type === VALUE_TYPE_REAL));
+  const maskAble = desc.columns.filter((col) => col.value && (col.value.type === VALUE_TYPE_INT || col.value.type === VALUE_TYPE_REAL));
   if (maskAble.length > 0) {
     arr.forEach((row) => {
       maskAble.forEach((col) => row[col.name] = mask(row[col.name], <INumberValueTypeDesc>col.value));
@@ -139,11 +157,11 @@ export function viaAPI2Loader(): ITableLoader2 {
       return r.objs(desc, range).then((objs) => toFlat(objs, desc.columns));
     },
     col: (desc: ITableDataDescription, column: string, range: Range) => {
-      const colDesc = (<any>desc).columns.find((c: any) => c.name === column);
+      const colDesc = (<any>desc).columns.find((c: any) => c.column === column || c.name === column);
       if (range.isAll) {
         if (cols[column] == null) {
           if (objs === null) {
-            cols[column] = getAPIJSON(`/dataset/table/${desc.id}/col/${column}`).then((data) => mask(data, colDesc));
+            cols[column] = getAPIJSON(`/dataset/table/${desc.id}/col/${column}`).then((data) => maskCol(data, colDesc));
           } else {
             cols[column] = objs.then((objs) => objs.map((row) => row[column]));
           }
@@ -151,7 +169,7 @@ export function viaAPI2Loader(): ITableLoader2 {
         return cols[column];
       }
       if (cols[column] != null) { //already loading all
-        return cols[column].then((d: any[]) => range.filter(d, (<any>desc).size));
+        return cols[column].then((d: any[]) => filterObjects(d, range, desc));
       }
       //server side slicing
       return getAPIData(`/dataset/table/${desc.id}/col/${column}`, {range: range.toString()}).then((data) => maskCol(data, colDesc));
@@ -162,7 +180,7 @@ export function viaAPI2Loader(): ITableLoader2 {
 }
 
 function toFlat(data: any[], vecs: ITableColumn<any>[]) {
-  return data.map((row) => vecs.map((col) => row[col.name]));
+  return data.map((row) => vecs.map((col) => row[col.column]));
 }
 
 
@@ -181,14 +199,14 @@ export function viaDataLoader(data: any[], nameProperty: any) {
       if (col.getter) {
         return col.getter;
       }
-      return (d: any) => d[col.column || col.name];
+      return (d: any) => d[col.column];
     }
 
     const getters: ((d: any) => any)[] = desc.columns.map(toGetter);
     const objs = data.map((row) => {
       const r: any = {_: row};
       desc.columns.forEach((col: any, i: number) => {
-        r[col.name] = getters[i](row);
+        r[col.column] = getters[i](row);
       });
       return r;
     });

@@ -3,7 +3,7 @@
  */
 
 import {IPersistable} from '../index';
-import {Range, all, parse, RangeLike} from '../range';
+import {Range, all, parse, RangeLike, list as rlist} from '../range';
 import {SelectAble, resolve as idtypes_resolve, IDType} from '../idtype';
 import {IVector} from '../vector';
 import {ITable, IQueryArgs} from './ITable';
@@ -71,9 +71,12 @@ export default ATable;
  * @internal
  */
 export class TableView extends ATable implements ITable {
+  private vectors: IVector<any, IValueTypeDesc>[];
+
   constructor(root: ITable & IInternalAccess, private range: Range) {
     super(root);
     this.range = range;
+    this.vectors = this.root.cols(rlist(range.dim(1))).map((v) => v.view(rlist(range.dim(0))));
   }
 
   get desc() {
@@ -105,12 +108,11 @@ export class TableView extends ATable implements ITable {
   }
 
   col(i: number) {
-    const inverted = this.range.invert([0, i], this.root.dim);
-    return this.root.col(inverted[1]);
+    return this.vectors[i];
   }
 
   cols(range: RangeLike = all()) {
-    return this.root.cols(this.range.swap().preMultiply(parse(range), this.root.dim));
+    return parse(range).filter(this.vectors, [this.ncol]);
   }
 
   data(range: RangeLike = all()) {

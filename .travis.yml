@@ -1,28 +1,30 @@
 language: node_js
-
 node_js:
 - 6
-
 addons:
   firefox: 49.0.1
-
 before_install:
 - export DISPLAY=:99.0
 - sh -e /etc/init.d/xvfb start
 - if [[ `npm -v` != 3* ]]; then npm i -g npm@3; fi
-
 script: npm run dist
-
-deploy:
-  provider: releases
-  api_key:
-    secure: TK9/P34Bi3WuppiDrBCwVcn41yCBwmILaU8hXTBzUPbT7TbeFIwsC6/4CtH85Z+ZrUve4S5pTmWRNf2dQDxWw3uYu7+bJuemV2J1LHG76mognj+TNEiYxfLQUt3Gql4W7C7FcI4Rlx5/uMN9wY1wro8TWUBMwT6jjSrUWIvK3GXoojd5bHvJx07XpjWl9wCon4D0ruZiFoM2mdeP23lbc2GckETi32oEKswnQXxkMACmxbPzoWbvkxH4aK8Bt2Rj2sl2TbPhVkN6DAkHGkGAvLI+2/aRfG27+oo3OKsaDjbuGABct8TfZccJ970CbQ8kbnCjYxstvqkg1JWjF0W67sX/flBZZOEUA5l0OLWo6HqMGMxm7/lEQhIdPMsRmvXL+HVOxkMrB2dda58QzxVwiZp+rRqUaeabPZp8Kl5xodGrVxsBvxe6zAbJ5jCtCSumG6+kLyKI00/kYlghqQNrgUw0ZsYJlQ34h3lo/24QpaeyDpQoCkGWQgtgqiXGpeKSu7bCnOqIqAy3nbT9Utwj7K8gIasTG5idosEAz/THMampNbGDuyxxc340sYGNMg9Bhm1g2ILWRdtV470p5hwBtIDTKi3/PAizEO26+Wh0zI47Sg3ao57avcbCsTmzbZUeA5J4bojmchhJCHX8su9cSCGh/2fJA/1eBIgEvOQ8LNE=
-  file: dist/phovea_core.tar.gz
-  on:
-    tags: true
-
 notifications:
   slack:
-    secure: E8/1UIdHSczUbN+6i6gd1d5LM4vmLdwLQ30tpyjvnM0wvfDce76oPxLJAy240WJ5ybXRZUtNrttpVpt4tEXCy8aLFCmxD7s77rVloH+q1J8R/ptTFWZGhFGEujk1awEmVbzcWxJkV9/JENQaeGBKxwv8/EQwWwEkAb7p/+AJb9owmH88b3wUZUGHBWtbMiyyaF4Rm1Wg1stJB8Z1Ga7PRF4cqufTgcDdsCPVv9gAY+VxOIGqX/Vfuc9UWpUH8vq8lHUE7Inn5QS78kuFfSgLWga3H6Mu/Gko1XNlWk0QWWQBUvEZ6ZC6Wuo68KzvUjJHDTnx8WyfHue2JNHIslcX+eJq2WHLeEgM24VeNkILCGo/H/60NGHiSjrIv/Y9h6bQ9FDjo6TUyE4nbdPYN1RN9FQ5UbI9Y4Gi753H9mqnHWlEywBOzHxdZCAuz9Wh03CCF/blsvJ+Obbyo6Jrfe+g44jyi9kQdBNQ78qG6v4EXws8FiYao6x3PpgIwFix42Cpr+soAh5FpA3C1zHSAyZZpXF65/lrDl5yPNofK7Wy0B9bw+0I6Z/u7ZKFNVZXvYPGYvtUVcsALGBdmYc61+LCta36Po0KZseWVAlJj6QnOJDYzv0wvV/zsuf9A5KpYFGiqV9Q7zmtiO5FYF5sBy+lE7O9tHVO4O18IRndhRQgxhs=
+    secure: i2sljs1hRlfGtH21FnKbb1xdIhcWUzc/P4IxjsJtjZqLSWkt4BMrQ0cqcMbCfqVjwT+kJXmdStQvQkMcIFQfxLpfWVOvENJArfIMKgR1r7sFA7SaY+GYBh318451od6qG5OnSowW6NicBmjuaBT7BqPHnbLNSLZfM/mQchkMv0USndeM5kERVdkXaeS3MggeBrChWnCkcr4BIyXQ0SKAunSj0ykIKi1/XaKFHtCrYaY3gtFUVVYCB4F2HPltUmVgfaZwiIE0rz4mBL1SdWIglyEcXVqDlfVPO6HoogjU2yzNbt3aIotX/Qlff6OFgETmtnIWRhZyLk7Y/w0X3QeBF3n0mQvFPURlXW7s8swVN2d3+e0n5xESyloFlSlMHXDknV2bjt74iD22bRhmCSU+iNSgbjwHqmWr/bhh+f1f2tzLd1tJ7JYwNMcz48qbv6Dv6hjKid5C4H51sEmxZANVbBXLF5SDzRN8tpkked+RRMuX3ZWpVu2xKiSa85hFMl910GD7eHLTEuBaWGTvL6jaQs47YBwRLOS1NX1ogLGaaReWV5oqwhcrmm/EMn099aAW5+hV48feC/7v6QTezR6QOr+4BvoysPc5zi9pONXZ2XMHyCKgtlNZ1toKcPvinJ/z5fDh61j0ieZaC9FD4t1BjiB1t77odJa3PTjt5yZcFDw=
     on_success: change
     on_failure: always
+deploy:
+  - provider: releases
+    api_key:
+      secure: d/OUmDw5A77qY9mZVwWPew9oJM29eKFISUwjbU7dk0ev8vF1YUaSuZAqUKUdnaSYEQt+uTw1wBn2KGPW7VyFxuU0yWn17KJC+QFyLFHDVN2+7l2/KDKH/H15cePubcw1YPVg1z3GlSWZW+/vQF417QWphj/Tr6NnEzxXxLf3zu79FCOwhap/tc8f4FOTx4bFe6QhgpTn4VMo0EUWVi5VB2V83w2QfxzvFay6DGoGXFoPGeMUlPdasHDTKfEHzDoOYbtMCalNDhtX9Rg6MPINmd912L5BgrQ/01MfDz79eU4Q2w71NIUCgJz4llcKZZVRBOgkcev+lI2pBamZ2TS2IKVaeUZ5IIP9GylegSGw1cHTV2noL8ALJ3DfJuocGfqJINLu6oGlVfhfywk4FSaB51D2s5fdQLgy+9/wARypyZcHwk8w6djtHztiiWpqFn04CazRUsVUADujsbZYPLyH+cuv3gTXqkETpYRl558zakNAWvPBfqmVpOFyzVE6W4b00qQgCIDorcLVixoJrtE8w+MmMrFrJd1LkverXulgWYOqmdgChJjCPu2QTuXrTsvshpeWmpG0p0ZGX4qxLVV6ckQnQ08JlejhbUWndFfoODTE4S8pOzkMrnPhWud5RMiqFPGtfds8nktb6MTeAIn2fclUerooRWN0p/DvjBiQKB4=
+    file: dist/phovea_core.tar.gz
+    on:
+      tags: true
+      repo: phovea/phovea_core
+  - provider: npm
+    email: samuel.gratzl@jku.at
+    api_key:
+      secure: HImMnVxZ/Et1hxggv/IfFW2c2sQyYiBabjafJFyBGFGeenavisdXut5RwtGoIuQoQ20rV8w7U/jBHv7shsVgTvzM3em0nZrKr6ibw5GCMKqM9tQtHc113aN+m/5w3dc1MJGMyZdYPpKVaVNoaS2zzDhgD3u+vpalFW3KkcqZ7SHBOQv1P5K94JFehx5mWI5RCpuur5hu1x4RLpD5g2mQvwcsE99jxy2q4tfzyfsXCFSPwv/HuUq44QGU9pk78CL9nX1X0FB0Spt1nI/+GGUzof7+mVSxSrjTc9Qn19Z7aEM4sksCOEJm2JYtuoRkJ4t3ysgfYeN5JYz6Jnzuv3W/zsNvXhtT8MECJUWbZNxAkzShrVxKI6yrZ8gOnTtempj8T3iU9DSo7IOEL88Clg6r0rRHXikxkhmALwDhWxWPsN9zX1vHsxW9vRZQRucizskCF1mILswX30i5FDr7tpPK0xWVKbsvlJYmdw0g9oJKoSppIEa2EyKcJEt71oUi0n9A7mW2wUh4G8oLMaVwKm2kQK0nQPFCn+zooM3uH72XvfhUNxS8RUfg0pTmhox3FnjprjgLyzRQDHCjrgRzbtQnaFSBWEUFhEO+ZoGonOMsC0oJLcLZ6A2r5eXa5/XqqLM2S4soejjoDjursHYlS7p679QrdAJrhz97mTrCVdQhlnk=
+    on:
+      tags: true
+      repo: phovea/phovea_core

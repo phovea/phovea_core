@@ -17,7 +17,7 @@ import AMatrix from './AMatrix';
 import TransposedMatrix from './internal/TransposedMatrix';
 import {IMatrixLoader, IMatrixLoader2, viaAPI2Loader, adapterOne2Two} from './loader';
 /**
- * root matrix implementation holding the data
+ * Base matrix implementation holding the data
  */
 export default class Matrix<T, D extends IValueTypeDesc> extends AMatrix<T, D> {
   readonly t: IMatrix<T, D>;
