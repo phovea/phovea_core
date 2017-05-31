@@ -253,6 +253,12 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
       this._slides = <any>this.backend.nodes.filter((n) => (n instanceof SlideNode));
       this.act = <StateNode>(act >= 0 ? this.getStateById(act) : this._states[0]);
     }
+
+    this.on('switch_state', (evt, state:StateNode) => {
+      // IMPORTANT: this line caches the current app/vis state
+      state.visState.init();
+      //console.log(state.visState, state.visState.tf('Population'));
+    });
   }
 
   get isEmpty() {

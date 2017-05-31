@@ -140,6 +140,13 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
     super.setAttr('description', description);
   }
 
+  get visStateAttrs():string[] {
+    if(this.value) {
+      return (<any>this.value).visStateAttrs;
+    }
+    return null;
+  }
+
   get value() {
     this.checkPersisted();
     return this._v;

@@ -4,17 +4,31 @@
 import {GraphNode, isType} from '../graph/graph';
 import ActionNode from './ActionNode';
 import ObjectNode from './ObjectNode';
+import {TermFrequency} from './retrieval/TermFrequency';
 
 /**
  * a state node is one state in the visual exploration consisting of an action creating it and one or more following ones.
- * In addition, a state is characterized by the set of active object nodes
+ * In addition, a state is characterized by the set of active object node s
  */
 export default class StateNode extends GraphNode {
+
+  visState:TermFrequency;
+
   constructor(name: string, description = '') {
     super('state');
     super.setAttr('name', name);
     super.setAttr('description', description);
+
+    this.visState = new TermFrequency(this, this.getVisStateAttrs.bind(this), 'visStateAttrs');
   }
+
+  private getVisStateAttrs():string[] {
+    // use first element and assume that only the application returns a list of terms
+    return this.consistsOf
+      .map((objectNode) => objectNode.visStateAttrs)
+      .filter((d) => d !== null && d !== undefined)[0]; // note the [0]
+  }
+
 
   get name(): string {
     return super.getAttr('name');
