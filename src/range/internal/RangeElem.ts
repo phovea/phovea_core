@@ -8,9 +8,9 @@ import SingleRangeElem from './SingleRangeElem';
 
 export default class RangeElem implements IRangeElem {
   constructor(public readonly from: number, public readonly to: number = -1, public readonly step: number = 1) {
-    /*if (step !== 1 && step !== -1) {
-     throw new Error('currently just +1 and -1 are valid steps');
-     }*/
+    if (step === 0) {
+      throw new Error('invalid step size: ' + step);
+    }
   }
 
   get isAll() {
@@ -49,6 +49,9 @@ export default class RangeElem implements IRangeElem {
     if (this.step === 1) {
       return Math.max(t - f, 0);
     } else if (this.step === -1) {
+      if(this.to === -1) {
+        return Math.max(f - -1, 0);
+      }
       return Math.max(f - t, 0);
     }
     const d = this.step > 0 ? (t - f + 1) : (f - t + 1);
@@ -64,9 +67,15 @@ export default class RangeElem implements IRangeElem {
   }
 
   reverse() {
-    const t = this.from < 0 ? this.from : this.from + 1;
-    const f = this.to < 0 ? this.to : this.to - 1;
-    return new RangeElem(f, t, -this.step);
+    if (this.step > 0) {
+      const t = this.from - 1;
+      const f = this.to - 1;
+      return new RangeElem(f, t, -this.step);
+    } else { //step <0
+      const t = this.from - 1;
+      const f = this.to - 1;
+      return new RangeElem(f, t, -this.step);
+    }
   }
 
   invert(index: number, size?: number) {
@@ -81,6 +90,10 @@ export default class RangeElem implements IRangeElem {
    * @param size the underlying size for negative indices
    */
   iter(size?: number): IIterator<number> {
+    if (this.step < 0 && this.to === -1) {
+      // keep negative to have 0 included
+      return iRange(fix(this.from, size), -1, this.step);
+    }
     return iRange(fix(this.from, size), fix(this.to, size), this.step);
   }
 
@@ -89,12 +102,20 @@ export default class RangeElem implements IRangeElem {
   }
 
   contains(value: number, size?: number) {
+    if (this.isAll) {
+      return true;
+    }
     const f = fix(this.from, size);
     const t = fix(this.to, size);
     if (this.step === -1) {
+      if (this.to === -1) {
+        return (value <= f && value >= 0);
+      }
       return (value <= f) && (value > t);
-    } else { //+1
+    } else if (this.step === +1) { //+1
       return (value >= f) && (value < t);
+    } else {
+      return this.iter(size).asList().indexOf(value) >= 0;
     }
   }
 
@@ -116,13 +137,28 @@ export default class RangeElem implements IRangeElem {
     if (code.length === 0) {
       return RangeElem.all();
     }
+    const parseElem = (v: string, defaultValue= NaN) => {
+      v = v.trim();
+      if (v === '' && !isNaN(defaultValue)) {
+        return defaultValue;
+      }
+      const n = parseInt(v, 10);
+      if (isNaN(n)) {
+        throw Error(`parse error: "${v}" is not a valid integer`);
+      }
+      return n;
+    };
     const parts = code.split(':');
-    if (parts.length === 1) {
-      return RangeElem.single(parseFloat(parts[0]));
-    } else if (parts.length === 2) {
-      return new RangeElem(parseFloat(parts[0]), parseFloat(parts[1]));
+    switch(parts.length) {
+      case 1:
+        return RangeElem.single(parseElem(parts[0]));
+      case 2:
+        return new RangeElem(parseElem(parts[0], 0), parseElem(parts[1], -1));
+      case 3:
+        return new RangeElem(parseElem(parts[0], 0), parseElem(parts[1], -1), parseElem(parts[2], 1));
+      default:
+        throw new Error(`parse error: "${code}" is not a valid range specifier`);
     }
-    return new RangeElem(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]));
   }
 }
 

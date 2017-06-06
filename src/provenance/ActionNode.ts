@@ -6,17 +6,13 @@ import {GraphNode, AttributeContainer, isType} from '../graph/graph';
 import ObjectNode, {op, cat, IObjectRef} from './ObjectNode';
 import StateNode from './StateNode';
 import ProvenanceGraph, {ICmdFunction, ICmdResult, IInverseActionCreator, ICmdFunctionFactory} from './ProvenanceGraph';
-import {retrieve} from '../session';
-
-function getCurrentUser() {
-  return retrieve('username', 'Anonymous');
-}
+import {currentUserNameOrAnonymous} from '../security';
 
 /**
  * additional data about a performed action
  */
 export class ActionMetaData {
-  constructor(public readonly category: string, public readonly operation: string, public readonly name: string, public readonly timestamp: number = Date.now(), public readonly user: string = getCurrentUser()) {
+  constructor(public readonly category: string, public readonly operation: string, public readonly name: string, public readonly timestamp: number = Date.now(), public readonly user: string = currentUserNameOrAnonymous()) {
 
   }
 
@@ -48,7 +44,7 @@ export class ActionMetaData {
   }
 }
 
-export function meta(name: string, category: string = cat.data, operation: string = op.update, timestamp: number = Date.now(), user: string = getCurrentUser()) {
+export function meta(name: string, category: string = cat.data, operation: string = op.update, timestamp: number = Date.now(), user: string = currentUserNameOrAnonymous()) {
   return new ActionMetaData(category, operation, name, timestamp, user);
 }
 

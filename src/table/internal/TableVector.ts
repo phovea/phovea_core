@@ -19,7 +19,7 @@ export default class TableVector<T,D extends IValueTypeDesc> extends AVector<T,D
 
   constructor(private table: ITable, private index: number, desc: ITableColumn<D>) {
     super(null);
-    this.column = desc.name;
+    this.column = desc.column;
     this.root = this;
     this.desc = {
       type: 'vector',

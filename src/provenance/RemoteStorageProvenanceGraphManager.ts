@@ -9,11 +9,7 @@ import ProvenanceGraph, {
   IProvenanceGraphDataDescription
 } from './ProvenanceGraph';
 import GraphBase from '../graph/GraphBase';
-import {retrieve} from '../session';
-
-function getCurrentUser() {
-  return retrieve('username', 'Anonymous');
-}
+import {currentUserNameOrAnonymous} from '../security';
 
 export default class RemoteStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private options = {
@@ -40,27 +36,31 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     return removeData(desc);
   }
 
-  async import(json: any): Promise<ProvenanceGraph> {
-    const desc: any = {
+  async clone(graph: GraphBase, desc: any = {}): Promise<ProvenanceGraph> {
+    return this.import(graph.persist(), desc);
+  }
+
+  async import(json: any, desc: any = {}): Promise<ProvenanceGraph> {
+    const pdesc: any = mixin({
       type: 'graph',
       attrs: {
         graphtype: 'provenance_graph',
         of: this.options.application
       },
       name: 'Workspace for ' + this.options.application,
-      creator: getCurrentUser(),
+      creator: currentUserNameOrAnonymous(),
       ts: Date.now(),
       description: '',
 
       nodes: json.nodes,
       edges: json.edges
-    };
-    const impl: Promise<GraphBase> = (<any>(await upload(desc))).impl(provenanceGraphFactory());
+    }, desc);
+    const impl: Promise<GraphBase> = (<any>(await upload(pdesc))).impl(provenanceGraphFactory());
     return impl.then((i) => new ProvenanceGraph(<IProvenanceGraphDataDescription>i.desc, i));
   }
 
-  async create() {
-    const desc: IProvenanceGraphDataDescription = {
+  async create(desc: any = {}) {
+    const pdesc: IProvenanceGraphDataDescription = mixin({
       id: undefined,
       type: 'graph',
       attrs: {
@@ -69,13 +69,13 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
       },
       name: 'Workspace for ' + this.options.application,
       fqname: 'provenance_graphs/Workspace for ' + this.options.application,
-      creator: getCurrentUser(),
-      size: [0, 0],
+      creator: currentUserNameOrAnonymous(),
+      size: <[number, number]>[0, 0],
       ts: Date.now(),
       description: ''
-    };
+    }, desc);
 
-    const impl: Promise<GraphBase> = (<any>(await upload(desc))).impl(provenanceGraphFactory());
+    const impl: Promise<GraphBase> = (<any>(await upload(pdesc))).impl(provenanceGraphFactory());
     return impl.then((i) => new ProvenanceGraph(<IProvenanceGraphDataDescription>i.desc, i));
   }
 }

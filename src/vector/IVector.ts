@@ -24,6 +24,9 @@ export interface IVectorDataDescription<D extends IValueTypeDesc> extends IDataD
   readonly size: number;
 }
 
+/**
+ * A vector is a 1-dimensional datastructure where all elements are of the same datatype.
+ */
 export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<D>, IStatsAbleDataType<D> {
   readonly desc: IVectorDataDescription<D>;
   /**
