@@ -19,13 +19,13 @@ export default class StateNode extends GraphNode {
     super.setAttr('name', name);
     super.setAttr('description', description);
 
-    this.visState = new TermFrequency(this, this.getVisStateAttrs.bind(this), 'visStateAttrs');
+    this.visState = new TermFrequency(this, this.getCurrVisState.bind(this), 'currVisState');
   }
 
-  private getVisStateAttrs():string[] {
+  private getCurrVisState():string[] {
     // use first element and assume that only the application returns a list of terms
     return this.consistsOf
-      .map((objectNode) => objectNode.visStateAttrs)
+      .map((objectNode) => objectNode.currVisState)
       .filter((d) => d !== null && d !== undefined)[0]; // note the [0]
   }
 

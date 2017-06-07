@@ -140,9 +140,9 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
     super.setAttr('description', description);
   }
 
-  get visStateAttrs():string[] {
+  get currVisState():string[] {
     if(this.value) {
-      return (<any>this.value).visStateAttrs;
+      return (<any>this.value).currVisState;
     }
     return null;
   }
