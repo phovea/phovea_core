@@ -47,7 +47,7 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
         graphtype: 'provenance_graph',
         of: this.options.application
       },
-      name: 'Workspace for ' + this.options.application,
+      name: 'Persistent WS',
       creator: currentUserNameOrAnonymous(),
       ts: Date.now(),
       description: '',
@@ -75,8 +75,8 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
         graphtype: 'provenance_graph',
         of: this.options.application
       },
-      name: 'Workspace for ' + this.options.application,
-      fqname: 'provenance_graphs/Workspace for ' + this.options.application,
+      name: `Persistent WS`,
+      fqname: `provenance_graphs/Persistent WS`,
       creator: currentUserNameOrAnonymous(),
       size: <[number, number]>[0, 0],
       ts: Date.now(),
