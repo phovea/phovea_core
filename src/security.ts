@@ -3,7 +3,7 @@
  */
 
 
-import {retrieve, store} from './session';
+import {retrieve, store, remove} from './session';
 import {fire} from './event';
 
 export const GLOBAL_EVENT_USER_LOGGED_IN = 'USER_LOGGED_IN';
@@ -21,6 +21,15 @@ export interface IUser {
 }
 
 export const ANONYMOUS_USER: IUser = {name: 'anonymous', roles: ['anonymous']};
+
+/**
+ * resets the stored session data that will be automatically filled during login
+ */
+export function reset() {
+  remove('logged_in');
+  remove('username');
+  remove('user');
+}
 
 /**
  * whether the user is logged in
@@ -46,7 +55,7 @@ export function login(user: IUser) {
  */
 export function logout() {
   const wasLoggedIn = isLoggedIn();
-  store('logged_in', false);
+  reset();
   if (wasLoggedIn) {
     fire(GLOBAL_EVENT_USER_LOGGED_OUT);
   }
