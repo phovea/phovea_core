@@ -25,7 +25,7 @@ export default class StateNode extends GraphNode {
   private getCurrVisState():string[] {
     // use first element and assume that only the application returns a list of terms
     return this.consistsOf
-      .map((objectNode) => objectNode.currVisState)
+      .map((objectNode) => objectNode.getCurrVisState())
       .filter((d) => d !== null && d !== undefined)[0]; // note the [0]
   }
 
