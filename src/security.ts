@@ -86,6 +86,10 @@ export enum EPermission {
   READ = 4, WRITE = 2, EXECUTE = 1
 }
 
+export enum EEntity {
+  USER, GROUP, OTHERS
+}
+
 function toNumber(p: Set<EPermission>) {
   return (p.has(EPermission.READ) ? 4 : 0) + (p.has(EPermission.WRITE) ? 2 : 0) + (p.has(EPermission.EXECUTE) ? 1 : 0);
 }
@@ -114,7 +118,11 @@ function fromNumber(p: number) {
  * by default only the creator has all permissions
  * @type {number}
  */
-export const DEFAULT_PERMISSION = 744;
+export const ALL_READ_READ = 744;
+export const ALL_NONE_NONE = 700;
+export const ALL_READ_NONE = 740;
+export const DEFAULT_PERMISSION = ALL_READ_READ;
+
 
 export interface ISecureItem {
   /**
@@ -146,6 +154,19 @@ export class Permission {
     const othersEncoded = toString(this.others);
     return userEncoded + groupEncoded + othersEncoded;
   }
+
+  getPermissions(entity: EEntity) {
+    switch(entity) {
+      case EEntity.USER: return this.user;
+      case EEntity.GROUP: return this.group;
+      case EEntity.OTHERS: return this.others;
+    }
+  }
+
+  hasPermission(entity: EEntity, permission: EPermission) {
+    const permissions = this.getPermissions(entity);
+    return permissions.has(permission);
+  }
 }
 
 export function encode(user: Set<EPermission>, group: Set<EPermission>, others: Set<EPermission>) {
@@ -156,6 +177,9 @@ export function encode(user: Set<EPermission>, group: Set<EPermission>, others: 
 }
 
 export function decode(permission = DEFAULT_PERMISSION) {
+  if (typeof permission !== 'number') {
+    permission = DEFAULT_PERMISSION;
+  }
   const others = fromNumber(permission % 10);
   const group = fromNumber(Math.floor(permission / 10) % 10);
   const user = fromNumber(Math.floor(permission / 100) % 10);
@@ -231,4 +255,10 @@ export function canWrite(item: ISecureItem, user = currentUser()) {
  */
 export function canExecute(item: ISecureItem, user = currentUser()) {
   return can(item, EPermission.EXECUTE, user);
+}
+
+
+export function hasPermission(item: ISecureItem, entity: EEntity = EEntity.USER, permission: EPermission = EPermission.READ) {
+  const permissions = decode(item.permissions);
+  return permissions.hasPermission(entity, permission);
 }
