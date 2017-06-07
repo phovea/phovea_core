@@ -6,7 +6,6 @@ import {isDataType, IDataType} from '../datatype';
 import {GraphNode, isType} from '../graph/graph';
 import ActionNode from './ActionNode';
 import StateNode from './StateNode';
-import {IVisStateApp} from '../../../phovea_clue/src/prov-retrieval/IVisStateApp';
 
 
 /**

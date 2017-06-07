@@ -256,7 +256,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
 
     this.on('switch_state', (evt, state:StateNode) => {
       // IMPORTANT: this line caches the current app/vis state
-      state.visState.init();
+      state.visState.checkPersisted();
       //console.log(state.visState, state.visState.tf('Population'));
     });
   }

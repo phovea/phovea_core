@@ -15,11 +15,11 @@ export class VisState {
   }
 
   get terms():string[] {
-    this.init();
+    this.checkPersisted();
     return this._terms;
   }
 
-  init() {
+  checkPersisted() {
     // object is already cached
     if(this._terms) {
       return;
