@@ -4,7 +4,7 @@
 import {GraphNode, isType} from '../graph/graph';
 import ActionNode from './ActionNode';
 import ObjectNode from './ObjectNode';
-import {TermFrequency} from './retrieval/TermFrequency';
+import {VisState} from './retrieval/VisState';
 
 /**
  * a state node is one state in the visual exploration consisting of an action creating it and one or more following ones.
@@ -12,14 +12,14 @@ import {TermFrequency} from './retrieval/TermFrequency';
  */
 export default class StateNode extends GraphNode {
 
-  visState:TermFrequency;
+  visState:VisState;
 
   constructor(name: string, description = '') {
     super('state');
     super.setAttr('name', name);
     super.setAttr('description', description);
 
-    this.visState = new TermFrequency(this, this.getCurrVisState.bind(this), 'currVisState');
+    this.visState = new VisState(this, this.getCurrVisState.bind(this), 'currVisState');
   }
 
   private getCurrVisState():string[] {

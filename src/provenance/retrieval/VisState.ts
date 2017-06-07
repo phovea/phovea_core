@@ -4,7 +4,7 @@
 
 import {GraphNode} from '../../graph/graph';
 
-export class TermFrequency {
+export class VisState {
 
   private _terms:string[] = null;
 
