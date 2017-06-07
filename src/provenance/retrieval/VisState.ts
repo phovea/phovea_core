@@ -19,7 +19,27 @@ export class VisState {
     return this._terms;
   }
 
-  checkPersisted() {
+  /**
+   *
+   * @param term
+   * @returns {number}
+   */
+  tf(attr: string): number {
+    this.checkPersisted();
+    return this._termFreq.has(attr) ? this._termFreq.get(attr) / this._terms.length : 0;
+  }
+
+  /**
+   *
+   * @param term
+   * @returns {boolean}
+   */
+  hasTerm(attr): boolean {
+    this.checkPersisted();
+    return this._termFreq.has(attr) && this._termFreq.get(attr) > 0;
+  }
+
+  private checkPersisted() {
     // object is already cached
     if(this._terms) {
       return;
@@ -49,24 +69,6 @@ export class VisState {
       tf.set(attr, val);
     });
     return tf;
-  }
-
-  /**
-   *
-   * @param term
-   * @returns {number}
-   */
-  tf(attr: string): number {
-    return this._termFreq.has(attr) ? this._termFreq.get(attr) / this._terms.length : 0;
-  }
-
-  /**
-   *
-   * @param term
-   * @returns {boolean}
-   */
-  hasTerm(attr): boolean {
-    return this._termFreq.has(attr) && this._termFreq.get(attr) > 0;
   }
 
 }
