@@ -6,6 +6,7 @@ import {isDataType, IDataType} from '../datatype';
 import {GraphNode, isType} from '../graph/graph';
 import ActionNode from './ActionNode';
 import StateNode from './StateNode';
+import {IVisStateApp} from '../../../phovea_clue/src/prov-retrieval/IVisStateApp';
 
 
 /**
@@ -141,7 +142,7 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
   }
 
   getCurrVisState():string[] {
-    if(this.value) {
+    if(this.value && (<any>this.value).getCurrVisState) {
       return (<any>this.value).getCurrVisState();
     }
     return null;
