@@ -68,11 +68,11 @@ export default class LocalStorageGraph extends AGraph implements IGraph {
 
   static delete(desc: IGraphDataDescription, storage: Storage = sessionStorage) {
     const uid = `graph${desc.id}`;
-    JSON.parse(storage.getItem(`${uid}.nodes`)).forEach((id: string) => {
+    JSON.parse(storage.getItem(`${uid}.nodes`) || '[]').forEach((id: string) => {
       storage.removeItem(`${uid}.node.${id}`);
     });
     storage.removeItem(`${uid}.nodes`);
-    JSON.parse(storage.getItem(`${uid}.edges`)).forEach((id: string) => {
+    JSON.parse(storage.getItem(`${uid}.edges`) || '[]').forEach((id: string) => {
       storage.removeItem(`${uid}.edge.${id}`);
     });
     storage.removeItem(`${uid}.edges`);
