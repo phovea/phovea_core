@@ -2,7 +2,7 @@
  * Created by sam on 12.02.2015.
  */
 import {mixin} from '../index';
-import {get as getData, remove as removeData, upload, list as listData} from '../data';
+import {get as getData, remove as removeData, upload, list as listData, modify} from '../data';
 import ProvenanceGraph, {
   IProvenanceGraphManager,
   provenanceGraphFactory,
@@ -57,6 +57,14 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     }, desc);
     const impl: Promise<GraphBase> = (<any>(await upload(pdesc))).impl(provenanceGraphFactory());
     return impl.then((i) => new ProvenanceGraph(<IProvenanceGraphDataDescription>i.desc, i));
+  }
+
+  async edit(graph: ProvenanceGraph|IProvenanceGraphDataDescription, desc: any = {}) {
+    const base = graph instanceof ProvenanceGraph ? graph.desc : graph;
+    mixin(base, desc);
+    const graphProxy = await getData(base.id);
+    await modify(graphProxy, desc);
+    return base;
   }
 
   async create(desc: any = {}) {

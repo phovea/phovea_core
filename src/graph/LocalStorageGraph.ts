@@ -79,6 +79,10 @@ export default class LocalStorageGraph extends AGraph implements IGraph {
     return true;
   }
 
+  static update(desc: IGraphDataDescription, storage: Storage = sessionStorage) {
+    const uid = `graph${desc.id}`;
+  }
+
   restoreDump(persisted: any, factory: IGraphFactory) {
     const lookup = new Map<number, GraphNode>();
 
