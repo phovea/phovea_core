@@ -19,7 +19,7 @@ export default class StateNode extends GraphNode {
     super.setAttr('name', name);
     super.setAttr('description', description);
 
-    this.visState = new VisState(this, this.getCurrVisState.bind(this), 'currVisState');
+    this.visState = new VisState(this, this.getCurrVisState.bind(this), 'visState');
   }
 
   private getCurrVisState():string[] {
