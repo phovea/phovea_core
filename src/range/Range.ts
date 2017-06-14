@@ -304,7 +304,7 @@ export default class Range {
  * @returns {Range}
  */
 export function all() {
-  return new Range();
+  return new Range([Range1D.all(), Range1D.all()]);
 }
 export function none() {
   //ensure two dimensions
