@@ -19,6 +19,7 @@ import {IMatrix} from '../IMatrix';
  */
 export default class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends IValueTypeDesc> extends AVector<T, D> implements IVector<T, D> {
   readonly desc: IVectorDataDescription<D>;
+  readonly parentValueType: number[];
 
   constructor(private m: IMatrix<M, MD>, private f: (row: M[]) => T, private thisArgument = m, public readonly valuetype: D = <any>m.valuetype, private _idtype = m.rowtype) {
     super(null);
@@ -34,6 +35,7 @@ export default class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends 
       creator: m.desc.creator,
       ts: m.desc.ts
     };
+    this.parentValueType = (<any>this.m).root.valuetype.range; //Hack to access root range for matrix to vector conversion for rendering barplot.
     this.root = this;
   }
 
