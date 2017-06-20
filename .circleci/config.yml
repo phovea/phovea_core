@@ -17,6 +17,6 @@ jobs:
             - ./node_modules
       - run:
           name: dist
-          command: npm run dist
+          command: npm run dist 
       - store_artifacts:
           path: dist
