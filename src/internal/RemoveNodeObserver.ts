@@ -72,8 +72,6 @@ class RemoveParentObserver {
       const target = mutation.target;
       const removed = new Set(Array.from(mutation.removedNodes));
 
-      console.log(target, removed);
-
       //mark already found entries
       const found = <number[]>[];
 
