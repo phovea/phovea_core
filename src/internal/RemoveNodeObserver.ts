@@ -34,10 +34,45 @@ class RemoveParentObserver {
       return {node, callback, parents: parentList(node)};
     });
 
+    const cleanUp = (found: number[]) => {
+      if (toCheck.length === found.length) {
+        //did we disable all? then we can stop early
+        this.observed.clear();
+        this.disable();
+        return true;
+      }
+
+      // delete found ones and remove from toCheck list for the remaining events
+      found.forEach((fi) => {
+        const entry = toCheck.splice(fi, 1)[0];
+        this.observed.delete(entry.node);
+      });
+      return false;
+    };
+
+    //optimization if the parents of any child doesn't contain the parent anymore it was already removed
+    {
+      //mark already found entries
+      const found = <number[]>[];
+
+      toCheck.forEach(({node, parents, callback}, i) => {
+        if (parents.indexOf(this.parent) < 0) {
+          //doesn't contain my parent anymore -> will never be found -> deleted
+          callback(node);
+          found.unshift(i); //mark for removal - reverse order for simpler splicing
+        }
+      });
+      if (cleanUp(found)) {
+        return;
+      }
+    }
+
 
     for (const mutation of events) {
       const target = mutation.target;
       const removed = new Set(Array.from(mutation.removedNodes));
+
+      console.log(target, removed);
 
       //mark already found entries
       const found = <number[]>[];
@@ -55,17 +90,9 @@ class RemoveParentObserver {
           found.unshift(i); //mark for removal - reverse order for simpler splicing
         }
       });
-      if (toCheck.length === found.length) {
-        //did we disable all? then we can stop early
-        this.observed.clear();
-        this.disable();
+      if (cleanUp(found)) {
+        return;
       }
-
-      // delete found ones and remove from toCheck list for the remaining events
-      found.forEach((fi) => {
-        const entry = toCheck.splice(fi, 1)[0];
-        this.observed.delete(entry.node);
-      });
     }
   }
 
