@@ -8,7 +8,7 @@
  */
 
 
-import {getAPIJSON} from '../ajax';
+import {getAPIJSON, sendAPI} from '../ajax';
 import {EventHandler} from '../event';
 import {none, Range, RangeLike, parse, list as rlist} from '../range';
 import {IIDType, defaultSelectionType, SelectOperation, asSelectOperation} from './IIDType';
@@ -153,25 +153,25 @@ export default class IDType extends EventHandler implements IIDType {
   mapToFirstName(ids: RangeLike, toIDType: string|IDType): Promise<string[]> {
     const target = resolve(toIDType);
     const r = parse(ids);
-    return getAPIJSON(`/idtype/${this.id}/${target.id}`, {ids: r.toString(), mode: 'first'});
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}`, {ids: r.toString(), mode: 'first'});
   }
 
   mapToName(ids: RangeLike, toIDType: string|IDType): Promise<string[][]> {
     const target = resolve(toIDType);
     const r = parse(ids);
-    return getAPIJSON(`/idtype/${this.id}/${target.id}`, {ids: r.toString()});
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}`, {ids: r.toString()});
   }
 
   mapToFirstID(ids: RangeLike, toIDType: string|IDType): Promise<number[]> {
     const target = resolve(toIDType);
     const r = parse(ids);
-    return getAPIJSON(`/idtype/${this.id}/${target.id}/map`, {ids: r.toString(), mode: 'first'});
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {ids: r.toString(), mode: 'first'});
   }
 
   mapToID(ids: RangeLike, toIDType: string|IDType): Promise<number[][]> {
     const target = resolve(toIDType);
     const r = parse(ids);
-    return getAPIJSON(`/idtype/${this.id}/${target.id}/map`, {ids: r.toString()});
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {ids: r.toString()});
   }
 
   /**
@@ -184,7 +184,7 @@ export default class IDType extends EventHandler implements IIDType {
     if (toResolve.length === 0) {
       return Promise.resolve(names.map((name) => this.name2idCache.get(name)));
     }
-    const ids: number[] = await getAPIJSON(`/idtype/${this.id}/map`, {ids: toResolve});
+    const ids: number[] = await chooseRequestMethod(`/idtype/${this.id}/map`, {ids: toResolve});
     toResolve.forEach((name, i) => {
       this.name2idCache.set(name, ids[i]);
       this.id2nameCache.set(ids[i], name);
@@ -206,7 +206,7 @@ export default class IDType extends EventHandler implements IIDType {
       r.dim(0).forEach((name) => result.push(this.id2nameCache.get(name)));
       return Promise.resolve(result);
     }
-    const result: string[] = await getAPIJSON(`/idtype/${this.id}/unmap`, {ids: rlist(toResolve).toString()});
+    const result: string[] = await chooseRequestMethod(`/idtype/${this.id}/unmap`, {ids: rlist(toResolve).toString()});
     toResolve.forEach((id, i) => {
       this.id2nameCache.set(id, result[i]);
       this.name2idCache.set(result[i], id);
@@ -242,6 +242,20 @@ export default class IDType extends EventHandler implements IIDType {
     const target = resolve(toIDType);
     return getAPIJSON(`/idtype/${this.id}/${target.id}/search`, {q: pattern, limit});
   }
+}
+
+/**
+ * chooses whether a GET or POST request based on the expected url length
+ * @param url
+ * @param data
+ * @returns {Promise<any>}
+ */
+function chooseRequestMethod(url: string, data: any = {}) {
+  const dataLengthGuess = JSON.stringify(data);
+  const lengthGuess = url.length + dataLengthGuess.length;
+
+  const method = lengthGuess < 2000 ? 'GET' : 'POST';
+  return sendAPI(url, data, method);
 }
 
 

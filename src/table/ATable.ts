@@ -102,8 +102,8 @@ export class TableView extends ATable implements ITable {
     return this.range.size(this.root.dim);
   }
 
-  at(i: number, j: number) {
-    const inverted = this.range.invert([i, j], this.root.dim);
+  at(row: number, col: number) {
+    const inverted = this.range.invert([row, col], this.root.dim);
     return this.root.at(inverted[0], inverted[1]);
   }
 

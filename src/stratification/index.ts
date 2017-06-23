@@ -5,3 +5,4 @@
 
 export {IStratification, guessColor, IGroup, IStratificationDataDescription} from './IStratification';
 export {asStratification, IAsStratifcationOptions} from './Stratification';
+export {asNameVector} from './internal/StratificationNameVector';
