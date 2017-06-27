@@ -15,9 +15,9 @@ interface ISyncItem {
 
 
 export default class RemoteStoreGraph extends GraphBase {
-  private static readonly DEFAULT_BATCH_SIZE = 5;
-  private static readonly DEFAULT_WAIT_TIME_BEFORE_EARLY_FLUSH = 500; //ms
-  private static readonly DEFAULT_WAIT_TIME_BEFORE_FULL_FLUSH = 50; //ms
+  private static readonly DEFAULT_BATCH_SIZE = 10;
+  private static readonly DEFAULT_WAIT_TIME_BEFORE_EARLY_FLUSH = 1000; //ms
+  private static readonly DEFAULT_WAIT_TIME_BEFORE_FULL_FLUSH = 100; //ms
 
   private updateHandler = (event: IEvent) => {
     const s = event.target;
@@ -129,7 +129,7 @@ export default class RemoteStoreGraph extends GraphBase {
 
     this.fire(`sync_start`, ++this.waitForSynced, 'batch');
     return sendAPI(`/dataset/${this.desc.id}`, { desc: param }, 'POST').then(() => {
-      this.fire(`sync_start`, --this.waitForSynced, 'batch');
+      this.fire(`sync`, --this.waitForSynced, 'batch');
     });
   }
 
