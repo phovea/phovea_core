@@ -16,7 +16,8 @@ interface ISyncItem {
 
 export default class RemoteStoreGraph extends GraphBase {
   private static readonly DEFAULT_BATCH_SIZE = 5;
-  private static readonly DEFAULT_WAIT_TIME_BEFORE_FLUSH = 500; //ms
+  private static readonly DEFAULT_WAIT_TIME_BEFORE_EARLY_FLUSH = 500; //ms
+  private static readonly DEFAULT_WAIT_TIME_BEFORE_FULL_FLUSH = 50; //ms
 
   private updateHandler = (event: IEvent) => {
     const s = event.target;
@@ -87,13 +88,14 @@ export default class RemoteStoreGraph extends GraphBase {
       this.flushTimeout = -1;
     }
     this.queue.push(item);
-    if (this.queue.length >= this.batchSize) {
+    if (this.queue.length >= this.batchSize * 2) { //really full
       return this.sendQueued();
     }
+    const wait = this.queue.length >= this.batchSize ? RemoteStoreGraph.DEFAULT_WAIT_TIME_BEFORE_FULL_FLUSH : RemoteStoreGraph.DEFAULT_WAIT_TIME_BEFORE_EARLY_FLUSH;
     //send it at most timeout ms if there is no update in between
     this.flushTimeout = <any>setTimeout(() => {
       this.sendQueued();
-    }, RemoteStoreGraph.DEFAULT_WAIT_TIME_BEFORE_FLUSH);
+    }, wait);
   }
 
   private sendNow(type: 'node'|'edge', op: 'add'|'update'|'remove', elem: GraphNode|GraphEdge) {
@@ -126,7 +128,7 @@ export default class RemoteStoreGraph extends GraphBase {
     this.queue.splice(0, this.queue.length);
 
     this.fire(`sync_start`, ++this.waitForSynced, 'batch');
-    return sendAPI(`/dataset/${this.desc.id}`, { desc: param }, 'PUT').then(() => {
+    return sendAPI(`/dataset/${this.desc.id}`, { desc: param }, 'POST').then(() => {
       this.fire(`sync_start`, --this.waitForSynced, 'batch');
     });
   }
