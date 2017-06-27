@@ -6,7 +6,18 @@ import {IEvent} from '../event';
 import GraphBase, {IGraphFactory, IGraphDataDescription} from './GraphBase';
 import {GraphEdge, GraphNode} from './graph';
 
+interface ISyncItem {
+  type: 'node'|'edge';
+  op: 'add'|'remove'|'update';
+  id?: number;
+  desc?: any;
+}
+
+
 export default class RemoteStoreGraph extends GraphBase {
+  private static readonly DEFAULT_BATCH_SIZE = 5;
+  private static readonly DEFAULT_WAIT_TIME_BEFORE_FLUSH = 500; //ms
+
   private updateHandler = (event: IEvent) => {
     const s = event.target;
     if (s instanceof GraphNode) {
@@ -19,9 +30,13 @@ export default class RemoteStoreGraph extends GraphBase {
 
   private waitForSynced = 0;
 
+  private readonly batchSize: number;
+  private readonly queue: ISyncItem[] = [];
+  private flushTimeout: number = -1;
 
   constructor(desc: IGraphDataDescription, nodes: GraphNode[] = [], edges: GraphEdge[] = []) {
     super(desc, nodes, edges);
+    this.batchSize = desc.attrs.batchSize || RemoteStoreGraph.DEFAULT_BATCH_SIZE;
   }
 
   static load(desc: IGraphDataDescription, factory: IGraphFactory) {
@@ -58,6 +73,30 @@ export default class RemoteStoreGraph extends GraphBase {
   }
 
   private send(type: 'node'|'edge', op: 'add'|'update'|'remove', elem: GraphNode|GraphEdge) {
+    if (this.batchSize <= 1) {
+      return this.sendNow(type, op, elem);
+    } else {
+      const item: ISyncItem = {type, op, id: elem.id, desc: elem.persist()};
+      return this.enqueue(item);
+    }
+  }
+
+  private enqueue(item: ISyncItem) {
+    if (this.flushTimeout >= 0) {
+      clearTimeout(this.flushTimeout);
+      this.flushTimeout = -1;
+    }
+    this.queue.push(item);
+    if (this.queue.length >= this.batchSize) {
+      return this.sendQueued();
+    }
+    //send it at most timeout ms if there is no update in between
+    this.flushTimeout = <any>setTimeout(() => {
+      this.sendQueued();
+    }, RemoteStoreGraph.DEFAULT_WAIT_TIME_BEFORE_FLUSH);
+  }
+
+  private sendNow(type: 'node'|'edge', op: 'add'|'update'|'remove', elem: GraphNode|GraphEdge) {
     this.fire(`sync_start_${type},sync_start`, ++this.waitForSynced, `${op}_{type}`, elem);
 
     const data = {
@@ -76,6 +115,27 @@ export default class RemoteStoreGraph extends GraphBase {
     return create().then(() => {
       this.fire(`sync_${type},sync`, --this.waitForSynced, elem);
     });
+  }
+
+  private sendQueued(): Promise<any> {
+    if (this.queue.length === 0) {
+      return Promise.resolve();
+    }
+    const param = JSON.stringify({operation: 'batch', items: this.queue.slice()});
+    // clear
+    this.queue.splice(0, this.queue.length);
+
+    this.fire(`sync_start`, ++this.waitForSynced, 'batch');
+    return sendAPI(`/dataset/${this.desc.id}`, { desc: param }, 'PUT').then(() => {
+      this.fire(`sync_start`, --this.waitForSynced, 'batch');
+    });
+  }
+
+  private flush() {
+    if (this.batchSize <= 1 || this.queue.length === 0) {
+      return Promise.resolve('nothing queued');
+    }
+    return this.sendQueued();
   }
 
   async addNode(n: GraphNode): Promise<this> {
@@ -137,9 +197,12 @@ export default class RemoteStoreGraph extends GraphBase {
     this.nodes.forEach((n) => n.off('setAttr', this.updateHandler));
     this.edges.forEach((n) => n.off('setAttr', this.updateHandler));
     super.clear();
-    this.fire('sync_start', ++this.waitForSynced, 'clear');
-    //clear all nodes
-    return sendAPI(`/dataset/graph/${this.desc.id}/node`, {}, 'DELETE').then(() => {
+
+    this.flush().then(() => {
+      this.fire('sync_start', ++this.waitForSynced, 'clear');
+      //clear all nodes
+      return sendAPI(`/dataset/graph/${this.desc.id}/node`, {}, 'DELETE');
+    }).then(() => {
       this.fire('sync');
       return this;
     });
