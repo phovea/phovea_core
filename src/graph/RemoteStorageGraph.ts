@@ -57,25 +57,38 @@ export default class RemoteStoreGraph extends GraphBase {
     return this.waitForSynced;
   }
 
+  private send(type: 'node'|'edge', op: 'add'|'update'|'remove', elem: GraphNode|GraphEdge) {
+    this.fire(`sync_start_${type},sync_start`, ++this.waitForSynced, `${op}_{type}`, elem);
+
+    const data = {
+      desc: JSON.stringify(elem.persist())
+    };
+    function create() {
+      switch(op) {
+        case 'add':
+          return sendAPI(`/dataset/graph/${this.desc.id}/${type}`, data, 'POST');
+        case 'update':
+          return sendAPI(`/dataset/graph/${this.desc.id}/${type}/${elem.id}`, data, 'PUT');
+        case 'remove':
+          return sendAPI(`/dataset/graph/${this.desc.id}/${type}/${elem.id}`, {}, 'DELETE');
+      }
+    }
+    return create().then(() => {
+      this.fire(`sync_${type},sync`, --this.waitForSynced, elem);
+    });
+  }
+
   async addNode(n: GraphNode): Promise<this> {
     super.addNode(n);
     n.on('setAttr', this.updateHandler);
 
-    this.fire('sync_start_node,sync_start', ++this.waitForSynced, 'add_node', n);
-    await sendAPI(`/dataset/graph/${this.desc.id}/node`, {
-      desc: JSON.stringify(n.persist())
-    }, 'POST');
-    this.fire('sync_node,sync', --this.waitForSynced, n);
+    await this.send('node','add', n);
     return this;
   }
 
   async updateNode(n: GraphNode): Promise<this> {
     super.updateNode(n);
-    this.fire('sync_start_node,sync_start', ++this.waitForSynced, 'update_node', n);
-    await sendAPI(`/dataset/graph/${this.desc.id}/node/${n.id}`, {
-      desc: JSON.stringify(n.persist())
-    }, 'PUT');
-    this.fire('sync_node,sync', --this.waitForSynced, n);
+    await this.send('node','update', n);
     return this;
   }
 
@@ -84,9 +97,8 @@ export default class RemoteStoreGraph extends GraphBase {
       return Promise.reject('invalid node');
     }
     n.off('setAttr', this.updateHandler);
-    this.fire('sync_start_node,sync_start', ++this.waitForSynced, 'remove_node', n);
-    await sendAPI(`/dataset/graph/${this.desc.id}/node/${n.id}`, {}, 'DELETE');
-    this.fire('sync_node,sync', --this.waitForSynced, n);
+
+    await this.send('node','remove', n);
     return this;
   }
 
@@ -95,11 +107,7 @@ export default class RemoteStoreGraph extends GraphBase {
       super.addEdge(edgeOrSource);
       const e = <GraphEdge>edgeOrSource;
       e.on('setAttr', this.updateHandler);
-      this.fire('sync_start_edge,sync_start', ++this.waitForSynced, 'add_edge', e);
-      await sendAPI(`/dataset/graph/${this.desc.id}/edge`, {
-        desc: JSON.stringify(e.persist())
-      }, 'POST');
-      this.fire('sync_edge,sync', --this.waitForSynced, e);
+      await this.send('edge','add', e);
       return this;
     }
     return super.addEdge(<GraphNode>edgeOrSource, type, t);
@@ -110,22 +118,16 @@ export default class RemoteStoreGraph extends GraphBase {
       return Promise.reject('invalid edge');
     }
     e.off('setAttr', this.updateHandler);
-    this.fire('sync_start_edge,sync_start', ++this.waitForSynced, 'remove_edge', e);
-    return sendAPI(`/dataset/graph/${this.desc.id}/edge/${e.id}`, {}, 'DELETE').then(() => {
-      this.fire('sync_edge,sync', --this.waitForSynced, e);
-      return this;
-    });
+
+    await this.send('edge','remove', e);
+    return this;
   }
 
   async updateEdge(e: GraphEdge): Promise<this> {
     super.updateEdge(e);
-    this.fire('sync_start_edge,sync_start', ++this.waitForSynced, 'update_edge', e);
-    return sendAPI(`/dataset/graph/${this.desc.id}/edge/${e.id}`, {
-      desc: JSON.stringify(e.persist())
-    }, 'PUT').then(() => {
-      this.fire('sync_edge,sync', --this.waitForSynced, e);
-      return this;
-    });
+
+    await this.send('edge','update', e);
+    return this;
   }
 
   clear() {
