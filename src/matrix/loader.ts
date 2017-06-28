@@ -161,6 +161,9 @@ export function viaAPI2Loader(): IMatrixLoader2<any> {
       if (options.palette) {
         args.format_palette = options.palette.toString();
       }
+      if (options.missing) {
+        args.format_missing = options.missing;
+      }
       return api2absURL(`/dataset/matrix/${desc.id}/data`, args);
     }
   };

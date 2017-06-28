@@ -1,6 +1,6 @@
 {
   "name": "phovea_core",
-  "version": "0.1.0-SNAPSHOT",
+  "version": "0.1.1-SNAPSHOT",
   "homepage": "https://phovea.caleydo.org",
   "description": "Phovea Core including plugin registry, data definition (+ common types: tables, matrix, vector, stratification), ajax, selections",
   "author": {

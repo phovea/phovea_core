@@ -75,8 +75,8 @@ export async function listAll(): Promise<IIDType[]> {
   if (filledUp) {
     return Promise.resolve(list());
   }
+  const c = await <Promise<IIDType[]>>getAPIJSON('/idtype/', {}, []);
   filledUp = true;
-  const c = await <Promise<IIDType[]>>getAPIJSON('/idtype', {}, []);
   fillUpData(c);
   return list();
 }

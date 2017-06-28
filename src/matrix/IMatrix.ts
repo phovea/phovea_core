@@ -31,6 +31,7 @@ export interface IHeatMapUrlOptions {
   transpose?: boolean;
   range?: [number, number];
   palette?: string;
+  missing?: string;
 }
 
 export interface IMatrixDataDescription<D extends IValueTypeDesc> extends IDataDescription {

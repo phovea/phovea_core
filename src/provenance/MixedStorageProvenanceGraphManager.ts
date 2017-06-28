@@ -51,9 +51,19 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
     }
   }
 
+  edit(graph: IProvenanceGraphDataDescription | ProvenanceGraph, desc: any): Promise<IProvenanceGraphDataDescription> {
+    const base = graph instanceof ProvenanceGraph ? graph.desc : graph;
+    if (base.local) {
+      return this.local.edit(base, desc);
+    } else {
+      return this.remote.edit(base, desc);
+    }
+  }
+
   async cloneLocal(desc: IProvenanceGraphDataDescription, extras: any = {}): Promise<ProvenanceGraph> {
     return this.local.clone(await this.getGraph(desc), extras);
   }
+
   async cloneRemote(desc: IProvenanceGraphDataDescription, extras: any = {}): Promise<ProvenanceGraph> {
     return this.remote.clone(await this.getGraph(desc), extras);
   }

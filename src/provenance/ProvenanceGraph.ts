@@ -214,6 +214,8 @@ export interface IProvenanceGraphManager {
   get(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph>;
   create(): Promise<ProvenanceGraph>;
 
+  edit(graph: IProvenanceGraphDataDescription|ProvenanceGraph, desc: any): Promise<IProvenanceGraphDataDescription>;
+
   delete(desc: IProvenanceGraphDataDescription): Promise<boolean>;
 
   import(json: any): Promise<ProvenanceGraph>;

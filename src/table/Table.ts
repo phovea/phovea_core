@@ -49,8 +49,8 @@ export default class Table extends ATable implements ITable {
     return parse(range).filter(this.vectors, [this.ncol]);
   }
 
-  async at(i: number, j: number) {
-    return (await this.colData(this.col(j).column, rlist(i)))[0];
+  async at(row: number, col: number) {
+    return (await this.colData(this.col(col).column, rlist(row)))[0];
   }
 
   queryView(name: string, args: any) {
