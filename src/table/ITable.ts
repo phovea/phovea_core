@@ -120,10 +120,10 @@ export interface ITable extends IDataType {
 
   /**
    * returns a promise for getting one cell
-   * @param i
-   * @param j
+   * @param row
+   * @param col
    */
-  at(i: number, j: number): Promise<IValueType>;
+  at(row: number, col: number): Promise<IValueType>;
 
   /**
    * Returns a promise for getting the data as two dimensional array.

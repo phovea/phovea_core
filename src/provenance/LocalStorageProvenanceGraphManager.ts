@@ -9,7 +9,7 @@ import ProvenanceGraph, {
 } from './ProvenanceGraph';
 import GraphBase from '../graph/GraphBase';
 import LocalStorageGraph from '../graph/LocalStorageGraph';
-import {currentUserNameOrAnonymous} from '../security';
+import {ALL_READ_NONE, currentUserNameOrAnonymous} from '../security';
 
 export default class LocalStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private options = {
@@ -24,7 +24,10 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
 
   list() {
     const lists : string[] = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
-    const l = lists.map((id) => JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graph.' + id)));
+    const l = lists
+      .map((id) => JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graph.' + id)))
+      // filter to right application
+      .filter((d: IProvenanceGraphDataDescription) => d.attrs.of === this.options.application);
     return Promise.resolve(l);
   }
 
@@ -38,7 +41,8 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
   }
 
   async clone(graph: GraphBase, desc: any = {}): Promise<ProvenanceGraph> {
-    const pdesc = this.createDesc(desc);
+    const description = `Cloned from ${graph.desc.name} created by ${graph.desc.creator}\n${(graph.desc.description || '')}`;
+    const pdesc = this.createDesc(mixin({name: graph.desc.name, description}, desc));
     const newGraph = await this.getGraph(pdesc);
     newGraph.restoreDump(graph.persist(), provenanceGraphFactory());
     return new ProvenanceGraph(pdesc, newGraph);
@@ -56,17 +60,26 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
     lists.splice(lists.indexOf(desc.id), 1);
     LocalStorageGraph.delete(desc);
     //just remove from the list
+    this.options.storage.removeItem(this.options.prefix + '_provenance_graph.' + desc.id);
     this.options.storage.setItem(this.options.prefix + '_provenance_graphs', JSON.stringify(lists));
     return Promise.resolve(true);
   }
 
+  edit(graph: ProvenanceGraph|IProvenanceGraphDataDescription, desc: any = {}) {
+    const base = graph instanceof ProvenanceGraph ? graph.desc : graph;
+    mixin(base, desc);
+    this.options.storage.setItem(this.options.prefix + '_provenance_graph.' + base.id, JSON.stringify(base));
+    return Promise.resolve(base);
+  }
+
   private createDesc(overrides: any = {}) {
     const lists: string[] = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
-    const id = this.options.prefix + (lists.length > 0 ? String(1 + Math.max(...lists.map((d) => parseInt(d.slice(this.options.prefix.length), 10)))) : '0');
+    const uid = (lists.length > 0 ? String(1 + Math.max(...lists.map((d) => parseInt(d.slice(this.options.prefix.length), 10)))) : '0');
+    const id = this.options.prefix + uid;
     const desc: IProvenanceGraphDataDescription = mixin({
       type: 'provenance_graph',
-      name: 'Local Workspace#' + id,
-      fqname: this.options.prefix + '.Provenance Graph #' + id,
+      name: 'Temporary Session ' + uid,
+      fqname: this.options.prefix + 'Temporary Session ' + uid,
       id,
       local: true,
       size: <[number, number]>[0, 0],
@@ -75,6 +88,7 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
         of: this.options.application
       },
       creator: currentUserNameOrAnonymous(),
+      permissions: ALL_READ_NONE,
       ts: Date.now(),
       description: ''
     }, overrides);

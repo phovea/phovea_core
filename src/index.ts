@@ -11,6 +11,7 @@ export {argFilter, argList, argSort, indexOf, search} from './internal/array';
 export {copyDnD, hasDnDType, updateDropEffect} from './internal/dnd';
 export {flagId, uniqueId, uniqueString} from './internal/unique';
 export {default as IdPool} from './internal/IdPool';
+import RemoveNodeObserver from './internal/RemoveNodeObserver';
 import HashProperties from './internal/HashProperties';
 import PropertyHandler from './internal/PropertyHandler';
 import {__extends} from 'tslib';
@@ -268,38 +269,20 @@ export function fixId(name: string) {
 export const fix_id = fixId;
 /* tslint:enable:variable-name */
 
+
+const removeNodeObserver = new RemoveNodeObserver();
+
 /**
  * utility function to get notified, when the given dom element is removed from its parent
  * @param node
  * @param callback
  */
 export function onDOMNodeRemoved(node: Element|Element[], callback: () => void, thisArg?: any) {
-  let arr: any[];
-  if (!Array.isArray(node)) {
-    arr = [node];
+  if (Array.isArray(node)) {
+    node.forEach((nodeid) => removeNodeObserver.observe(nodeid, callback, thisArg));
   } else {
-    arr = <any[]>node;
+    removeNodeObserver.observe(node, callback, thisArg);
   }
-  arr.forEach((n) => {
-    const body = n.ownerDocument.body;
-    function l(evt: Event) {
-      //since this event bubbles check if it the right node
-      let act = n;
-      while (act) { //check if node or its parent are removed
-        if (evt.target === act) {
-          node = null;
-          n.removeEventListener('DOMNodeRemoved', l);
-          body.removeEventListener('DOMNodeRemoved', l);
-          callback.call(thisArg, n);
-          return;
-        }
-        act = act.parentNode;
-      }
-    }
-
-    n.addEventListener('DOMNodeRemoved', l);
-    body.addEventListener('DOMNodeRemoved', l);
-  });
 }
 
 /**

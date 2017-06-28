@@ -2,7 +2,7 @@
  * Created by sam on 12.02.2015.
  */
 import {mixin} from '../index';
-import {get as getData, remove as removeData, upload, list as listData} from '../data';
+import {get as getData, remove as removeData, upload, list as listData, modify} from '../data';
 import ProvenanceGraph, {
   IProvenanceGraphManager,
   provenanceGraphFactory,
@@ -47,7 +47,7 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
         graphtype: 'provenance_graph',
         of: this.options.application
       },
-      name: 'Workspace for ' + this.options.application,
+      name: 'Persistent WS',
       creator: currentUserNameOrAnonymous(),
       ts: Date.now(),
       description: '',
@@ -59,6 +59,14 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     return impl.then((i) => new ProvenanceGraph(<IProvenanceGraphDataDescription>i.desc, i));
   }
 
+  async edit(graph: ProvenanceGraph|IProvenanceGraphDataDescription, desc: any = {}) {
+    const base = graph instanceof ProvenanceGraph ? graph.desc : graph;
+    mixin(base, desc);
+    const graphProxy = await getData(base.id);
+    await modify(graphProxy, desc);
+    return base;
+  }
+
   async create(desc: any = {}) {
     const pdesc: IProvenanceGraphDataDescription = mixin({
       id: undefined,
@@ -67,8 +75,8 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
         graphtype: 'provenance_graph',
         of: this.options.application
       },
-      name: 'Workspace for ' + this.options.application,
-      fqname: 'provenance_graphs/Workspace for ' + this.options.application,
+      name: `Persistent WS`,
+      fqname: `provenance_graphs/Persistent WS`,
       creator: currentUserNameOrAnonymous(),
       size: <[number, number]>[0, 0],
       ts: Date.now(),
