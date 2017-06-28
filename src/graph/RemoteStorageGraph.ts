@@ -104,7 +104,7 @@ export default class RemoteStoreGraph extends GraphBase {
     const data = {
       desc: JSON.stringify(elem.persist())
     };
-    function create() {
+    const create = () => {
       switch(op) {
         case 'add':
           return sendAPI(`/dataset/graph/${this.desc.id}/${type}`, data, 'POST');
@@ -113,7 +113,7 @@ export default class RemoteStoreGraph extends GraphBase {
         case 'remove':
           return sendAPI(`/dataset/graph/${this.desc.id}/${type}/${elem.id}`, {}, 'DELETE');
       }
-    }
+    };
     return create().then(() => {
       this.fire(`sync_${type},sync`, --this.waitForSynced, elem);
     });
