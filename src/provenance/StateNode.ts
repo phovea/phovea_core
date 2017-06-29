@@ -5,6 +5,7 @@ import {GraphNode, isType} from '../graph/graph';
 import ActionNode from './ActionNode';
 import ObjectNode from './ObjectNode';
 import {VisState} from './retrieval/VisState';
+import {IPropertyValue} from 'phovea_clue/src/provenance_retrieval/VisStateProperty';
 
 /**
  * a state node is one state in the visual exploration consisting of an action creating it and one or more following ones.
@@ -22,7 +23,7 @@ export default class StateNode extends GraphNode {
     this.visState = new VisState(this, this.getCurrVisState.bind(this), 'visState');
   }
 
-  private getCurrVisState():string[] {
+  private getCurrVisState():IPropertyValue[] {
     // use first element and assume that only the application returns a list of terms
     return this.consistsOf
       .map((objectNode) => objectNode.getCurrVisState())

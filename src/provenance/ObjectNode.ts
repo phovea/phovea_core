@@ -6,6 +6,7 @@ import {isDataType, IDataType} from '../datatype';
 import {GraphNode, isType} from '../graph/graph';
 import ActionNode from './ActionNode';
 import StateNode from './StateNode';
+import {IPropertyValue} from 'phovea_clue/src/provenance_retrieval/VisStateProperty';
 
 
 /**
@@ -140,7 +141,7 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
     super.setAttr('description', description);
   }
 
-  getCurrVisState():string[] {
+  getCurrVisState():IPropertyValue[] {
     if(this.value && (<any>this.value).getCurrVisState) {
       return (<any>this.value).getCurrVisState();
     }

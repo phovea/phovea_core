@@ -3,6 +3,7 @@
  */
 
 import {GraphNode} from '../../graph/graph';
+import {IPropertyValue, PropertyType} from 'phovea_clue/src/provenance_retrieval/VisStateProperty';
 
 export class VisState {
 
@@ -10,7 +11,7 @@ export class VisState {
 
   private _termFreq = new Map<string, number>();
 
-  constructor(public node:GraphNode, private termAccessor:() => string[], private storageId:string) {
+  constructor(public node:GraphNode, private stateAccessor:() => IPropertyValue[], private storageId:string) {
 
   }
 
@@ -93,7 +94,12 @@ export class VisState {
    * Captures the current visState using the `termAccessor`
    */
   private captureVisState() {
-    this._terms = this.termAccessor();
+    const propValues = this.stateAccessor();
+
+    this._terms = propValues
+      .filter((d) => d.type === PropertyType.CATEGORICAL)
+      .map((d) => String(d.id));
+
     this._termFreq = this.calcTermFreq(this._terms);
   }
 
