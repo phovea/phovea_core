@@ -44,7 +44,7 @@ export default class LocalStorageGraph extends AGraph implements IGraph {
 
   private load(factory: IGraphFactory) {
     const uid = this.uid;
-    if (!this.storage.hasOwnProperty(`${uid}.nodes`)) {
+    if (this.storage.getItem(`${uid}.nodes`) === null) {
       return;
     }
     const nodeIds: string[] = JSON.parse(this.storage.getItem(`${uid}.nodes`));
