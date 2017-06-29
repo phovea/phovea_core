@@ -3,9 +3,11 @@
  */
 
 import {GraphNode} from '../../graph/graph';
-import {IPropertyValue, PropertyType} from 'phovea_clue/src/provenance_retrieval/VisStateProperty';
+import {createPropertyValue, IPropertyValue, PropertyType} from 'phovea_clue/src/provenance_retrieval/VisStateProperty';
 
 export class VisState {
+
+  private _propValues:IPropertyValue[] = null;
 
   private _terms:string[] = null;
 
@@ -68,7 +70,7 @@ export class VisState {
    */
   private checkCache() {
     // object is already cached
-    if(this._terms) {
+    if(this._propValues) {
       return;
     }
 
@@ -86,7 +88,16 @@ export class VisState {
   private loadPersisted() {
     // otherwise use try to use sessionStorage and decode json
     const jsonTerms:string = this.node.getAttr(this.storageId, null);
-    this._terms = JSON.parse(jsonTerms);
+    const propValues = JSON.parse(jsonTerms);
+
+    this._propValues = propValues.map((d) => {
+      return createPropertyValue(d.type, d);
+    });
+
+    this._terms = this._propValues
+      .filter((d) => d.type === PropertyType.CATEGORICAL)
+      .map((d) => String(d.id));
+
     this._termFreq = this.calcTermFreq(this._terms);
   }
 
@@ -94,9 +105,9 @@ export class VisState {
    * Captures the current visState using the `termAccessor`
    */
   private captureVisState() {
-    const propValues = this.stateAccessor();
+    this._propValues = this.stateAccessor();
 
-    this._terms = propValues
+    this._terms = this._propValues
       .filter((d) => d.type === PropertyType.CATEGORICAL)
       .map((d) => String(d.id));
 
@@ -108,7 +119,7 @@ export class VisState {
    * Note: A previously set visState will be overridden without further checks.
    */
   private persist() {
-    this.node.setAttr(this.storageId, JSON.stringify(this._terms));
+    this.node.setAttr(this.storageId, JSON.stringify(this._propValues));
   }
 
   /**
