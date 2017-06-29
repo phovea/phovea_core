@@ -5,7 +5,7 @@ import {GraphNode, isType} from '../graph/graph';
 import ActionNode from './ActionNode';
 import ObjectNode from './ObjectNode';
 import {VisState} from './retrieval/VisState';
-import {IPropertyValue} from 'phovea_clue/src/provenance_retrieval/VisStateProperty';
+import {IPropertyValue} from './retrieval/VisStateProperty';
 
 /**
  * a state node is one state in the visual exploration consisting of an action creating it and one or more following ones.

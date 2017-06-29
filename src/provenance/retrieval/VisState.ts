@@ -3,7 +3,7 @@
  */
 
 import {GraphNode} from '../../graph/graph';
-import {createPropertyValue, IPropertyValue, PropertyType} from 'phovea_clue/src/provenance_retrieval/VisStateProperty';
+import {createPropertyValue, IPropertyValue, PropertyType} from './VisStateProperty';
 
 export class VisState {
 
