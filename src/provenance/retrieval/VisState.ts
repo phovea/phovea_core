@@ -6,6 +6,7 @@ import {GraphNode} from '../../graph/graph';
 import {createPropertyValue, IPropertyValue, PropertyType} from './VisStateProperty';
 import {TermFrequency} from './tf_idf/TermFrequency';
 import {InverseDocumentFrequency} from './tf_idf/InverseDocumentFrequency';
+import {Jaccard} from './jaccard/Jaccard';
 
 
 export interface IVisState {
@@ -51,9 +52,21 @@ export class VisState implements IVisState {
   compare(propValues:IPropertyValue[]):number {
     this.checkCache();
 
-    const queryTerms = this.getCategoricalValues(propValues);
+    const catSimiliarities = this.getPropIds(PropertyType.CATEGORICAL, propValues)
+      .map((d) => this.idf.tfidf([d], this._termFreq));
+    const catSimilarity = catSimiliarities.reduce((a,b) => a + b, 0.0);
 
-    return this.idf.tfidf(queryTerms, this._termFreq);
+    const stateSetProps = this.getPropIds(PropertyType.SET, this._propValues);
+    const querySetProps = this.getPropIds(PropertyType.SET, propValues);
+
+    let jaccardIndex = Jaccard.index(stateSetProps, querySetProps);
+    if(isNaN(jaccardIndex)) {
+      jaccardIndex = 0;
+    }
+
+    //console.log(propValues, catSimiliarities, Jaccard.intersection(stateSetProps, querySetProps), jaccardIndex);
+
+    return catSimilarity + jaccardIndex;
   }
 
   /**
@@ -124,15 +137,13 @@ export class VisState implements IVisState {
   }
 
   private processPropValues(propValues:IPropertyValue[]) {
-
     // handle categorical values with TF
-    this._termFreq.terms = this.getCategoricalValues(propValues);
-
+    this._termFreq.terms = this.getPropIds(PropertyType.CATEGORICAL, propValues);
   }
 
-  private getCategoricalValues(propValues:IPropertyValue[]) {
+  private getPropIds(type:PropertyType, propValues:IPropertyValue[]) {
     return propValues
-      .filter((d) => d.type === PropertyType.CATEGORICAL)
+      .filter((d) => d.type === type)
       .map((d) => String(d.id));
   }
 
