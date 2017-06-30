@@ -4,46 +4,56 @@
 
 import {GraphNode} from '../../graph/graph';
 import {createPropertyValue, IPropertyValue, PropertyType} from './VisStateProperty';
+import {TermFrequency} from './tf_idf/TermFrequency';
+import {InverseDocumentFrequency} from './tf_idf/InverseDocumentFrequency';
 
-export class VisState {
+
+export interface IVisState {
+  node:GraphNode;
+  propValues:IPropertyValue[];
+
+  idf:InverseDocumentFrequency;
+
+  isPersisted():boolean;
+  captureAndPersist():void;
+  compare(propValues:IPropertyValue[]):number;
+}
+
+export class VisState implements IVisState {
+
+  private _idf:InverseDocumentFrequency = null;
+  private _termFreq:TermFrequency = new TermFrequency();
 
   private _propValues:IPropertyValue[] = null;
-
-  private _terms:string[] = null;
-
-  private _termFreq = new Map<string, number>();
 
   constructor(public node:GraphNode, private stateAccessor:() => IPropertyValue[], private storageId:string) {
 
   }
 
-  /**
-   * Returns a list of all terms
-   * @returns {string[]}
-   */
-  get terms():string[] {
-    this.checkCache();
-    return this._terms;
+  get idf():InverseDocumentFrequency {
+    return this._idf;
+  }
+
+  set idf(value:InverseDocumentFrequency) {
+    this._idf = value;
+    this._idf.addTermFreq(this._termFreq);
+  }
+
+  get propValues() {
+    return this._propValues;
   }
 
   /**
-   * Returns the term frequency of this state
-   * @param attr
+   * Compare this VisState with a list of property values and return a similarity score
+   * @param propValues
    * @returns {number}
    */
-  tf(attr: string): number {
+  compare(propValues:IPropertyValue[]):number {
     this.checkCache();
-    return this._termFreq.has(attr) ? this._termFreq.get(attr) / this._terms.length : 0;
-  }
 
-  /**
-   * Checks whether or not a given attr exists
-   * @param attr
-   * @returns {boolean}
-   */
-  hasTerm(attr): boolean {
-    this.checkCache();
-    return this._termFreq.has(attr) && this._termFreq.get(attr) > 0;
+    const queryTerms = this.getCategoricalValues(propValues);
+
+    return this.idf.tfidf(queryTerms, this._termFreq);
   }
 
   /**
@@ -94,11 +104,7 @@ export class VisState {
       return createPropertyValue(d.type, d);
     });
 
-    this._terms = this._propValues
-      .filter((d) => d.type === PropertyType.CATEGORICAL)
-      .map((d) => String(d.id));
-
-    this._termFreq = this.calcTermFreq(this._terms);
+    this.processPropValues(this._propValues);
   }
 
   /**
@@ -106,12 +112,7 @@ export class VisState {
    */
   private captureVisState() {
     this._propValues = this.stateAccessor();
-
-    this._terms = this._propValues
-      .filter((d) => d.type === PropertyType.CATEGORICAL)
-      .map((d) => String(d.id));
-
-    this._termFreq = this.calcTermFreq(this._terms);
+    this.processPropValues(this._propValues);
   }
 
   /**
@@ -122,21 +123,18 @@ export class VisState {
     this.node.setAttr(this.storageId, JSON.stringify(this._propValues));
   }
 
-  /**
-   * Calculates the term frequency for list of given terms
-   * @param terms
-   * @returns {Map<string, number>}
-   */
-  private calcTermFreq(terms:string[]):Map<string, number> {
-    const tf = new Map<string, number>();
-    terms.forEach((attr) => {
-      let val = 1;
-      if (tf.has(attr)) {
-        val += tf.get(attr);
-      }
-      tf.set(attr, val);
-    });
-    return tf;
+  private processPropValues(propValues:IPropertyValue[]) {
+
+    // handle categorical values with TF
+    this._termFreq.terms = this.getCategoricalValues(propValues);
+
+  }
+
+  private getCategoricalValues(propValues:IPropertyValue[]) {
+    return propValues
+      .filter((d) => d.type === PropertyType.CATEGORICAL)
+      .map((d) => String(d.id));
   }
 
 }
+

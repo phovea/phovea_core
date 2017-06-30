@@ -2,6 +2,8 @@
  * Created by Holger Stitz on 28.06.2017.
  */
 
+export const TAG_VALUE_SEPARATOR = '=';
+
 export enum PropertyType {
   NUMERICAL,
   CATEGORICAL,
@@ -64,7 +66,7 @@ export function setProperty(text:string, values:string[]|{text:string, id?:strin
 }
 
 export function numericalProperty(text:string, values:string[]|{text:string, id?:string|number}[]):IProperty {
-  const textAddon = ' = <i>&lt;number&gt;</i>';
+  const textAddon = ` ${TAG_VALUE_SEPARATOR} <i>&lt;number&gt;</i>`;
   const vals:IPropertyValue[] = (<any>values).map((d) => createPropertyValue(PropertyType.NUMERICAL, d, textAddon));
   return new Property(PropertyType.NUMERICAL, text, vals);
 }
