@@ -6,7 +6,10 @@ import {GraphNode} from '../../graph/graph';
 import {createPropertyValue, IPropertyValue, PropertyType} from './VisStateProperty';
 import {TermFrequency} from './tf_idf/TermFrequency';
 import {InverseDocumentFrequency} from './tf_idf/InverseDocumentFrequency';
-import {Jaccard} from './jaccard/Jaccard';
+import {
+  ICategoricalPropertyComparator, INumericalPropertyComparator,
+  IPropertyComparator, ISetPropertyComparator
+} from './PropertyValueComparator';
 
 
 export interface IVisState {
@@ -17,7 +20,7 @@ export interface IVisState {
 
   isPersisted():boolean;
   captureAndPersist():void;
-  compare(propValues:IPropertyValue[]):number;
+  compare(comparatorAccessor:(type:PropertyType) => IPropertyComparator, propValues:IPropertyValue[]):number;
 }
 
 export class VisState implements IVisState {
@@ -46,27 +49,41 @@ export class VisState implements IVisState {
 
   /**
    * Compare this VisState with a list of property values and return a similarity score
-   * @param propValues
+   * @param comparatorAccessor
+   * @param queryPropValues
    * @returns {number}
    */
-  compare(propValues:IPropertyValue[]):number {
+  compare(comparatorAccessor:(type:PropertyType) => IPropertyComparator, queryPropValues:IPropertyValue[]):number {
     this.checkCache();
 
-    const catSimiliarities = this.getPropIds(PropertyType.CATEGORICAL, propValues)
-      .map((d) => this.idf.tfidf([d], this._termFreq));
-    const catSimilarity = catSimiliarities.reduce((a,b) => a + b, 0.0);
-
     const stateSetProps = this.getPropIds(PropertyType.SET, this._propValues);
-    const querySetProps = this.getPropIds(PropertyType.SET, propValues);
+    const querySetProps = this.getPropIds(PropertyType.SET, queryPropValues);
 
-    let jaccardIndex = Jaccard.index(stateSetProps, querySetProps);
-    if(isNaN(jaccardIndex)) {
-      jaccardIndex = 0;
-    }
+    const similarities:number[] = queryPropValues.map((queryPropVal) => {
+      const statePropVal = this._propValues.filter((d) => d.id === queryPropVal.id);
 
-    //console.log(propValues, catSimiliarities, Jaccard.intersection(stateSetProps, querySetProps), jaccardIndex);
+      if(statePropVal.length > 0) {
+        switch (queryPropVal.type) {
+          case PropertyType.CATEGORICAL:
+            return (<ICategoricalPropertyComparator>comparatorAccessor(queryPropVal.type))
+              .compare(String(queryPropVal.id), this._termFreq, this._idf);
 
-    return catSimilarity + jaccardIndex;
+          case PropertyType.NUMERICAL:
+            return (<INumericalPropertyComparator>comparatorAccessor(queryPropVal.type))
+              .compare(queryPropVal.payload.numVal, statePropVal[0].payload.numVal);
+
+          case PropertyType.SET:
+            return (<ISetPropertyComparator>comparatorAccessor(queryPropVal.type))
+              .compare(stateSetProps, querySetProps);
+        }
+      }
+
+      return 0;
+    });
+
+    console.log(similarities);
+
+    return similarities.reduce((a,b) => a + b, 0.0);
   }
 
   /**
@@ -148,4 +165,3 @@ export class VisState implements IVisState {
   }
 
 }
-
