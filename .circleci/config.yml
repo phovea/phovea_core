@@ -15,8 +15,11 @@ jobs:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
             - ./node_modules
+      - run: #force update of dynamic dependencies
+          name: update-vcs-dependencies
+          command: npm update
       - run:
           name: dist
-          command: npm run dist 
+          command: npm run dist
       - store_artifacts:
           path: dist
