@@ -20,7 +20,7 @@ export interface IVisState {
 
   isPersisted():boolean;
   captureAndPersist():void;
-  compare(comparatorAccessor:(type:PropertyType) => IPropertyComparator, propValues:IPropertyValue[]):number;
+  compare(comparatorAccessor:(type:PropertyType) => IPropertyComparator, propValues:IPropertyValue[]):number[];
 }
 
 export class VisState implements IVisState {
@@ -54,7 +54,7 @@ export class VisState implements IVisState {
    * @param queryPropValues
    * @returns {number}
    */
-  compare(comparatorAccessor:(type:PropertyType) => IPropertyComparator, queryPropValues:IPropertyValue[]):number {
+  compare(comparatorAccessor:(type:PropertyType) => IPropertyComparator, queryPropValues:IPropertyValue[]):number[] {
     this.checkCache();
 
     const stateSetProps = this.getPropIds(PropertyType.SET, this._propValues);
@@ -82,7 +82,7 @@ export class VisState implements IVisState {
       return 0;
     });
 
-    return similarities.reduce((a,b) => a + b, 0.0);
+    return similarities;
   }
 
   /**

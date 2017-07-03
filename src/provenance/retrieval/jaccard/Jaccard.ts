@@ -35,7 +35,7 @@ export class Jaccard {
    * @param b
    * @returns {Array}
    */
-  static intersection(a, b) {
+  static intersection(a, b):any[] {
     return a.filter((n) => {
       return b.indexOf(n) !== -1;
     });
@@ -47,7 +47,7 @@ export class Jaccard {
    * @param b
    * @returns {Array}
    */
-  static union(a, b) {
+  static union(a, b):any[] {
     return Array.from(new Set([...a, ...b]));
   }
 
