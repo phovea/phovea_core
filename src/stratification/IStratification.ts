@@ -35,7 +35,7 @@ export function guessColor(stratification: string, group: string) {
 }
 
 export interface IStratificationDataDescription extends IDataDescription {
-  readonly idtype: IDType;
+  readonly idtype: string;
   readonly size: number;
   readonly groups: IGroup[];
   readonly ngroups: number;
