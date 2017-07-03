@@ -44,6 +44,7 @@ export class VisState implements IVisState {
   }
 
   get propValues() {
+    this.checkCache();
     return this._propValues;
   }
 
@@ -66,11 +67,11 @@ export class VisState implements IVisState {
         switch (queryPropVal.type) {
           case PropertyType.CATEGORICAL:
             return (<ICategoricalPropertyComparator>comparatorAccessor(queryPropVal.type))
-              .compare(String(queryPropVal.id), this._termFreq, this._idf);
+              .compare(String(queryPropVal.id), this._termFreq);
 
           case PropertyType.NUMERICAL:
             return (<INumericalPropertyComparator>comparatorAccessor(queryPropVal.type))
-              .compare(queryPropVal.payload.numVal, statePropVal[0].payload.numVal);
+              .compare(queryPropVal, statePropVal[0]);
 
           case PropertyType.SET:
             return (<ISetPropertyComparator>comparatorAccessor(queryPropVal.type))
@@ -80,8 +81,6 @@ export class VisState implements IVisState {
 
       return 0;
     });
-
-    console.log(similarities);
 
     return similarities.reduce((a,b) => a + b, 0.0);
   }
