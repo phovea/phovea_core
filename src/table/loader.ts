@@ -7,6 +7,7 @@ import {getAPIJSON, getAPIData} from '../ajax';
 import {Range, parse, range} from '../range';
 import {IValueType, VALUE_TYPE_INT, VALUE_TYPE_REAL, INumberValueTypeDesc, mask} from '../datatype';
 import {IQueryArgs, ITableDataDescription, ITableColumn} from './ITable';
+import {resolve} from '../idtype';
 
 /**
  * @internal
@@ -117,16 +118,28 @@ export function viaAPI2Loader(): ITableLoader2 {
     rows: Promise<string[]> = null,
     objs: Promise<any[]> = null,
     data: Promise<any[][]> = null;
+
+  function fillIds(desc: ITableDataDescription) {
+    if (rowIds !== null && rows !== null) {
+      Promise.all([rowIds, rows]).then(([rowIdValues, rowValues]) => {
+        const idType = resolve(desc.idtype);
+        const rowIds = parse(rowIdValues);
+        idType.fillMapCache(rowIds.dim(0).asList(rowValues.length), rowValues);
+      });
+    }
+  }
   const r: ITableLoader2 = {
     rowIds: (desc: ITableDataDescription, range: Range) => {
       if (rowIds == null) {
         rowIds = getAPIJSON(`/dataset/table/${desc.id}/rowIds`).then(parse);
+        fillIds(desc);
       }
       return rowIds.then((d) => d.preMultiply(range, desc.size));
     },
     rows: (desc: ITableDataDescription, range: Range) => {
       if (rows == null) {
         rows = getAPIJSON(`/dataset/table/${desc.id}/rows`);
+        fillIds(desc);
       }
       return rows.then((d: string[]) => range.dim(0).filter(d, desc.size[0]));
     },
