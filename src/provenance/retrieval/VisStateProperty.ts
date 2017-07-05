@@ -72,7 +72,7 @@ export function numericalProperty(text:string, values:string[]|{text:string, id?
 }
 
 export function createPropertyValue(type:PropertyType, data:any, textAddon:string = ''):IPropertyValue {
-  let id = data.id || data.text;
+  let id = (data.id === undefined) ? data.text : data.id;
   let text = data.text || data.id;
 
   if(Object.prototype.toString.call(data) === '[object String]') {
