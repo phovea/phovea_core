@@ -22,18 +22,23 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
     mixin(this.options, options);
   }
 
-  private loadFromLocalStorage(suffix: string, defaultValue: string) {
+  private loadFromLocalStorage<T>(suffix: string, defaultValue: T): T {
     try {
-      return JSON.parse(this.options.storage.getItem(this.options.prefix + suffix) || defaultValue);
+      const item = this.options.storage.getItem(this.options.prefix + suffix);
+      if(item === undefined || item === null) {
+        return defaultValue;
+      }
+      return JSON.parse(item);
     } catch(e) {
       console.error(e);
+      return defaultValue;
     }
   }
 
   list() {
-    const lists : string[] = this.loadFromLocalStorage('_provenance_graphs', '[]');
+    const lists : string[] = this.loadFromLocalStorage('_provenance_graphs', []);
     const l = lists
-      .map((id) => this.loadFromLocalStorage('_provenance_graph.' + id, '{}'))
+      .map((id) => this.loadFromLocalStorage('_provenance_graph.' + id, {}))
       // filter to right application
       .filter((d: IProvenanceGraphDataDescription) => d.attrs && d.attrs.of === this.options.application);
     return Promise.resolve(l);
