@@ -31,7 +31,7 @@ export default class StratificationVector extends ADataType<IStratificationDataD
       ts: v.desc.ts,
       fqname: v.desc.fqname,
       type: 'stratification',
-      idtype: v.idtype,
+      idtype: v.idtype.id,
       size: v.length,
       ngroups: r.groups.length,
       groups: r.groups.map((ri) => ({name: ri.name, color: ri.color, size: ri.length}))
