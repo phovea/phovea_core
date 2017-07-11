@@ -68,10 +68,13 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
 
   async migrate(graph: ProvenanceGraph, desc: any = {}) {
     return this.importImpl({nodes: [], edges: []}, desc).then((backend: RemoteStoreGraph) => {
-      return Promise.resolve(graph.backend.migrate()).then(({nodes, edges}) => backend.addAll(nodes, edges)).then(() => {
-        graph.migrateBackend(backend);
-        return graph;
-      });
+      return Promise.resolve(graph.backend.migrate())
+        .then(({nodes, edges}) => {
+          return backend.addAll(nodes, edges);
+        }).then(() => {
+          graph.migrateBackend(backend);
+          return graph;
+        });
     });
   }
 
