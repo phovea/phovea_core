@@ -54,6 +54,17 @@ export default class GraphBase extends AGraph implements IGraph {
     return this._edges;
   }
 
+  /**
+   * migrate one graph to another cleaning this graph returning node references
+   * @returns {{nodes: GraphNode[]; edges: GraphEdge[]}}
+   */
+  migrate(): Promise<{nodes: GraphNode[], edges: GraphEdge[]}>|{nodes: GraphNode[], edges: GraphEdge[]} {
+    return {
+      nodes: this.nodes,
+      edges: this.edges
+    };
+  }
+
   addNode(n: GraphNode): this|Promise<this> {
     this.nodes.push(n);
     this.fire('add_node', n);

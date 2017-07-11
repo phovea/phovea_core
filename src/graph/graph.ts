@@ -9,6 +9,7 @@ import {all, parse, RangeLike, list} from '../range';
 import {IPersistable, flagId, uniqueId} from '../index';
 import {EventHandler} from '../event';
 import {IDataType} from '../datatype';
+import {IGraphDataDescription} from 'phovea_core/src/graph/GraphBase';
 
 export const DIM_NODES = 0;
 export const IDTYPE_NODES = '_nodes';
@@ -158,6 +159,8 @@ export function isType(type: string|RegExp) {
 
 
 export interface IGraph extends IDataType {
+  readonly desc: IGraphDataDescription;
+
   readonly nodes: GraphNode[];
   readonly nnodes: number;
   readonly edges: GraphEdge[];
