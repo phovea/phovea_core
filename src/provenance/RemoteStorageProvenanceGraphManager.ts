@@ -10,8 +10,8 @@ import ProvenanceGraph, {
 } from './ProvenanceGraph';
 import GraphBase from '../graph/GraphBase';
 import {currentUserNameOrAnonymous} from '../security';
-import GraphProxy from 'phovea_core/src/graph/GraphProxy';
-import RemoteStoreGraph from 'phovea_core/src/graph/RemoteStorageGraph';
+import GraphProxy from '../graph/GraphProxy';
+import RemoteStoreGraph from '../graph/RemoteStorageGraph';
 
 export default class RemoteStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private options = {
@@ -66,7 +66,7 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     });
   }
 
-  async migrate(graph: ProvenanceGraph, desc: any = {}) {
+  async migrate(graph: ProvenanceGraph, desc: any = {}): Promise<ProvenanceGraph> {
     return this.importImpl({nodes: [], edges: []}, desc).then((backend: RemoteStoreGraph) => {
       return Promise.resolve(graph.backend.migrate())
         .then(({nodes, edges}) => {
