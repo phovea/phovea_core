@@ -38,7 +38,7 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     return removeData(desc);
   }
 
-  async clone(graph: GraphBase, desc: any = {}): Promise<ProvenanceGraph> {
+  clone(graph: GraphBase, desc: any = {}): Promise<ProvenanceGraph> {
     return this.import(graph.persist(), desc);
   }
 
@@ -66,7 +66,7 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     });
   }
 
-  async migrate(graph: ProvenanceGraph, desc: any = {}): Promise<ProvenanceGraph> {
+  migrate(graph: ProvenanceGraph, desc: any = {}): Promise<ProvenanceGraph> {
     return this.importImpl({nodes: [], edges: []}, desc).then((backend: RemoteStoreGraph) => {
       return Promise.resolve(graph.backend.migrate())
         .then(({nodes, edges}) => {
