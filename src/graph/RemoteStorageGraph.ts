@@ -147,7 +147,7 @@ export default class RemoteStoreGraph extends GraphBase {
     return this.sendQueued();
   }
 
-  async addAll(nodes: GraphNode[], edges: GraphEdge[]) {
+  addAll(nodes: GraphNode[], edges: GraphEdge[]) {
     //add all and and to queue
     nodes.forEach((n) => {
       super.addNode(n);
