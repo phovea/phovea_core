@@ -4,7 +4,7 @@
 import {sendAPI} from '../ajax';
 import {IEvent} from '../event';
 import GraphBase, {IGraphFactory, IGraphDataDescription} from './GraphBase';
-import {GraphEdge, GraphNode} from './graph';
+import {GraphEdge, GraphNode, IGraph} from './graph';
 
 interface ISyncItem {
   type: 'node'|'edge';
@@ -35,11 +35,17 @@ export default class RemoteStoreGraph extends GraphBase {
   private readonly queue: ISyncItem[] = [];
   private flushTimeout: number = -1;
 
-  constructor(desc: IGraphDataDescription, nodes: GraphNode[] = [], edges: GraphEdge[] = []) {
-    super(desc, nodes, edges);
+  constructor(desc: IGraphDataDescription) {
+    super(desc);
     this.batchSize = desc.attrs.batchSize || RemoteStoreGraph.DEFAULT_BATCH_SIZE;
   }
 
+  migrate() {
+    this.nodes.forEach((n) => n.off('setAttr', this.updateHandler));
+    this.edges.forEach((n) => n.off('setAttr', this.updateHandler));
+    //TODO delete old
+    return super.migrate();
+  }
   static load(desc: IGraphDataDescription, factory: IGraphFactory) {
     const r = new RemoteStoreGraph(desc);
     return r.load(factory);
@@ -130,6 +136,7 @@ export default class RemoteStoreGraph extends GraphBase {
     this.fire(`sync_start`, ++this.waitForSynced, 'batch');
     return sendAPI(`/dataset/${this.desc.id}`, { desc: param }, 'POST').then(() => {
       this.fire(`sync`, --this.waitForSynced, 'batch');
+      return this;
     });
   }
 
@@ -139,6 +146,22 @@ export default class RemoteStoreGraph extends GraphBase {
     }
     return this.sendQueued();
   }
+
+  addAll(nodes: GraphNode[], edges: GraphEdge[]) {
+    //add all and and to queue
+    nodes.forEach((n) => {
+      super.addNode(n);
+      n.on('setAttr', this.updateHandler);
+      this.queue.push({type: 'node', op: 'add', id: n.id, desc: n.persist()});
+    });
+    edges.forEach((e) => {
+      super.addEdge(e);
+      e.on('setAttr', this.updateHandler);
+      this.queue.push({type: 'edge', op: 'add', id: e.id, desc: e.persist()});
+    });
+    return this.sendQueued();
+  }
+
 
   async addNode(n: GraphNode): Promise<this> {
     super.addNode(n);

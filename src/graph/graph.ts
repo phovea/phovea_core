@@ -8,7 +8,7 @@ import {SelectOperation, resolve as idtypes_resolve, SelectAble} from '../idtype
 import {all, parse, RangeLike, list} from '../range';
 import {IPersistable, flagId, uniqueId} from '../index';
 import {EventHandler} from '../event';
-import {IDataType} from '../datatype';
+import {IDataType, IDataDescription} from '../datatype';
 
 export const DIM_NODES = 0;
 export const IDTYPE_NODES = '_nodes';
@@ -157,7 +157,28 @@ export function isType(type: string|RegExp) {
 }
 
 
+export interface IGraphDataDescription extends IDataDescription {
+  /**
+   * size: [number of nodes, number of edges]
+   */
+  readonly size: [number, number];
+
+  /**
+   * where to store: memory, remote, local, session, given (requires instance)
+   */
+  readonly storage?: string;
+
+  /**
+   * in case of storage type 'given'
+   */
+  readonly graph?: AGraph;
+
+  readonly attrs: {[key: string]: any};
+}
+
 export interface IGraph extends IDataType {
+  readonly desc: IGraphDataDescription;
+
   readonly nodes: GraphNode[];
   readonly nnodes: number;
   readonly edges: GraphEdge[];

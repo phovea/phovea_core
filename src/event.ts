@@ -136,6 +136,12 @@ export class EventHandler implements IEventHandler {
   static readonly MULTI_EVENT_SEPARATOR = ',';
   private readonly handlers = new Map<string, SingleEventHandler>();
 
+  private readonly propagationHandler: IEventListener = (event: IEvent) => {
+    if (!event.isPropagationStopped()) {
+      this.fireEvent(propagateEvent(event, this));
+    }
+  }
+
   /**
    * register a global event handler
    * @param events either one event string (multiple are supported using , as separator) or a map of event handlers
@@ -222,11 +228,11 @@ export class EventHandler implements IEventHandler {
    * @param events
    */
   propagate(progatee: IEventHandler, ...events: string[]) {
-    progatee.on(events.join(EventHandler.MULTI_EVENT_SEPARATOR), (event: IEvent) => {
-      if (!event.isPropagationStopped()) {
-        this.fireEvent(propagateEvent(event, this));
-      }
-    });
+    progatee.on(events.join(EventHandler.MULTI_EVENT_SEPARATOR), this.propagationHandler);
+  }
+
+  stopPropagation(progatee: IEventHandler, ...events: string[]) {
+    progatee.off(events.join(EventHandler.MULTI_EVENT_SEPARATOR), this.propagationHandler);
   }
 }
 
