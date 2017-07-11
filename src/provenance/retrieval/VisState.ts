@@ -3,7 +3,7 @@
  */
 
 import {GraphNode} from '../../graph/graph';
-import {createPropertyValue, IPropertyValue, PropertyType} from './VisStateProperty';
+import {createPropertyValue, IPropertyValue, PropertyType, TAG_VALUE_SEPARATOR} from './VisStateProperty';
 import {TermFrequency} from './tf_idf/TermFrequency';
 import {InverseDocumentFrequency} from './tf_idf/InverseDocumentFrequency';
 import {
@@ -61,9 +61,9 @@ export class VisState implements IVisState {
     const querySetProps = this.getPropIds(PropertyType.SET, queryPropValues);
 
     const similarities:number[] = queryPropValues.map((queryPropVal) => {
-      const statePropVal = this._propValues.filter((d) => d.id === queryPropVal.id);
+      const statePropVal = this._propValues.find((p) => p.id.split(TAG_VALUE_SEPARATOR)[0].trim() === queryPropVal.id.split(TAG_VALUE_SEPARATOR)[0].trim());
 
-      if(statePropVal.length > 0) {
+      if(statePropVal) {
         switch (queryPropVal.type) {
           case PropertyType.CATEGORICAL:
             return (<ICategoricalPropertyComparator>comparatorAccessor(queryPropVal.type))
@@ -71,7 +71,7 @@ export class VisState implements IVisState {
 
           case PropertyType.NUMERICAL:
             return (<INumericalPropertyComparator>comparatorAccessor(queryPropVal.type))
-              .compare(queryPropVal, statePropVal[0]);
+              .compare(statePropVal, queryPropVal);
 
           case PropertyType.SET:
             return (<ISetPropertyComparator>comparatorAccessor(queryPropVal.type))

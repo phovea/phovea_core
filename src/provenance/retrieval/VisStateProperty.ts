@@ -18,10 +18,11 @@ export interface IProperty {
 
 export interface IPropertyValue {
   type: PropertyType;
-  id: string|number; // must be `id` because of Select2 usage
+  id: string; // must be `id` because of Select2 usage
   text: string; // must be `text` because of Select2 usage
   payload: any;
   isSelected: boolean;
+  needsInput: boolean;
 }
 
 class Property implements IProperty {
@@ -32,19 +33,20 @@ class Property implements IProperty {
 
 class PropertyValue implements IPropertyValue {
   isSelected:boolean = false;
+  needsInput:boolean = false;
 
-  constructor(public type: PropertyType, public id:string|number, public text:string, public payload:any) {
+  constructor(public type: PropertyType, public id:string, public text:string, public payload:any) {
     //
   }
 
   toJSON():any {
     const r:any = {
       type: this.type,
-      text: this.text,
+      id: this.id,
     };
 
     if(this.id !== this.text) {
-      r.id = this.id;
+      r.text = this.text;
     }
 
     if(this.payload !== undefined) {
@@ -55,19 +57,23 @@ class PropertyValue implements IPropertyValue {
   }
 }
 
-export function categoricalProperty(text:string, values:string[]|{text:string, id?:string|number}[]):IProperty {
+export function categoricalProperty(text:string, values:string[]|{text:string, id?:string}[]):IProperty {
   const vals:IPropertyValue[] = (<any>values).map((d) => createPropertyValue(PropertyType.CATEGORICAL, d));
   return new Property(PropertyType.CATEGORICAL, text, vals);
 }
 
-export function setProperty(text:string, values:string[]|{text:string, id?:string|number}[]):IProperty {
+export function setProperty(text:string, values:string[]|{text:string, id?:string}[]):IProperty {
   const vals:IPropertyValue[] = (<any>values).map((d) => createPropertyValue(PropertyType.SET, d));
   return new Property(PropertyType.SET, text, vals);
 }
 
-export function numericalProperty(text:string, values:string[]|{text:string, id?:string|number}[]):IProperty {
-  const textAddon = ` ${TAG_VALUE_SEPARATOR} <i>&lt;number&gt;</i>`;
-  const vals:IPropertyValue[] = (<any>values).map((d) => createPropertyValue(PropertyType.NUMERICAL, d, textAddon));
+export function numericalProperty(text:string, values:string[]|{text:string, id?:string}[], needsInput:boolean = false):IProperty {
+  const textAddon = (needsInput) ? ` ${TAG_VALUE_SEPARATOR} <i>&lt;number&gt;</i>` : '';
+  const vals:IPropertyValue[] = (<any>values).map((d) => {
+    const prop = createPropertyValue(PropertyType.NUMERICAL, d, textAddon);
+    prop.needsInput = needsInput;
+    return prop;
+  });
   return new Property(PropertyType.NUMERICAL, text, vals);
 }
 
