@@ -28,7 +28,7 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
   }
 
   delete(desc: IProvenanceGraphDataDescription): Promise<boolean> {
-    if ((<any>desc).local) {
+    if (desc.local) {
       return this.local.delete(desc);
     } else {
       return this.remote.delete(desc);
@@ -66,6 +66,10 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
 
   async cloneRemote(desc: IProvenanceGraphDataDescription, extras: any = {}): Promise<ProvenanceGraph> {
     return this.remote.clone(await this.getGraph(desc), extras);
+  }
+
+  migrateRemote(graph: ProvenanceGraph, extras: any = {}): Promise<ProvenanceGraph> {
+    return this.remote.migrate(graph, extras);
   }
 
   importLocal(json: any, desc: any = {}) {

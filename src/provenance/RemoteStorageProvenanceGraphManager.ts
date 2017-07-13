@@ -10,6 +10,8 @@ import ProvenanceGraph, {
 } from './ProvenanceGraph';
 import GraphBase from '../graph/GraphBase';
 import {currentUserNameOrAnonymous} from '../security';
+import GraphProxy from '../graph/GraphProxy';
+import RemoteStoreGraph from '../graph/RemoteStorageGraph';
 
 export default class RemoteStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private options = {
@@ -36,11 +38,11 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     return removeData(desc);
   }
 
-  async clone(graph: GraphBase, desc: any = {}): Promise<ProvenanceGraph> {
+  clone(graph: GraphBase, desc: any = {}): Promise<ProvenanceGraph> {
     return this.import(graph.persist(), desc);
   }
 
-  async import(json: any, desc: any = {}): Promise<ProvenanceGraph> {
+  private importImpl(json: {nodes: any[], edges: any[]}, desc: any = {}): Promise<GraphBase> {
     const pdesc: any = mixin({
       type: 'graph',
       attrs: {
@@ -55,8 +57,25 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
       nodes: json.nodes,
       edges: json.edges
     }, desc);
-    const impl: Promise<GraphBase> = (<any>(await upload(pdesc))).impl(provenanceGraphFactory());
-    return impl.then((i) => new ProvenanceGraph(<IProvenanceGraphDataDescription>i.desc, i));
+    return upload(pdesc).then((base: GraphProxy) => base.impl(provenanceGraphFactory()));
+  }
+
+  import(json: any, desc: any = {}): Promise<ProvenanceGraph> {
+    return this.importImpl(json, desc).then((impl) => {
+      return new ProvenanceGraph(<IProvenanceGraphDataDescription>impl.desc, impl);
+    });
+  }
+
+  migrate(graph: ProvenanceGraph, desc: any = {}): Promise<ProvenanceGraph> {
+    return this.importImpl({nodes: [], edges: []}, desc).then((backend: RemoteStoreGraph) => {
+      return Promise.resolve(graph.backend.migrate())
+        .then(({nodes, edges}) => {
+          return backend.addAll(nodes, edges);
+        }).then(() => {
+          graph.migrateBackend(backend);
+          return graph;
+        });
+    });
   }
 
   async edit(graph: ProvenanceGraph|IProvenanceGraphDataDescription, desc: any = {}) {

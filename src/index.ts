@@ -92,7 +92,8 @@ _init();
  * @param {Object} bs
  * @returns {Object} a with extended b
  */
-export function mixin<T>(a: T, ...bs: any[]): T {
+export function mixin<T, U>(a: T, b: U, ...bs: any[]): T & U {
+  bs.unshift(b);
   function extend(r: any, b: any) {
     Object.keys(b).forEach((key) => {
       const v = b[key];
@@ -110,7 +111,7 @@ export function mixin<T>(a: T, ...bs: any[]): T {
       a = extend(a, b);
     }
   });
-  return a;
+  return <any>a;
 }
 
 /**
