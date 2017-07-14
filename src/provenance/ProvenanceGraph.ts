@@ -226,6 +226,7 @@ function findMetaObject<T>(find: IObjectRef<T>) {
 }
 
 export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescription> {
+  private static readonly PROPAGATED_EVENTS = ['sync', 'add_edge', 'add_node', 'sync_node', 'sync_edge', 'sync_start'];
   private _actions: ActionNode[] = [];
   private _objects: ObjectNode<any>[] = [];
   private _states: StateNode[] = [];
@@ -241,7 +242,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
 
   constructor(desc: IProvenanceGraphDataDescription, public backend: GraphBase) {
     super(desc);
-    this.propagate(this.backend, 'sync', 'add_edge', 'add_node', 'sync_node', 'sync_edge', 'sync_start');
+    this.propagate(this.backend, ...ProvenanceGraph.PROPAGATED_EVENTS);
 
     if (this.backend.nnodes === 0) {
       this.act = new StateNode('Start');
@@ -255,6 +256,15 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
       this._slides = <any>this.backend.nodes.filter((n) => (n instanceof SlideNode));
       this.act = <StateNode>(act >= 0 ? this.getStateById(act) : this._states[0]);
     }
+  }
+
+  migrateBackend(backend: GraphBase) {
+    //asserts that the old backend and the new one have the same nodes inside of them
+    this.stopPropagation(this.backend, ...ProvenanceGraph.PROPAGATED_EVENTS);
+    this.backend = backend;
+    this.propagate(this.backend, ...ProvenanceGraph.PROPAGATED_EVENTS);
+    //hack to update the description object
+    (<any>this).desc = <IProvenanceGraphDataDescription>backend.desc;
   }
 
   get isEmpty() {

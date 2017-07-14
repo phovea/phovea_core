@@ -125,7 +125,7 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
       case VALUE_TYPE_CATEGORICAL:
         const vc = <ICategoricalValueTypeDesc><any>v;
         return categoricalHist(d, this.indices.dim(0), d.length, vc.categories.map((d) => typeof d === 'string' ? d : d.name),
-          vc.categories.map((d) => typeof d === 'string' ? d : d.name || d.label),
+          vc.categories.map((d) => typeof d === 'string' ? d : d.label || d.name),
           vc.categories.map((d) => typeof d === 'string' ? 'gray' : d.color || 'gray'));
       case VALUE_TYPE_REAL:
       case VALUE_TYPE_INT:

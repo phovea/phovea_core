@@ -112,7 +112,7 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
       case VALUE_TYPE_CATEGORICAL:
         const vc = <ICategoricalValueTypeDesc><any>v;
         return categoricalHist<string>(<any[]>flat.data, flat.indices, flat.data.length, vc.categories.map((d) => typeof d === 'string' ? d : d.name),
-          vc.categories.map((d) => typeof d === 'string' ? d : d.name || d.label),
+          vc.categories.map((d) => typeof d === 'string' ? d : d.label || d.name),
           vc.categories.map((d) => typeof d === 'string' ? 'gray' : d.color || 'gray'));
       case VALUE_TYPE_INT:
       case VALUE_TYPE_REAL:

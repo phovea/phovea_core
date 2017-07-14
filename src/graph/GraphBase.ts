@@ -4,8 +4,8 @@
 /**
  * Created by Samuel Gratzl on 22.10.2014.
  */
-import {IDataDescription} from '../datatype';
-import {GraphNode, GraphEdge, AGraph, IGraph} from './graph';
+import {GraphNode, GraphEdge, AGraph, IGraph, IGraphDataDescription} from './graph';
+export {IGraphDataDescription} from './graph';
 
 export interface IGraphFactory {
   makeNode(p: any): GraphNode;
@@ -16,25 +16,6 @@ export const defaultGraphFactory: IGraphFactory = {
   makeNode: (p: any) => ((new GraphNode()).restore(p)),
   makeEdge: (p: any, lookup) => ((new GraphEdge()).restore(p, lookup))
 };
-
-export interface IGraphDataDescription extends IDataDescription {
-  /**
-   * size: [number of nodes, number of edges]
-   */
-  readonly size: [number, number];
-
-  /**
-   * where to store: memory, remote, local, session, given (requires instance)
-   */
-  readonly storage?: string;
-
-  /**
-   * in case of storage type 'given'
-   */
-  readonly graph?: AGraph;
-
-  readonly attrs: {[key: string]: any};
-}
 
 export default class GraphBase extends AGraph implements IGraph {
   private readonly _nodes: GraphNode[];
@@ -52,6 +33,17 @@ export default class GraphBase extends AGraph implements IGraph {
 
   get edges() {
     return this._edges;
+  }
+
+  /**
+   * migrate one graph to another cleaning this graph returning node references
+   * @returns {{nodes: GraphNode[]; edges: GraphEdge[]}}
+   */
+  migrate(): Promise<{nodes: GraphNode[], edges: GraphEdge[]}>|{nodes: GraphNode[], edges: GraphEdge[]} {
+    return {
+      nodes: this.nodes,
+      edges: this.edges
+    };
   }
 
   addNode(n: GraphNode): this|Promise<this> {
