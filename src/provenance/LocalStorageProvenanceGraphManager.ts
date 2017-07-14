@@ -71,7 +71,7 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
   delete(desc: IProvenanceGraphDataDescription) {
     const lists = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
     lists.splice(lists.indexOf(desc.id), 1);
-    LocalStorageGraph.delete(desc);
+    LocalStorageGraph.delete(desc, this.options.storage);
     //just remove from the list
     this.options.storage.removeItem(this.options.prefix + '_provenance_graph.' + desc.id);
     this.options.storage.setItem(this.options.prefix + '_provenance_graphs', JSON.stringify(lists));
