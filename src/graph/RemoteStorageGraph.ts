@@ -130,7 +130,6 @@ export default class RemoteStoreGraph extends GraphBase {
     if (this.queue.length === 0) {
       return Promise.resolve();
     }
-    console.log(this.queue.map((s) => `${s.type} ${s.op} ${s.id}`).join('\n'));
     const param = JSON.stringify({operation: 'batch', items: this.queue.slice()});
     // clear
     this.queue.splice(0, this.queue.length);
