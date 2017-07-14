@@ -242,21 +242,29 @@ const global = new EventHandler();
  * @param events
  * @param handler
  */
-export const on = global.on.bind(global);
+export function on(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
+  return global.on(events, handler);
+}
 /**
  * unregister a global event handler
  * @param events
  * @param handler
  */
-export const off = global.off.bind(global);
+export function off(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
+  return global.off(events, handler);
+}
 /**
  * fires an event
  * @param event
  * @param extraArguments
  */
-export const fire = global.fire.bind(global);
+export function fire(events: string, ...args: any[]) {
+  return global.fire(events, ...args);
+}
 /**
  * list all events
  */
-export const list = global.list.bind(global);
+export function list() {
+  return global.list();
+}
 
