@@ -94,15 +94,20 @@ async function createCompressor(path: ActionNode[]) {
  * @param path
  */
 export async function compress(path: ActionNode[]) {
+  if (path.length <= 1) {
+    return path; //can't compress single one
+  }
   //return Promise.resolve(path);
   //TODO find a strategy how to compress but also invert skipped actions
   const compressor = await createCompressor(path);
   //return path;
+  //console.log('before', path.map((path) => path.toString()));
   let before: number;
   do {
     before = path.length;
     path = compressor(path);
   } while (before > path.length);
+  //console.log('after', path.map((path) => path.toString()));
   return path;
 }
 
