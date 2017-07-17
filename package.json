@@ -51,7 +51,8 @@
   },
   "dependencies": {
     "tslib": "1.5.0",
-    "@types/whatwg-fetch": "0.0.33"
+    "@types/whatwg-fetch": "0.0.33",
+    "@types/handlebars": "4.0.33"
   },
   "devDependencies": {
     "@types/jasmine": "2.5.41",

@@ -5,10 +5,10 @@
  * Created by Samuel Gratzl on 22.10.2014.
  */
 import {IEvent} from '../event';
-import AGraph, {IGraphFactory, IGraphDataDescription} from './GraphBase';
+import GraphBase, {IGraphFactory, IGraphDataDescription} from './GraphBase';
 import {GraphEdge, GraphNode, IGraph} from './graph';
 
-export default class LocalStorageGraph extends AGraph implements IGraph {
+export default class LocalStorageGraph extends GraphBase implements IGraph {
 
   private updateHandler = (event: IEvent) => {
     const s = event.target;
@@ -22,6 +22,33 @@ export default class LocalStorageGraph extends AGraph implements IGraph {
 
   constructor(desc: IGraphDataDescription, nodes: GraphNode[] = [], edges: GraphEdge[] = [], private storage: Storage = sessionStorage) {
     super(desc, nodes, edges);
+
+    if (nodes.length > 0 || edges.length > 0) {
+      const uid = this.uid;
+      this.storage.setItem(`${uid}.nodes`, JSON.stringify(nodes.map((d) => d.id)));
+      nodes.forEach((n) => {
+        this.storage.setItem(uid + '.node.' + n.id, JSON.stringify(n.persist()));
+        n.on('setAttr', this.updateHandler);
+      });
+
+      this.storage.setItem(`${uid}.edges`, JSON.stringify(edges.map((d) => d.id)));
+      edges.forEach((e) => {
+        this.storage.setItem(`${uid}.edge.${e.id}`, JSON.stringify(e.persist()));
+        e.on('setAttr', this.updateHandler);
+      });
+    }
+  }
+
+  static migrate(graph: GraphBase, storage = sessionStorage) {
+    return Promise.resolve(graph.migrate()).then(({nodes, edges}) => {
+      return new LocalStorageGraph(graph.desc, nodes, edges, storage);
+    });
+  }
+
+  migrate() {
+    this.nodes.forEach((n) => n.off('setAttr', this.updateHandler));
+    this.edges.forEach((n) => n.off('setAttr', this.updateHandler));
+    return super.migrate();
   }
 
   static load(desc: IGraphDataDescription, factory: IGraphFactory, storage: Storage = sessionStorage, reset = false) {
@@ -32,7 +59,7 @@ export default class LocalStorageGraph extends AGraph implements IGraph {
     return r;
   }
 
-  static clone(graph: AGraph, factory: IGraphFactory, storage: Storage = sessionStorage) {
+  static clone(graph: GraphBase, factory: IGraphFactory, storage: Storage = sessionStorage) {
     const r = new LocalStorageGraph(graph.desc, [], [], storage);
     r.restoreDump(graph.persist(), factory);
     return r;
@@ -44,7 +71,7 @@ export default class LocalStorageGraph extends AGraph implements IGraph {
 
   private load(factory: IGraphFactory) {
     const uid = this.uid;
-    if (!this.storage.hasOwnProperty(`${uid}.nodes`)) {
+    if (this.storage.getItem(`${uid}.nodes`) === null) {
       return;
     }
     const nodeIds: string[] = JSON.parse(this.storage.getItem(`${uid}.nodes`));
