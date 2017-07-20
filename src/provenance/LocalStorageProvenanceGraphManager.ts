@@ -10,6 +10,7 @@ import ProvenanceGraph, {
 import GraphBase from '../graph/GraphBase';
 import LocalStorageGraph from '../graph/LocalStorageGraph';
 import {ALL_READ_NONE, currentUserNameOrAnonymous} from '../security';
+import MemoryGraph from '../graph/MemoryGraph';
 
 export default class LocalStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private options = {
@@ -114,5 +115,39 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
   create(desc: any = {}) {
     const pdesc = this.createDesc(desc);
     return this.get(pdesc);
+  }
+
+  private createInMemoryDesc(base?: IProvenanceGraphDataDescription): IProvenanceGraphDataDescription {
+    return mixin({
+      type: 'provenance_graph',
+      name: 'In Memory Session',
+      fqname: 'In Memory Session',
+      id: 'memory',
+      local: true,
+      size: <[number, number]>[0, 0],
+      attrs: {
+        graphtype: 'provenance_graph',
+        of: this.options.application
+      },
+      creator: currentUserNameOrAnonymous(),
+      permissions: ALL_READ_NONE,
+      ts: Date.now(),
+      description: ''
+    }, base? base : {}, {
+      id: 'memory',
+      local: true
+    });
+  }
+
+  createInMemory() {
+    const desc = this.createInMemoryDesc();
+    return new ProvenanceGraph(desc, new MemoryGraph(desc, [], [], provenanceGraphFactory()));
+  }
+
+  cloneInMemory(graph: GraphBase) {
+    const desc = this.createInMemoryDesc(<IProvenanceGraphDataDescription>graph.desc);
+    const m = new MemoryGraph(desc, [], [], provenanceGraphFactory());
+    m.restore(graph.persist());
+    return new ProvenanceGraph(desc, m);
   }
 }
