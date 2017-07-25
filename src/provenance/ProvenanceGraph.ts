@@ -94,15 +94,20 @@ async function createCompressor(path: ActionNode[]) {
  * @param path
  */
 export async function compress(path: ActionNode[]) {
+  if (path.length <= 1) {
+    return path; //can't compress single one
+  }
   //return Promise.resolve(path);
   //TODO find a strategy how to compress but also invert skipped actions
   const compressor = await createCompressor(path);
   //return path;
+  //console.log('before', path.map((path) => path.toString()));
   let before: number;
   do {
     before = path.length;
     path = compressor(path);
   } while (before > path.length);
+  //console.log('after', path.map((path) => path.toString()));
   return path;
 }
 
@@ -151,16 +156,21 @@ function createNoop() {
 
 function createLazyCmdFunctionFactory(): ICmdFunctionFactory {
   const facts = listPlugins('actionFactory');
+  const singles = listPlugins('actionFunction');
 
   function resolveFun(id: string) {
     if (id === 'noop') {
       return Promise.resolve(noop);
     }
-    const factory = facts.filter((f: any) => id.match(f.creates) != null)[0];
-    if (factory == null) {
-      return Promise.reject('no factory found for ' + id);
+    const single = singles.find((f) => f.id === id);
+    if (single) {
+      return single.load().then((f) => f.factory.bind(f));
     }
-    return factory.load().then((f) => f.factory(id));
+    const factory = facts.find((f: any) => id.match(f.creates) != null);
+    if (factory) {
+      return factory.load().then((f) => f.factory(id));
+    }
+    return Promise.reject('no factory found for ' + id);
   }
 
   const lazyFunction = (id: string) => {

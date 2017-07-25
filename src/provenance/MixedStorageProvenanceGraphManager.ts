@@ -95,4 +95,12 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
   create(desc: any = {}) {
     return this.createLocal(desc);
   }
+
+  createInMemory(): ProvenanceGraph {
+    return this.local.createInMemory();
+  }
+
+  cloneInMemory(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
+    return this.getGraph(desc).then((graph) => this.local.cloneInMemory(graph));
+  }
 }

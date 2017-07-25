@@ -52,6 +52,7 @@ export default class RemoteStoreGraph extends GraphBase {
   }
 
   private async load(factory: IGraphFactory) {
+    this.fire('sync_load_start,sync_start', ++this.waitForSynced);
     const r: {nodes: any[], edges: any[]} = await sendAPI(`/dataset/graph/${this.desc.id}/data`);
     this.loadImpl(r.nodes, r.edges, factory);
     this.fire('sync_load,sync', --this.waitForSynced);
