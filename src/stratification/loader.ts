@@ -10,6 +10,7 @@
 import {getAPIJSON} from '../ajax';
 import {parse, Range1DGroup, composite, Range, list as rlist, CompositeRange1D} from '../range';
 import {IStratificationDataDescription} from './IStratification';
+import {resolve} from '../idtype';
 
 export interface ILoadedStratification {
   readonly rowIds: Range;
@@ -32,8 +33,11 @@ export function viaAPILoader(): IStratificationLoader {
   return (desc) => {
     if (!_data) { //in the cache
       _data = getAPIJSON('/dataset/' + desc.id).then((data) => {
+        const idType = resolve(desc.idtype);
+        const rowIds = parse(data.rowIds);
+        idType.fillMapCache(rowIds.dim(0).asList(data.rows.length), data.rows);
         return {
-          rowIds: parse(data.rowIds),
+          rowIds,
           rows: data.rows,
           range: createRangeFromGroups(desc.name, data.groups)
         };

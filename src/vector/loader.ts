@@ -12,6 +12,7 @@ import {parse} from '../range';
 import Range from '../range/Range';
 import {IValueType, mask} from '../datatype';
 import {IVectorDataDescription} from './IVector';
+import {resolve} from '../idtype';
 
 /**
  * @internal
@@ -40,8 +41,12 @@ export function viaAPILoader<T>() {
       return _loader;
     }
     return _loader = getAPIJSON('/dataset/' + desc.id).then((data) => {
-      data.rowIds = parse(data.rowIds);
+      const range = parse(data.rowIds);
+      data.rowIds = range;
       data.data = mask(data.data, desc.value);
+
+      const idType = resolve(desc.idtype);
+      idType.fillMapCache(range.dim(0).asList(data.rows.length), data.rows);
       return data;
     });
   };
