@@ -128,10 +128,11 @@ export function dragAble(node: HTMLElement, onDragStart: () => IDragStartResult,
  * add dropable support for the given node
  * @param {HTMLElement} node
  * @param {string[]} mimeTypes mimeTypes to look for
- * @param {(result: IDropResult) => boolean} onDrop callback when dropped, returns true if the drop was successful
+ * @param {(result: IDropResult, e: DragEvent) => boolean} onDrop callback when dropped, returns true if the drop was successful
+ * @param {(e: DragEvent) => void} onDragOver optional drag over handler, e.g. for special effects
  * @param {boolean} stopPropagation flag if the event propagation should be stopped in case of success
  */
-export function dropAble(node: HTMLElement, mimeTypes: string[], onDrop: (result: IDropResult) => boolean, stopPropagation: boolean = false) {
+export function dropAble(node: HTMLElement, mimeTypes: string[], onDrop: (result: IDropResult, e: DragEvent) => boolean, onDragOver: null|((e: DragEvent)=> void) = null, stopPropagation: boolean = false) {
   node.addEventListener('dragenter', (e) => {
     //var xy = mouse($node.node());
     if (hasDnDType(e, ...mimeTypes) || isEdgeDnD(e)) {
@@ -154,6 +155,9 @@ export function dropAble(node: HTMLElement, mimeTypes: string[], onDrop: (result
 
       if (stopPropagation) {
         e.stopPropagation();
+      }
+      if (onDragOver) {
+        onDragOver(e);
       }
       //sound good
       return false;
@@ -178,7 +182,7 @@ export function dropAble(node: HTMLElement, mimeTypes: string[], onDrop: (result
       if (dndTransferStorage.has(id)) {
         const data = dndTransferStorage.get(id);
         dndTransferStorage.delete(id);
-        return !onDrop({effect, data});
+        return !onDrop({effect, data}, e);
       }
       return;
     }
@@ -191,7 +195,7 @@ export function dropAble(node: HTMLElement, mimeTypes: string[], onDrop: (result
           data[mime] = value;
         }
       });
-      return !onDrop({effect, data});
+      return !onDrop({effect, data}, e);
     }
     return;
   });
