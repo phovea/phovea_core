@@ -22,6 +22,7 @@ export interface IPropertyValue {
   text: string; // must be `text` because of Select2 usage
   payload: any;
   isSelected: boolean;
+  isDisabled: boolean;
   needsInput: boolean;
 }
 
@@ -33,6 +34,7 @@ class Property implements IProperty {
 
 class PropertyValue implements IPropertyValue {
   isSelected:boolean = false;
+  isDisabled:boolean = false;
   needsInput:boolean = false;
 
   constructor(public type: PropertyType, public id:string, public text:string, public payload:any) {
