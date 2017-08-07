@@ -26,7 +26,7 @@ export interface IPropertyValue {
   needsInput: boolean;
 }
 
-class Property implements IProperty {
+export class Property implements IProperty {
   constructor(public type: PropertyType, public text:string, public values: IPropertyValue[]) {
     //
   }
