@@ -24,6 +24,8 @@ export interface IPropertyValue {
   isSelected: boolean;
   isDisabled: boolean;
   needsInput: boolean;
+
+  baseId: string; // part of the id that comes before the TAG_VALUE_SEPARATOR
 }
 
 export class Property implements IProperty {
@@ -39,6 +41,10 @@ class PropertyValue implements IPropertyValue {
 
   constructor(public type: PropertyType, public id:string, public text:string, public payload:any) {
     //
+  }
+
+  get baseId():string {
+    return this.id.split(TAG_VALUE_SEPARATOR)[0].trim();
   }
 
   toJSON():any {
