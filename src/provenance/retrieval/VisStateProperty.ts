@@ -23,6 +23,7 @@ export interface IPropertyValue {
   payload: any;
   isSelected: boolean;
   isDisabled: boolean;
+  isActive: boolean;
   needsInput: boolean;
 
   baseId: string; // part of the id that comes before the TAG_VALUE_SEPARATOR
@@ -37,6 +38,7 @@ export class Property implements IProperty {
 class PropertyValue implements IPropertyValue {
   isSelected:boolean = false;
   isDisabled:boolean = false;
+  isActive:boolean = false;
   needsInput:boolean = false;
 
   constructor(public type: PropertyType, public id:string, public text:string, public payload:any) {
