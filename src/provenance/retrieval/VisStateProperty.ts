@@ -21,10 +21,13 @@ export interface IPropertyValue {
   id: string; // must be `id` because of Select2 usage
   text: string; // must be `text` because of Select2 usage
   payload: any;
+
   isSelected: boolean;
   isDisabled: boolean;
   isActive: boolean;
   needsInput: boolean;
+
+  numCount: number; // number of occurrences in provenance graph
 
   baseId: string; // part of the id that comes before the TAG_VALUE_SEPARATOR
 }
@@ -40,6 +43,8 @@ class PropertyValue implements IPropertyValue {
   isDisabled:boolean = false;
   isActive:boolean = false;
   needsInput:boolean = false;
+
+  numCount:number = 0;
 
   constructor(public type: PropertyType, public id:string, public text:string, public payload:any) {
     //
