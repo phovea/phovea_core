@@ -30,6 +30,8 @@ export interface IPropertyValue {
   numCount: number; // number of occurrences in provenance graph
 
   baseId: string; // part of the id that comes before the TAG_VALUE_SEPARATOR
+
+  clone():IPropertyValue;
 }
 
 export class Property implements IProperty {
@@ -69,6 +71,18 @@ class PropertyValue implements IPropertyValue {
     }
 
     return r;
+  }
+
+  clone():IPropertyValue {
+    const pv = new PropertyValue(this.type, this.id, this.text, this.payload);
+
+    pv.isSelected = this.isSelected;
+    pv.isDisabled = this.isDisabled;
+    pv.isActive = this.isActive;
+    pv.needsInput = this.needsInput;
+    pv.numCount = this.numCount;
+
+    return pv;
   }
 }
 
