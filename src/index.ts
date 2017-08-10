@@ -8,7 +8,7 @@
  */
 
 export {argFilter, argList, argSort, indexOf, search} from './internal/array';
-export {copyDnD, hasDnDType, updateDropEffect} from './internal/dnd';
+export {copyDnD, hasDnDType, updateDropEffect, dragAble, dropAble} from './internal/dnd';
 export {flagId, uniqueId, uniqueString} from './internal/unique';
 export {default as IdPool} from './internal/IdPool';
 import RemoveNodeObserver from './internal/RemoveNodeObserver';
