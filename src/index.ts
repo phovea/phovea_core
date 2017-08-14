@@ -323,24 +323,27 @@ export const param = new PropertyHandler(location.search);
 
 
 /**
- * create a delayed call, can be called multiple times but only the last one at most delayed by timeToDelay will be executed
+ * create a debounce call, can be called multiple times but only the last one at most delayed by timeToDelay will be executed
  * @param callback
- * @param thisCallback
  * @param timeToDelay
  * @return {function(...[any]): undefined}
  */
-export function delayedCall(this: any, callback: () => void, timeToDelay = 100, thisCallback = this) {
+export function debounce(this: any, callback: () => void, timeToDelay = 100) {
   let tm = -1;
-  return (...args: any[]) => {
+  return function(...args: any[]) {
     if (tm >= 0) {
       clearTimeout(tm);
       tm = -1;
     }
-    args.unshift(thisCallback);
+    args.unshift(this);
     tm = setTimeout(callback.bind.apply(callback, args), timeToDelay);
   };
 }
 
+/**
+ * @deprecated use debounce instead
+ */
+export const delayedCall = debounce;
 
 /**
  * computes the absolute offset of the given element
