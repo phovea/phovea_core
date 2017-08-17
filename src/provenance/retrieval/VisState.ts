@@ -19,7 +19,7 @@ export interface IVisState {
   idf:InverseDocumentFrequency;
 
   isPersisted():boolean;
-  captureAndPersist():void;
+  captureAndPersist():Promise<IVisState>;
   compare(comparatorAccessor:(type:PropertyType) => IPropertyComparator, propValues:IPropertyValue[]):number[];
 }
 
@@ -30,7 +30,7 @@ export class VisState implements IVisState {
 
   private _propValues:IPropertyValue[] = null;
 
-  constructor(public node:GraphNode, private stateAccessor:() => IPropertyValue[], private storageId:string) {
+  constructor(public node:GraphNode, private stateAccessor:() => Promise<IPropertyValue[]>, private storageId:string) {
 
   }
 
@@ -97,9 +97,12 @@ export class VisState implements IVisState {
    * Capture and persist the visState in the provenance graph
    * Note: A previously set visState will be overridden without further checks.
    */
-  captureAndPersist() {
-    this.captureVisState();
-    this.persist();
+  captureAndPersist():Promise<IVisState> {
+    return this.captureVisState()
+      .then(() => {
+        this.persist();
+        return this;
+      });
   }
 
   /**
@@ -140,8 +143,11 @@ export class VisState implements IVisState {
    * Captures the current visState using the `termAccessor`
    */
   private captureVisState() {
-    this._propValues = this.stateAccessor();
-    this.processPropValues(this._propValues);
+    return this.stateAccessor()
+      .then((propVals) => {
+        this._propValues = propVals;
+        this.processPropValues(this._propValues);
+      });
   }
 
   /**

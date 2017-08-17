@@ -141,7 +141,7 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
     super.setAttr('description', description);
   }
 
-  getCurrVisState():IPropertyValue[] {
+  getCurrVisState():Promise<IPropertyValue[]> {
     if(this.value && (<any>this.value).getCurrVisState) {
       return (<any>this.value).getCurrVisState();
     }

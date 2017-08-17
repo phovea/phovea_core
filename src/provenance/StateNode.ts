@@ -23,7 +23,7 @@ export default class StateNode extends GraphNode {
     this.visState = new VisState(this, this.getCurrVisState.bind(this), 'visState');
   }
 
-  private getCurrVisState():IPropertyValue[] {
+  private getCurrVisState():Promise<IPropertyValue[]> {
     // use first element and assume that only the application returns a list of terms
     return this.consistsOf
       .map((objectNode) => objectNode.getCurrVisState())
