@@ -113,6 +113,10 @@ export interface IRegistry {
   push(type: string, loader: () => any, desc?: any): void;
   push(type: string, id: string, loader: () => any, desc?: any): void;
   push(type: string, idOrLoader: string | (() => any), descOrLoader: any, desc?: any): void;
+  /**
+   * defined registry using the WebpackDefinePlugin
+   */
+  flags: object;
 }
 
 
@@ -128,7 +132,7 @@ export function register(plugin: string, generator?: (registry: IRegistry) => vo
   }
   knownPlugins.add(plugin);
 
-  generator({push});
+  generator({push, flags: {}});
 }
 
 /**
