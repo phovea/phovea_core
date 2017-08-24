@@ -57,8 +57,9 @@ export class VisState implements IVisState {
   compare(comparatorAccessor:(type:PropertyType) => IPropertyComparator, queryPropValues:IPropertyValue[]):number[] {
     this.checkCache();
 
-    const stateSetProps = this.getPropIds(PropertyType.SET, this._propValues);
-    const querySetProps = this.getPropIds(PropertyType.SET, queryPropValues);
+    // cache once before looping through all properties
+    const stateSetProps = this.getGroupedPropIds(PropertyType.SET, this._propValues);
+    const querySetProps = this.getGroupedPropIds(PropertyType.SET, queryPropValues);
 
     const similarities:number[] = queryPropValues.map((queryPropVal) => {
       const statePropVal = this._propValues.find((p) => p.baseId === queryPropVal.baseId);
@@ -74,8 +75,12 @@ export class VisState implements IVisState {
               .compare(statePropVal, queryPropVal);
 
           case PropertyType.SET:
-            return (<ISetPropertyComparator>comparatorAccessor(queryPropVal.type))
-              .compare(stateSetProps, querySetProps);
+            // additional group check for set properties to compare only within the same group
+            if(statePropVal.group === queryPropVal.group) {
+              return (<ISetPropertyComparator>comparatorAccessor(queryPropVal.type))
+                .compare(stateSetProps.get(statePropVal.group), querySetProps.get(queryPropVal.group));
+            }
+
         }
       }
 
@@ -167,6 +172,19 @@ export class VisState implements IVisState {
     return propValues
       .filter((d) => d.type === type)
       .map((d) => String(d.id));
+  }
+
+  private getGroupedPropIds(type:PropertyType, propValues:IPropertyValue[]): Map<string, string[]> {
+    const map = new Map<string, string[]>();
+
+    propValues
+      .filter((d) => d.type === type)
+      .forEach((d) => {
+        const arr = (map.has(d.group)) ? map.get(d.group) : [];
+        map.set(d.group, [...arr, String(d.id)]);
+      });
+
+    return map;
   }
 
 }

@@ -22,6 +22,8 @@ export interface IPropertyValue {
   text: string; // must be `text` because of Select2 usage
   payload: any;
 
+  group: string; // define groups of property values for set comparison
+
   isSelected: boolean;
   isDisabled: boolean;
   isActive: boolean;
@@ -47,6 +49,7 @@ class PropertyValue implements IPropertyValue {
   needsInput:boolean = false;
 
   numCount:number = 0;
+  group:string = '';
 
   constructor(public type: PropertyType, public id:string, public text:string, public payload:any) {
     //
@@ -70,12 +73,17 @@ class PropertyValue implements IPropertyValue {
       r.payload = this.payload;
     }
 
+    if(this.group) {
+      r.group = this.group;
+    }
+
     return r;
   }
 
   clone():IPropertyValue {
     const pv = new PropertyValue(this.type, this.id, this.text, this.payload);
 
+    pv.group = this.group;
     pv.isSelected = this.isSelected;
     pv.isDisabled = this.isDisabled;
     pv.isActive = this.isActive;
@@ -117,5 +125,11 @@ export function createPropertyValue(type:PropertyType, data:any, textAddon:strin
 
   text += textAddon;
 
-  return new PropertyValue(type, id, text, data.payload);
+  const pv = new PropertyValue(type, id, text, data.payload);
+
+  if(data.group) {
+    pv.group = data.group;
+  }
+
+  return pv;
 }
