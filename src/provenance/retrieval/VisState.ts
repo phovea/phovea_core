@@ -62,7 +62,19 @@ export class VisState implements IVisState {
     const querySetProps = this.getGroupedPropIds(PropertyType.SET, queryPropValues);
 
     const similarities:number[] = queryPropValues.map((queryPropVal) => {
-      const statePropVal = this._propValues.find((p) => p.id === queryPropVal.id);
+      let statePropVal;
+
+      if(queryPropVal.type === PropertyType.SET) {
+        // get SET property by exact id (`param1 = foo` -> id: `param1 = foo`) and group
+        // in order to match only properties from the same group.
+        // the "fuzzyness" based  will happen later by the Jaccard index in the comparator.
+        statePropVal = this._propValues.find((p) => p.id === queryPropVal.id && p.group === queryPropVal.group);
+
+      } else {
+        // get property with the baseId in order to fuzzy match numerical properties (`year = 1920` -> baseId: `year`).
+        // a detailed check will happen later in the comparator.
+        statePropVal = this._propValues.find((p) => p.baseId === queryPropVal.baseId);
+      }
 
       if(statePropVal) {
         switch (queryPropVal.type) {
@@ -75,12 +87,8 @@ export class VisState implements IVisState {
               .compare(statePropVal, queryPropVal);
 
           case PropertyType.SET:
-            // additional group check for set properties to compare only within the same group
-            if(statePropVal.group === queryPropVal.group) {
-              return (<ISetPropertyComparator>comparatorAccessor(queryPropVal.type))
-                .compare(stateSetProps.get(statePropVal.group), querySetProps.get(queryPropVal.group));
-            }
-
+            return (<ISetPropertyComparator>comparatorAccessor(queryPropVal.type))
+              .compare(stateSetProps.get(statePropVal.group), querySetProps.get(queryPropVal.group));
         }
       }
 
