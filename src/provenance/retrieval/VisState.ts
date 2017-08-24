@@ -62,7 +62,7 @@ export class VisState implements IVisState {
     const querySetProps = this.getGroupedPropIds(PropertyType.SET, queryPropValues);
 
     const similarities:number[] = queryPropValues.map((queryPropVal) => {
-      const statePropVal = this._propValues.find((p) => p.baseId === queryPropVal.baseId);
+      const statePropVal = this._propValues.find((p) => p.id === queryPropVal.id);
 
       if(statePropVal) {
         switch (queryPropVal.type) {
