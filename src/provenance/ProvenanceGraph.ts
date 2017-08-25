@@ -825,6 +825,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     const s = this.makeState(action.resultsIn.name, action.resultsIn.description);
     this.addEdge(clone, 'resultsIn', s);
     this.copyObjects(action.resultsIn, s);
+    s.visState.cloneAndPersist(action.resultsIn.visState);
     return s;
   }
 

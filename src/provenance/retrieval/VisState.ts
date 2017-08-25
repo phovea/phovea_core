@@ -20,6 +20,7 @@ export interface IVisState {
 
   isPersisted():boolean;
   captureAndPersist():Promise<IVisState>;
+  cloneAndPersist(visState:IVisState):boolean;
   compare(comparatorAccessor:(type:PropertyType) => IPropertyComparator, propValues:IPropertyValue[]):number[];
 }
 
@@ -96,6 +97,22 @@ export class VisState implements IVisState {
     });
 
     return similarities;
+  }
+
+  /**
+   * Clone all property values from a given visState and persist the current visState with the newly cloned values
+   * @param {IVisState} visState
+   * @returns {boolean}
+   */
+  cloneAndPersist(visState:IVisState):boolean {
+    if(!visState) {
+      return false;
+    }
+
+    this._propValues = visState.propValues.map((d) => d.clone());
+    this.processPropValues(this._propValues);
+    this.persist();
+    return true;
   }
 
   /**
