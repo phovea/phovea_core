@@ -614,13 +614,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
 
       //update new state
       if (newState) {
-        const objs = current.consistsOf;
-        objs.push.apply(objs, created);
-        removed.forEach((r) => {
-          const i = objs.indexOf(r);
-          objs.splice(i, 1);
-        });
-        objs.forEach((obj) => this.addEdge(next, 'consistsOf', obj));
+        this.copyObjects(current, next, created, removed);
       }
       this.fire('executed_first', action, next);
     } else {
@@ -815,11 +809,22 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     return true;
   }
 
+  private copyObjects(source:StateNode, target:StateNode, created: ObjectNode<any>[] = [], removed: ObjectNode<any>[] = []) {
+    const objs = source.consistsOf;
+    objs.push.apply(objs, created);
+    removed.forEach((r) => {
+      const i = objs.indexOf(r);
+      objs.splice(i, 1);
+    });
+    objs.forEach((obj) => this.addEdge(target, 'consistsOf', obj));
+  }
+
   private copyAction(action: ActionNode, appendTo: StateNode, objectReplacements: {[id: string]: IObjectRef<any>}) {
     const clone = this.initAction(action.clone(), action.requires.map((a) => objectReplacements[String(a.id)] || a));
     this.addEdge(appendTo, 'next', clone);
     const s = this.makeState(action.resultsIn.name, action.resultsIn.description);
     this.addEdge(clone, 'resultsIn', s);
+    this.copyObjects(action.resultsIn, s);
     return s;
   }
 
