@@ -4,7 +4,7 @@
 import {GraphNode, isType} from '../graph/graph';
 import ActionNode from './ActionNode';
 import ObjectNode from './ObjectNode';
-import {VisState} from './retrieval/VisState';
+import {IVisState, VisState} from './retrieval/VisState';
 import {IPropertyValue} from './retrieval/VisStateProperty';
 
 /**
@@ -13,7 +13,7 @@ import {IPropertyValue} from './retrieval/VisStateProperty';
  */
 export default class StateNode extends GraphNode {
 
-  visState:VisState;
+  readonly visState:IVisState;
 
   constructor(name: string, description = '') {
     super('state');
@@ -24,6 +24,9 @@ export default class StateNode extends GraphNode {
   }
 
   private getCurrVisState():Promise<IPropertyValue[]> {
+    if(this.consistsOf.length === 0) {
+      return Promise.reject(`No current vis state for state #${this.id} available. This state does not consists of any objects.`);
+    }
     // use first element and assume that only the application returns a list of terms
     return this.consistsOf
       .map((objectNode) => objectNode.getCurrVisState())
