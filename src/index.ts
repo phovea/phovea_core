@@ -11,6 +11,7 @@ export {argFilter, argList, argSort, indexOf, search} from './internal/array';
 export {copyDnD, hasDnDType, updateDropEffect, dragAble, dropAble} from './internal/dnd';
 export {flagId, uniqueId, uniqueString} from './internal/unique';
 export {default as IdPool} from './internal/IdPool';
+export {resolveImmediately} from './internal/promise';
 import RemoveNodeObserver from './internal/RemoveNodeObserver';
 import HashProperties from './internal/HashProperties';
 import PropertyHandler from './internal/PropertyHandler';
