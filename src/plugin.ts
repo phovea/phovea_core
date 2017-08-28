@@ -94,8 +94,9 @@ function getFactoryMethod(instance: any, factory: string) {
       } else {
         f = 'default';
       }
+    } else {
+      console.error(`neighter a default export nor the 'create' method exists in the module:`, instance);
     }
-    console.error(`neighter a default export nor the 'create' method exists in the module:`, instance);
   }
   if (f.startsWith('new ')) {
     const className = f.substring('new '.length);
