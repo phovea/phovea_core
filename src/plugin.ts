@@ -80,6 +80,23 @@ function getFactoryMethod(instance: any, factory: string) {
     //instantiate the default class
     f = 'new default';
   }
+  if (f === 'create') { //default value
+    if (typeof instance.create === 'function') {
+      //default exists
+      return instance.create;
+    }
+    // try another default
+    if (typeof instance.default === 'function') {
+      //we have a default export
+      const functionName: string = instance.default.name;
+      if (functionName[0] === functionName[0].toUpperCase()) { //starts with a upper case letter assume it is a class
+        f = 'new default';
+      } else {
+        f = 'default';
+      }
+    }
+    console.error(`neighter a default export nor the 'create' method exists in the module:`, instance);
+  }
   if (f.startsWith('new ')) {
     const className = f.substring('new '.length);
     return (...args:any[]) => new instance[className](...args);
