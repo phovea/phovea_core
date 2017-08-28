@@ -133,7 +133,7 @@ export default class IDType extends EventHandler implements IIDType {
    */
   fillMapCache(ids: number[], names: string[]) {
     ids.forEach((id, i) => {
-      const name = names[i];
+      const name = String(names[i]);
       this.name2idCache.set(name, id);
       this.id2nameCache.set(id, name);
     });
@@ -180,6 +180,7 @@ export default class IDType extends EventHandler implements IIDType {
    * @returns a promise of system identifiers that match the input names
    */
   async map(names: string[]): Promise<number[]> {
+    names = names.map((s) => String(s)); // ensure strings
     const toResolve = names.filter((name) => !this.name2idCache.has(name));
     if (toResolve.length === 0) {
       return Promise.resolve(names.map((name) => this.name2idCache.get(name)));
@@ -208,8 +209,9 @@ export default class IDType extends EventHandler implements IIDType {
     }
     const result: string[] = await chooseRequestMethod(`/idtype/${this.id}/unmap`, {ids: rlist(toResolve).toString()});
     toResolve.forEach((id, i) => {
-      this.id2nameCache.set(id, result[i]);
-      this.name2idCache.set(result[i], id);
+      const r = String(result[i]);
+      this.id2nameCache.set(id, r);
+      this.name2idCache.set(r, id);
     });
     const out: string[] = [];
     r.dim(0).forEach((name) => out.push(this.id2nameCache.get(name)));
@@ -226,8 +228,9 @@ export default class IDType extends EventHandler implements IIDType {
    const result: IDPair[] = await getAPIJSON(`/idtype/${this.id}/search`, {q: pattern, limit});
     // cache results
     result.forEach((pair) => {
-      this.id2nameCache.set(pair.id, pair.name);
-      this.name2idCache.set(pair.name, pair.id);
+      const r = String(pair.name);
+      this.id2nameCache.set(pair.id, r);
+      this.name2idCache.set(r, pair.id);
     });
     return result;
   }
