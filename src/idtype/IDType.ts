@@ -12,7 +12,7 @@ import {getAPIJSON, sendAPI} from '../ajax';
 import {EventHandler} from '../event';
 import {none, Range, RangeLike, parse, list as rlist} from '../range';
 import {IIDType, defaultSelectionType, SelectOperation, asSelectOperation} from './IIDType';
-import {resolve} from './manager';
+import {IDTypeLike, resolve} from './manager';
 /**
  * An IDType is a semantic aggregation of an entity type, like Patient and Gene.
  *
@@ -150,10 +150,15 @@ export default class IDType extends EventHandler implements IIDType {
     return this.canBeMappedTo;
   }
 
-  mapToFirstName(ids: RangeLike, toIDType: string|IDType): Promise<string[]> {
+  mapToFirstName(ids: RangeLike, toIDType: IDTypeLike): Promise<string[]> {
     const target = resolve(toIDType);
     const r = parse(ids);
     return chooseRequestMethod(`/idtype/${this.id}/${target.id}`, {ids: r.toString(), mode: 'first'});
+  }
+
+  mapNameToFirstName(names: string[], toIDtype: IDTypeLike): Promise<string[]> {
+    const target = resolve(toIDtype);
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}`, {q: names, mode: 'first'});
   }
 
   mapToName(ids: RangeLike, toIDType: string|IDType): Promise<string[][]> {
@@ -162,16 +167,25 @@ export default class IDType extends EventHandler implements IIDType {
     return chooseRequestMethod(`/idtype/${this.id}/${target.id}`, {ids: r.toString()});
   }
 
-  mapToFirstID(ids: RangeLike, toIDType: string|IDType): Promise<number[]> {
+  mapNameToName(names: string[], toIDtype: IDTypeLike): Promise<string[][]> {
+    const target = resolve(toIDtype);
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}`, {q: names});
+  }
+
+  mapToFirstID(ids: RangeLike, toIDType: IDTypeLike): Promise<number[]> {
     const target = resolve(toIDType);
     const r = parse(ids);
     return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {ids: r.toString(), mode: 'first'});
   }
 
-  mapToID(ids: RangeLike, toIDType: string|IDType): Promise<number[][]> {
+  mapNameToFirstID(names: string[], toIDType: IDTypeLike): Promise<number[]> {
     const target = resolve(toIDType);
-    const r = parse(ids);
-    return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {ids: r.toString()});
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {q: names, mode: 'first'});
+  }
+
+  mapNameToID(names: string[], toIDType: IDTypeLike): Promise<number[][]> {
+    const target = resolve(toIDType);
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {q: names});
   }
 
   /**
