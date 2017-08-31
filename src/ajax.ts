@@ -165,20 +165,22 @@ export function encodeParams(data :any = null) {
   return s.join('&').replace(/%20/g, '+');
 }
 
-type OfflineGenerator = ((data: any) => Promise<any>)|Promise<any>|any;
+type OfflineGenerator = ((data: any, url: string) => Promise<any>) | Promise<any> | any;
+let defaultGenerator: OfflineGenerator = () => Promise.reject('offline');
 
-function defaultOfflineGenerator() {
-  return Promise.reject('offline');
+export function setDefaultOfflineGenerator(generator: OfflineGenerator | null) {
+  defaultGenerator = generator || (() => Promise.reject('offline'));
 }
 
 /**
  * handler in case phovea is set to be in offline mode
  * @param generator
  * @param data
+ * @param url
  * @returns {Promise<OfflineGenerator>}
  */
-function offline(generator: OfflineGenerator, data: any = {}) {
-  return Promise.resolve(typeof generator === 'function' ? generator(data) : generator);
+function offline(generator: OfflineGenerator, url: string, data: any) {
+  return Promise.resolve(typeof generator === 'function' ? generator(data, url) : generator);
 }
 
 /**
@@ -190,9 +192,9 @@ function offline(generator: OfflineGenerator, data: any = {}) {
  * @param offlineGenerator in case phovea is set to be offline
  * @returns {Promise<any>}
  */
-export function sendAPI(url: string, data: any = {}, method = 'GET', expectedDataType = 'json', offlineGenerator: OfflineGenerator = defaultOfflineGenerator): Promise<any> {
+export function sendAPI(url: string, data: any = {}, method = 'GET', expectedDataType = 'json', offlineGenerator: OfflineGenerator = defaultGenerator): Promise<any> {
   if (isOffline) {
-    return offline(offlineGenerator, data);
+    return offline(offlineGenerator, url, data);
   }
   return send(api2absURL(url), data, method, expectedDataType);
 }
@@ -204,9 +206,9 @@ export function sendAPI(url: string, data: any = {}, method = 'GET', expectedDat
  * @param offlineGenerator in case of offline flag is set what should be returned
  * @returns {Promise<any>}
  */
-export function getAPIJSON(url: string, data: any = {}, offlineGenerator: OfflineGenerator = defaultOfflineGenerator): Promise<any> {
+export function getAPIJSON(url: string, data: any = {}, offlineGenerator: OfflineGenerator = defaultGenerator): Promise<any> {
   if (isOffline) {
-    return offline(offlineGenerator, data);
+    return offline(offlineGenerator, url, data);
   }
   return getJSON(api2absURL(url), data);
 }
@@ -219,9 +221,9 @@ export function getAPIJSON(url: string, data: any = {}, offlineGenerator: Offlin
  * @param offlineGenerator in case of offline flag is set what should be returned
  * @returns {Promise<any>}
  */
-export function getAPIData(url: string, data: any = {}, expectedDataType = 'json', offlineGenerator: OfflineGenerator = () => defaultOfflineGenerator): Promise<any> {
+export function getAPIData(url: string, data: any = {}, expectedDataType = 'json', offlineGenerator: OfflineGenerator = () => defaultGenerator): Promise<any> {
   if (isOffline) {
-    return offline(offlineGenerator, data);
+    return offline(offlineGenerator, url, data);
   }
   return getData(api2absURL(url), data, expectedDataType);
 }
