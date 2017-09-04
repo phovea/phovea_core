@@ -88,8 +88,7 @@ function getFactoryMethod(instance: any, factory: string) {
     // try another default
     if (typeof instance.default === 'function') {
       //we have a default export
-      const functionName: string = instance.default.name;
-      if (functionName[0] === functionName[0].toUpperCase()) { //starts with a upper case letter assume it is a class
+      if (instance.default.prototype !== undefined) { // it has a prototype so guess it is a class
         f = 'new default';
       } else {
         f = 'default';
