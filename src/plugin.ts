@@ -80,6 +80,23 @@ function getFactoryMethod(instance: any, factory: string) {
     //instantiate the default class
     f = 'new default';
   }
+  if (f === 'create') { //default value
+    if (typeof instance.create === 'function') {
+      //default exists
+      return instance.create;
+    }
+    // try another default
+    if (typeof instance.default === 'function') {
+      //we have a default export
+      if (instance.default.prototype !== undefined) { // it has a prototype so guess it is a class
+        f = 'new default';
+      } else {
+        f = 'default';
+      }
+    } else {
+      console.error(`neighter a default export nor the 'create' method exists in the module:`, instance);
+    }
+  }
   if (f.startsWith('new ')) {
     const className = f.substring('new '.length);
     return (...args:any[]) => new instance[className](...args);
@@ -113,6 +130,10 @@ export interface IRegistry {
   push(type: string, loader: () => any, desc?: any): void;
   push(type: string, id: string, loader: () => any, desc?: any): void;
   push(type: string, idOrLoader: string | (() => any), descOrLoader: any, desc?: any): void;
+  /**
+   * defined registry using the WebpackDefinePlugin
+   */
+  flags: object;
 }
 
 
@@ -128,7 +149,7 @@ export function register(plugin: string, generator?: (registry: IRegistry) => vo
   }
   knownPlugins.add(plugin);
 
-  generator({push});
+  generator({push, flags: {}});
 }
 
 /**

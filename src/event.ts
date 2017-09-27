@@ -236,14 +236,14 @@ export class EventHandler implements IEventHandler {
   }
 }
 
-const global = new EventHandler();
+const globalHandler = new EventHandler();
 /**
  * register a global event handler
  * @param events
  * @param handler
  */
 export function on(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
-  return global.on(events, handler);
+  return globalHandler.on(events, handler);
 }
 /**
  * unregister a global event handler
@@ -251,7 +251,7 @@ export function on(events: string|{[key: string]: IEventListener}, handler?: IEv
  * @param handler
  */
 export function off(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
-  return global.off(events, handler);
+  return globalHandler.off(events, handler);
 }
 /**
  * fires an event
@@ -259,12 +259,12 @@ export function off(events: string|{[key: string]: IEventListener}, handler?: IE
  * @param extraArguments
  */
 export function fire(events: string, ...args: any[]) {
-  return global.fire(events, ...args);
+  return globalHandler.fire(events, ...args);
 }
 /**
  * list all events
  */
 export function list() {
-  return global.list();
+  return globalHandler.list();
 }
 

@@ -122,6 +122,12 @@ export function dragAble(node: HTMLElement, onDragStart: () => IDragStartResult,
       dndTransferStorage.delete(id);
     }
   });
+  node.addEventListener('dragexit', (e) => {
+    node.classList.remove('phovea-dragging');
+    if (stopPropagation) {
+      e.stopPropagation();
+    }
+  });
 }
 
 /**
@@ -164,8 +170,8 @@ export function dropAble(node: HTMLElement, mimeTypes: string[], onDrop: (result
     }
     return;
   });
-  node.addEventListener('dragleave', () => {
-    node.classList.remove('phovea-dragover');
+  node.addEventListener('dragleave', (evt) => {
+    (<HTMLElement>evt.target).classList.remove('phovea-dragover');
   });
   node.addEventListener('drop', (e) => {
     e.preventDefault();
@@ -175,7 +181,12 @@ export function dropAble(node: HTMLElement, mimeTypes: string[], onDrop: (result
     const effect = <IDragEffect>e.dataTransfer.effectAllowed;
 
     node.classList.remove('phovea-dragover');
-
+    {
+      const cleanup = <HTMLElement>node.ownerDocument.querySelector('.phovea-dragging');
+      if (cleanup) {
+        cleanup.classList.remove('phovea-dragging');
+      }
+    }
     if (isEdgeDnD(e)) {
       const base = e.dataTransfer.getData('text/plain');
       const id = parseInt(base.indexOf(':') >= 0 ? base.substring(0, base.indexOf(':')) : base, 10);
