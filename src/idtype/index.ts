@@ -27,7 +27,8 @@ export {
   defaultSelectionType,
   hoverSelectionType,
   SelectOperation,
-  toSelectOperation
+  toSelectOperation,
+  integrateSelection
 } from './IIDType';
 export {default as IDType} from './IDType';
 export {default as AProductSelectAble, IProductSelectAble} from './AProductSelectAble';

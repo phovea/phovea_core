@@ -9,7 +9,7 @@
 
 import {IPersistable} from '../index';
 import {IEventHandler} from '../event';
-import {Range, Range1D} from '../range';
+import {parse, Range, Range1D, RangeLike} from '../range';
 
 export const defaultSelectionType = 'selected';
 export const hoverSelectionType = 'hovered';
@@ -88,4 +88,16 @@ export function fillWithNone(r: Range, ndim: number) {
     r.dims[r.ndim] = Range1D.none();
   }
   return r;
+}
+
+export function integrateSelection(current: Range, additional: RangeLike, operation: SelectOperation = SelectOperation.SET) {
+  const next = parse(additional);
+  switch (operation) {
+    case SelectOperation.ADD:
+      return current.union(next);
+    case SelectOperation.REMOVE:
+      return current.without(next);
+    default:
+      return next;
+  }
 }
