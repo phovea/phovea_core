@@ -4,7 +4,7 @@
 
 
 import {getAPIJSON, getAPIData} from '../ajax';
-import {Range, parse, range} from '../range';
+import {Range, parse, range, all} from '../range';
 import {IValueType, VALUE_TYPE_INT, VALUE_TYPE_REAL, INumberValueTypeDesc, mask} from '../datatype';
 import {IQueryArgs, ITableDataDescription, ITableColumn} from './ITable';
 import {resolve} from '../idtype';
@@ -158,7 +158,7 @@ export function viaAPI2Loader(): ITableLoader2 {
     },
     data: (desc: ITableDataDescription, range: Range) => {
       if (data == null && (range.isAll || desc.loadAtOnce)) {
-        data = r.objs(desc, range).then((objs) => toFlat(objs, desc.columns));
+        data = r.objs(desc, all()).then((objs) => toFlat(objs, desc.columns));
       }
       if (range.isAll) {
         return data;
