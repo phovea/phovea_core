@@ -25,6 +25,7 @@ export interface IPropertyValue {
   group: string; // define groups of property values for set comparison
 
   isSelected: boolean;
+  isVisible: boolean;
   isDisabled: boolean;
   isActive: boolean;
   needsInput: boolean;
@@ -44,6 +45,7 @@ export class Property implements IProperty {
 
 class PropertyValue implements IPropertyValue {
   isSelected:boolean = false;
+  isVisible:boolean = true;
   isDisabled:boolean = false;
   isActive:boolean = false;
   needsInput:boolean = false;
@@ -85,6 +87,7 @@ class PropertyValue implements IPropertyValue {
 
     pv.group = this.group;
     pv.isSelected = this.isSelected;
+    pv.isSelected = this.isVisible;
     pv.isDisabled = this.isDisabled;
     pv.isActive = this.isActive;
     pv.needsInput = this.needsInput;
