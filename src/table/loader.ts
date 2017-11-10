@@ -4,7 +4,7 @@
 
 
 import {getAPIJSON, getAPIData} from '../ajax';
-import {Range, parse, range} from '../range';
+import {Range, parse, range, all} from '../range';
 import {IValueType, VALUE_TYPE_INT, VALUE_TYPE_REAL, INumberValueTypeDesc, mask} from '../datatype';
 import {IQueryArgs, ITableDataDescription, ITableColumn} from './ITable';
 import {resolve} from '../idtype';
@@ -144,10 +144,10 @@ export function viaAPI2Loader(): ITableLoader2 {
       return rows.then((d: string[]) => range.dim(0).filter(d, desc.size[0]));
     },
     objs: (desc: ITableDataDescription, range: Range) => {
+      if (objs == null && (range.isAll || desc.loadAtOnce)) {
+        objs = getAPIJSON(`/dataset/table/${desc.id}/raw`).then((data) => maskObjects(data, desc));
+      }
       if (range.isAll) {
-        if (objs == null) {
-          objs = getAPIJSON(`/dataset/table/${desc.id}/raw`).then((data) => maskObjects(data, desc));
-        }
         return objs;
       }
       if (objs != null) { //already loading all
@@ -157,10 +157,10 @@ export function viaAPI2Loader(): ITableLoader2 {
       return getAPIData(`/dataset/table/${desc.id}/raw`, {range: range.toString()}).then((data) => maskObjects(data, desc));
     },
     data: (desc: ITableDataDescription, range: Range) => {
+      if (data == null && (range.isAll || desc.loadAtOnce)) {
+        data = r.objs(desc, all()).then((objs) => toFlat(objs, desc.columns));
+      }
       if (range.isAll) {
-        if (data == null) {
-          data = r.objs(desc, range).then((objs) => toFlat(objs, desc.columns));
-        }
         return data;
       }
       if (data != null) { //already loading all
@@ -171,14 +171,19 @@ export function viaAPI2Loader(): ITableLoader2 {
     },
     col: (desc: ITableDataDescription, column: string, range: Range) => {
       const colDesc = (<any>desc).columns.find((c: any) => c.column === column || c.name === column);
-      if (range.isAll) {
-        if (cols[column] == null) {
-          if (objs === null) {
-            cols[column] = getAPIJSON(`/dataset/table/${desc.id}/col/${column}`).then((data) => maskCol(data, colDesc));
-          } else {
+      if (cols[column] == null && (range.isAll || desc.loadAtOnce)) {
+        if (objs === null) {
+          if (desc.loadAtOnce) {
+            objs = getAPIJSON(`/dataset/table/${desc.id}/raw`).then((data) => maskObjects(data, desc));
             cols[column] = objs.then((objs) => objs.map((row) => row[column]));
+          } else {
+            cols[column] = getAPIJSON(`/dataset/table/${desc.id}/col/${column}`).then((data) => maskCol(data, colDesc));
           }
+        } else {
+          cols[column] = objs.then((objs) => objs.map((row) => row[column]));
         }
+      }
+      if (range.isAll) {
         return cols[column];
       }
       if (cols[column] != null) { //already loading all

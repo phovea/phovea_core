@@ -37,6 +37,7 @@ export declare type IAnyTableColumn = ITableColumn<any>;
  * The description, i.e., the metadata for the table (name, idtype, etc.)
  */
 export interface ITableDataDescription extends IDataDescription {
+  readonly loadAtOnce?: boolean;
   readonly idtype: string;
   readonly size: number[];
   readonly columns: IAnyTableColumn[];
