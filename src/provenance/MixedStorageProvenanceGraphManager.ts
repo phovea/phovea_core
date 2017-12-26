@@ -23,6 +23,10 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
     return this.local.list();
   }
 
+  listLocalSync() {
+    return this.local.listSync();
+  }
+
   list(): Promise<IProvenanceGraphDataDescription[]> {
     return Promise.all([this.listLocal(), this.listRemote()]).then((arr) => arr[0].concat(arr[1]));
   }

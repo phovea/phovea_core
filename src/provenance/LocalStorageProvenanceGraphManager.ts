@@ -36,13 +36,16 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
     }
   }
 
-  list() {
+  listSync(): IProvenanceGraphDataDescription[] {
     const lists : string[] = this.loadFromLocalStorage('_provenance_graphs', []);
-    const l = lists
-      .map((id) => this.loadFromLocalStorage('_provenance_graph.' + id, {}))
+    return lists
+      .map((id) => <any>this.loadFromLocalStorage('_provenance_graph.' + id, {}))
       // filter to right application
       .filter((d: IProvenanceGraphDataDescription) => d.attrs && d.attrs.of === this.options.application);
-    return Promise.resolve(l);
+  }
+
+  list() {
+    return Promise.resolve(this.listSync());
   }
 
 
