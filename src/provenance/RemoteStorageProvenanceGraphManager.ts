@@ -22,8 +22,8 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     mixin(this.options, options);
   }
 
-  async list() {
-    return (await listData((d) => d.desc.type === 'graph' && (<any>d.desc).attrs.graphtype === 'provenance_graph' && (<any>d.desc).attrs.of === this.options.application)).map((di) => di.desc);
+  async list(): Promise<IProvenanceGraphDataDescription[]> {
+    return (await listData((d) => d.desc.type === 'graph' && (<any>d.desc).attrs.graphtype === 'provenance_graph' && (<any>d.desc).attrs.of === this.options.application)).map((di) => <any>di.desc);
   }
 
   async getGraph(desc: IProvenanceGraphDataDescription): Promise<GraphBase> {
