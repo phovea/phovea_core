@@ -148,6 +148,8 @@ export function encodeParams(data :any = null) {
           add(prefix, `${key}[]`, v);
         }
       });
+    } else if (value == null) {
+      // skip
     } else if (typeof value === 'object') {
       Object.keys(value).forEach((v) => {
         add(prefix, `${key}[${v}]`, value[v]);
