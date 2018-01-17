@@ -73,7 +73,7 @@ export interface IPlugin {
 /**
  * determines the factory method to use in case of the 'new ' syntax wrap the class constructor using a factory method
  */
-function getFactoryMethod(instance: any, factory: string) {
+export function getFactoryMethod(instance: any, factory: string) {
   let f = factory.trim();
 
   if (f === 'new') {
