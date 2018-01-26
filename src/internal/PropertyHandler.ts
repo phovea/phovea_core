@@ -1,12 +1,17 @@
 /**
  * Created by Samuel Gratzl on 27.12.2016.
  */
+import {EventHandler} from '../event';
 
 
-export default class PropertyHandler {
-  protected map = new Map<string, any>();
+export default class PropertyHandler extends EventHandler {
+  static readonly EVENT_CHANGED = 'changed';
+  static readonly EVENT_ENTRY_CHANGED = 'entryChanged';
+
+  protected readonly map = new Map<string, any>();
 
   constructor(code?: string) {
+    super();
     if (code) {
       this.parse(code);
     }
@@ -80,6 +85,7 @@ export default class PropertyHandler {
    */
   removeProp(name: string) {
     if (this.map.has(name)) {
+      this.fire(PropertyHandler.EVENT_ENTRY_CHANGED + PropertyHandler.MULTI_EVENT_SEPARATOR + PropertyHandler.EVENT_CHANGED, name, this.map.get(name), null);
       this.map.delete(name);
       return true;
     }
@@ -96,8 +102,12 @@ export default class PropertyHandler {
 
   protected parse(code: string = '') {
     //if available use https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
+    const oldLength = this.map.size;
     this.map.clear();
     if (code.length <= 1) { //just the starting character ? or #
+      if (oldLength !== 0) {
+        this.fire(PropertyHandler.EVENT_CHANGED);
+      }
       return;
     }
     //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript/21152762#21152762
@@ -116,6 +126,8 @@ export default class PropertyHandler {
         this.map.set(k, v);
       }
     });
+
+    this.fire(PropertyHandler.EVENT_CHANGED);
   }
 }
 
