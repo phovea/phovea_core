@@ -164,7 +164,7 @@ function createLazyCmdFunctionFactory(): ICmdFunctionFactory {
     }
     const single = singles.find((f) => f.id === id);
     if (single) {
-      return single.load().then((f) => f.factory.bind(f));
+      return single.load().then((f) => f.factory);
     }
     const factory = facts.find((f: any) => id.match(f.creates) != null);
     if (factory) {
