@@ -62,7 +62,7 @@ export default class PropertyHandler extends EventHandler {
   }
 
   /**
-   * returns the given integer value with optinal default, the value itself might be encoded to safe space
+   * returns the given integer value with optional default, the value itself might be encoded to safe space
    * @param name
    * @param defaultValue
    * @returns {number}
@@ -72,10 +72,7 @@ export default class PropertyHandler extends EventHandler {
     if (l === null) {
       return defaultValue;
     }
-    if (l.match(/[0-9-.]/) != null) {
-      return parseInt(l, 10);
-    }
-    return parseInt(l, 36);
+    return parseInt(l, 10);
   }
 
   /**

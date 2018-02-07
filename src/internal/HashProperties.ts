@@ -29,12 +29,7 @@ export default class HashProperties extends PropertyHandler {
   }
 
   setInt(name: string, value: number, update: boolean|number = true) {
-    let v = String(value);
-    if (value > 100) {
-      //idea encode the the using a different radix
-      v = value.toString(36);
-    }
-    this.setProp(name, String(v), update);
+    this.setProp(name, String(value), update);
   }
 
   setProp(name: string, value: string, update: boolean|number = true) {
