@@ -33,6 +33,9 @@ export default class HashProperties extends PropertyHandler {
   }
 
   setProp(name: string, value: string, update: boolean|number = true) {
+    if (this.map.get(name) === value) {
+      return;
+    }
     this.map.set(name, value);
     if (update !== false) {
       this.update(typeof update === 'number' ? update : 0);
