@@ -178,6 +178,12 @@ export default class IDType extends EventHandler implements IIDType {
     return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {ids: r.toString(), mode: 'first'});
   }
 
+  mapToID(ids: RangeLike, toIDType: IDTypeLike): Promise<number[][]> {
+    const target = resolve(toIDType);
+    const r = parse(ids);
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {ids: r.toString()});
+  }
+
   mapNameToFirstID(names: string[], toIDType: IDTypeLike): Promise<number[]> {
     const target = resolve(toIDType);
     return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {q: names, mode: 'first'});
