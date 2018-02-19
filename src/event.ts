@@ -193,7 +193,7 @@ export class EventHandler implements IEventHandler {
   /**
    * list for each registered event the number of listeners
    */
-  list(): {[key: string]: number} {
+  getRegisteredHandlerCount(): {[key: string]: number} {
     const r: {[key: string]: number} = {};
     this.handlers.forEach((handler, type) => {
       r[type] = handler.length;
@@ -264,7 +264,7 @@ export function fire(events: string, ...args: any[]) {
 /**
  * list all events
  */
-export function list() {
-  return globalHandler.list();
+export function getRegisteredHandlerCount() {
+  return globalHandler.getRegisteredHandlerCount();
 }
 
