@@ -7,6 +7,7 @@
 import {IEvent} from '../event';
 import GraphBase, {IGraphFactory, IGraphDataDescription} from './GraphBase';
 import {GraphEdge, GraphNode, IGraph} from './graph';
+import {resolveImmediately} from '../internal/promise';
 
 export default class LocalStorageGraph extends GraphBase implements IGraph {
 
@@ -40,7 +41,7 @@ export default class LocalStorageGraph extends GraphBase implements IGraph {
   }
 
   static migrate(graph: GraphBase, storage = sessionStorage) {
-    return Promise.resolve(graph.migrate()).then(({nodes, edges}) => {
+    return resolveImmediately(graph.migrate()).then(({nodes, edges}) => {
       return new LocalStorageGraph(graph.desc, nodes, edges, storage);
     });
   }

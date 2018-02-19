@@ -7,6 +7,7 @@ import ObjectNode, {op, cat, IObjectRef} from './ObjectNode';
 import StateNode from './StateNode';
 import ProvenanceGraph, {ICmdFunction, ICmdResult, IInverseActionCreator, ICmdFunctionFactory} from './ProvenanceGraph';
 import {currentUserNameOrAnonymous} from '../security';
+import {resolveImmediately} from '../internal/promise';
 
 /**
  * additional data about a performed action
@@ -186,9 +187,9 @@ export default class ActionNode extends GraphNode {
     }
   }
 
-  execute(graph: ProvenanceGraph, withinMilliseconds: number): Promise<ICmdResult> {
+  execute(graph: ProvenanceGraph, withinMilliseconds: number): PromiseLike<ICmdResult> {
     const r = this.f.call(this, this.requires, this.parameter, graph, <number>withinMilliseconds);
-    return Promise.resolve(r);
+    return resolveImmediately(r);
   }
 
   equals(that: ActionNode): boolean {
