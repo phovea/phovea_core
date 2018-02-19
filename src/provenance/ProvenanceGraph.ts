@@ -164,7 +164,7 @@ function createLazyCmdFunctionFactory(): ICmdFunctionFactory {
     }
     const single = singles.find((f) => f.id === id);
     if (single) {
-      return single.load().then((f) => f.factory.bind(f));
+      return single.load().then((f) => f.factory);
     }
     const factory = facts.find((f: any) => id.match(f.creates) != null);
     if (factory) {
@@ -650,7 +650,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
       this.addEdge(action, 'resultsIn', next);
     }
     this.fire('execute', action);
-    if (hash.is('debug')) {
+    if (hash.has('debug')) {
       console.log('execute ' + action.meta + ' ' + action.f_id);
     }
     this.currentlyRunning = true;
@@ -712,6 +712,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
       remaining -= consumed;
     }
 
+    this.fire('run_chain', torun);
     const results =[];
     for (let i = 0; i < torun.length; ++i) {
       const action = torun[i];
@@ -723,6 +724,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     if (this.act !== last.resultsIn) {
       this.switchToImpl(last, last.resultsIn);
     }
+    this.fire('ran_chain', this.act, torun);
     return results;
   }
 
