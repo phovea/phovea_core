@@ -184,15 +184,15 @@ export interface IGraph extends IDataType {
   readonly edges: GraphEdge[];
   readonly nedges: number;
 
-  addNode(n: GraphNode): this|Promise<this>;
-  updateNode(n: GraphNode): this|Promise<this>;
-  removeNode(n: GraphNode): this|Promise<this>;
+  addNode(n: GraphNode): this|PromiseLike<this>;
+  updateNode(n: GraphNode): this|PromiseLike<this>;
+  removeNode(n: GraphNode): this|PromiseLike<this>;
 
-  addEdge(e: GraphEdge): this|Promise<this>;
-  addEdge(s: GraphNode, type: string, t: GraphNode): this|Promise<this>;
+  addEdge(e: GraphEdge): this|PromiseLike<this>;
+  addEdge(s: GraphNode, type: string, t: GraphNode): this|PromiseLike<this>;
 
-  updateEdge(e: GraphEdge): this|Promise<this>;
-  removeEdge(e: GraphEdge): this|Promise<this>;
+  updateEdge(e: GraphEdge): this|PromiseLike<this>;
+  removeEdge(e: GraphEdge): this|PromiseLike<this>;
 }
 
 

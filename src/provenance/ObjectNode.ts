@@ -6,6 +6,7 @@ import {isDataType, IDataType} from '../datatype';
 import {GraphNode, isType} from '../graph/graph';
 import ActionNode from './ActionNode';
 import StateNode from './StateNode';
+import {resolveImmediately} from '../internal/promise';
 
 
 /**
@@ -46,7 +47,7 @@ export interface IObjectRef<T> {
   /**
    * the value
    */
-  readonly v: Promise<T>;
+  readonly v: PromiseLike<T>;
 
   /**
    * maybe null if not defined
@@ -69,7 +70,7 @@ export interface IObjectRef<T> {
  */
 export function ref<T>(v: T, name: string, category = cat.data, hash = name + '_' + category): IObjectRef<T> {
   return {
-    v: Promise.resolve(v),
+    v: resolveImmediately(v),
     value: v,
     name,
     category,
@@ -108,13 +109,13 @@ function restoreData(v: any): any {
   switch (v.type) {
     case 'element':
       if (v.id) {
-        return Promise.resolve(document.getElementById(v.id));
+        return resolveImmediately(document.getElementById(v.id));
       }
       return null;
     case 'dataset':
       return getData(v.persist);
     case 'primitive':
-      return Promise.resolve(v.v);
+      return resolveImmediately(v.v);
   }
   return null;
 }
@@ -126,13 +127,13 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
   /**
    * a promise of the value accessible via .v
    */
-  private _promise: Promise<T>;
+  private _promise: PromiseLike<T>;
   private _persisted: any = null;
 
   constructor(private _v: T, name: string, category = cat.data, hash = name + '_' + category, description = '') {
     super('object');
     if (_v != null) { //if the value is given, auto generate a promise for it
-      this._promise = Promise.resolve(_v);
+      this._promise = resolveImmediately(_v);
     }
     super.setAttr('name', name);
     super.setAttr('category', category);
@@ -147,7 +148,7 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
 
   set value(v: T) {
     this._v = v;
-    this._promise = v == null ? null : Promise.resolve(v);
+    this._promise = v == null ? null : resolveImmediately(v);
     this._persisted = null;
   }
 

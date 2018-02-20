@@ -9,9 +9,10 @@ import {defaultGraphFactory, IGraphFactory, IGraphDataDescription} from './Graph
 import RemoteStoreGraph from './RemoteStorageGraph';
 import MemoryGraph from './MemoryGraph';
 import LocalStorageGraph from './LocalStorageGraph';
+import {resolveImmediately} from '../internal/promise';
 
 export default class GraphProxy extends ADataType<IGraphDataDescription> {
-  private cache: Promise<AGraph> = null;
+  private cache: PromiseLike<AGraph> = null;
   private loaded: AGraph = null;
 
   constructor(desc: IGraphDataDescription) {
@@ -38,7 +39,7 @@ export default class GraphProxy extends ADataType<IGraphDataDescription> {
     return [this.nnodes, this.nedges];
   }
 
-  impl(factory: IGraphFactory = defaultGraphFactory): Promise<AGraph> {
+  impl(factory: IGraphFactory = defaultGraphFactory): PromiseLike<AGraph> {
     if (this.cache) {
       return this.cache;
     }
@@ -46,25 +47,25 @@ export default class GraphProxy extends ADataType<IGraphDataDescription> {
     if (type === 'memory') {
       //memory only
       this.loaded = new MemoryGraph(this.desc, [], [], factory);
-      this.cache = Promise.resolve(this.loaded);
+      this.cache = resolveImmediately(this.loaded);
     } else if (type === 'local') {
       this.loaded = LocalStorageGraph.load(this.desc, factory, localStorage);
-      this.cache = Promise.resolve(this.loaded);
+      this.cache = resolveImmediately(this.loaded);
     } else if (type === 'session') {
       this.loaded = LocalStorageGraph.load(this.desc, factory, sessionStorage);
-      this.cache = Promise.resolve(this.loaded);
+      this.cache = resolveImmediately(this.loaded);
     } else if (type === 'given' && this.desc.graph instanceof AGraph) {
       this.loaded = this.desc.graph;
-      this.cache = Promise.resolve(this.loaded);
+      this.cache = resolveImmediately(this.loaded);
     } else {
-      this.cache = RemoteStoreGraph.load(this.desc, factory).then((graph: AGraph) => this.loaded = graph);
+      this.cache = resolveImmediately(RemoteStoreGraph.load(this.desc, factory)).then((graph: AGraph) => this.loaded = graph);
     }
     return this.cache;
   }
 
   ids(range: RangeLike = all()) {
     if (this.cache) {
-      return this.cache.then((i) => i.ids(range));
+      return Promise.resolve(this.cache.then((i) => i.ids(range)));
     }
     return Promise.resolve(none());
   }

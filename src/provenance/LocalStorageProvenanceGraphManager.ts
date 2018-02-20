@@ -11,6 +11,7 @@ import GraphBase from '../graph/GraphBase';
 import LocalStorageGraph from '../graph/LocalStorageGraph';
 import {ALL_READ_NONE, currentUserNameOrAnonymous} from '../security';
 import MemoryGraph from '../graph/MemoryGraph';
+import {resolveImmediately} from '../internal/promise';
 
 export default class LocalStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private options = {
@@ -45,12 +46,12 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
   }
 
   list() {
-    return Promise.resolve(this.listSync());
+    return resolveImmediately(this.listSync());
   }
 
 
-  getGraph(desc: IProvenanceGraphDataDescription): Promise<LocalStorageGraph> {
-    return Promise.resolve(LocalStorageGraph.load(desc, provenanceGraphFactory(), this.options.storage));
+  getGraph(desc: IProvenanceGraphDataDescription): PromiseLike<LocalStorageGraph> {
+    return resolveImmediately(LocalStorageGraph.load(desc, provenanceGraphFactory(), this.options.storage));
   }
 
   async get(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
@@ -79,14 +80,14 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
     //just remove from the list
     this.options.storage.removeItem(this.options.prefix + '_provenance_graph.' + desc.id);
     this.options.storage.setItem(this.options.prefix + '_provenance_graphs', JSON.stringify(lists));
-    return Promise.resolve(true);
+    return resolveImmediately(true);
   }
 
   edit(graph: ProvenanceGraph|IProvenanceGraphDataDescription, desc: any = {}) {
     const base = graph instanceof ProvenanceGraph ? graph.desc : graph;
     mixin(base, desc);
     this.options.storage.setItem(this.options.prefix + '_provenance_graph.' + base.id, JSON.stringify(base));
-    return Promise.resolve(base);
+    return resolveImmediately(base);
   }
 
   private createDesc(overrides: any = {}) {
