@@ -4,7 +4,8 @@
 import {sendAPI} from '../ajax';
 import {IEvent} from '../event';
 import GraphBase, {IGraphFactory, IGraphDataDescription} from './GraphBase';
-import {GraphEdge, GraphNode, IGraph} from './graph';
+import {GraphEdge, GraphNode} from './graph';
+import {resolveImmediately} from '../internal/promise';
 
 interface ISyncItem {
   type: 'node'|'edge';
@@ -126,9 +127,9 @@ export default class RemoteStoreGraph extends GraphBase {
     });
   }
 
-  private sendQueued(): Promise<any> {
+  private sendQueued(): PromiseLike<any> {
     if (this.queue.length === 0) {
-      return Promise.resolve();
+      return resolveImmediately(null);
     }
     const param = JSON.stringify({operation: 'batch', items: this.queue.slice()});
     // clear
@@ -143,7 +144,7 @@ export default class RemoteStoreGraph extends GraphBase {
 
   private flush() {
     if (this.batchSize <= 1 || this.queue.length === 0) {
-      return Promise.resolve('nothing queued');
+      return resolveImmediately('nothing queued');
     }
     return this.sendQueued();
   }

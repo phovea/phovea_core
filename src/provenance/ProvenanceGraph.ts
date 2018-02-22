@@ -12,6 +12,7 @@ import ActionNode, {IAction, meta, ActionMetaData} from './ActionNode';
 import SlideNode from './SlideNode';
 import {isType, GraphEdge, GraphNode} from '../graph/graph';
 import GraphBase, {IGraphFactory, IGraphDataDescription} from '../graph/GraphBase';
+import {resolveImmediately} from '../internal/promise';
 
 export interface IProvenanceGraphDataDescription extends IGraphDataDescription {
   readonly local?: boolean;
@@ -50,7 +51,7 @@ export interface ICmdResult {
  * abstract definition of a command
  */
 export interface ICmdFunction {
-  (inputs: IObjectRef<any>[], parameters: any, graph: ProvenanceGraph, within: number): Promise<ICmdResult> | ICmdResult;
+  (inputs: IObjectRef<any>[], parameters: any, graph: ProvenanceGraph, within: number): PromiseLike<ICmdResult> | ICmdResult;
 }
 /**
  * a factory to create from an id the corresponding command
@@ -97,7 +98,7 @@ export async function compress(path: ActionNode[]) {
   if (path.length <= 1) {
     return path; //can't compress single one
   }
-  //return Promise.resolve(path);
+  //return resolveImmediately(path);
   //TODO find a strategy how to compress but also invert skipped actions
   const compressor = await createCompressor(path);
   //return path;
@@ -160,7 +161,7 @@ function createLazyCmdFunctionFactory(): ICmdFunctionFactory {
 
   function resolveFun(id: string) {
     if (id === 'noop') {
-      return Promise.resolve(noop);
+      return resolveImmediately(noop);
     }
     const single = singles.find((f) => f.id === id);
     if (single) {
@@ -174,7 +175,7 @@ function createLazyCmdFunctionFactory(): ICmdFunctionFactory {
   }
 
   const lazyFunction = (id: string) => {
-    let _resolved: Promise<any> = null;
+    let _resolved: PromiseLike<any> = null;
     return function (this: any, inputs: IObjectRef<any>[], parameters: any) {
       const that = this, args = Array.from(arguments);
       if (_resolved == null) {
@@ -220,15 +221,15 @@ export function toSlidePath(s?: SlideNode) {
 }
 
 export interface IProvenanceGraphManager {
-  list(): Promise<IProvenanceGraphDataDescription[]>;
-  get(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph>;
-  create(): Promise<ProvenanceGraph>;
+  list(): PromiseLike<IProvenanceGraphDataDescription[]>;
+  get(desc: IProvenanceGraphDataDescription): PromiseLike<ProvenanceGraph>;
+  create(): PromiseLike<ProvenanceGraph>;
 
-  edit(graph: IProvenanceGraphDataDescription|ProvenanceGraph, desc: any): Promise<IProvenanceGraphDataDescription>;
+  edit(graph: IProvenanceGraphDataDescription|ProvenanceGraph, desc: any): PromiseLike<IProvenanceGraphDataDescription>;
 
-  delete(desc: IProvenanceGraphDataDescription): Promise<boolean>;
+  delete(desc: IProvenanceGraphDataDescription): PromiseLike<boolean>;
 
-  import(json: any): Promise<ProvenanceGraph>;
+  import(json: any): PromiseLike<ProvenanceGraph>;
 }
 
 function findMetaObject<T>(find: IObjectRef<T>) {
@@ -572,7 +573,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     }
   }
 
-  private inOrder(f: () => Promise<any>): Promise<any> {
+  private inOrder(f: () => PromiseLike<any>): PromiseLike<any> {
     if (this.currentlyRunning) {
       let helper: ()=>void;
       const r = new Promise((resolve) => {
@@ -640,7 +641,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     };
   }
 
-  private run(action: ActionNode, result: ICmdResult, withinMilliseconds: number | (() => number) = -1): Promise<ICmdResult> {
+  private run(action: ActionNode, result: ICmdResult, withinMilliseconds: number | (() => number) = -1): PromiseLike<ICmdResult> {
     let next: StateNode = action.resultsIn,
       newState = false;
     if (!next) { //create a new state
@@ -660,7 +661,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     }
     this.executeCurrentActionWithin = <number>withinMilliseconds;
 
-    const runningAction = (result ? Promise.resolve(result) : action.execute(this, this.executeCurrentActionWithin)).then(this.executedAction.bind(this, action, newState));
+    const runningAction = (result ? resolveImmediately(result) : action.execute(this, this.executeCurrentActionWithin)).then(this.executedAction.bind(this, action, newState));
 
     runningAction.then((result) => {
       const q = this.nextQueue.shift();
@@ -693,7 +694,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
       if (withinMilliseconds > 0) {
         return resolveIn(withinMilliseconds).then(() => []);
       }
-      return Promise.resolve([]);
+      return resolveImmediately([]);
     }
     //actions = compress(actions, null);
     const last = actions[actions.length - 1];
@@ -730,7 +731,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
 
   undo() {
     if (!this.lastAction) {
-      return Promise.resolve(null);
+      return resolveImmediately(null);
     }
     //create and store the inverse
     if (this.lastAction.inverses != null) {
@@ -746,7 +747,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
       let actions: ActionNode[] = [];
       const act = this.act;
       if (act === state) { //jump to myself
-        return withinMilliseconds >= 0 ? resolveIn(withinMilliseconds).then(() => []) : Promise.resolve([]);
+        return withinMilliseconds >= 0 ? resolveIn(withinMilliseconds).then(() => []) : resolveImmediately([]);
       }
       //lets look at the simple past
       const actPath = act.path,

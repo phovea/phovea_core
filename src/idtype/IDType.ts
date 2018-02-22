@@ -13,6 +13,7 @@ import {EventHandler} from '../event';
 import {none, Range, RangeLike, parse, list as rlist} from '../range';
 import {IIDType, defaultSelectionType, SelectOperation, asSelectOperation} from './IIDType';
 import {IDTypeLike, resolve} from './manager';
+import {resolveImmediately} from '../internal/promise';
 /**
  * An IDType is a semantic aggregation of an entity type, like Patient and Gene.
  *
@@ -203,7 +204,7 @@ export default class IDType extends EventHandler implements IIDType {
     names = names.map((s) => String(s)); // ensure strings
     const toResolve = names.filter((name) => !this.name2idCache.has(name));
     if (toResolve.length === 0) {
-      return Promise.resolve(names.map((name) => this.name2idCache.get(name)));
+      return resolveImmediately(names.map((name) => this.name2idCache.get(name)));
     }
     const ids: number[] = await chooseRequestMethod(`/idtype/${this.id}/map`, {ids: toResolve});
     toResolve.forEach((name, i) => {
@@ -225,7 +226,7 @@ export default class IDType extends EventHandler implements IIDType {
     if (toResolve.length === 0) {
       const result: string[] = [];
       r.dim(0).forEach((name) => result.push(this.id2nameCache.get(name)));
-      return Promise.resolve(result);
+      return resolveImmediately(result);
     }
     const result: string[] = await chooseRequestMethod(`/idtype/${this.id}/unmap`, {ids: rlist(toResolve).toString()});
     toResolve.forEach((id, i) => {

@@ -31,7 +31,7 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
     return Promise.all([this.listLocal(), this.listRemote()]).then((arr) => arr[0].concat(arr[1]));
   }
 
-  delete(desc: IProvenanceGraphDataDescription): Promise<boolean> {
+  delete(desc: IProvenanceGraphDataDescription): PromiseLike<boolean> {
     if (desc.local) {
       return this.local.delete(desc);
     } else {
@@ -39,7 +39,7 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
     }
   }
 
-  get(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
+  get(desc: IProvenanceGraphDataDescription): PromiseLike<ProvenanceGraph> {
     if ((<any>desc).local) {
       return this.local.get(desc);
     } else {
@@ -47,7 +47,7 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
     }
   }
 
-  getGraph(desc: IProvenanceGraphDataDescription): Promise<GraphBase> {
+  getGraph(desc: IProvenanceGraphDataDescription): PromiseLike<GraphBase> {
     if (desc.local) {
       return this.local.getGraph(desc);
     } else {
@@ -55,7 +55,7 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
     }
   }
 
-  edit(graph: IProvenanceGraphDataDescription | ProvenanceGraph, desc: any): Promise<IProvenanceGraphDataDescription> {
+  edit(graph: IProvenanceGraphDataDescription | ProvenanceGraph, desc: any): PromiseLike<IProvenanceGraphDataDescription> {
     const base = graph instanceof ProvenanceGraph ? graph.desc : graph;
     if (base.local) {
       return this.local.edit(base, desc);
@@ -72,7 +72,7 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
     return this.remote.clone(await this.getGraph(desc), extras);
   }
 
-  migrateRemote(graph: ProvenanceGraph, extras: any = {}): Promise<ProvenanceGraph> {
+  migrateRemote(graph: ProvenanceGraph, extras: any = {}): PromiseLike<ProvenanceGraph> {
     return this.remote.migrate(graph, extras);
   }
 
@@ -104,7 +104,7 @@ export default class MixedStorageProvenanceGraphManager implements IProvenanceGr
     return this.local.createInMemory();
   }
 
-  cloneInMemory(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
+  cloneInMemory(desc: IProvenanceGraphDataDescription): PromiseLike<ProvenanceGraph> {
     return this.getGraph(desc).then((graph) => this.local.cloneInMemory(graph));
   }
 }

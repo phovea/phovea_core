@@ -12,6 +12,7 @@ import GraphBase from '../graph/GraphBase';
 import {currentUserNameOrAnonymous} from '../security';
 import GraphProxy from '../graph/GraphProxy';
 import RemoteStoreGraph from '../graph/RemoteStorageGraph';
+import {resolveImmediately} from '../internal/promise';
 
 export default class RemoteStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private options = {
@@ -38,11 +39,11 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     return removeData(desc);
   }
 
-  clone(graph: GraphBase, desc: any = {}): Promise<ProvenanceGraph> {
+  clone(graph: GraphBase, desc: any = {}): PromiseLike<ProvenanceGraph> {
     return this.import(graph.persist(), desc);
   }
 
-  private importImpl(json: {nodes: any[], edges: any[]}, desc: any = {}): Promise<GraphBase> {
+  private importImpl(json: {nodes: any[], edges: any[]}, desc: any = {}): PromiseLike<GraphBase> {
     const pdesc: any = mixin({
       type: 'graph',
       attrs: {
@@ -60,15 +61,15 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     return upload(pdesc).then((base: GraphProxy) => base.impl(provenanceGraphFactory()));
   }
 
-  import(json: any, desc: any = {}): Promise<ProvenanceGraph> {
+  import(json: any, desc: any = {}): PromiseLike<ProvenanceGraph> {
     return this.importImpl(json, desc).then((impl) => {
       return new ProvenanceGraph(<IProvenanceGraphDataDescription>impl.desc, impl);
     });
   }
 
-  migrate(graph: ProvenanceGraph, desc: any = {}): Promise<ProvenanceGraph> {
+  migrate(graph: ProvenanceGraph, desc: any = {}): PromiseLike<ProvenanceGraph> {
     return this.importImpl({nodes: [], edges: []}, desc).then((backend: RemoteStoreGraph) => {
-      return Promise.resolve(graph.backend.migrate())
+      return resolveImmediately(graph.backend.migrate())
         .then(({nodes, edges}) => {
           return backend.addAll(nodes, edges);
         }).then(() => {
