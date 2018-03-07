@@ -51,9 +51,10 @@ function parseType(expectedDataType: string, response: Response) {
  * @param data arguments
  * @param method the http method
  * @param expectedDataType expected data type to return, in case of JSON it will be parsed using JSON.parse
+ * @param requestBody body mime type, default auto derive
  * @returns {Promise<any>}
  */
-export async function send(url: string, data: any = {}, method = 'GET', expectedDataType = 'json'): Promise<any> {
+export async function send(url: string, data: any = {}, method = 'GET', expectedDataType = 'json', requestBody = 'formdata'): Promise<any> {
   // for compatibility
   method = method.toUpperCase();
 
@@ -73,11 +74,30 @@ export async function send(url: string, data: any = {}, method = 'GET', expected
       'Accept': 'application/json'
     },
   };
-  if (data && !(data instanceof FormData)) {
-    (<any>options.headers)['Content-Type'] = 'application/x-www-form-urlencoded';
-    options.body = encodeParams(data);
-  } else if (data) {
-    options.body = data;
+
+  if (data) {
+    let mimetype: string;
+    switch (requestBody.trim().toLowerCase()) {
+      case 'json':
+      case 'application/json':
+        mimetype = 'application/json';
+        options.body = typeof data === 'string' ? data : JSON.stringify(data);
+        break;
+      case 'text':
+      case 'text/plain':
+        mimetype = 'text/plain';
+        options.body = String(data);
+        break;
+      case 'blob':
+      case 'arraybuffer':
+        mimetype = 'application/octet-stream';
+        options.body = data;
+        break;
+      default:
+        mimetype = 'application/x-www-form-urlencoded';
+        options.body = data instanceof FormData ? data : encodeParams(data);
+    }
+    (<any>options.headers)['Content-Type'] = mimetype;
   }
 
   // there are no typings for fetch so far
