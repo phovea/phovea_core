@@ -224,7 +224,7 @@ export class AVisInstance extends EventHandler {
     return Promise.resolve(null);
   }
 
-  restore(persisted: any) {
+  restore(persisted: any): Promise<AVisInstance> {
     return Promise.resolve(this);
   }
 

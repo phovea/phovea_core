@@ -213,7 +213,7 @@ export function transpose(m: any[][]) {
   return r;
 }
 
-function maskImpl(arr: number|number[], missing: number) {
+function maskImpl(arr: number|number[], missing: number): number|number[] {
   if (Array.isArray(arr)) {
     const vs = <number[]>arr;
     if (vs.indexOf(missing) >= 0) {
@@ -223,7 +223,7 @@ function maskImpl(arr: number|number[], missing: number) {
   return arr === missing ? NaN : arr;
 }
 
-export function mask(arr: number|number[], desc: INumberValueTypeDesc) {
+export function mask(arr: number|number[], desc: INumberValueTypeDesc): number|number[] {
   if (desc.type === VALUE_TYPE_INT && 'missing' in desc) {
     return maskImpl(arr, desc.missing);
   }
