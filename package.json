@@ -50,7 +50,7 @@
     "dist": "mkdirp dist && cd build && tar cvzf ../dist/phovea_core.tar.gz *"
   },
   "dependencies": {
-    "tslib": "1.6.0",
+    "tslib": "1.9.0",
     "@types/whatwg-fetch": "0.0.33",
     "@types/handlebars": "4.0.33"
   },
