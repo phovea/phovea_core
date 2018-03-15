@@ -8,11 +8,12 @@
  */
 
 
-import {getAPIJSON} from '../ajax';
+import {getAPIJSON, sendAPI} from '../ajax';
 import {EventHandler} from '../event';
 import {none, Range, RangeLike, parse, list as rlist} from '../range';
 import {IIDType, defaultSelectionType, SelectOperation, asSelectOperation} from './IIDType';
-import {resolve} from './manager';
+import {IDTypeLike, resolve} from './manager';
+import {resolveImmediately} from '../internal/promise';
 /**
  * An IDType is a semantic aggregation of an entity type, like Patient and Gene.
  *
@@ -133,7 +134,7 @@ export default class IDType extends EventHandler implements IIDType {
    */
   fillMapCache(ids: number[], names: string[]) {
     ids.forEach((id, i) => {
-      const name = names[i];
+      const name = String(names[i]);
       this.name2idCache.set(name, id);
       this.id2nameCache.set(id, name);
     });
@@ -150,28 +151,48 @@ export default class IDType extends EventHandler implements IIDType {
     return this.canBeMappedTo;
   }
 
-  mapToFirstName(ids: RangeLike, toIDType: string|IDType): Promise<string[]> {
+  mapToFirstName(ids: RangeLike, toIDType: IDTypeLike): Promise<string[]> {
     const target = resolve(toIDType);
     const r = parse(ids);
-    return getAPIJSON(`/idtype/${this.id}/${target.id}`, {ids: r.toString(), mode: 'first'});
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}`, {ids: r.toString(), mode: 'first'});
+  }
+
+  mapNameToFirstName(names: string[], toIDtype: IDTypeLike): Promise<string[]> {
+    const target = resolve(toIDtype);
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}`, {q: names, mode: 'first'});
   }
 
   mapToName(ids: RangeLike, toIDType: string|IDType): Promise<string[][]> {
     const target = resolve(toIDType);
     const r = parse(ids);
-    return getAPIJSON(`/idtype/${this.id}/${target.id}`, {ids: r.toString()});
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}`, {ids: r.toString()});
   }
 
-  mapToFirstID(ids: RangeLike, toIDType: string|IDType): Promise<number[]> {
-    const target = resolve(toIDType);
-    const r = parse(ids);
-    return getAPIJSON(`/idtype/${this.id}/${target.id}/map`, {ids: r.toString(), mode: 'first'});
+  mapNameToName(names: string[], toIDtype: IDTypeLike): Promise<string[][]> {
+    const target = resolve(toIDtype);
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}`, {q: names});
   }
 
-  mapToID(ids: RangeLike, toIDType: string|IDType): Promise<number[][]> {
+  mapToFirstID(ids: RangeLike, toIDType: IDTypeLike): Promise<number[]> {
     const target = resolve(toIDType);
     const r = parse(ids);
-    return getAPIJSON(`/idtype/${this.id}/${target.id}/map`, {ids: r.toString()});
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {ids: r.toString(), mode: 'first'});
+  }
+
+  mapToID(ids: RangeLike, toIDType: IDTypeLike): Promise<number[][]> {
+    const target = resolve(toIDType);
+    const r = parse(ids);
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {ids: r.toString()});
+  }
+
+  mapNameToFirstID(names: string[], toIDType: IDTypeLike): Promise<number[]> {
+    const target = resolve(toIDType);
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {q: names, mode: 'first'});
+  }
+
+  mapNameToID(names: string[], toIDType: IDTypeLike): Promise<number[][]> {
+    const target = resolve(toIDType);
+    return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {q: names});
   }
 
   /**
@@ -180,11 +201,12 @@ export default class IDType extends EventHandler implements IIDType {
    * @returns a promise of system identifiers that match the input names
    */
   async map(names: string[]): Promise<number[]> {
+    names = names.map((s) => String(s)); // ensure strings
     const toResolve = names.filter((name) => !this.name2idCache.has(name));
     if (toResolve.length === 0) {
-      return Promise.resolve(names.map((name) => this.name2idCache.get(name)));
+      return resolveImmediately(names.map((name) => this.name2idCache.get(name)));
     }
-    const ids: number[] = await getAPIJSON(`/idtype/${this.id}/map`, {ids: toResolve});
+    const ids: number[] = await chooseRequestMethod(`/idtype/${this.id}/map`, {ids: toResolve});
     toResolve.forEach((name, i) => {
       this.name2idCache.set(name, ids[i]);
       this.id2nameCache.set(ids[i], name);
@@ -204,12 +226,13 @@ export default class IDType extends EventHandler implements IIDType {
     if (toResolve.length === 0) {
       const result: string[] = [];
       r.dim(0).forEach((name) => result.push(this.id2nameCache.get(name)));
-      return Promise.resolve(result);
+      return resolveImmediately(result);
     }
-    const result: string[] = await getAPIJSON(`/idtype/${this.id}/unmap`, {ids: rlist(toResolve).toString()});
+    const result: string[] = await chooseRequestMethod(`/idtype/${this.id}/unmap`, {ids: rlist(toResolve).toString()});
     toResolve.forEach((id, i) => {
-      this.id2nameCache.set(id, result[i]);
-      this.name2idCache.set(result[i], id);
+      const r = String(result[i]);
+      this.id2nameCache.set(id, r);
+      this.name2idCache.set(r, id);
     });
     const out: string[] = [];
     r.dim(0).forEach((name) => out.push(this.id2nameCache.get(name)));
@@ -226,11 +249,37 @@ export default class IDType extends EventHandler implements IIDType {
    const result: IDPair[] = await getAPIJSON(`/idtype/${this.id}/search`, {q: pattern, limit});
     // cache results
     result.forEach((pair) => {
-      this.id2nameCache.set(pair.id, pair.name);
-      this.name2idCache.set(pair.name, pair.id);
+      const r = String(pair.name);
+      this.id2nameCache.set(pair.id, r);
+      this.name2idCache.set(r, pair.id);
     });
     return result;
   }
+
+  /**
+   * search for all matching ids for a given pattern
+   * @param pattern
+   * @param limit maximal number of results
+   * @return {Promise<void>}
+   */
+  searchMapping(pattern: string, toIDType: string|IDType, limit = 10): Promise<{match: string, to: string}[]> {
+    const target = resolve(toIDType);
+    return getAPIJSON(`/idtype/${this.id}/${target.id}/search`, {q: pattern, limit});
+  }
+}
+
+/**
+ * chooses whether a GET or POST request based on the expected url length
+ * @param url
+ * @param data
+ * @returns {Promise<any>}
+ */
+function chooseRequestMethod(url: string, data: any = {}) {
+  const dataLengthGuess = JSON.stringify(data);
+  const lengthGuess = url.length + dataLengthGuess.length;
+
+  const method = lengthGuess < 2000 ? 'GET' : 'POST';
+  return sendAPI(url, data, method);
 }
 
 

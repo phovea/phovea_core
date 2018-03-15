@@ -8,9 +8,13 @@
  */
 
 export {argFilter, argList, argSort, indexOf, search} from './internal/array';
-export {copyDnD, hasDnDType, updateDropEffect} from './internal/dnd';
+export {copyDnD, hasDnDType, updateDropEffect, dragAble, dropAble} from './internal/dnd';
 export {flagId, uniqueId, uniqueString} from './internal/unique';
 export {default as IdPool} from './internal/IdPool';
+export {resolveImmediately} from './internal/promise';
+export {default as HashProperties} from './internal/HashProperties';
+export {default as PropertyHandler} from './internal/PropertyHandler';
+import RemoveNodeObserver from './internal/RemoveNodeObserver';
 import HashProperties from './internal/HashProperties';
 import PropertyHandler from './internal/PropertyHandler';
 import {__extends} from 'tslib';
@@ -91,7 +95,8 @@ _init();
  * @param {Object} bs
  * @returns {Object} a with extended b
  */
-export function mixin<T>(a: T, ...bs: any[]): T {
+export function mixin<T, U>(a: T, b: U, ...bs: any[]): T & U {
+  bs.unshift(b);
   function extend(r: any, b: any) {
     Object.keys(b).forEach((key) => {
       const v = b[key];
@@ -109,7 +114,7 @@ export function mixin<T>(a: T, ...bs: any[]): T {
       a = extend(a, b);
     }
   });
-  return a;
+  return <any>a;
 }
 
 /**
@@ -268,38 +273,20 @@ export function fixId(name: string) {
 export const fix_id = fixId;
 /* tslint:enable:variable-name */
 
+
+const removeNodeObserver = new RemoveNodeObserver();
+
 /**
  * utility function to get notified, when the given dom element is removed from its parent
  * @param node
  * @param callback
  */
 export function onDOMNodeRemoved(node: Element|Element[], callback: () => void, thisArg?: any) {
-  let arr: any[];
-  if (!Array.isArray(node)) {
-    arr = [node];
+  if (Array.isArray(node)) {
+    node.forEach((nodeid) => removeNodeObserver.observe(nodeid, callback, thisArg));
   } else {
-    arr = <any[]>node;
+    removeNodeObserver.observe(node, callback, thisArg);
   }
-  arr.forEach((n) => {
-    const body = n.ownerDocument.body;
-    function l(evt: Event) {
-      //since this event bubbles check if it the right node
-      let act = n;
-      while (act) { //check if node or its parent are removed
-        if (evt.target === act) {
-          node = null;
-          n.removeEventListener('DOMNodeRemoved', l);
-          body.removeEventListener('DOMNodeRemoved', l);
-          callback.call(thisArg, n);
-          return;
-        }
-        act = act.parentNode;
-      }
-    }
-
-    n.addEventListener('DOMNodeRemoved', l);
-    body.addEventListener('DOMNodeRemoved', l);
-  });
 }
 
 /**
@@ -339,24 +326,27 @@ export const param = new PropertyHandler(location.search);
 
 
 /**
- * create a delayed call, can be called multiple times but only the last one at most delayed by timeToDelay will be executed
+ * create a debounce call, can be called multiple times but only the last one at most delayed by timeToDelay will be executed
  * @param callback
- * @param thisCallback
  * @param timeToDelay
  * @return {function(...[any]): undefined}
  */
-export function delayedCall(this: any, callback: () => void, timeToDelay = 100, thisCallback = this) {
+export function debounce(this: any, callback: () => void, timeToDelay = 100) {
   let tm = -1;
-  return (...args: any[]) => {
+  return function(...args: any[]) {
     if (tm >= 0) {
       clearTimeout(tm);
       tm = -1;
     }
-    args.unshift(thisCallback);
+    args.unshift(this);
     tm = setTimeout(callback.bind.apply(callback, args), timeToDelay);
   };
 }
 
+/**
+ * @deprecated use debounce instead
+ */
+export const delayedCall = debounce;
 
 /**
  * computes the absolute offset of the given element

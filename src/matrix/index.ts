@@ -15,3 +15,5 @@ export {
 } from './IMatrix';
 
 export {asMatrix, IAsMatrixOptions} from './Matrix';
+export {asNameVector as asColumnNameVector} from './internal/MatrixColumnNameVector';
+export {asNameVector as asRowNameVector} from './internal/MatrixRowNameVector';

@@ -136,6 +136,12 @@ export class EventHandler implements IEventHandler {
   static readonly MULTI_EVENT_SEPARATOR = ',';
   private readonly handlers = new Map<string, SingleEventHandler>();
 
+  private readonly propagationHandler: IEventListener = (event: IEvent) => {
+    if (!event.isPropagationStopped()) {
+      this.fireEvent(propagateEvent(event, this));
+    }
+  }
+
   /**
    * register a global event handler
    * @param events either one event string (multiple are supported using , as separator) or a map of event handlers
@@ -187,7 +193,7 @@ export class EventHandler implements IEventHandler {
   /**
    * list for each registered event the number of listeners
    */
-  list(): {[key: string]: number} {
+  getRegisteredHandlerCount(): {[key: string]: number} {
     const r: {[key: string]: number} = {};
     this.handlers.forEach((handler, type) => {
       r[type] = handler.length;
@@ -222,35 +228,43 @@ export class EventHandler implements IEventHandler {
    * @param events
    */
   propagate(progatee: IEventHandler, ...events: string[]) {
-    progatee.on(events.join(EventHandler.MULTI_EVENT_SEPARATOR), (event: IEvent) => {
-      if (!event.isPropagationStopped()) {
-        this.fireEvent(propagateEvent(event, this));
-      }
-    });
+    progatee.on(events.join(EventHandler.MULTI_EVENT_SEPARATOR), this.propagationHandler);
+  }
+
+  stopPropagation(progatee: IEventHandler, ...events: string[]) {
+    progatee.off(events.join(EventHandler.MULTI_EVENT_SEPARATOR), this.propagationHandler);
   }
 }
 
-const global = new EventHandler();
+const globalHandler = new EventHandler();
 /**
  * register a global event handler
  * @param events
  * @param handler
  */
-export const on = global.on.bind(global);
+export function on(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
+  return globalHandler.on(events, handler);
+}
 /**
  * unregister a global event handler
  * @param events
  * @param handler
  */
-export const off = global.off.bind(global);
+export function off(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
+  return globalHandler.off(events, handler);
+}
 /**
  * fires an event
  * @param event
  * @param extraArguments
  */
-export const fire = global.fire.bind(global);
+export function fire(events: string, ...args: any[]) {
+  return globalHandler.fire(events, ...args);
+}
 /**
  * list all events
  */
-export const list = global.list.bind(global);
+export function getRegisteredHandlerCount() {
+  return globalHandler.getRegisteredHandlerCount();
+}
 

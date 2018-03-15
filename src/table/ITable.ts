@@ -37,6 +37,7 @@ export declare type IAnyTableColumn = ITableColumn<any>;
  * The description, i.e., the metadata for the table (name, idtype, etc.)
  */
 export interface ITableDataDescription extends IDataDescription {
+  readonly loadAtOnce?: boolean;
   readonly idtype: string;
   readonly size: number[];
   readonly columns: IAnyTableColumn[];
@@ -120,10 +121,10 @@ export interface ITable extends IDataType {
 
   /**
    * returns a promise for getting one cell
-   * @param i
-   * @param j
+   * @param row
+   * @param col
    */
-  at(i: number, j: number): Promise<IValueType>;
+  at(row: number, col: number): Promise<IValueType>;
 
   /**
    * Returns a promise for getting the data as two dimensional array.

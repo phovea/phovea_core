@@ -36,6 +36,10 @@ export interface IPluginDesc {
 
   /**
    * name of the method, which is the entry point of this plugin
+   * options:
+   *  * `<factorymethod>` the name of the factory method to use
+   *  * `new <classname>` will create a new instance of the given class
+   *  * `new` will create an instance of the default exported class of this module, same as `new default`
    * @default create
    */
   readonly factory: string;
@@ -66,8 +70,42 @@ export interface IPlugin {
   factory(...args: any[]): any;
 }
 
-const registry: IPluginDesc[] = [];
+/**
+ * determines the factory method to use in case of the 'new ' syntax wrap the class constructor using a factory method
+ */
+export function getFactoryMethod(instance: any, factory: string) {
+  let f = factory.trim();
 
+  if (f === 'new') {
+    //instantiate the default class
+    f = 'new default';
+  }
+  if (f === 'create') { //default value
+    if (typeof instance.create === 'function') {
+      //default exists
+      return instance.create;
+    }
+    // try another default
+    if (typeof instance.default === 'function') {
+      //we have a default export
+      if (instance.default.prototype !== undefined) { // it has a prototype so guess it is a class
+        f = 'new default';
+      } else {
+        f = 'default';
+      }
+    } else {
+      console.error(`neighter a default export nor the 'create' method exists in the module:`, instance);
+    }
+  }
+  if (f.startsWith('new ')) {
+    const className = f.substring('new '.length);
+    return (...args:any[]) => new instance[className](...args);
+  }
+  return instance[f];
+}
+
+
+const registry: IPluginDesc[] = [];
 
 function push(type: string, idOrLoader: string | (() => any), descOrLoader: any, desc?: any) {
   const id = typeof idOrLoader === 'string' ? <string>idOrLoader : uniqueString(type);
@@ -81,7 +119,7 @@ function push(type: string, idOrLoader: string | (() => any), descOrLoader: any,
     version: '1.0.0',
     load: async (): Promise<IPlugin> => {
       const instance= await Promise.resolve(loader());
-      return {desc: p, factory: instance[p.factory]};
+      return {desc: p, factory: getFactoryMethod(instance, p.factory)};
     }
   }, typeof descOrLoader === 'function' ? desc : descOrLoader);
 
@@ -92,6 +130,10 @@ export interface IRegistry {
   push(type: string, loader: () => any, desc?: any): void;
   push(type: string, id: string, loader: () => any, desc?: any): void;
   push(type: string, idOrLoader: string | (() => any), descOrLoader: any, desc?: any): void;
+  /**
+   * defined registry using the WebpackDefinePlugin
+   */
+  flags: object;
 }
 
 
@@ -107,7 +149,7 @@ export function register(plugin: string, generator?: (registry: IRegistry) => vo
   }
   knownPlugins.add(plugin);
 
-  generator({push});
+  generator({push, flags: {}});
 }
 
 /**

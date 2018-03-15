@@ -4,8 +4,9 @@
 /**
  * Created by Samuel Gratzl on 22.10.2014.
  */
-import {IDataDescription} from '../datatype';
-import {GraphNode, GraphEdge, AGraph, IGraph} from './graph';
+import {GraphNode, GraphEdge, AGraph, IGraph, IGraphDataDescription} from './graph';
+export {IGraphDataDescription} from './graph';
+import {resolveImmediately} from '../internal/promise';
 
 export interface IGraphFactory {
   makeNode(p: any): GraphNode;
@@ -16,25 +17,6 @@ export const defaultGraphFactory: IGraphFactory = {
   makeNode: (p: any) => ((new GraphNode()).restore(p)),
   makeEdge: (p: any, lookup) => ((new GraphEdge()).restore(p, lookup))
 };
-
-export interface IGraphDataDescription extends IDataDescription {
-  /**
-   * size: [number of nodes, number of edges]
-   */
-  readonly size: [number, number];
-
-  /**
-   * where to store: memory, remote, local, session, given (requires instance)
-   */
-  readonly storage?: string;
-
-  /**
-   * in case of storage type 'given'
-   */
-  readonly graph?: AGraph;
-
-  readonly attrs: {[key: string]: any};
-}
 
 export default class GraphBase extends AGraph implements IGraph {
   private readonly _nodes: GraphNode[];
@@ -54,19 +36,30 @@ export default class GraphBase extends AGraph implements IGraph {
     return this._edges;
   }
 
-  addNode(n: GraphNode): this|Promise<this> {
+  /**
+   * migrate one graph to another cleaning this graph returning node references
+   * @returns {{nodes: GraphNode[]; edges: GraphEdge[]}}
+   */
+  migrate(): PromiseLike<{nodes: GraphNode[], edges: GraphEdge[]}>|{nodes: GraphNode[], edges: GraphEdge[]} {
+    return {
+      nodes: this.nodes,
+      edges: this.edges
+    };
+  }
+
+  addNode(n: GraphNode): this|PromiseLike<this> {
     this.nodes.push(n);
     this.fire('add_node', n);
     return this;
   }
 
-  updateNode(n: GraphNode): this|Promise<this> {
+  updateNode(n: GraphNode): this|PromiseLike<this> {
     //since we store a reference we don't need to do anything
     this.fire('update_node', n);
     return this;
   }
 
-  removeNode(n: GraphNode): this|Promise<this> {
+  removeNode(n: GraphNode): this|PromiseLike<this> {
     const i = this.nodes.indexOf(n);
     if (i < 0) {
       return null;
@@ -76,7 +69,7 @@ export default class GraphBase extends AGraph implements IGraph {
     return this;
   }
 
-  addEdge(edgeOrSource: GraphEdge | GraphNode, type?: string, t?: GraphNode): this|Promise<this> {
+  addEdge(edgeOrSource: GraphEdge | GraphNode, type?: string, t?: GraphNode): this|PromiseLike<this> {
     if (edgeOrSource instanceof GraphEdge) {
       const e = <GraphEdge>edgeOrSource;
       this.edges.push(e);
@@ -86,13 +79,13 @@ export default class GraphBase extends AGraph implements IGraph {
     return this.addEdge(new GraphEdge(type, <GraphNode>edgeOrSource, t));
   }
 
-  updateEdge(e: GraphEdge): this|Promise<this> {
+  updateEdge(e: GraphEdge): this|PromiseLike<this> {
     //since we store a reference we don't need to do anything
     this.fire('update_edge', e);
     return this;
   }
 
-  removeEdge(e: GraphEdge): this|Promise<this> {
+  removeEdge(e: GraphEdge): this|PromiseLike<this> {
     const i = this.edges.indexOf(e);
     if (i < 0) {
       return null;

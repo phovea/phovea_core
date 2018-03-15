@@ -9,7 +9,9 @@ import ProvenanceGraph, {
 } from './ProvenanceGraph';
 import GraphBase from '../graph/GraphBase';
 import LocalStorageGraph from '../graph/LocalStorageGraph';
-import {currentUserNameOrAnonymous} from '../security';
+import {ALL_READ_NONE, currentUserNameOrAnonymous} from '../security';
+import MemoryGraph from '../graph/MemoryGraph';
+import {resolveImmediately} from '../internal/promise';
 
 export default class LocalStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private options = {
@@ -22,15 +24,34 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
     mixin(this.options, options);
   }
 
+  private loadFromLocalStorage<T>(suffix: string, defaultValue: T): T {
+    try {
+      const item = this.options.storage.getItem(this.options.prefix + suffix);
+      if(item === undefined || item === null) {
+        return defaultValue;
+      }
+      return JSON.parse(item);
+    } catch(e) {
+      console.error(e);
+      return defaultValue;
+    }
+  }
+
+  listSync(): IProvenanceGraphDataDescription[] {
+    const lists : string[] = this.loadFromLocalStorage('_provenance_graphs', []);
+    return lists
+      .map((id) => <any>this.loadFromLocalStorage('_provenance_graph.' + id, {}))
+      // filter to right application
+      .filter((d: IProvenanceGraphDataDescription) => d.attrs && d.attrs.of === this.options.application);
+  }
+
   list() {
-    const lists : string[] = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
-    const l = lists.map((id) => JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graph.' + id)));
-    return Promise.resolve(l);
+    return resolveImmediately(this.listSync());
   }
 
 
-  getGraph(desc: IProvenanceGraphDataDescription): Promise<LocalStorageGraph> {
-    return Promise.resolve(LocalStorageGraph.load(desc, provenanceGraphFactory(), this.options.storage));
+  getGraph(desc: IProvenanceGraphDataDescription): PromiseLike<LocalStorageGraph> {
+    return resolveImmediately(LocalStorageGraph.load(desc, provenanceGraphFactory(), this.options.storage));
   }
 
   async get(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph> {
@@ -38,7 +59,8 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
   }
 
   async clone(graph: GraphBase, desc: any = {}): Promise<ProvenanceGraph> {
-    const pdesc = this.createDesc(desc);
+    const description = `Cloned from ${graph.desc.name} created by ${graph.desc.creator}\n${(graph.desc.description || '')}`;
+    const pdesc = this.createDesc(mixin({name: graph.desc.name, description}, desc));
     const newGraph = await this.getGraph(pdesc);
     newGraph.restoreDump(graph.persist(), provenanceGraphFactory());
     return new ProvenanceGraph(pdesc, newGraph);
@@ -54,19 +76,28 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
   delete(desc: IProvenanceGraphDataDescription) {
     const lists = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
     lists.splice(lists.indexOf(desc.id), 1);
-    LocalStorageGraph.delete(desc);
+    LocalStorageGraph.delete(desc, this.options.storage);
     //just remove from the list
+    this.options.storage.removeItem(this.options.prefix + '_provenance_graph.' + desc.id);
     this.options.storage.setItem(this.options.prefix + '_provenance_graphs', JSON.stringify(lists));
-    return Promise.resolve(true);
+    return resolveImmediately(true);
+  }
+
+  edit(graph: ProvenanceGraph|IProvenanceGraphDataDescription, desc: any = {}) {
+    const base = graph instanceof ProvenanceGraph ? graph.desc : graph;
+    mixin(base, desc);
+    this.options.storage.setItem(this.options.prefix + '_provenance_graph.' + base.id, JSON.stringify(base));
+    return resolveImmediately(base);
   }
 
   private createDesc(overrides: any = {}) {
     const lists: string[] = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
-    const id = this.options.prefix + (lists.length > 0 ? String(1 + Math.max(...lists.map((d) => parseInt(d.slice(this.options.prefix.length), 10)))) : '0');
+    const uid = (lists.length > 0 ? String(1 + Math.max(...lists.map((d) => parseInt(d.slice(this.options.prefix.length), 10)))) : '0');
+    const id = this.options.prefix + uid;
     const desc: IProvenanceGraphDataDescription = mixin({
       type: 'provenance_graph',
-      name: 'Local Workspace#' + id,
-      fqname: this.options.prefix + '.Provenance Graph #' + id,
+      name: 'Temporary Session ' + uid,
+      fqname: this.options.prefix + 'Temporary Session ' + uid,
       id,
       local: true,
       size: <[number, number]>[0, 0],
@@ -75,6 +106,7 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
         of: this.options.application
       },
       creator: currentUserNameOrAnonymous(),
+      permissions: ALL_READ_NONE,
       ts: Date.now(),
       description: ''
     }, overrides);
@@ -87,5 +119,39 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
   create(desc: any = {}) {
     const pdesc = this.createDesc(desc);
     return this.get(pdesc);
+  }
+
+  private createInMemoryDesc(base?: IProvenanceGraphDataDescription): IProvenanceGraphDataDescription {
+    return mixin({
+      type: 'provenance_graph',
+      name: 'In Memory Session',
+      fqname: 'In Memory Session',
+      id: 'memory',
+      local: true,
+      size: <[number, number]>[0, 0],
+      attrs: {
+        graphtype: 'provenance_graph',
+        of: this.options.application
+      },
+      creator: currentUserNameOrAnonymous(),
+      permissions: ALL_READ_NONE,
+      ts: Date.now(),
+      description: ''
+    }, base? base : {}, {
+      id: 'memory',
+      local: true
+    });
+  }
+
+  createInMemory() {
+    const desc = this.createInMemoryDesc();
+    return new ProvenanceGraph(desc, new MemoryGraph(desc, [], [], provenanceGraphFactory()));
+  }
+
+  cloneInMemory(graph: GraphBase) {
+    const desc = this.createInMemoryDesc(<IProvenanceGraphDataDescription>graph.desc);
+    const m = new MemoryGraph(desc, [], [], provenanceGraphFactory());
+    m.restore(graph.persist());
+    return new ProvenanceGraph(desc, m);
   }
 }

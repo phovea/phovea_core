@@ -12,6 +12,7 @@ import {list as rlist, Range, all, join, parse} from '../range';
 import {mask, INumberValueTypeDesc, VALUE_TYPE_INT, VALUE_TYPE_REAL} from '../datatype';
 import {IHistogram, wrapHist, IAdvancedStatistics, computeAdvancedStats} from '../math';
 import {IMatrixDataDescription, IHeatMapUrlOptions} from './IMatrix';
+import {resolve} from '../idtype';
 
 export interface IMatrixLoader<T> {
   (desc: IMatrixDataDescription<any>): Promise<{
@@ -64,28 +65,51 @@ export function viaAPI2Loader(): IMatrixLoader2<any> {
     data: Promise<any[][]> = null,
     hist: Promise<IHistogram> = null,
     stats: Promise<IAdvancedStatistics> = null;
+
+  function fillRowIds(desc: IMatrixDataDescription<any>) {
+    if (rowIds !== null && rows !== null) {
+      Promise.all([rowIds, rows]).then(([rowIdValues, rowValues]) => {
+        const idType = resolve(desc.rowtype);
+        const rowIds = parse(rowIdValues);
+        idType.fillMapCache(rowIds.dim(0).asList(rowValues.length), rowValues);
+      });
+    }
+  }
+  function fillColumnIds(desc: IMatrixDataDescription<any>) {
+    if (colIds !== null && cols !== null) {
+      Promise.all([colIds, cols]).then(([colIdValues, colValues]) => {
+        const idType = resolve(desc.coltype);
+        const colIds = parse(colIdValues);
+        idType.fillMapCache(colIds.dim(0).asList(colValues.length), colValues);
+      });
+    }
+  }
   const r = {
     rowIds: (desc: IMatrixDataDescription<any>, range: Range) => {
       if (rowIds == null) {
         rowIds = getAPIJSON(`/dataset/matrix/${desc.id}/rowIds`).then(parse);
+        fillRowIds(desc);
       }
       return rowIds.then((d) => d.preMultiply(range, desc.size));
     },
     rows: (desc: IMatrixDataDescription<any>, range: Range) => {
       if (rows == null) {
         rows = getAPIJSON(`/dataset/matrix/${desc.id}/rows`);
+        fillRowIds(desc);
       }
       return rows.then((d) => range.dim(0).filter(d, desc.size[0]));
     },
     colIds: (desc: IMatrixDataDescription<any>, range: Range) => {
       if (colIds == null) {
         colIds = getAPIJSON(`/dataset/matrix/${desc.id}/colIds`).then(parse);
+        fillColumnIds(desc);
       }
       return colIds.then((d) => d.preMultiply(range, desc.size));
     },
     cols: (desc: IMatrixDataDescription<any>, range: Range) => {
       if (cols == null) {
         cols = getAPIJSON(`/dataset/matrix/${desc.id}/cols`);
+        fillColumnIds(desc);
       }
       return cols.then((d) => range.dim(1).filter(d, desc.size[1]));
     },
@@ -159,6 +183,9 @@ export function viaAPI2Loader(): IMatrixLoader2<any> {
       }
       if (options.palette) {
         args.format_palette = options.palette.toString();
+      }
+      if (options.missing) {
+        args.format_missing = options.missing;
       }
       return api2absURL(`/dataset/matrix/${desc.id}/data`, args);
     }

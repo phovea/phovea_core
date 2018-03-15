@@ -156,7 +156,7 @@ export function wrapCategoricalVector(v: ICategoricalVector) {
     name: v.desc.name + '-s',
     fqname: v.desc.fqname + '-s',
     description: v.desc.description,
-    idtype: v.idtype,
+    idtype: v.idtype.id,
     ngroups: cats.length,
     groups: cats,
     size: v.length,

@@ -9,6 +9,7 @@ import {IDataDescription} from '../datatype';
 
 export {ITable, IQueryArgs, ITableColumn, ITableDataDescription} from './ITable';
 export {asTable, asTableFromArray, IAsTableOptions} from './Table';
+export {asNameVector} from './internal/TableNameVector';
 
 export function fromVectors(desc: IDataDescription, vecs: IAnyVector[]) {
   return new VectorTable(desc, vecs);
