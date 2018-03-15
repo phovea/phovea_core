@@ -76,7 +76,7 @@ export async function send(url: string, data: any = {}, method = 'GET', expected
   };
 
   if (data) {
-    let mimetype: string;
+    let mimetype: string = '';
     switch (requestBody.trim().toLowerCase()) {
       case 'json':
       case 'application/json':
@@ -94,10 +94,16 @@ export async function send(url: string, data: any = {}, method = 'GET', expected
         options.body = data;
         break;
       default:
-        mimetype = 'application/x-www-form-urlencoded';
-        options.body = data instanceof FormData ? data : encodeParams(data);
+        if (data instanceof FormData) {
+          options.body = data;
+        } else {
+          mimetype = 'application/x-www-form-urlencoded';
+          options.body = encodeParams(data);
+        }
     }
-    (<any>options.headers)['Content-Type'] = mimetype;
+    if (mimetype) {
+      (<any>options.headers)['Content-Type'] = mimetype;
+    }
   }
 
   // there are no typings for fetch so far
