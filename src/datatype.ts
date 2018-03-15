@@ -35,7 +35,13 @@ export interface IDataDescriptionMetaData extends ISecureItem {
    */
   readonly fqname: string;
 
-  readonly [extras: string]: any;
+  /**
+   * custom properties that can be added on the fly
+   * @see https://www.typescriptlang.org/docs/handbook/interfaces.html#indexable-types
+   * Note: This property needs to be writable to set it later on (e.g. in VectorTable)
+   */
+  [extras: string]: any;
+
   /**
    * creation time stamp
    */

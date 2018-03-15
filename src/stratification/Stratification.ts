@@ -64,15 +64,15 @@ export default class Stratification extends ADataType<IStratificationDataDescrip
     return Promise.reject('no origin specified');
   }
 
-  async range() {
+  async range(): Promise<CompositeRange1D> {
     return (await this.loader(this.desc)).range;
   }
 
-  async idRange() {
+  async idRange(): Promise<CompositeRange1D> {
     const data = await this.loader(this.desc);
     const ids = data.rowIds.dim(0);
     const range = data.range;
-    return ids.preMultiply(range, this.dim[0]);
+    return <CompositeRange1D>ids.preMultiply(range, this.dim[0]);
   }
 
   async names(range: RangeLike = all()) {

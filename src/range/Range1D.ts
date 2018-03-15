@@ -29,27 +29,27 @@ export default class Range1D {
     }
   }
 
-  get length() {
+  get length(): number {
     return this.size();
   }
 
-  static all() {
+  static all(): Range1D {
     return new Range1D([RangeElem.all()]);
   }
 
-  static single(item: number) {
+  static single(item: number): Range1D {
     return new Range1D([RangeElem.single(item)]);
   }
 
-  static none() {
+  static none(): Range1D {
     return new Range1D();
   }
 
-  static from(indices: number[]) {
+  static from(indices: number[]): Range1D {
     return new Range1D(Range1D.compress(indices));
   }
 
-  private static compress(indices: number[]) {
+  private static compress(indices: number[]): IRangeElem[] {
     if (indices.length === 0) {
       return [];
     } else if (indices.length === 1) {
@@ -85,15 +85,15 @@ export default class Range1D {
     return r;
   }
 
-  get isAll() {
+  get isAll(): boolean {
     return this.arr.length === 1 && this.at(0).isAll;
   }
 
-  get isNone() {
+  get isNone(): boolean {
     return this.arr.length === 0;
   }
 
-  get isUnbound() {
+  get isUnbound(): boolean {
     return this.arr.some((d) => d.isUnbound);
   }
 
@@ -116,20 +116,20 @@ export default class Range1D {
     return this.arr.push(...items.map(p));
   }
 
-  pushSlice(from: number, to: number = -1, step: number = 1) {
+  pushSlice(from: number, to: number = -1, step: number = 1): void {
     this.arr.push(new RangeElem(from, to, step));
   }
 
-  pushList(indices: number[]) {
+  pushList(indices: number[]): void {
     this.arr.push(...Range1D.compress(indices));
   }
 
-  setSlice(from: number, to: number = -1, step: number = 1) {
+  setSlice(from: number, to: number = -1, step: number = 1): void {
     this.arr.length = 0;
     this.pushSlice(from, to, step);
   }
 
-  setList(indices: number[]) {
+  setList(indices: number[]): void {
     this.arr.length = 0;
     this.pushList(indices);
   }
@@ -144,7 +144,7 @@ export default class Range1D {
     return this.arr[index];
   }
 
-  size(size?: number) {
+  size(size?: number): number {
     const t = this.arr.map((d) => d.size(size));
     return t.reduce((a, b) => a + b, 0);
   }
@@ -153,11 +153,11 @@ export default class Range1D {
    * whether this range is the identity, i.e. the first natural numbers starting with 0
    * @return {boolean}
    */
-  get isIdentityRange() {
+  get isIdentityRange(): boolean {
     return this.arr.length === 1 && this.arr[0].from === 0 && this.arr[0].step === 1;
   }
 
-  repeat(ntimes = 1) {
+  repeat(ntimes = 1): Range1D {
     if (ntimes === 1) {
       return this;
     }
@@ -172,7 +172,7 @@ export default class Range1D {
   /**
    * combines this range with another and returns a new one
    * this = (1,3,5,7), sub = (1,2) -> (1,2)(1,3,5,7) = (3,5)
-   * @returns {*}
+   * @returns {Range1D}
    */
   preMultiply(sub: Range1D, size?: number): Range1D {
     if (this.isAll) {
@@ -210,7 +210,7 @@ export default class Range1D {
   /**
    * logical union between two ranges
    * @param other
-   * @returns {RangeDim}
+   * @returns {Range1D}
    */
   union(other: Range1D, size?: number): Range1D {
     if (this.isAll || other.isNone) {
@@ -232,9 +232,10 @@ export default class Range1D {
   /**
    * logical intersection between two ranges
    * @param other
-   * @returns {RangeDim}
+   * @param size
+   * @returns {Range1D}
    */
-  intersect(other: Range1D, size?: number) {
+  intersect(other: Range1D, size?: number): Range1D {
     if (this.isNone || other.isNone) {
       return Range1D.none();
     }
@@ -262,9 +263,10 @@ export default class Range1D {
   /**
    * logical difference between two ranges
    * @param without
-   * @returns {RangeDim}
+   * @param size
+   * @returns {Range1D}
    */
-  without(without: Range1D, size?: number) {
+  without(without: Range1D, size?: number): Range1D {
     if (this.isNone || without.isNone) {
       return this.clone();
     }
@@ -284,9 +286,9 @@ export default class Range1D {
 
   /**
    * clones this range
-   * @returns {RangeDim}
+   * @returns {Range1D}
    */
-  clone() {
+  clone(): Range1D {
     return new Range1D(this.arr.map((d) => d.clone()));
   }
 
@@ -294,9 +296,9 @@ export default class Range1D {
    * inverts the given index to the original range
    * @param index
    * @param size the underlying size for negative indices
-   * @returns {*}
+   * @returns {number}
    */
-  invert(index: number, size?: number) {
+  invert(index: number, size?: number): number {
     if (this.isAll) {
       return index;
     }

@@ -107,8 +107,8 @@ export class TableView extends ATable implements ITable {
     return this.root.at(inverted[0], inverted[1]);
   }
 
-  col(i: number) {
-    return this.vectors[i];
+  col<T, D extends IValueTypeDesc>(i: number): IVector<T, D> {
+    return <any>this.vectors[i]; // TODO prevent `<any>` by using `<IVector<any, IValueTypeDesc>>` leads to TS compile errors
   }
 
   cols(range: RangeLike = all()) {
@@ -119,7 +119,7 @@ export class TableView extends ATable implements ITable {
     return this.root.data(this.range.preMultiply(parse(range), this.root.dim));
   }
 
-  colData<T>(column: string, range: RangeLike = all()) {
+  colData<T>(column: string, range?: RangeLike): Promise<T[]> {
     return this.dataOfColumn(column, range);
   }
 
