@@ -69,7 +69,7 @@ export default class HashProperties extends PropertyHandler {
       this.debounceTimer = -1;
     }
     this.debounceTimer = self.setTimeout(() => this.updateImpl(), updateInMs);
-  };
+  }
 
   private updateImpl() {
     if (this.debounceTimer >= 0) {

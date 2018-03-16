@@ -3,7 +3,7 @@
  */
 import {resolve as idtypes_resolve} from '../idtype';
 import {ADataType} from '../datatype';
-import {all, none, RangeLike} from '../range';
+import {all, none, Range, RangeLike} from '../range';
 import {AGraph, IDTYPE_EDGES, IDTYPE_NODES, DIM_EDGES, DIM_NODES} from './graph';
 import {defaultGraphFactory, IGraphFactory, IGraphDataDescription} from './GraphBase';
 import RemoteStoreGraph from './RemoteStorageGraph';
@@ -63,9 +63,9 @@ export default class GraphProxy extends ADataType<IGraphDataDescription> {
     return this.cache;
   }
 
-  ids(range: RangeLike = all()) {
+  ids(range: RangeLike = all()): Promise<Range> {
     if (this.cache) {
-      return Promise.resolve(this.cache.then((i) => i.ids(range)));
+      return Promise.resolve(<any>this.cache.then((i) => i.ids(range))); // TODO avoid <any> type cast
     }
     return Promise.resolve(none());
   }

@@ -13,6 +13,8 @@ import {currentUserNameOrAnonymous} from '../security';
 import GraphProxy from '../graph/GraphProxy';
 import RemoteStoreGraph from '../graph/RemoteStorageGraph';
 import {resolveImmediately} from '../internal/promise';
+import {IDataType} from '../datatype';
+import {AGraph} from '../graph';
 
 export default class RemoteStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private options = {
@@ -43,7 +45,7 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     return this.import(graph.persist(), desc);
   }
 
-  private importImpl(json: {nodes: any[], edges: any[]}, desc: any = {}): PromiseLike<GraphBase> {
+  private importImpl(json: {nodes: any[], edges: any[]}, desc: any = {}): PromiseLike<AGraph> {
     const pdesc: any = mixin({
       type: 'graph',
       attrs: {
@@ -58,11 +60,13 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
       nodes: json.nodes,
       edges: json.edges
     }, desc);
-    return upload(pdesc).then((base: GraphProxy) => base.impl(provenanceGraphFactory()));
+    return upload(pdesc).then((base: IDataType) => {
+      return (<GraphProxy>base).impl(provenanceGraphFactory());
+    });
   }
 
   import(json: any, desc: any = {}): PromiseLike<ProvenanceGraph> {
-    return this.importImpl(json, desc).then((impl) => {
+    return this.importImpl(json, desc).then((impl: GraphBase) => {
       return new ProvenanceGraph(<IProvenanceGraphDataDescription>impl.desc, impl);
     });
   }

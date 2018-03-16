@@ -19,7 +19,7 @@ export {
   resolve,
   resolveProduct,
   isInternalIDType
-} from './manager'
+} from './manager';
 export {default as SelectAble, ISelectAble} from './ASelectAble';
 export {
   IIDType,

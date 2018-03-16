@@ -5,6 +5,7 @@
  **************************************************************************** */
 // to resolve the window extensions
 /// <reference types="whatwg-fetch" />
+
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
@@ -36,8 +37,6 @@ function parseType(expectedDataType: string, response: Response) {
       return response.text();
     case 'blob':
       return response.blob();
-    case 'formdata':
-      return response.formData();
     case 'arraybuffer':
       return response.arrayBuffer();
     default:

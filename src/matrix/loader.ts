@@ -154,7 +154,7 @@ export function viaAPI2Loader(): IMatrixLoader2<any> {
     data: (desc: IMatrixDataDescription<any>, range: Range) => {
       if (range.isAll) {
         if (data == null) {
-          data = getAPIJSON(`/dataset/matrix/${desc.id}/raw`).then(maskIt(desc));
+          data = <any>getAPIJSON(`/dataset/matrix/${desc.id}/raw`).then(maskIt(desc)); // TODO avoid <any> type cast
         }
         return data;
       }
@@ -162,8 +162,8 @@ export function viaAPI2Loader(): IMatrixLoader2<any> {
         return data.then((d) => range.filter(d, desc.size));
       }
       const size = desc.size;
-      if (size[0] * size[1] < 1000 || desc.loadAtOnce) { //small file load all
-        data = getAPIJSON(`/dataset/matrix/${desc.id}/raw`).then(maskIt(desc));
+      if (size[0] * size[1] < 1000 || desc.loadAtOnce) { // small file load all
+        data = <any>getAPIJSON(`/dataset/matrix/${desc.id}/raw`).then(maskIt(desc)); // TODO avoid <any> type cast
         return data.then((d) => range.filter(d, desc.size));
       }
       //server side slicing

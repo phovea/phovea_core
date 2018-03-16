@@ -26,46 +26,46 @@ export default class CompositeRange1D extends Range1D implements ICompositeRange
     super(base ? base : toBase(groups));
   }
 
-  preMultiply(sub: Range1D, size?: number): Range1D {
+  preMultiply(sub: Range1D, size?: number): ICompositeRange1D {
     const r = this.groups.length > 1 ? super.preMultiply(sub, size) : undefined;
     return new CompositeRange1D(this.name, this.groups.map((g) => <Range1DGroup>g.preMultiply(sub, size)), r);
   }
 
-  union(other: Range1D, size?: number) {
+  union(other: Range1D, size?: number): ICompositeRange1D {
     const r = this.groups.length > 1 ? super.union(other, size) : undefined;
     return new CompositeRange1D(this.name, this.groups.map((g) => <Range1DGroup>g.union(other, size)), r);
   }
 
-  intersect(other: Range1D, size?: number) {
+  intersect(other: Range1D, size?: number): ICompositeRange1D {
     const r = this.groups.length > 1 ? super.intersect(other, size) : undefined;
     return new CompositeRange1D(this.name, this.groups.map((g) => <Range1DGroup>g.intersect(other, size)), r);
   }
 
-  without(without: Range1D, size?: number) {
+  without(without: Range1D, size?: number): ICompositeRange1D {
     const r = this.groups.length > 1 ? super.without(without, size) : undefined;
     return new CompositeRange1D(this.name, this.groups.map((g) => <Range1DGroup>g.without(without, size)), r);
   }
 
-  clone() {
+  clone(): ICompositeRange1D {
     const r = this.groups.length > 1 ? super.clone() : undefined;
     return new CompositeRange1D(name, this.groups.map((g) => <Range1DGroup>g.clone()), r);
   }
 
-  sort(cmp?: (a: number, b: number) => number): Range1D {
+  sort(cmp?: (a: number, b: number) => number): ICompositeRange1D {
     const r = this.groups.length > 1 ? super.sort(cmp) : undefined;
     return new CompositeRange1D(this.name, this.groups.map((g) => <Range1DGroup>g.sort(cmp)), r);
   }
 
-  toSet(size?: number): CompositeRange1D {
+  toSet(size?: number): ICompositeRange1D {
     const r = this.groups.length > 1 ? super.toSet(size) : undefined;
     return new CompositeRange1D(this.name, this.groups.map((g) => <Range1DGroup>g.toSet(size)), r);
   }
 
-  toString() {
+  toString(): string {
     return '"' + this.name + '"{' + this.groups.join(',') + '}';
   }
 
-  fromLikeComposite(groups: Range1DGroup[]) {
+  fromLikeComposite(groups: Range1DGroup[]): ICompositeRange1D {
     return new CompositeRange1D(this.name, groups);
   }
 }

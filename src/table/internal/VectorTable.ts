@@ -5,10 +5,11 @@
 import {IPersistable} from '../../index';
 import {all, parse, RangeLike} from '../../range';
 import IDType from '../../idtype/IDType';
-import {IDataDescription} from '../../datatype';
+import {IDataDescription, IValueTypeDesc} from '../../datatype';
 import {ITable, ITableDataDescription, IQueryArgs} from '../ITable';
 import ATable from '../ATable';
 import {IAnyVector} from '../../vector/IVector';
+import {IVector} from '../../vector';
 
 /**
  * @internal
@@ -25,7 +26,7 @@ export default class VectorTable extends ATable implements ITable {
     const d = <any>desc;
     d.idtype = ref.idtype;
     d.size = [vectors[0].length, vectors.length];
-    d.columns = vectors.map((v) => {
+    d.columns = vectors.map((v: IAnyVector) => {
       v.desc.column = v.desc.column || v.desc.name;
       return v.desc;
     });
@@ -37,8 +38,8 @@ export default class VectorTable extends ATable implements ITable {
     return [this.idtype];
   }
 
-  col(i: number) {
-    return this.vectors[i];
+  col<T, D extends IValueTypeDesc>(i: number): IVector<T, D> {
+    return <any>this.vectors[i]; // TODO prevent `<any>` by using `<TableVector<any, IValueTypeDesc>>` leads to TS compile errors
   }
 
   cols(range: RangeLike = all()) {
