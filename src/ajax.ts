@@ -10,6 +10,10 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 import {offline as isOffline, server_url, server_json_suffix} from '.';
+import {fire} from './event';
+
+export const GLOBAL_EVENT_AJAX_PRE_SEND = 'ajaxPreSend';
+export const GLOBAL_EVENT_AJAX_POST_SEND = 'ajaxPostSend';
 
 class AjaxError extends Error {
   constructor(public readonly response: Response, message?: string) {
@@ -106,8 +110,11 @@ export async function send(url: string, data: any = {}, method = 'GET', expected
   }
 
   // there are no typings for fetch so far
+  fire(GLOBAL_EVENT_AJAX_PRE_SEND, url, options);
   const r = checkStatus(await self.fetch(url, options));
-  return parseType(expectedDataType, r);
+  const output = parseType(expectedDataType, r);
+  fire(GLOBAL_EVENT_AJAX_POST_SEND, url, options, r, output);
+  return output;
 }
 /**
  * to get some ajax json file
@@ -150,7 +157,7 @@ export function api2absURL(url: string, data: any = null) {
  * @param data
  * @returns {any}
  */
-export function encodeParams(data :any = null) {
+export function encodeParams(data: any = null) {
   if (data === null) {
     return null;
   }
@@ -161,7 +168,7 @@ export function encodeParams(data :any = null) {
   if (keys.length === 0) {
     return null;
   }
-  const s :string[] = [];
+  const s: string[] = [];
 
   function add(prefix: string, key: string, value: any) {
     if (Array.isArray(value)) {
