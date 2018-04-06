@@ -24,20 +24,18 @@ export default class LocalStorageGraph extends GraphBase implements IGraph {
   constructor(desc: IGraphDataDescription, nodes: GraphNode[] = [], edges: GraphEdge[] = [], private storage: Storage = sessionStorage) {
     super(desc, nodes, edges);
 
-    if (nodes.length > 0 || edges.length > 0) {
-      const uid = this.uid;
-      this.storage.setItem(`${uid}.nodes`, JSON.stringify(nodes.map((d) => d.id)));
-      nodes.forEach((n) => {
-        this.storage.setItem(uid + '.node.' + n.id, JSON.stringify(n.persist()));
-        n.on('setAttr', this.updateHandler);
-      });
+    const uid = this.uid;
+    this.storage.setItem(`${uid}.nodes`, JSON.stringify(nodes.map((d) => d.id)));
+    nodes.forEach((n) => {
+      this.storage.setItem(uid + '.node.' + n.id, JSON.stringify(n.persist()));
+      n.on('setAttr', this.updateHandler);
+    });
 
-      this.storage.setItem(`${uid}.edges`, JSON.stringify(edges.map((d) => d.id)));
-      edges.forEach((e) => {
-        this.storage.setItem(`${uid}.edge.${e.id}`, JSON.stringify(e.persist()));
-        e.on('setAttr', this.updateHandler);
-      });
-    }
+    this.storage.setItem(`${uid}.edges`, JSON.stringify(edges.map((d) => d.id)));
+    edges.forEach((e) => {
+      this.storage.setItem(`${uid}.edge.${e.id}`, JSON.stringify(e.persist()));
+      e.on('setAttr', this.updateHandler);
+    });
   }
 
   static migrate(graph: GraphBase, storage = sessionStorage) {
