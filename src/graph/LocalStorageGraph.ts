@@ -25,17 +25,19 @@ export default class LocalStorageGraph extends GraphBase implements IGraph {
     super(desc, nodes, edges);
 
     const uid = this.uid;
-    this.storage.setItem(`${uid}.nodes`, JSON.stringify(nodes.map((d) => d.id)));
-    nodes.forEach((n) => {
-      this.storage.setItem(uid + '.node.' + n.id, JSON.stringify(n.persist()));
-      n.on('setAttr', this.updateHandler);
-    });
+    if (nodes.length > 0 || edges.length > 0) {
+      this.storage.setItem(`${uid}.nodes`, JSON.stringify(nodes.map((d) => d.id)));
+      nodes.forEach((n) => {
+        this.storage.setItem(uid + '.node.' + n.id, JSON.stringify(n.persist()));
+        n.on('setAttr', this.updateHandler);
+      });
 
-    this.storage.setItem(`${uid}.edges`, JSON.stringify(edges.map((d) => d.id)));
-    edges.forEach((e) => {
-      this.storage.setItem(`${uid}.edge.${e.id}`, JSON.stringify(e.persist()));
-      e.on('setAttr', this.updateHandler);
-    });
+      this.storage.setItem(`${uid}.edges`, JSON.stringify(edges.map((d) => d.id)));
+      edges.forEach((e) => {
+        this.storage.setItem(`${uid}.edge.${e.id}`, JSON.stringify(e.persist()));
+        e.on('setAttr', this.updateHandler);
+      });
+    }
   }
 
   static migrate(graph: GraphBase, storage = sessionStorage) {
@@ -70,7 +72,7 @@ export default class LocalStorageGraph extends GraphBase implements IGraph {
 
   private load(factory: IGraphFactory) {
     const uid = this.uid;
-    if (this.storage.getItem(`${uid}.nodes`) === null) {
+    if (this.storage.getItem(`${uid}.nodes`) == null) {
       return;
     }
     const nodeIds: string[] = JSON.parse(this.storage.getItem(`${uid}.nodes`));
