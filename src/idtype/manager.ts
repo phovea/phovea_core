@@ -8,6 +8,7 @@ import {fire as global_fire} from '../event';
 import {defaultSelectionType, IIDType} from './IIDType';
 import IDType from './IDType';
 import ProductIDType from './ProductIDType';
+import {list as listPlugin} from '../plugin';
 
 const cache = new Map<string, IDType|ProductIDType>();
 let filledUp = false;
@@ -117,4 +118,17 @@ export function clearSelection(type = defaultSelectionType) {
  */
 export function isInternalIDType(idtype: IIDType) {
   return idtype.internal || idtype.id.startsWith('_');
+}
+
+
+{
+  const EXTENSION_POINT_IDTYPE = 'idType';
+  //register known idtypes via registry
+  listPlugin(EXTENSION_POINT_IDTYPE).forEach((plugin) => {
+    const id = plugin.id;
+    const name = plugin.name;
+    const names = plugin.names || toPlural(name);
+    const internal = Boolean(plugin.internal);
+    register(id, new IDType(id, name, names, internal));
+  });
 }
