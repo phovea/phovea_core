@@ -54,7 +54,7 @@ export default class GridElem implements IPersistable {
     };
   }
 
-  restore(persisted: any): any{
+  restore(persisted: any): any {
     //FIXME
     /*if (persisted.id) {
      var selected = search(this.visses, (e) => e.id === persisted.id);

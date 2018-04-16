@@ -24,8 +24,8 @@ export default class LocalStorageGraph extends GraphBase implements IGraph {
   constructor(desc: IGraphDataDescription, nodes: GraphNode[] = [], edges: GraphEdge[] = [], private storage: Storage = sessionStorage) {
     super(desc, nodes, edges);
 
+    const uid = this.uid;
     if (nodes.length > 0 || edges.length > 0) {
-      const uid = this.uid;
       this.storage.setItem(`${uid}.nodes`, JSON.stringify(nodes.map((d) => d.id)));
       nodes.forEach((n) => {
         this.storage.setItem(uid + '.node.' + n.id, JSON.stringify(n.persist()));
@@ -72,7 +72,7 @@ export default class LocalStorageGraph extends GraphBase implements IGraph {
 
   private load(factory: IGraphFactory) {
     const uid = this.uid;
-    if (this.storage.getItem(`${uid}.nodes`) === null) {
+    if (this.storage.getItem(`${uid}.nodes`) == null) {
       return;
     }
     const nodeIds: string[] = JSON.parse(this.storage.getItem(`${uid}.nodes`));

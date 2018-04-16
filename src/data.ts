@@ -96,7 +96,7 @@ export async function list(filter?: ({[key: string]: string})|((d: IDataType) =>
     r = getCachedEntries();
   } else {
     //load descriptions and create data out of them
-    r = getAPIJSON('/dataset/', q).then((r) => Promise.all(r.map(transformEntry)));
+    r = getAPIJSON('/dataset/', q).then((r) => Promise.all<IDataType>(r.map(transformEntry)));
   }
 
   if (f !== null) {
@@ -275,7 +275,7 @@ export async function modify(entry: IDataType, data: any, file?: File): Promise<
  * @param entry
  * @returns {Promise<boolean>}
  */
-export async function remove(entry: IDataType | IDataDescription): Promise<Boolean> {
+export async function remove(entry: IDataType | IDataDescription): Promise<boolean> {
   const desc: IDataDescription = (<IDataType>entry).desc || <IDataDescription>entry;
 
   await sendAPI(`/dataset/${desc.id}`, {}, 'DELETE');

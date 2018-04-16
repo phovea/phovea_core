@@ -35,7 +35,13 @@ export interface IDataDescriptionMetaData extends ISecureItem {
    */
   readonly fqname: string;
 
-  readonly [extras: string]: any;
+  /**
+   * custom properties that can be added on the fly
+   * @see https://www.typescriptlang.org/docs/handbook/interfaces.html#indexable-types
+   * Note: This property needs to be writable to set it later on (e.g. in VectorTable)
+   */
+  [extras: string]: any;
+
   /**
    * creation time stamp
    */
@@ -207,7 +213,7 @@ export function transpose(m: any[][]) {
   return r;
 }
 
-function maskImpl(arr: number|number[], missing: number) {
+function maskImpl(arr: number|number[], missing: number): number|number[] {
   if (Array.isArray(arr)) {
     const vs = <number[]>arr;
     if (vs.indexOf(missing) >= 0) {
@@ -217,7 +223,7 @@ function maskImpl(arr: number|number[], missing: number) {
   return arr === missing ? NaN : arr;
 }
 
-export function mask(arr: number|number[], desc: INumberValueTypeDesc) {
+export function mask(arr: number|number[], desc: INumberValueTypeDesc): number|number[] {
   if (desc.type === VALUE_TYPE_INT && 'missing' in desc) {
     return maskImpl(arr, desc.missing);
   }

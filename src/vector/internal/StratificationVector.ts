@@ -12,7 +12,7 @@ import CompositeRange1D from '../../range/CompositeRange1D';
 import Range from '../../range/Range';
 import {IDataType, ADataType, IValueTypeDesc,} from '../../datatype';
 import {IHistogram, rangeHist} from '../../math';
-import {IVector} from '../IVector';
+import {ICategoricalVector, IVector} from '../IVector';
 import {IStratification, IStratificationDataDescription} from '../../stratification';
 import StratificationGroup from '../../stratification/StratificationGroup';
 
@@ -55,25 +55,25 @@ export default class StratificationVector extends ADataType<IStratificationDataD
     return rangeHist(await this.range());
   }
 
-  vector() {
+  vector(): Promise<ICategoricalVector> {
     return this.asVector();
   }
 
-  asVector() {
-    return Promise.resolve(this.v);
+  asVector(): Promise<ICategoricalVector> {
+    return Promise.resolve(<ICategoricalVector>this.v);
   }
 
   origin(): Promise<IDataType> {
     return this.asVector();
   }
 
-  range() {
+  range(): Promise<CompositeRange1D> {
     return Promise.resolve(this.r);
   }
 
-  async idRange() {
+  async idRange(): Promise<CompositeRange1D> {
     const ids = await this.ids();
-    return ids.dim(0).preMultiply(this.r, this.dim[0]);
+    return <CompositeRange1D>ids.dim(0).preMultiply(this.r, this.dim[0]);
   }
 
   names(range: RangeLike = all()) {

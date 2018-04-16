@@ -37,7 +37,11 @@ export abstract class ANameVector<T extends IDataType> extends AVector<string, I
     return this.desc.value;
   }
 
-  abstract get idtype(): IDType;
+  // TODO This method should be abstract. However, it results in a compile error with Typescript v2.7.2:
+  // `TS2715: Abstract property 'idtype' in class 'ANameVector' cannot be accessed in the constructor.`
+  /*abstract*/ get idtype(): IDType {
+    return null;
+  }
 
   get idtypes() {
     return [this.idtype];

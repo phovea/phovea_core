@@ -15,7 +15,7 @@ import AVector from '../../vector/AVector';
  */
 export default class TableVector<T,D extends IValueTypeDesc> extends AVector<T,D> implements IVector<T,D> {
   readonly desc: IVectorDataDescription<D>;
-  readonly column: string;
+  public readonly column: string;
 
   constructor(private table: ITable, private index: number, desc: ITableColumn<D>) {
     super(null);
@@ -71,7 +71,7 @@ export default class TableVector<T,D extends IValueTypeDesc> extends AVector<T,D
     return this.table.at(i, this.index);
   }
 
-  data(range: RangeLike = all()) {
+  data(range: RangeLike = all()): Promise<T[]> {
     return this.table.colData(this.column, range);
   }
 

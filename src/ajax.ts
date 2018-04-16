@@ -5,10 +5,15 @@
  **************************************************************************** */
 // to resolve the window extensions
 /// <reference types="whatwg-fetch" />
+
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
 import {offline as isOffline, server_url, server_json_suffix} from '.';
+import {fire} from './event';
+
+export const GLOBAL_EVENT_AJAX_PRE_SEND = 'ajaxPreSend';
+export const GLOBAL_EVENT_AJAX_POST_SEND = 'ajaxPostSend';
 
 class AjaxError extends Error {
   constructor(public readonly response: Response, message?: string) {
@@ -36,8 +41,6 @@ function parseType(expectedDataType: string, response: Response) {
       return response.text();
     case 'blob':
       return response.blob();
-    case 'formdata':
-      return response.formData();
     case 'arraybuffer':
       return response.arrayBuffer();
     default:
@@ -76,7 +79,7 @@ export async function send(url: string, data: any = {}, method = 'GET', expected
   };
 
   if (data) {
-    let mimetype: string;
+    let mimetype: string = '';
     switch (requestBody.trim().toLowerCase()) {
       case 'json':
       case 'application/json':
@@ -94,15 +97,24 @@ export async function send(url: string, data: any = {}, method = 'GET', expected
         options.body = data;
         break;
       default:
-        mimetype = 'application/x-www-form-urlencoded';
-        options.body = data instanceof FormData ? data : encodeParams(data);
+        if (data instanceof FormData) {
+          options.body = data;
+        } else {
+          mimetype = 'application/x-www-form-urlencoded';
+          options.body = encodeParams(data);
+        }
     }
-    (<any>options.headers)['Content-Type'] = mimetype;
+    if (mimetype) {
+      (<any>options.headers)['Content-Type'] = mimetype;
+    }
   }
 
   // there are no typings for fetch so far
+  fire(GLOBAL_EVENT_AJAX_PRE_SEND, url, options);
   const r = checkStatus(await self.fetch(url, options));
-  return parseType(expectedDataType, r);
+  const output = parseType(expectedDataType, r);
+  fire(GLOBAL_EVENT_AJAX_POST_SEND, url, options, r, output);
+  return output;
 }
 /**
  * to get some ajax json file
@@ -145,7 +157,7 @@ export function api2absURL(url: string, data: any = null) {
  * @param data
  * @returns {any}
  */
-export function encodeParams(data :any = null) {
+export function encodeParams(data: any = null) {
   if (data === null) {
     return null;
   }
@@ -156,7 +168,7 @@ export function encodeParams(data :any = null) {
   if (keys.length === 0) {
     return null;
   }
-  const s :string[] = [];
+  const s: string[] = [];
 
   function add(prefix: string, key: string, value: any) {
     if (Array.isArray(value)) {

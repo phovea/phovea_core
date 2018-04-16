@@ -15,7 +15,8 @@ import {ITable, ITableColumn, ITableDataDescription, createDefaultTableDesc} fro
 import ATable from './ATable';
 import TableVector from './internal/TableVector';
 import {ITableLoader, ITableLoader2, adapterOne2Two, viaAPI2Loader, viaDataLoader} from './loader';
-import {IInternalAccess} from './internal';
+import {IVector} from '../vector';
+import {IAnyVector} from '../vector/IVector';
 
 /**
  * root matrix implementation holding the data
@@ -40,19 +41,19 @@ export default class Table extends ATable implements ITable {
     return [this.idtype];
   }
 
-  col(i: number) {
-    return this.vectors[i];
+  col<T, D extends IValueTypeDesc>(i: number): IVector<T, D> {
+    return <any>this.vectors[i]; // TODO prevent `<any>` by using `<TableVector<any, IValueTypeDesc>>` leads to TS compile errors
   }
 
-  cols(range: RangeLike = all()) {
+  cols(range: RangeLike = all()): IAnyVector[] {
     return parse(range).filter(this.vectors, [this.ncol]);
   }
 
-  async at(row: number, col: number) {
-    return (await this.colData(this.col(col).column, rlist(row)))[0];
+  async at(row: number, col: number): Promise<IValueType> {
+    return (await this.colData((<TableVector<any, IValueTypeDesc>>this.col(col)).column, rlist(row)))[0];
   }
 
-  queryView(name: string, args: any) {
+  queryView(name: string, args: any): ITable {
     return new Table(this.desc, adapterOne2Two(this.loader.view(this.desc, name, args)));
   }
 
@@ -104,6 +105,7 @@ export default class Table extends ATable implements ITable {
 /**
  * module entry point for creating a datatype
  * @param desc
+ * @param loader
  * @returns {ITable}
  */
 export function create(desc: ITableDataDescription, loader?: ITableLoader): ITable {
