@@ -1,9 +1,3 @@
-/* *****************************************************************************
- * Caleydo - Visualization for Molecular Biology - http://caleydo.org
- * Copyright (c) The Caleydo Team. All rights reserved.
- * Licensed under the new BSD license, available at http://caleydo.org/license
- **************************************************************************** */
-
 const webpack = require('./webpack.config.js');
 
 module.exports = (config) => {
@@ -14,7 +8,7 @@ module.exports = (config) => {
 
     // list of files / patterns to load in the browser
     files: [
-      'tests.webpack.js' // just load this file
+      'tests.webpack.js' //just load this file
     ],
 
     // preprocess matching files before serving them to the browser
@@ -24,7 +18,7 @@ module.exports = (config) => {
       'tests.webpack.js': ['webpack', 'sourcemap']
     },
 
-    webpack: Object.assign({ mode: 'development' }, webpack('', { mode: 'development'})),
+    webpack: Object.assign({ mode: 'development' }, webpack('', { mode: 'development' })),
 
     failOnEmptyTestSuite: false,
 

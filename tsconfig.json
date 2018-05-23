@@ -16,8 +16,7 @@
     "declaration": true,
     "removeComments": true,
     "forceConsistentCasingInFileNames": true,
-    "stripInternal": true,
-    "esModuleInterop": true
+    "stripInternal": true
   },
   "compileOnSave": false,
   "include": [

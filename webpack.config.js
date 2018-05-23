@@ -138,8 +138,7 @@ module.exports = (env, options) => {
     externals: [],
     module: {
       rules: [
-        {test: /\.scss$/, use: 'style-loader!css-loader!sass-loader'},
-        {test: /\.css$/, use: 'style-loader!css-loader'},
+        {test: /\.s?css$/, use: ['style-loader', 'css-loader', 'sass-loader']},
         {
           test: /\.tsx?$/,
           exclude: /node_modules/,
@@ -277,8 +276,11 @@ module.exports = (env, options) => {
     });
     base.plugins.push(p);
     base.module.rules[0] = {
-      test: /\.scss$/,
-      loader: p.extract(['css-loader', 'sass-loader'])
+      test: /\.s?css$/,
+      loader: p.extract({
+        fallback: 'style-loader',
+        use: ['css-loader', 'sass-loader']
+      })
     };
   }
   if (app) {
