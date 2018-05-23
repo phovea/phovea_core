@@ -7,14 +7,14 @@ describe('methods', () => {
     expect(has(key)).toBe(false);
   });
   it('valid key', () => {
+    expect(has(key)).toBe(false);
     store(key, 'foobar');
     expect(has(key)).toBe(true);
     expect(retrieve(key)).toBe('foobar');
-  });
-  it('overrite key', () => {
     store(key, 'barfoo');
     expect(has(key)).toBe(true);
     expect(retrieve(key)).toBe('barfoo');
+    remove(key);
   });
   it('remove key', () => {
     remove(key);
