@@ -4,6 +4,7 @@
 
 import {RangeLike} from '../../range';
 
+/** @internal */
 export interface IInternalAccess {
   /**
    * @param column

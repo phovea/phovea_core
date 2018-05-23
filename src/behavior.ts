@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 16.12.2014.
  */
 
-import {IVisInstance, IVisMetaData} from './vis';
+import {IVisInstance, IVisMetaData, ITransform} from './vis';
 import {EventHandler} from './event';
 
 /**

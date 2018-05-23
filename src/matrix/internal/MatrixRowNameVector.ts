@@ -5,6 +5,7 @@ import {IAnyMatrix} from '../';
 import {RangeLike, all} from '../../range';
 import ANameVector, {IStringVector} from '../../vector/internal/ANameVector';
 
+/** @internal */
 export default class MatrixRowNameVector extends ANameVector<IAnyMatrix> implements IStringVector {
 
   constructor(matrix: IAnyMatrix) {
@@ -41,6 +42,7 @@ export default class MatrixRowNameVector extends ANameVector<IAnyMatrix> impleme
  * converts the rows of the given matrix as a string vector
  * @param matrix
  * @return {IStringVector}
+ * @internal
  */
 export function asNameVector(matrix: IAnyMatrix): IStringVector {
   return new MatrixRowNameVector(matrix);

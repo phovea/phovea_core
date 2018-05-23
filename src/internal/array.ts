@@ -8,6 +8,7 @@
  * @param f
  * @deprecated use Array.prototype.find
  * @return {T}
+ * @internal
  */
 export function search<T>(arr: T[], f: (v: T) => boolean): T {
   let r: T = undefined;
@@ -27,6 +28,7 @@ export function search<T>(arr: T[], f: (v: T) => boolean): T {
  * @param arr
  * @param f
  * @return {number}
+ * @internal
  */
 export function indexOf<T>(arr: T[], f: (v: T) => boolean): number {
   let r = -1;
@@ -59,6 +61,7 @@ export function argList(args: IArguments) {
  * array with indices of 0...n-1
  * @param n
  * @returns {any[]}
+ * @internal
  */
 function indexRange(n: number): number[] {
   //http://stackoverflow.com/questions/3746725/create-a-javascript-array-containing-1-n
@@ -70,6 +73,7 @@ function indexRange(n: number): number[] {
  * @param arr
  * @param compareFn
  * @param thisArg
+ * @internal
  */
 export function argSort<T>(arr: T[], compareFn?: (a: T, b: T) => number, thisArg?: any): number[] {
   const indices = indexRange(arr.length);
@@ -84,6 +88,7 @@ export function argSort<T>(arr: T[], compareFn?: (a: T, b: T) => number, thisArg
  * @param arr
  * @param callbackfn
  * @param thisArg
+ * @internal
  */
 export function argFilter<T>(arr: T[], callbackfn: (value: T, index: number) => boolean, thisArg?: any): number[] {
   const indices = indexRange(arr.length);

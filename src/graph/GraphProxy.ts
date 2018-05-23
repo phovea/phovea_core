@@ -1,7 +1,7 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import {resolve as idtypes_resolve} from '../idtype';
+import {resolve as idtypes_resolve, IDType} from '../idtype';
 import {ADataType} from '../datatype';
 import {all, none, Range, RangeLike} from '../range';
 import {AGraph, IDTYPE_EDGES, IDTYPE_NODES, DIM_EDGES, DIM_NODES} from './graph';

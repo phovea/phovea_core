@@ -197,7 +197,7 @@ export function encodeParams(data: any = null) {
   return s.join('&').replace(/%20/g, '+');
 }
 
-type OfflineGenerator = ((data: any, url: string) => Promise<any>) | Promise<any> | any;
+export declare type OfflineGenerator = ((data: any, url: string) => Promise<any>) | Promise<any> | any;
 let defaultGenerator: OfflineGenerator = () => Promise.reject('offline');
 
 export function setDefaultOfflineGenerator(generator: OfflineGenerator | null) {

@@ -7,6 +7,7 @@ import {list} from '../data';
  * utility to convert a list of datatypes to a table compatible datatype object
  * @param list
  * @returns {any}
+ * @internal
  */
 export function convertToTable(list: IDataType[]) {
   return wrapObjects({
@@ -56,6 +57,7 @@ export function convertToTable(list: IDataType[]) {
  * utility function converting all contained tables in their vectors of individual columns
  * @param list
  * @returns {IDataType[]}
+ * @internal
  */
 export function convertTableToVectors(list: IDataType[]) {
   const r: IDataType[] = [];
@@ -73,6 +75,7 @@ export function convertTableToVectors(list: IDataType[]) {
  * lists all datasets and converts them to a table
  * @param tablesAsVectors whether tables should be converted to individual vectors
  * @returns {Promise<*>}
+ * @internal
  */
 export async function listAsTable(tablesAsVectors = false) {
   let l = await list();

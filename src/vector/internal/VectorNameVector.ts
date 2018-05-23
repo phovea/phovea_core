@@ -5,6 +5,7 @@ import {IAnyVector} from '../';
 import {RangeLike, all} from '../../range';
 import ANameVector, {IStringVector} from './ANameVector';
 
+/** @internal */
 export default class VectorNameVector extends ANameVector<IAnyVector> implements IStringVector {
 
   constructor(vector: IAnyVector) {
@@ -33,6 +34,7 @@ export default class VectorNameVector extends ANameVector<IAnyVector> implements
  * converts the name of the given vector as a string vector
  * @param vector
  * @return {IStringVector}
+ * @internal
  */
 export function asNameVector(vector: IAnyVector): IStringVector {
   return new VectorNameVector(vector);

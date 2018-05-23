@@ -5,7 +5,7 @@
  * Created by Samuel Gratzl on 22.10.2014.
  */
 import {IPersistable} from '../index';
-import GraphBase, {defaultGraphFactory, IGraphDataDescription} from './GraphBase';
+import GraphBase, {defaultGraphFactory, IGraphDataDescription, IGraphFactory} from './GraphBase';
 import {GraphEdge, GraphNode} from './graph';
 
 export default class MemoryGraph extends GraphBase implements IPersistable {

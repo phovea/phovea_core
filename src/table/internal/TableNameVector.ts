@@ -5,6 +5,7 @@ import {ITable} from '../';
 import {RangeLike, all} from '../../range';
 import ANameVector, {IStringVector} from '../../vector/internal/ANameVector';
 
+/** @internal */
 export default class TableNameVector extends ANameVector<ITable> implements IStringVector {
 
   constructor(table: ITable) {
@@ -34,6 +35,7 @@ export default class TableNameVector extends ANameVector<ITable> implements IStr
  * converts the rows of the given table as a string vector
  * @param table
  * @return {IStringVector}
+ * @internal
  */
 export function asNameVector(table: ITable): IStringVector {
   return new TableNameVector(table);

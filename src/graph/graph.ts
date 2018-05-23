@@ -4,8 +4,8 @@
 /**
  * Created by Samuel Gratzl on 22.10.2014.
  */
-import {SelectOperation, resolve as idtypes_resolve, SelectAble} from '../idtype';
-import {all, parse, RangeLike, list} from '../range';
+import {SelectOperation, resolve as idtypes_resolve, SelectAble, IDType} from '../idtype';
+import {all, parse, RangeLike, list, Range} from '../range';
 import {IPersistable, flagId, uniqueId} from '../index';
 import {EventHandler} from '../event';
 import {IDataType, IDataDescription} from '../datatype';

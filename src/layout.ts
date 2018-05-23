@@ -7,6 +7,7 @@
  * Created by Samuel Gratzl on 15.12.2014.
  */
 import {Rect, rect} from './geom';
+import {Vector2D} from './2D';
 
 export interface ILayoutElem {
   setBounds(x: number, y: number, w: number, h: number): Promise<void>|null;
@@ -106,7 +107,7 @@ class HTMLLayoutElem extends ALayoutElem implements ILayoutElem {
   }
 }
 
-export function wrapDOM(node: HTMLElement, options: any = {}) {
+export function wrapDOM(node: HTMLElement, options: any = {}): ILayoutElem {
   return new HTMLLayoutElem(node, options);
 }
 

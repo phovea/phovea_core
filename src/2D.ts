@@ -1010,7 +1010,7 @@ export class Vector2D {
   }
 }
 
-class Polynomial {
+export class Polynomial {
   static TOLERANCE = 1e-6;
   static ACCURACY = 6;
 
@@ -1528,7 +1528,7 @@ export class Path {
   }
 }
 
-interface IPathSegment extends IShape {
+export interface IPathSegment extends IShape {
   command: string;
   lastPoint: Vector2D;
   previous: IPathSegment;

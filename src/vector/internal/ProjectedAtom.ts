@@ -9,6 +9,7 @@ import {list as rlist, RangeLike, Range, parse, all, none} from '../../range';
 import {SelectAble} from '../../idtype';
 import {IVector} from '../IVector';
 
+/** @internal */
 export default class ProjectedAtom<T, D extends IValueTypeDesc, M, MD extends IValueTypeDesc> extends SelectAble implements IAtom<T,D> {
   readonly desc: IAtomDataDescription<D>;
 

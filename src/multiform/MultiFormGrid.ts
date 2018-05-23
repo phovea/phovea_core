@@ -9,7 +9,7 @@
 
 import {mixin, offset} from '../index';
 import {IDataType, assignData} from '../datatype';
-import {AShape, rect} from '../geom';
+import {AShape, rect, Rect} from '../geom';
 import {
   IVisMetaData,
   IVisInstance,

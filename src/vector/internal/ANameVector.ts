@@ -8,8 +8,10 @@ import {RangeLike, parse, all, list as rlist} from '../../range';
 import {argSort, argFilter} from '../../';
 import IDType from '../../idtype/IDType';
 
+/** @internal */
 export declare type IStringVector = IVector<string, IStringValueTypeDesc>;
 
+/** @internal */
 export abstract class ANameVector<T extends IDataType> extends AVector<string, IStringValueTypeDesc> {
   readonly desc: IVectorDataDescription<IStringValueTypeDesc>;
 
@@ -85,4 +87,5 @@ export abstract class ANameVector<T extends IDataType> extends AVector<string, I
   }
 }
 
+/** @internal */
 export default ANameVector;

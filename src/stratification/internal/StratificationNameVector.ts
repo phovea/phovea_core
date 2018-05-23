@@ -5,6 +5,7 @@ import {IStratification} from '../';
 import {RangeLike, all} from '../../range';
 import ANameVector, {IStringVector} from '../../vector/internal/ANameVector';
 
+/** @internal */
 export default class StratificationNameVector extends ANameVector<IStratification> implements IStringVector {
 
   constructor(strat: IStratification) {
@@ -34,6 +35,7 @@ export default class StratificationNameVector extends ANameVector<IStratificatio
  * converts the rows of the given stratification as a string vector
  * @param stratification
  * @return {IStringVector}
+ * @internal
  */
 export function asNameVector(stratification: IStratification): IStringVector {
   return new StratificationNameVector(stratification);

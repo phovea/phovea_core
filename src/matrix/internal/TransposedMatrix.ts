@@ -7,9 +7,10 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {RangeLike, all, parse} from '../../range';
+import {RangeLike, all, parse, Range} from '../../range';
+import {IDType, ProductIDType} from '../../idtype';
 import {IValueTypeDesc, transpose} from '../../datatype';
-import {IMatrix, IHeatMapUrlOptions} from '../IMatrix';
+import {IMatrix, IHeatMapUrlOptions, IMatrixDataDescription} from '../IMatrix';
 import AMatrix, {MatrixView} from '../AMatrix';
 import SliceRowVector from './SliceRowVector';
 import {IVector} from '../../vector';
@@ -19,6 +20,7 @@ import {IHistogram, IAdvancedStatistics, IStatistics} from '../../math';
  * view on the underlying matrix as transposed version
  * @param base
  * @constructor
+ * @internal
  */
 export default class TransposedMatrix<T, D extends IValueTypeDesc> extends AMatrix<T,D> {
   readonly t: IMatrix<T,D>;

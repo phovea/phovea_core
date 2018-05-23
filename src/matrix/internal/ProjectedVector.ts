@@ -16,6 +16,7 @@ import {IMatrix} from '../IMatrix';
 
 /**
  * a simple projection of a matrix columns to a vector
+ * @internal
  */
 export default class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends IValueTypeDesc> extends AVector<T,D> implements IVector<T,D> {
   readonly desc: IVectorDataDescription<D>;

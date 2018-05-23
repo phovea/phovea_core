@@ -194,10 +194,10 @@ export function categoricalHist<T>(arr: IIterable<T>, indices: Range1D, size: nu
   return r;
 }
 
-export function rangeHist(range: CompositeRange1D) {
+export function rangeHist(range: CompositeRange1D): IHistogram {
   return new RangeHistogram(range);
 }
-export function wrapHist(hist: number[], valueRange: number[]) {
+export function wrapHist(hist: number[], valueRange: number[]): IHistogram {
   return new Histogram(hist.length, valueRange, hist);
 }
 

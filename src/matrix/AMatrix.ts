@@ -10,7 +10,7 @@
 import {IPersistable} from '../index';
 import {RangeLike, all, range, parse} from '../range';
 import Range from '../range/Range';
-import {resolve as resolveIDType} from '../idtype';
+import {resolve as resolveIDType, ProductIDType} from '../idtype';
 import IDType from '../idtype/IDType';
 import AProductSelectAble from '../idtype/AProductSelectAble';
 import {
@@ -19,7 +19,7 @@ import {
 } from '../datatype';
 import {IVector} from '../vector';
 import {IStatistics, IHistogram, computeStats, hist, categoricalHist, IAdvancedStatistics, computeAdvancedStats} from '../math';
-import {IMatrix, IHeatMapUrlOptions} from './IMatrix';
+import {IMatrix, IHeatMapUrlOptions, IMatrixDataDescription} from './IMatrix';
 import SliceColVector from './internal/SliceColVector';
 import ProjectedVector from './internal/ProjectedVector';
 
