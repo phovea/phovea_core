@@ -30,15 +30,17 @@ describe('bounds', () => {
 //regex for sem ver: https://github.com/sindresorhus/semver-regex/blob/master/index.js
 it('version is sem ver', () => expect(version).toMatch(/\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z\-]+(?:\.[\da-z\-]+)*)?(?:\+[\da-z\-]+(?:\.[\da-z\-]+)*)?\b/ig));
 
-describe('uniqueId', () => {
-  it('first time', () => expect(uniqueId()).toEqual(0));
-  it('second time', () => expect(uniqueId()).toEqual(1));
-});
+describe('unique', () => {
+  describe('uniqueId', () => {
+    it('first time', () => expect(uniqueId()).toEqual(0));
+    it('second time', () => expect(uniqueId()).toEqual(1));
+  });
 
-describe('uniqueString', () => {
-  it('first time', () => expect(uniqueString()).toEqual('_default2'));
-  it('second time', () => expect(uniqueString()).toEqual('_default3'));
-  it('foobar time', () => expect(uniqueString('foobar')).toEqual('foobar0'));
+  describe('uniqueString', () => {
+    it('first time', () => expect(uniqueString()).toEqual('_default2'));
+    it('second time', () => expect(uniqueString()).toEqual('_default3'));
+    it('foobar time', () => expect(uniqueString('foobar')).toEqual('foobar0'));
+  });
 });
 
 describe('resolveIn', () => {
