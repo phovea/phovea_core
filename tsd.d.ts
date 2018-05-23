@@ -12,10 +12,10 @@ declare module '*.html' {
 //allow json dependencies
 declare module '*.json';
 //allow file dependencies
-declare module 'file-loader!*';
+declare module 'file-loader*';
 //allow file dependencies
-declare module 'raw-loader!*';
+declare module 'raw-loader*';
 //allow url dependencies
-declare module 'url-loader!*';
+declare module 'url-loader*';
 //allow html dependencies
-declare module 'imports-loader!*';
+declare module 'imports-loader*';
