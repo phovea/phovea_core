@@ -24,7 +24,7 @@ module.exports = (config) => {
       'tests.webpack.js': ['webpack', 'sourcemap']
     },
 
-    webpack: webpack('', { mode: 'development' }),
+    webpack: Object.assign({ mode: 'development' }, webpack('', { mode: 'development'})),
 
     failOnEmptyTestSuite: false,
 
