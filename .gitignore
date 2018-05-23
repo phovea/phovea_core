@@ -5,6 +5,8 @@
 node_modules/
 /src/**/*.js
 /tests/**/*.js
+/src/**/*.d.ts
+/tests/**/*.d.ts
 *.map
 *.css
 *.log
