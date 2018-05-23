@@ -98,45 +98,14 @@ function injectRegistry(entry) {
 module.exports = (env, options) => {
   const dev = options.mode.startsWith('d');
   const prod = options.mode.startsWith('p');
-
-  const base = {
-    entries: entries,
-    libs: libraryAliases,
-    externals: libraryExternals,
-    modules: modules,
-    vendor: vendor,
-    ignore: ignores,
-    isProduction: isProduction,
-    isDev: isDev,
-    isTest: isTest
-  };
-
-  if (isTest) {
-    return generateWebpack(Object.assign({}, base, {
-      bundle: true
-    }));
-  }
-
-  if (type.startsWith('app')) {
-    base.isApp = true;
-    base.bundle = true; // bundle everything together
-    base.name = '[name]'; // multiple entries case
-    base.commons = true; // extract commons module
-  } else if (type === 'bundle') {
-    base.library = true; // expose as library
-    base.moduleBundle = true; // expose as library 'phovea'
-    base.name = pkg.name; // to avoid adding _bundle
-    base.bundle = true;
-  } else { // type === 'lib'
-    base.library = true;
-  }
+  const app = type.startsWith('app');
 
   let base = {
     node: false, // no polyfills
-    entry: injectRegistry(options.entries),
+    entry: injectRegistry(entries),
     output: {
       path: resolve(__dirname, 'build'),
-      filename: (options.name || pkg.name) + '.js',
+      filename: (app ? '[name]' : pkg.name) + '.js',
       chunkFilename: '[chunkhash].js',
       publicPath: '' // no public path = relative
     },
@@ -153,13 +122,12 @@ module.exports = (env, options) => {
     plugins: [
       // define magic constants that are replaced
       new webpack.DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify(options.isProduction ? 'production' : 'development'),
+        'process.env.NODE_ENV': JSON.stringify(prod ? 'production' : 'development'),
         __VERSION__: JSON.stringify(pkg.version),
         __LICENSE__: JSON.stringify(pkg.license),
         __BUILD_ID__: JSON.stringify(buildId),
-        __DEBUG__: options.isDev || options.isTest,
-        __TEST__: options.isTest,
-        __PRODUCTION__: options.isProduction,
+        __DEBUG__: dev,
+        __PRODUCTION__: prod,
         __APP_CONTEXT__: JSON.stringify('/')
       }),
       new ForkTsCheckerWebpackPlugin({
@@ -272,21 +240,17 @@ module.exports = (env, options) => {
     }));
   }
 
-  if (options.library) {
+  if (!app) { // not an app
     let libName = /phovea_.*/.test(pkg.name) ? ['phovea', pkg.name.slice(7)] : pkg.name;
     // generate a library, i.e. output the last entry element
-    // create library name
-    if (options.moduleBundle) {
-      libName = 'phovea';
-    }
     base.output.library = libName;
     base.output.libraryTarget = 'umd';
     base.output.umdNamedDefine = false; // anonymous require module
   }
 
-  if (!options.bundle) {
+  if (!app) {
     // if we don't bundle don't include external libraries and other phovea modules
-    base.externals.push(...(options.externals || Object.keys(options.libs || {})));
+    base.externals.push(...(libraryExternals || Object.keys(libraryAliases || {})));
 
     // ignore all phovea modules
     if (modules) {
@@ -294,21 +258,21 @@ module.exports = (env, options) => {
     }
 
     // ignore extra modules
-    (options.ignore || []).forEach(function (d) {
-      base.module.loaders.push({test: new RegExp(d), loader: 'null-loader'}); // use null loader
+    (ignores || []).forEach(function (d) {
+      base.module.rules.push({test: new RegExp(d), loader: 'null-loader'}); // use null loader
     });
     // ingore phovea module registry calls
-    (options.modules || []).forEach(function (m) {
-      base.module.loaders.push({
+    (modules || []).forEach(function (m) {
+      base.module.rules.push({
         test: new RegExp('.*[\\\\/]' + m + '[\\\\/]phovea_registry.js'),
         loader: 'null-loader'
       }); // use null loader
     });
   }
-  if (!options.bundle || options.isApp) {
+  if (app) {
     // extract the included css file to own file
     const p = new ExtractTextPlugin({
-      filename: (options.isApp || options.moduleBundle ? 'style' : pkg.name) + '.css',
+      filename: (app ? 'style' : pkg.name) + '.css',
       allChunks: true // there seems to be a bug in dynamically loaded chunk styles are not loaded, workaround: extract all styles from all chunks
     });
     base.plugins.push(p);
@@ -317,11 +281,7 @@ module.exports = (env, options) => {
       loader: p.extract(['css-loader', 'sass-loader'])
     };
   }
-  if (options.isApp) {
-    // create manifest
-    // base.plugins.push(new webpack.optimize.AppCachePlugin());
-  }
-  if (options.commons) {
+  if (app) {
     // build a commons plugin
     base.optimization.splitChunks.cacheGroups.common = {
       name: "common",

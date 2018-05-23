@@ -1,8 +1,4 @@
 {
-  "extends": [
-    "tslint-eslint-rules",
-    "tslint-consistent-codestyle"
-  ],
   "rules": {
     "arrow-parens": true,
     "ban": [
@@ -62,7 +58,7 @@
     "no-switch-case-fall-through": true,
     "no-trailing-whitespace": true,
     "no-unused-expression": true,
-    "no-use-before-declare": true,
+    "no-use-before-declare": false,
     "no-unsafe-finally": true,
     "no-var-requires": true,
     "no-var-keyword": true,
@@ -84,8 +80,7 @@
     "radix": true,
     "semicolon": [
       true,
-      "always",
-      "ignore-bound-class-methods"
+      "always"
     ],
     "triple-equals": [
       true,
@@ -128,44 +123,6 @@
       "check-operator",
       "check-separator",
       "check-type"
-    ],
-
-
-    "trailing-comma": true,
-    "no-conditional-assignment": true,
-    "no-constant-condition": true,
-    "no-control-regex": true,
-    "no-duplicate-case": true,
-    "no-empty-character-class": true,
-    "no-ex-assign": true,
-    "no-extra-boolean-cast": true,
-    "no-extra-semi": true,
-    "no-inner-declarations": true,
-    "no-invalid-regexp": true,
-    "ter-no-irregular-whitespace": true,
-    "no-regex-spaces": true,
-    "ter-no-sparse-arrays": true,
-    "no-unexpected-multiline": true,
-    "block-spacing": [
-      true,
-      "always"
-    ],
-    "array-bracket-spacing": [
-      true,
-      "never"
-    ],
-    "ter-arrow-parens": true,
-    "ter-arrow-spacing": true,
-    "prefer-template": true,
-
-    "early-exit": true,
-    "no-as-type-assertion": true,
-    "no-collapsible-if": true,
-    "no-else-after-return": true,
-    "no-static-this": true,
-    "no-unnecessary-else": true,
-    "no-var-before-return": true,
-    "prefer-const-enum": true,
-    "prefer-while": true
+    ]
   }
 }
