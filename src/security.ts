@@ -123,6 +123,13 @@ export const ALL_NONE_NONE = 700;
 export const ALL_READ_NONE = 740;
 export const DEFAULT_PERMISSION = ALL_READ_READ;
 
+/**
+ * buddy variants: buddy, creator, group, others
+ * buddies first for backward compatibility
+ */
+export const ALL_ALL_READ_READ = 7744;
+export const ALL_ALL_NONE_NONE = 7700;
+export const ALL_ALL_READ_NONE = 7740;
 
 export interface ISecureItem {
   /**
