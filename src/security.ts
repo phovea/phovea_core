@@ -87,7 +87,7 @@ export enum EPermission {
 }
 
 export enum EEntity {
-  USER, GROUP, OTHERS
+  USER, GROUP, OTHERS, BUDDIES
 }
 
 function toNumber(p: Set<EPermission>) {
@@ -137,10 +137,14 @@ export interface ISecureItem {
    * detailed permissions, by default 744
    */
   readonly permissions?: number;
+  /**
+   * group of users with special rights, once buddies which e.g. should have write access, too
+   */
+  readonly buddies?: string[];
 }
 
 export class Permission {
-  constructor(public readonly user: Set<EPermission>, public readonly group: Set<EPermission>, public readonly others: Set<EPermission>) {
+  constructor(public readonly user: Set<EPermission>, public readonly group: Set<EPermission>, public readonly others: Set<EPermission>, public readonly buddies: Set<EPermission> = new Set()) {
 
   }
 
@@ -169,11 +173,12 @@ export class Permission {
   }
 }
 
-export function encode(user: Set<EPermission>, group: Set<EPermission>, others: Set<EPermission>) {
+export function encode(user: Set<EPermission>, group: Set<EPermission>, others: Set<EPermission>, buddies: Set<EPermission> = new Set()) {
   const userEncoded = toNumber(user);
   const groupEncoded = toNumber(group);
   const othersEncoded = toNumber(others);
-  return userEncoded * 100 + groupEncoded * 10 + othersEncoded;
+  const buddiesEncoded = toNumber(buddies);
+  return buddiesEncoded * 1000 + userEncoded * 100 + groupEncoded * 10 + othersEncoded;
 }
 
 export function decode(permission = DEFAULT_PERMISSION) {
@@ -183,7 +188,8 @@ export function decode(permission = DEFAULT_PERMISSION) {
   const others = fromNumber(permission % 10);
   const group = fromNumber(Math.floor(permission / 10) % 10);
   const user = fromNumber(Math.floor(permission / 100) % 10);
-  return new Permission(user, group, others);
+  const buddies = fromNumber(Math.floor(permission / 1000) % 10);
+  return new Permission(user, group, others, buddies);
 }
 
 function isEqual(a: string, b: string) {
@@ -211,14 +217,19 @@ function can(item: ISecureItem, permission: EPermission, user = currentUser()): 
   }
   const permissions = decode(item.permissions);
 
-  // I'm the creator
-  if (isEqual(user.name, item.creator)) {
-    return permissions.user.has(permission);
+  // I'm the creator and have the right
+  if (isEqual(user.name, item.creator) && permissions.user.has(permission)) {
+    return true;
   }
 
-  // check if I'm in the group
-  if (item.group && includes(user.roles, item.group)) {
-    return permissions.group.has(permission);
+  // check if I'm in the group and have the right
+  if (item.group && includes(user.roles, item.group) && permissions.group.has(permission)) {
+    return true;
+  }
+
+  // check if I'm a buddy having the right
+  if (item.buddies && Array.isArray(item.buddies) && includes(item.buddies, user.name) && permissions.buddies.has(permission)) {
+    return true;
   }
 
   // check others
