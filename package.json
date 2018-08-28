@@ -1,6 +1,6 @@
 {
   "name": "phovea_core",
-  "version": "0.1.1-SNAPSHOT",
+  "version": "2.0.0",
   "homepage": "https://phovea.caleydo.org",
   "description": "Phovea Core including plugin registry, data definition (+ common types: tables, matrix, vector, stratification), ajax, selections",
   "author": {
@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "tslib": "1.9.0",
+    "@types/whatwg-streams": "0.0.4",
     "@types/whatwg-fetch": "0.0.33",
     "@types/handlebars": "4.0.33"
   },
