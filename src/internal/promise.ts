@@ -14,8 +14,7 @@ class ResolveNow<T> implements PromiseLike<T> {
   constructor(private readonly v: T) {
   }
 
-  // When using Typescript v2.7+ the typing can be further specified as `then<TResult1 = T, TResult2 = never>(...`
-  then<TResult1, TResult2>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): PromiseLike<TResult1 | TResult2> {
-    return resolveImmediately(onfulfilled(this.v));
+  then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, _onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): PromiseLike<TResult1 | TResult2> {
+    return resolveImmediately(onfulfilled ? onfulfilled(this.v) : <TResult1><unknown>this.v);
   }
 }

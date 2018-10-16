@@ -234,7 +234,7 @@ class AHistogram implements IHistogram {
     return this._bins.length;
   }
 
-  binOf(value: any) {
+  binOf(_value: any) {
     return -1;
   }
 

@@ -79,13 +79,14 @@ class HTMLLayoutElem extends ALayoutElem implements ILayoutElem {
   }
 
   setBounds(x: number, y: number, w: number, h: number): Promise<void>  {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const unit = this.layoutOption('unit', 'px'),
       style = this.node.style;
       style.left = x + unit;
       style.top = y + unit;
       style.width = w + unit;
       style.height = h + unit;
+      resolve();
     });
 
   }
@@ -145,7 +146,7 @@ function waitFor(promises: Promise<any>[], redo: boolean = false): Promise<boole
   return Promise.all(promises).then(() => redo);
 }
 
-export function layers(elems: ILayoutElem[], w: number, h: number, parent: ILayoutElem) {
+export function layers(elems: ILayoutElem[], w: number, h: number, _parent: ILayoutElem) {
   return waitFor(elems.map((elem) => {
     const x = grab(elem.layoutOption('prefX', Number.NaN), 0);
     const y = grab(elem.layoutOption('prefY', Number.NaN), 0);
@@ -162,7 +163,7 @@ export function flowLayout(horizontal: boolean, gap: number, padding = {top: 0, 
     }
   }
 
-  function FlowLayout(elems: ILayoutElem[], w: number, h: number, parent: ILayoutElem) {
+  function FlowLayout(elems: ILayoutElem[], w: number, h: number, _parent: ILayoutElem) {
     w -= padding.left + padding.right;
     h -= padding.top + padding.bottom;
     const freeSpace = (horizontal ? w : h) - gap * (elems.length - 1);
@@ -225,7 +226,7 @@ export function distributeLayout(horizontal: boolean, defaultValue: number, padd
     }
   }
 
-  function DistributeLayout(elems: ILayoutElem[], w: number, h: number, parent: ILayoutElem) {
+  function DistributeLayout(elems: ILayoutElem[], w: number, h: number, _parent: ILayoutElem) {
     w -= padding.left + padding.right;
     h -= padding.top + padding.bottom;
     const freeSpace = (horizontal ? w : h);
@@ -282,7 +283,7 @@ export function distributeLayout(horizontal: boolean, defaultValue: number, padd
 //-------------
 //   bottom
 
-export function borderLayout(horizontal: boolean, gap: number, percentages: IPadding = {
+export function borderLayout(_horizontal: boolean, gap: number, percentages: IPadding = {
   top: 0.2,
   left: 0.2,
   right: 0.2,
@@ -291,7 +292,7 @@ export function borderLayout(horizontal: boolean, gap: number, percentages: IPad
   function BorderLayout(elems: ILayoutElem[], w: number, h: number, parent: ILayoutElem) {
     w -= padding.left + padding.right;
     h -= padding.top + padding.bottom;
-    let x = padding.top, y = padding.left, wc = w, hc = h;
+    let wc = w, hc = h;
     const pos = new Map<string, ILayoutElem[]>();
     pos.set('top', []);
     pos.set('center', []);
@@ -308,7 +309,6 @@ export function borderLayout(horizontal: boolean, gap: number, percentages: IPad
 
     const promises = [];
     if (pos.get('top')!.length > 0) {
-      y += h * percentages.top;
       hc -= h * percentages.top;
       promises.push(flowLayout(true, gap)(pos.get('top')!, w, h * percentages.top, parent));
     }
@@ -317,7 +317,6 @@ export function borderLayout(horizontal: boolean, gap: number, percentages: IPad
       promises.push(flowLayout(true, gap)(pos.get('bottom')!, w, h * percentages.bottom, parent));
     }
     if (pos.get('left')!.length > 0) {
-      x += w * percentages.left;
       wc -= w * percentages.left;
       promises.push(flowLayout(false, gap)(pos.get('left')!, w * percentages.left, hc, parent));
     }

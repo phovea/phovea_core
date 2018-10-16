@@ -109,7 +109,7 @@ class RemoveParentObserver {
  */
 function parentList(node: Node) {
   const result = <Node[]>[];
-  let parent = node;
+  let parent: Node|null = node;
   while (parent) {
     result.push(parent);
     parent = parent.parentNode;
@@ -124,7 +124,7 @@ export default class RemoveNodeObserver {
 
   observe(node: Node, callback: (node: Node)=>void, thisArg?: any) {
     //use body as root element
-    const document = node.ownerDocument.body;
+    const document = node.ownerDocument!.body;
 
     let observer = this.documents.get(document);
     if (!observer) {

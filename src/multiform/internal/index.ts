@@ -55,7 +55,7 @@ export function clearNode(parent: Element) {
  * @internal
  */
 export function createNode(parent: HTMLElement, type: string = 'div', clazz?: string) {
-  const node = parent.ownerDocument.createElement(type);
+  const node = parent.ownerDocument!.createElement(type);
   if (clazz) {
     clazz.split(' ').forEach((c) => node.classList.add(c));
   }

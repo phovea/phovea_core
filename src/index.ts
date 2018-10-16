@@ -333,13 +333,13 @@ export const param = new PropertyHandler(location.search);
  */
 export function debounce(this: any, callback: () => void, timeToDelay = 100) {
   let tm = -1;
-  return function(...args: any[]) {
+  return function(this: any, ...args: any[]) {
     if (tm >= 0) {
       clearTimeout(tm);
       tm = -1;
     }
     args.unshift(this);
-    tm = setTimeout(callback.bind.apply(callback, args), timeToDelay);
+    tm = self.setTimeout(callback.bind.apply(callback, args), timeToDelay);
   };
 }
 
@@ -353,7 +353,7 @@ export const delayedCall = debounce;
  * @param element
  * @return {{left: number, top: number, width: number, height: number}}
  */
-export function offset(element: Element) {
+export function offset(element: Element | null) {
   if (!element || !element.ownerDocument || !element.ownerDocument.defaultView) {
     return {left: 0, top: 0, width: 0, height: 0};
   }

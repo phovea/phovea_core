@@ -13,8 +13,8 @@ import {IPlugin} from '../../plugin';
  * @internal
  */
 export default class GridElem implements IPersistable {
-  actVis: IVisInstance;
-  content: HTMLElement;
+  actVis: IVisInstance | null = null;
+  content: HTMLElement | null = null;
 
   constructor(public readonly range: Range, public readonly pos: number[], public readonly data: IDataType) {
   }
@@ -54,7 +54,7 @@ export default class GridElem implements IPersistable {
     };
   }
 
-  restore(persisted: any): any {
+  restore(_persisted: any): any {
     //FIXME
     /*if (persisted.id) {
      var selected = search(this.visses, (e) => e.id === persisted.id);
@@ -71,7 +71,7 @@ export default class GridElem implements IPersistable {
 
   switchDestroy() {
     //remove content dom side
-    clearNode(this.content);
+    clearNode(this.content!);
     if (this.actVis && typeof(this.actVis.destroy) === 'function') {
       this.actVis.destroy();
     }
@@ -80,8 +80,8 @@ export default class GridElem implements IPersistable {
 
   build(plugin: IPlugin, options: any) {
     this.actVis = plugin.factory(this.data, this.content, options);
-    assignVis(this.content, this.actVis);
-    return this.actVis;
+    assignVis(this.content!, this.actVis!);
+    return this.actVis!;
   }
 
   get location() {
@@ -96,7 +96,7 @@ export default class GridElem implements IPersistable {
   transform(scale?: [number, number], rotate?: number): ITransform {
     if (this.actVis) {
       if (arguments.length > 0) {
-        return this.actVis.transform(scale, rotate);
+        return this.actVis.transform(scale || [1, 1], rotate || 0);
       } else {
         return this.actVis.transform();
       }

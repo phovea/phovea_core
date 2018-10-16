@@ -10,7 +10,7 @@
 import {getAPIJSON, api2absURL, getAPIData} from '../ajax';
 import {list as rlist, Range, all, join, parse} from '../range';
 import {mask, INumberValueTypeDesc, VALUE_TYPE_INT, VALUE_TYPE_REAL} from '../datatype';
-import {IHistogram, wrapHist, IAdvancedStatistics, computeAdvancedStats} from '../math';
+import {IHistogram, wrapHist, IAdvancedStatistics} from '../math';
 import {IMatrixDataDescription, IHeatMapUrlOptions} from './IMatrix';
 import {resolve} from '../idtype';
 
@@ -58,13 +58,13 @@ function maskIt(desc: IMatrixDataDescription<any>) {
 }
 
 export function viaAPI2Loader(): IMatrixLoader2<any> {
-  let rowIds: Promise<Range> = null,
-    rows: Promise<string[]> = null,
-    colIds: Promise<Range> = null,
-    cols: Promise<string[]> = null,
-    data: Promise<any[][]> = null,
-    hist: Promise<IHistogram> = null,
-    stats: Promise<IAdvancedStatistics> = null;
+  let rowIds: Promise<Range> | null = null,
+    rows: Promise<string[]> | null = null,
+    colIds: Promise<Range> | null = null,
+    cols: Promise<string[]> | null = null,
+    data: Promise<any[][]> | null = null,
+    hist: Promise<IHistogram> | null = null,
+    stats: Promise<IAdvancedStatistics> | null = null;
 
   function fillRowIds(desc: IMatrixDataDescription<any>) {
     if (rowIds !== null && rows !== null) {
@@ -127,7 +127,7 @@ export function viaAPI2Loader(): IMatrixLoader2<any> {
         if (stats == null) {
           stats = getAPIJSON(`/dataset/matrix/${desc.id}/stats`);
         }
-        return stats;
+        return stats!;
       }
       const args: any = {
         range: range.toString()
@@ -140,7 +140,7 @@ export function viaAPI2Loader(): IMatrixLoader2<any> {
         if (hist == null) {
           hist = getAPIJSON(`/dataset/matrix/${desc.id}/hist`).then((hist: number[]) => wrapHist(hist, valueRange));
         }
-        return hist;
+        return hist!;
       }
       const args: any = {
         range: range.toString()
@@ -150,13 +150,13 @@ export function viaAPI2Loader(): IMatrixLoader2<any> {
       }
       return getAPIJSON(`/dataset/matrix/${desc.id}/hist`, args).then((hist: number[]) => wrapHist(hist, valueRange));
     },
-    at: (desc: IMatrixDataDescription<any>, i: number, j: number) => r.data(desc, rlist([i], [j])).then((data) => maskIt(desc)(data[0][0])),
+    at: (desc: IMatrixDataDescription<any>, i: number, j: number) => r.data(desc, rlist([i], [j]))!.then((data) => maskIt(desc)(data[0][0])),
     data: (desc: IMatrixDataDescription<any>, range: Range) => {
       if (range.isAll) {
         if (data == null) {
           data = <any>getAPIJSON(`/dataset/matrix/${desc.id}/raw`).then(maskIt(desc)); // TODO avoid <any> type cast
         }
-        return data;
+        return data!;
       }
       if (data != null) { //already loading all
         return data.then((d) => range.filter(d, desc.size));
@@ -164,7 +164,7 @@ export function viaAPI2Loader(): IMatrixLoader2<any> {
       const size = desc.size;
       if (size[0] * size[1] < 1000 || desc.loadAtOnce) { // small file load all
         data = <any>getAPIJSON(`/dataset/matrix/${desc.id}/raw`).then(maskIt(desc)); // TODO avoid <any> type cast
-        return data.then((d) => range.filter(d, desc.size));
+        return data!.then((d) => range.filter(d, desc.size));
       }
       //server side slicing
       return getAPIData(`/dataset/matrix/${desc.id}/raw`, {range: range.toString()}).then(maskIt(desc));

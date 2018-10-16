@@ -53,7 +53,7 @@ export default class PropertyHandler extends EventHandler {
    * @param defaultValue
    * @returns {any}
    */
-  getProp(name: string, defaultValue: string = null) {
+  getProp(name: string, defaultValue: string | null = null) {
     if (this.map.has(name)) {
       const v = this.map.get(name);
       return v === null ? null : v.toString();

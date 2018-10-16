@@ -14,9 +14,9 @@ export interface IMultiForm extends IVisInstance {
   readonly act: IVisPluginDesc;
   readonly actLoader: Promise<IVisInstance>;
   readonly visses: IVisPluginDesc[];
-  switchTo(id: string): Promise<IVisInstance|IVisInstance[]>;
-  switchTo(index: number): Promise<IVisInstance|IVisInstance[]>;
-  switchTo(vis: IVisPluginDesc): Promise<IVisInstance|IVisInstance[]>;
+  switchTo(id: string): Promise<IVisInstance | null |IVisInstance[]>;
+  switchTo(index: number): Promise<IVisInstance | null |IVisInstance[]>;
+  switchTo(vis: IVisPluginDesc): Promise<IVisInstance | null |IVisInstance[]>;
 
   addIconVisChooser(toolbar: Element): void;
   addSelectVisChooser(toolbar: Element): void;
@@ -40,7 +40,7 @@ function toAvailableVisses(forms: IMultiForm[]) {
 }
 
 export function addIconVisChooser(toolbar: HTMLElement, ...forms: IMultiForm[]) {
-  const s = toolbar.ownerDocument.createElement('div');
+  const s = toolbar.ownerDocument!.createElement('div');
   toolbar.insertBefore(s, toolbar.firstChild);
   const visses = toAvailableVisses(forms);
 
@@ -52,7 +52,7 @@ export function addIconVisChooser(toolbar: HTMLElement, ...forms: IMultiForm[]) 
 }
 
 export function addSelectVisChooser(toolbar: HTMLElement, ...forms: IMultiForm[]) {
-  const s = toolbar.ownerDocument.createElement('select');
+  const s = toolbar.ownerDocument!.createElement('select');
   toolbar.insertBefore(s, toolbar.firstChild);
   const visses = toAvailableVisses(forms);
 

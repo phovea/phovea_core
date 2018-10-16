@@ -166,15 +166,15 @@ export default AMatrix;
  * @constructor
  */
 export class MatrixView<T, D extends IValueTypeDesc> extends AMatrix<T, D> {
-  constructor(root: IMatrix<T, D>, private range: Range, public readonly t: IMatrix<T, D> = null) {
+  public readonly t: IMatrix<T, D>;
+
+  constructor(root: IMatrix<T, D>, private range: Range, t?: IMatrix<T, D>) {
     super(root);
     this.range = range;
     //ensure that there are two dimensions
     range.dim(0);
     range.dim(1);
-    if (!t) {
-      this.t = new MatrixView(root.t, range.swap(), this);
-    }
+    this.t = t ? t : new MatrixView(root.t, range.swap(), this);
   }
 
   get desc() {
@@ -237,7 +237,7 @@ export class MatrixView<T, D extends IValueTypeDesc> extends AMatrix<T, D> {
     return this.root.heatmapUrl(this.range.preMultiply(parse(range), this.root.dim), options);
   }
 
-  view(range: RangeLike = all()) {
+  view(range: RangeLike = all()): IMatrix<T, D> {
     const r = parse(range);
     if (r.isAll) {
       return this;

@@ -27,13 +27,13 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
    */
   readonly visses: IVisPluginDesc[];
 
-  private actVis: IVisInstance;
-  private actVisPromise: Promise<any>;
+  private actVis: IVisInstance | null = null;
+  private actVisPromise: Promise<any> | null = null;
 
-  private actDesc: IVisPluginDesc;
-  private content: HTMLElement;
+  private actDesc: IVisPluginDesc | null = null;
+  private content: HTMLElement | null = null;
 
-  private readonly _metaData: IVisMetaData = new ProxyMetaData(() => this.actDesc);
+  private readonly _metaData: IVisMetaData = new ProxyMetaData(() => this.actDesc!);
 
   constructor(public readonly data: IDataType, parent: HTMLElement, private options: IMultiFormOptions = {}) {
     super();
@@ -48,7 +48,7 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
     assignData(parent, data);
     assignVis(this.node, this);
     //find all suitable plugins
-    this.visses = listVisses(data).filter(this.options.filter);
+    this.visses = listVisses(data).filter(this.options.filter!);
 
     this.build();
   }
@@ -68,7 +68,7 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
     //create content
     this.content = createNode(this.node, 'div', 'content');
     //switch to first
-    this.switchTo(this.options.initialVis);
+    this.switchTo(this.options.initialVis!);
   }
 
   destroy() {
@@ -129,18 +129,18 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
       if (arguments.length === 0) {
         return this.actVis.transform();
       } else {
-        const t = (event: any, newValue: ITransform, old: ITransform) => {
+        const t = (_event: any, newValue: ITransform, old: ITransform) => {
           this.fire('transform', newValue, old);
         };
         this.actVis.on('transform', t);
-        const r = this.actVis.transform(scale, rotate);
+        const r = this.actVis.transform(scale || [1, 1], rotate || 0);
         this.actVis.off('transform', t);
         return r;
       }
     }
     if (this.actVisPromise && arguments.length > 0) {
       //2nd try
-      this.actVisPromise.then((v) => this.transform(scale, rotate));
+      this.actVisPromise.then(() => this.transform(scale, rotate));
     }
     return {
       scale: <[number, number]>[1, 1],
@@ -153,11 +153,11 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
    * @returns {plugins.IPluginDesc}
    */
   get act() {
-    return this.actDesc;
+    return this.actDesc!;
   }
 
   get actLoader() {
-    return this.actVisPromise;
+    return this.actVisPromise!;
   }
 
   get size(): [number, number] {
@@ -178,11 +178,11 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
    * switch to the desired vis technique given by index
    * @param param
    */
-  switchTo(param: number|string|IVisPluginDesc): Promise<IVisInstance> {
+  switchTo(param: number|string|IVisPluginDesc): Promise<IVisInstance | null> {
     const vis: IVisPluginDesc = selectVis(param, this.visses);
 
     if (vis === this.actDesc) {
-      return this.actVisPromise; //already selected
+      return this.actVisPromise!; //already selected
     }
     //gracefully destroy
     if (this.actVis) {
@@ -191,7 +191,7 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
       this.actVisPromise = null;
     }
     //remove content dom side
-    clearNode(this.content);
+    clearNode(this.content!);
 
     //switch and trigger event
     const bak = this.actDesc;
@@ -208,10 +208,10 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
           return null;
         }
         this.actVis = plugin.factory(this.data, this.content, mixin({}, this.options.all, this.options[vis.id] || {}));
-        if (this.actVis.isBuilt) {
+        if (this.actVis!.isBuilt) {
           this.markReady();
         } else {
-          this.actVis.on('ready', () => {
+          this.actVis!.on('ready', () => {
             this.markReady();
           });
         }

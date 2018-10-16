@@ -9,8 +9,8 @@
  * @deprecated use Array.prototype.find
  * @return {T}
  */
-export function search<T>(arr: T[], f: (v: T) => boolean): T {
-  let r: T = undefined;
+export function search<T>(arr: T[], f: (v: T) => boolean): T | undefined {
+  let r: T | undefined = undefined;
   arr.some((v) => {
     if (f(v)) {
       r = v;
@@ -74,7 +74,9 @@ function indexRange(n: number): number[] {
 export function argSort<T>(arr: T[], compareFn?: (a: T, b: T) => number, thisArg?: any): number[] {
   const indices = indexRange(arr.length);
   return indices.sort((a: any, b: any) => {
-    return compareFn.call(thisArg, arr[a], arr[b]);
+    const av = arr[a];
+    const bv = arr[b];
+    return compareFn ? compareFn.call(thisArg, av, bv) : (av < bv ? -1 : (bv > av ? 1 : 0));
   });
 }
 
