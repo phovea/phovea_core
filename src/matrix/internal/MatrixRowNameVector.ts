@@ -8,12 +8,8 @@ import ANameVector, {IStringVector} from '../../vector/internal/ANameVector';
 export default class MatrixRowNameVector extends ANameVector<IAnyMatrix> implements IStringVector {
 
   constructor(matrix: IAnyMatrix) {
-    super(matrix);
+    super(matrix, matrix.rowtype);
     this.root = this;
-  }
-
-  get idtype() {
-    return this.base.rowtype;
   }
 
   names(range: RangeLike = all()) {

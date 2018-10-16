@@ -21,7 +21,7 @@ import {
   guessValueTypeDesc,
   IValueTypeDesc
 } from '../datatype';
-import {IVector, IVectorDataDescription, createDefaultVectorDesc} from './IVector';
+import IVector, {IVectorDataDescription, createDefaultVectorDesc} from './IVector';
 import AVector from './AVector';
 import {IVectorLoader, viaAPILoader, viaDataLoader, IVectorLoaderResult} from './loader';
 /**
@@ -88,13 +88,13 @@ export default class Vector<T,D extends IValueTypeDesc> extends AVector<T,D> {
     return this.desc.size;
   }
 
-  async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<AVector<T,D>> {
+  async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
     const d = await this.data();
     const indices = argSort(d, compareFn, thisArg);
     return this.view(rlist(indices));
   }
 
-  async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<AVector<T,D>> {
+  async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
     const d = await this.data();
     const indices = argFilter(d, callbackfn, thisArg);
     return this.view(rlist(indices));

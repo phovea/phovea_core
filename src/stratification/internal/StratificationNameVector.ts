@@ -12,10 +12,6 @@ export default class StratificationNameVector extends ANameVector<IStratificatio
     this.root = this;
   }
 
-  get idtype() {
-    return this.base.idtype;
-  }
-
   names(range: RangeLike = all()) {
     return this.base.names(range);
   }

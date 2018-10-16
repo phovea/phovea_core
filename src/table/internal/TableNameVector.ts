@@ -12,10 +12,6 @@ export default class TableNameVector extends ANameVector<ITable> implements IStr
     this.root = this;
   }
 
-  get idtype() {
-    return this.base.idtype;
-  }
-
   names(range: RangeLike = all()) {
     return this.base.rows(range);
   }

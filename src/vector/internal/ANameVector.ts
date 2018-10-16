@@ -13,7 +13,7 @@ export declare type IStringVector = IVector<string, IStringValueTypeDesc>;
 export abstract class ANameVector<T extends IDataType> extends AVector<string, IStringValueTypeDesc> {
   readonly desc: IVectorDataDescription<IStringValueTypeDesc>;
 
-  constructor(protected base: T) {
+  constructor(protected base: T, public readonly idtype: IDType = base.idtypes[0]) {
     super(null);
     this.desc = {
       type: 'vector',
@@ -24,7 +24,7 @@ export abstract class ANameVector<T extends IDataType> extends AVector<string, I
       value: {
         type: 'string'
       },
-      idtype: this.idtype ? this.idtype.id : 0,
+      idtype: idtype.id,
       size: this.length,
       ts: base.desc.ts,
       creator: base.desc.creator,
@@ -35,12 +35,6 @@ export abstract class ANameVector<T extends IDataType> extends AVector<string, I
 
   get valuetype() {
     return this.desc.value;
-  }
-
-  // TODO This method should be abstract. However, it results in a compile error with Typescript v2.7.2:
-  // `TS2715: Abstract property 'idtype' in class 'ANameVector' cannot be accessed in the constructor.`
-  /*abstract*/ get idtype(): IDType | null {
-    return null;
   }
 
   get idtypes() {

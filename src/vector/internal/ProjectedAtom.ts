@@ -3,7 +3,6 @@
  */
 
 import {IValueTypeDesc} from '../../datatype';
-import AAtom from '../../atom/AAtom';
 import {IAtom, IAtomDataDescription, IAtomValue} from '../../atom/IAtom';
 import {list as rlist, RangeLike, Range, parse, all, none} from '../../range';
 import {SelectAble} from '../../idtype';
@@ -12,7 +11,7 @@ import {IVector} from '../IVector';
 export default class ProjectedAtom<T, D extends IValueTypeDesc, M, MD extends IValueTypeDesc> extends SelectAble implements IAtom<T,D> {
   readonly desc: IAtomDataDescription<D>;
 
-  private cache: Promise<IAtomValue<T>> = null;
+  private cache: Promise<IAtomValue<T>> | null = null;
 
   constructor(private v: IVector<M, MD>, private f: (data: M[], ids: Range, names: string[]) => IAtomValue<T>, private thisArgument = v, public readonly valuetype: D = <any>v.valuetype, private _idtype = v.idtype) {
     super();

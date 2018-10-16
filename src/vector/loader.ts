@@ -35,7 +35,7 @@ export interface IVectorLoader<T> {
  * @internal
  */
 export function viaAPILoader<T>() {
-  let _loader: Promise<IVectorLoaderResult<T>> = undefined;
+  let _loader: Promise<IVectorLoaderResult<T>>;
   return (desc: IVectorDataDescription<any>) => {
     if (_loader) { //in the cache
       return _loader;
@@ -56,7 +56,7 @@ export function viaAPILoader<T>() {
  * @internal
  */
 export function viaDataLoader<T>(rows: string[], rowIds: number[], data: IValueType[]) {
-  let _data: IVectorLoaderResult<T> = undefined;
+  let _data: IVectorLoaderResult<T>;
   return () => {
     if (_data) { //in the cache
       return Promise.resolve(_data);

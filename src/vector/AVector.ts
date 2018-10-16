@@ -11,7 +11,7 @@ import {all, list as rlist, RangeLike, range, asUngrouped, composite, parse} fro
 import Range from '../range/Range';
 import CompositeRange1D from '../range/CompositeRange1D';
 import {argSort, argFilter} from '../index';
-import {SelectAble, resolve as resolveIDType, IDType, IDTypeLike} from '../idtype';
+import {SelectAble, resolve as resolveIDType, IDType} from '../idtype';
 import {
   categorical2partitioning,
   ICategorical2PartitioningOptions,
@@ -44,7 +44,7 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
 
   constructor(protected root: IVector<T,D> | null) {
     super();
-    
+
   }
 
   get dim() {
@@ -106,10 +106,10 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
       if (typeof vc.categories[0] !== 'string') {
         const vcc = <ICategory[]>vc.categories;
         if (vcc[0].color) {
-          options.colors = vcc.map((d) => d.color);
+          options.colors = vcc.map((d) => d.color!);
         }
         if (vcc[0].label) {
-          options.labels = vcc.map((d) => d.label);
+          options.labels = vcc.map((d) => d.label!);
         }
       }
       return categorical2partitioning(d, vc.categories.map((d) => typeof d === 'string' ? d : d.name), options);
@@ -132,7 +132,7 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
   async hist(bins?: number, range: RangeLike = all()): Promise<IHistogram | null> {
     if(!this.root){
       throw new Error('root not set');
-    }  
+    }
     const v = this.root.valuetype;
     const d = await this.data(range);
     switch (v.type) {

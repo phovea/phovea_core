@@ -32,7 +32,7 @@ export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<
   /**
    * id type
    */
-  readonly idtype: IDTypeLike;
+  readonly idtype: IDType;
 
   /**
    * return the associated ids of this vector
