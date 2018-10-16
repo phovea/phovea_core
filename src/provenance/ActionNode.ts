@@ -90,7 +90,7 @@ function byIndex(a: AttributeContainer, b: AttributeContainer) {
 
 
 export default class ActionNode extends GraphNode {
-  private inverter: IInverseActionCreator;
+  private inverter: IInverseActionCreator | null = null;
 
   constructor(meta: ActionMetaData, functionId: string, private f: ICmdFunction, parameter: any = {}) {
     super('action');
@@ -219,12 +219,12 @@ export default class ActionNode extends GraphNode {
     return this.outgoing.filter(isType('requires')).sort(byIndex).map((e) => <ObjectNode<any>>e.target);
   }
 
-  get resultsIn(): StateNode {
+  get resultsIn(): StateNode | null {
     const r = this.outgoing.filter(isType('resultsIn'))[0];
     return r ? <StateNode>r.target : null;
   }
 
-  get previous(): StateNode {
+  get previous(): StateNode | null {
     const r = this.incoming.filter(isType('next'))[0];
     return r ? <StateNode>r.source : null;
   }

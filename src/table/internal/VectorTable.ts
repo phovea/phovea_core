@@ -111,7 +111,7 @@ export default class VectorTable extends ATable implements ITable {
     return super.restore(persisted);
   }
 
-  queryView(name: string, args: IQueryArgs): ITable {
+  queryView(_name: string, _args: IQueryArgs): ITable {
     throw Error('not implemented');
   }
 }

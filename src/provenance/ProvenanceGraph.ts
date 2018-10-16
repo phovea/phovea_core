@@ -139,7 +139,7 @@ function asFunction(i: any) {
   return i;
 }
 
-function noop(inputs: IObjectRef<any>[], parameter: any): ICmdResult {
+function noop(_inputs: IObjectRef<any>[], _parameter: any): ICmdResult {
   return {
     inverse: createNoop()
   };
@@ -175,9 +175,9 @@ function createLazyCmdFunctionFactory(): ICmdFunctionFactory {
   }
 
   const lazyFunction = (id: string) => {
-    let _resolved: PromiseLike<any> = null;
-    return function (this: any, inputs: IObjectRef<any>[], parameters: any) {
-      const that = this, args = Array.from(arguments);
+    let _resolved: PromiseLike<any> | null = null;
+    return function (this: any, ...args: any[]) {
+      const that = this;
       if (_resolved == null) {
         _resolved = resolveFun(id);
       }
@@ -215,7 +215,7 @@ export function toSlidePath(s?: SlideNode) {
       return r;
     }
     r.push(s);
-    s = s.next;
+    s = s.next!;
   }
   return r;
 }
@@ -243,8 +243,8 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   private _states: StateNode[] = [];
   private _slides: SlideNode[] = [];
 
-  act: StateNode = null;
-  private lastAction: ActionNode = null;
+  act: StateNode;
+  private lastAction: ActionNode | null = null;
 
   //currently executing promise
   private currentlyRunning = false;
@@ -355,7 +355,6 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     this._actions = [];
     this._objects = [];
     this._slides = [];
-    this.act = null;
     this.lastAction = null;
 
     this.act = new StateNode('start');
@@ -423,7 +422,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   }
 
   private initAction(r: ActionNode, inputs: IObjectRef<any>[] = []) {
-    const inobjects = inputs.map((i) => ProvenanceGraph.findInArray(this._objects, i));
+    const inobjects = inputs.map((i) => ProvenanceGraph.findInArray(this._objects, i)!);
     this._actions.push(r);
     this.backend.addNode(r);
     this.fire('add_action', r);
@@ -450,18 +449,18 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     });
 
     //create the loop in the states
-    this.addEdge(action.resultsIn, 'next', inverted);
-    this.addEdge(inverted, 'resultsIn', action.previous);
+    this.addEdge(action.resultsIn!, 'next', inverted);
+    this.addEdge(inverted, 'resultsIn', action.previous!);
 
     return inverted;
   }
 
   push(action: IAction): Promise<ICmdResult>;
   push(meta: ActionMetaData, functionId: string, f: ICmdFunction, inputs: IObjectRef<any>[], parameter: any): Promise<ICmdResult>;
-  push(arg: any, functionId: string = '', f: ICmdFunction = null, inputs: IObjectRef<any>[] = [], parameter: any = {}) {
+  push(arg: any, functionId: string = '', f: ICmdFunction | null = null, inputs: IObjectRef<any>[] = [], parameter: any = {}) {
     return this.inOrder(() => {
       if (arg instanceof ActionMetaData) {
-        return this.run(this.createAction(<ActionMetaData>arg, functionId, f, inputs, parameter), null);
+        return this.run(this.createAction(<ActionMetaData>arg, functionId, f!, inputs, parameter), null);
       } else {
         const a = <IAction>arg;
         return this.run(this.createAction(a.meta, a.id, a.f, a.inputs || [], a.parameter || {}), null);
@@ -498,7 +497,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     this._objects.push(r);
     this.backend.addNode(r);
     if (createEdge) {
-      this.addEdge(this.act, 'consistsOf', r);
+      this.addEdge(this.act!, 'consistsOf', r);
     }
     this.fire('add_object', r);
     return r;
@@ -541,7 +540,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   }
 
   private findOrAddObjectImpl<T>(i: T|IObjectRef<T>, name?: string, type?: any, createEdge = false): ObjectNode<T> {
-    let r: ObjectNode<T>;
+    let r: ObjectNode<T> | undefined;
     const j = <any>i;
     if (i instanceof ObjectNode) {
       return <ObjectNode<T>>i;
@@ -575,11 +574,11 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
 
   private inOrder(f: () => PromiseLike<any>): PromiseLike<any> {
     if (this.currentlyRunning) {
-      let helper: ()=>void;
+      let helper: ()=>any;
       const r = new Promise((resolve) => {
         helper = resolve.bind(this);
       });
-      this.nextQueue.push(helper);
+      this.nextQueue.push(helper!);
       return r.then(f);
     } else {
       return f();
@@ -601,13 +600,13 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     if (firstTime) {
       //create an link outputs
       //
-      created = this.resolve(result.created);
+      created = this.resolve(result.created || []);
       created.forEach((c, i) => {
         this.addEdge(action, 'creates', c, {index: i});
       });
       // a removed one should be part of the inputs
       const requires = action.requires;
-      removed = result.removed.map((r) => ProvenanceGraph.findInArray(requires, r));
+      removed = (result.removed || []).map((r) => ProvenanceGraph.findInArray(requires, r)!);
       removed.forEach((c) => {
         c.value = null; //free reference
         this.addEdge(action, 'removes', c);
@@ -621,14 +620,14 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
           const i = objs.indexOf(r);
           objs.splice(i, 1);
         });
-        objs.forEach((obj) => this.addEdge(next, 'consistsOf', obj));
+        objs.forEach((obj) => this.addEdge(next!, 'consistsOf', obj));
       }
       this.fire('executed_first', action, next);
     } else {
       created = action.creates;
       //update creates reference values
       created.forEach((c, i) => {
-        c.value = result.created[i].value;
+        c.value = result.created![i].value;
       });
       removed = action.removes;
       removed.forEach((c) => c.value = null);
@@ -636,7 +635,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     result.inverse = asFunction(result.inverse);
     action.updateInverse(this, <IInverseActionCreator>result.inverse);
 
-    this.switchToImpl(action, next);
+    this.switchToImpl(action, next!);
 
     return {
       action,
@@ -647,9 +646,9 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     };
   }
 
-  private run(action: ActionNode, result: ICmdResult, withinMilliseconds: number | (() => number) = -1): PromiseLike<ICmdResult> {
-    let next: StateNode = action.resultsIn,
-      newState = false;
+  private run(action: ActionNode, result: ICmdResult | null, withinMilliseconds: number | (() => number) = -1): PromiseLike<ICmdResult> {
+    let next: StateNode | null = action.resultsIn;
+    let newState = false;
     if (!next) { //create a new state
       newState = true;
       this.addEdge(this.act, 'next', action);
@@ -669,7 +668,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
 
     const runningAction = (result ? resolveImmediately(result) : action.execute(this, this.executeCurrentActionWithin)).then(this.executedAction.bind(this, action, newState));
 
-    runningAction.then((result) => {
+    runningAction.then(() => {
       const q = this.nextQueue.shift();
       if (q) {
         q();
@@ -725,11 +724,11 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
       const action = torun[i];
       const result = await this.run(action, null, withinMilliseconds < 0 ? -1 : guessTime(i));
       results.push(result);
-      updateTime(result.consumed);
+      updateTime(result.consumed || 0);
     }
 
     if (this.act !== last.resultsIn) {
-      this.switchToImpl(last, last.resultsIn);
+      this.switchToImpl(last, last.resultsIn!);
     }
     this.fire('ran_chain', this.act, torun);
     return results;
@@ -742,9 +741,9 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     //create and store the inverse
     if (this.lastAction.inverses != null) {
       //undo and undoing should still go one up
-      return this.jumpTo(this.act.previousState);
+      return this.jumpTo(this.act.previousState!);
     } else {
-      return this.inOrder(() => this.run(this.lastAction.getOrCreateInverse(this), null));
+      return this.inOrder(() => this.run(this.lastAction!.getOrCreateInverse(this)!, null));
     }
   }
 
@@ -762,7 +761,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
       if (common) {
         const toRevert = actPath.slice(common.i + 1).reverse(),
           toForward = targetPath.slice(common.j + 1);
-        actions = actions.concat(toRevert.map((r) => r.resultsFrom[0].getOrCreateInverse(this)));
+        actions = actions.concat(toRevert.map((r) => r.resultsFrom[0].getOrCreateInverse(this)!));
         actions = actions.concat(toForward.map((r) => r.resultsFrom[0]));
       }
       //no in the direct branches maybe in different loop instances?
@@ -784,7 +783,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     const all: StateNode[] = [];
     const queue = [action.resultsIn];
     while (queue.length > 0) {
-      const next = queue.shift();
+      const next = queue.shift()!;
       if (all.indexOf(next) >= 0) {
         continue;
       }
@@ -796,7 +795,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     }
 
     const targetObjects = target.consistsOf;
-    const sourceObjects = action.previous.consistsOf;
+    const sourceObjects = action.previous!.consistsOf;
     //function isSame(a: any[], b : any[]) {
     //  return a.length === b.length && a.every((ai, i) => ai === b[i]);
     //}
@@ -821,7 +820,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   private copyAction(action: ActionNode, appendTo: StateNode, objectReplacements: {[id: string]: IObjectRef<any>}) {
     const clone = this.initAction(action.clone(), action.requires.map((a) => objectReplacements[String(a.id)] || a));
     this.addEdge(appendTo, 'next', clone);
-    const s = this.makeState(action.resultsIn.name, action.resultsIn.description);
+    const s = this.makeState(action.resultsIn!.name, action.resultsIn!.description);
     this.addEdge(clone, 'resultsIn', s);
     return s;
   }
@@ -829,7 +828,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   private copyBranch(action: ActionNode, target: StateNode, removedObject: ObjectNode<any>[], objectReplacements: {[id: string]: IObjectRef<any>}) {
     const queue = [{a: action, b: target}];
     while (queue.length > 0) {
-      const next = queue.shift();
+      const next = queue.shift()!;
       let b = next.b;
       const a = next.a;
       const someRemovedObjectRequired = a.requires.some((ai) => removedObject.indexOf(ai) >= 0 && !(String(ai.id) in objectReplacements));
@@ -837,7 +836,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
         //copy it and create a new pair to execute
         b = this.copyAction(a, next.b, objectReplacements);
       }
-      queue.push.apply(queue, a.resultsIn.next.map((aa) => ({a: aa, b})));
+      queue.push.apply(queue, a.resultsIn!.next.map((aa) => ({a: aa, b})));
     }
   }
 
@@ -925,9 +924,9 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
       this.fire('add_slide', node);
       return node;
     };
-    let slide: SlideNode = addStartEnd ? addSlide(SlideNode.makeText('Unnamed Story')) : null,
-      prev = slide;
-    states.forEach((s, i) => {
+    let slide: SlideNode | null = addStartEnd ? addSlide(SlideNode.makeText('Unnamed Story')) : null;
+    let prev = slide;
+    states.forEach((s) => {
       const node = addSlide(new SlideNode());
       node.name = s.name;
       this.addEdge(node, 'jumpTo', s);
@@ -942,12 +941,12 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     if (addStartEnd) {
       const last = SlideNode.makeText('Thanks');
       addSlide(last);
-      this.addEdge(prev, 'next', last);
+      this.addEdge(prev!, 'next', last);
     }
 
     this.fire('extract_slide', slide);
-    this.selectSlide(slide);
-    return slide;
+    this.selectSlide(slide!);
+    return slide!;
   }
 
   startNewSlide(title?: string, states: StateNode[] = []) {
@@ -1045,7 +1044,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     while (node) {
       const next = node.next;
       this.removeSlideNode(node);
-      node = next;
+      node = next!;
     }
     this.fire('destroy_slide', bak);
   }

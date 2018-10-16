@@ -6,7 +6,7 @@ import {randomId, mixin} from '../';
 
 export interface INodeVis {
   node: Element;
-  destroy?();
+  destroy?(): void;
 }
 
 export interface IPopupProxyOptions {
@@ -16,8 +16,8 @@ export interface IPopupProxyOptions {
 
 
 export default class PopupProxy<T extends INodeVis> {
-  private current: T;
-  private popup: Window;
+  private current: T | null = null;
+  private popup: Window | null = null;
 
   private options: IPopupProxyOptions = {
     args: [],
@@ -32,13 +32,12 @@ export default class PopupProxy<T extends INodeVis> {
   }
 
   private build(parent: HTMLElement) {
-    this.current = this.factory(parent, ...this.options.args);
+    this.current = this.factory(parent, ...this.options.args!);
   }
 
 
   private buildPopup(callbackFunction: string) {
-    const serializer = new XMLSerializer();
-    const links = Array.from(document.head.querySelectorAll('link')).map((link: HTMLLinkElement) => `<link href="${link.href}" rel="${link.rel}" type="${link.type}" />`);
+    const links = Array.from(document.head!.querySelectorAll('link')).map((link: HTMLLinkElement) => `<link href="${link.href}" rel="${link.rel}" type="${link.type}" />`);
     const template = `<!doctype html>
       <html>
       <head>
@@ -69,9 +68,9 @@ export default class PopupProxy<T extends INodeVis> {
   }
 
   close() {
-    if (this.current.destroy) {
+    if (this.current && this.current.destroy) {
       this.current.destroy();
-    } else {
+    } else if (this.current) {
       this.current.node.remove();
     }
     this.current = null;
@@ -80,22 +79,22 @@ export default class PopupProxy<T extends INodeVis> {
   }
 
   open() {
-    const rect = this.current.node.getBoundingClientRect();
-    if (this.current.destroy) {
-      this.current.destroy();
+    const rect = this.current!.node.getBoundingClientRect();
+    if (this.current!.destroy) {
+      this.current!.destroy!();
     } else {
-      this.current.node.remove();
+      this.current!.node.remove();
     }
     this.parent.classList.add('as-popup');
     this.current = null;
     // use a callback function similar to jsonp, don't know why the popup state if overridden
     const name = 'popupCallback' + randomId(8);
-    (<any>window)[name] = (popupBody) => {
+    (<any>window)[name] = (popupBody: HTMLElement) => {
       this.build(popupBody);
       delete (<any>window)[name];
     };
     this.popup = self.open(this.buildPopup(name), this.options.name, `width=${rect.width}, height=${rect.height}, left=${rect.left}, top=${rect.top}, location=no`);
-    this.popup.onbeforeunload = () => this.close();
+    this.popup!.onbeforeunload = () => this.close();
   }
 }
 

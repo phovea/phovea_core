@@ -12,8 +12,8 @@ import LocalStorageGraph from './LocalStorageGraph';
 import {resolveImmediately} from '../internal/promise';
 
 export default class GraphProxy extends ADataType<IGraphDataDescription> {
-  private cache: PromiseLike<AGraph> = null;
-  private loaded: AGraph = null;
+  private cache: PromiseLike<AGraph> | null = null;
+  private loaded: AGraph | null = null;
 
   constructor(desc: IGraphDataDescription) {
     super(desc);
@@ -58,9 +58,12 @@ export default class GraphProxy extends ADataType<IGraphDataDescription> {
       this.loaded = this.desc.graph;
       this.cache = resolveImmediately(this.loaded);
     } else {
-      this.cache = resolveImmediately(RemoteStoreGraph.load(this.desc, factory)).then((graph: AGraph) => this.loaded = graph);
+      this.cache = resolveImmediately(RemoteStoreGraph.load(this.desc, factory)).then((graph: AGraph) => {
+        this.loaded = graph;
+        return graph;
+      });
     }
-    return this.cache;
+    return this.cache!;
   }
 
   ids(range: RangeLike = all()): Promise<Range> {

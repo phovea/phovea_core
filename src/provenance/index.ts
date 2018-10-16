@@ -39,9 +39,10 @@ export const graphModule = graph;
 
 export function findLatestPath(state: StateNode) {
   const path = state.path.slice();
+  let s: StateNode | null = state;
   //compute the first path to the end
-  while ((state = state.nextState) != null && (path.indexOf(state) < 0)) {
-    path.push(state);
+  while ((s = s.nextState) != null && (path.indexOf(s) < 0)) {
+    path.push(s!);
   }
   return path;
 }

@@ -127,7 +127,7 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
   /**
    * a promise of the value accessible via .v
    */
-  private _promise: PromiseLike<T>;
+  private _promise: PromiseLike<T> | null = null;
   private _persisted: any = null;
 
   constructor(private _v: T, name: string, category = cat.data, hash = name + '_' + category, description = '') {
@@ -169,7 +169,7 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
 
   get v() {
     this.checkPersisted();
-    return this._promise;
+    return this._promise!;
   }
 
   get name(): string {

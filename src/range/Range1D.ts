@@ -349,7 +349,7 @@ export default class Range1D {
     if (arr.length === 0) {
       return [];
     }
-    return arr.map((index, i) => base.indexOf(index));
+    return arr.map((index) => base.indexOf(index));
   }
 
   /**
@@ -358,7 +358,7 @@ export default class Range1D {
    * @param size
    * @return {Range1D}
    */
-  indexRangeOf(r: Range1D, size?: number): Range1D {
+  indexRangeOf(r: Range1D, _size?: number): Range1D {
     if (r.isNone || this.isNone) {
       return r.fromLike([]);
     }
@@ -482,7 +482,7 @@ export default class Range1D {
     return this.fromLike(r);
   }
 
-  private removeDuplicates(size?: number): Range1D {
+  private removeDuplicates(_size?: number): Range1D {
     let arr = this.iter().asList();
     arr = arr.sort(sortNumeric);
     arr = arr.filter((di, i) => di !== arr[i - 1]); //same value as before, remove

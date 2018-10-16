@@ -26,7 +26,7 @@ export default class Table extends ATable implements ITable {
   private vectors: TableVector<any, IValueTypeDesc>[];
 
   constructor(public readonly desc: ITableDataDescription, private loader: ITableLoader2) {
-    super(<any>null); 
+    super(<any>null);
     this.root = this;
     // set default column
     desc.columns.forEach((col) => col.column = col.column || col.name);
@@ -50,7 +50,7 @@ export default class Table extends ATable implements ITable {
   }
 
   async at(row: number, col: number): Promise<IValueType> {
-    return (await this.colData((<TableVector<any, IValueTypeDesc>>this.col(col)).column, rlist(row)))[0];
+    return (await this.colData((<TableVector<any, IValueTypeDesc>>this.col(col)).column!, rlist(row)))[0];
   }
 
   queryView(name: string, args: any): ITable {

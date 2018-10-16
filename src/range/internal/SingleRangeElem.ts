@@ -29,7 +29,7 @@ export default class SingleRangeElem implements IRangeElem {
     return false;
   }
 
-  size(size?: number): number {
+  size(_size?: number): number {
     return 1;
   }
 

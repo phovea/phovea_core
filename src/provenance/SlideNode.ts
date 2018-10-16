@@ -116,7 +116,7 @@ export default class SlideNode extends GraphNode {
     this.setAttr('annotations', old);
   }
 
-  updateAnnotation(ann: IStateAnnotation) {
+  updateAnnotation(_ann: IStateAnnotation) {
     //since it is a reference just updated
     this.setAttr('annotations', this.annotations);
   }

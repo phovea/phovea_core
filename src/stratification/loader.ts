@@ -29,7 +29,7 @@ function createRangeFromGroups(name: string, groups: any[]) {
 }
 
 export function viaAPILoader(): IStratificationLoader {
-  let _data: Promise<ILoadedStratification> = undefined;
+  let _data: Promise<ILoadedStratification> | null = null;
   return (desc) => {
     if (!_data) { //in the cache
       _data = getAPIJSON('/dataset/' + desc.id).then((data) => {
@@ -48,7 +48,7 @@ export function viaAPILoader(): IStratificationLoader {
 }
 
 export function viaDataLoader(rows: string[], rowIds: number[], range: CompositeRange1D): IStratificationLoader {
-  let _data: Promise<ILoadedStratification> = undefined;
+  let _data: Promise<ILoadedStratification> | null = null;
   return () => {
     if (!_data) { //in the cache
       _data = Promise.resolve({

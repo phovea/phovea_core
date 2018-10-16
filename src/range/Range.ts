@@ -252,7 +252,7 @@ export default class Range {
    */
   size(size?: number[]): number[] {
     if (this.isAll) {
-      return size;
+      return size!;
     }
     return this.dims.map((r, i) => {
       return r.size(size ? size[i] : undefined);
@@ -276,7 +276,7 @@ export default class Range {
       const act = ids.length;
       if (act < ndim) {
         const dim = this.dims[act];
-        dim.iter(size ? size[act] : null).forEach((id) => {
+        dim.iter(size ? size[act]! : undefined).forEach((id) => {
           ids.push(id);
           iter(ids);
           ids.pop();

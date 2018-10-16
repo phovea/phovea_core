@@ -85,7 +85,7 @@ function parseNamedRange1D(code: string, act: number): IParseDimResult {
       }
       return {
         dim: new CompositeRange1D(name, groups),
-        act: r.act + 1
+        act: r!.act + 1
       };
     default: //ERROR
       return {

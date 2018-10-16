@@ -198,13 +198,13 @@ export interface IGraph extends IDataType {
 
   addNode(n: GraphNode): this|PromiseLike<this>;
   updateNode(n: GraphNode): this|PromiseLike<this>;
-  removeNode(n: GraphNode): this|PromiseLike<this>;
+  removeNode(n: GraphNode): null|this|PromiseLike<this>;
 
   addEdge(e: GraphEdge): this|PromiseLike<this>;
   addEdge(s: GraphNode, type: string, t: GraphNode): this|PromiseLike<this>;
 
   updateEdge(e: GraphEdge): this|PromiseLike<this>;
-  removeEdge(e: GraphEdge): this|PromiseLike<this>;
+  removeEdge(e: GraphEdge): null|this|PromiseLike<this>;
 }
 
 
@@ -230,7 +230,7 @@ export abstract class AGraph extends SelectAble {
     return Promise.resolve(ids.preMultiply(parse(range)));
   }
 
-  idView(idRange: RangeLike = all()): Promise<IGraph> {
+  idView(_idRange: RangeLike = all()): Promise<IGraph> {
     throw Error('not implemented');
   }
 

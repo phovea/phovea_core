@@ -20,7 +20,7 @@ export interface IGroup {
   readonly size: number;
 }
 
-export function guessColor(stratification: string, group: string) {
+export function guessColor(_stratification: string, group: string) {
   switch (group.toLowerCase()) {
     case 'male':
       return 'blue';

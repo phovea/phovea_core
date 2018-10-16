@@ -5,7 +5,7 @@
 import {EventHandler} from '../event';
 
 export interface IChangedHandler {
-  (newValue: any, oldValue: any, url: string);
+  (newValue: any, oldValue: any, url: string): void;
 }
 
 function parse(v: string) {
@@ -23,11 +23,11 @@ export default class Store extends EventHandler {
     super();
 
     window.addEventListener('storage', (event: StorageEvent) => {
-      if (event.storageArea === storage && event.key.startsWith(prefix)) {
-        const key = event.key.substring(prefix.length);
+      if (event.storageArea === storage && event.key!.startsWith(prefix)) {
+        const key = event.key!.substring(prefix.length);
         // send specific and generic event
-        const newValue= parse(event.newValue);
-        const oldValue = parse(event.oldValue);
+        const newValue= parse(event.newValue!);
+        const oldValue = parse(event.oldValue!);
         this.fire(key, newValue, oldValue, event.url);
         this.fire(Store.EVENT_CHANGED, key, newValue, oldValue, event.url);
       }
@@ -55,7 +55,7 @@ export default class Store extends EventHandler {
     return (this.storage.getItem(key) !== null);
   }
 
-  getValue<T>(key: string, defaultValue: T = null): T {
+  getValue<T>(key: string, defaultValue: T): T {
     key = this.toFullKey(key);
     const v = this.storage.getItem(key);
     return v !== null ? parse(v) : defaultValue;

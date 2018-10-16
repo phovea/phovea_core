@@ -27,6 +27,6 @@ export interface IRangeElem {
   contains(value: number, size?: number): boolean;
 }
 
-export function fix(v: number, size: number) {
+export function fix(v: number, size: number = 0) {
   return v < 0 ? (size + 1 + v) : v;
 }

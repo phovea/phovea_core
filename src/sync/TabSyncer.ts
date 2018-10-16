@@ -14,7 +14,7 @@ export interface ITabSyncerOptions {
 export const SYNCER_EXTENSION_POINT = 'tabSyncer';
 
 export interface ISyncerExtension {
-  (store: Store);
+  (store: Store): void;
 }
 
 export default class TabSyncer {
@@ -30,7 +30,7 @@ export default class TabSyncer {
   constructor(options?: ITabSyncerOptions) {
     mixin(this.options, options);
 
-    this.store = new Store(this.options.storage, this.options.keyPrefix);
+    this.store = new Store(this.options.storage!, this.options.keyPrefix!);
     this.store.on(Store.EVENT_CHANGED, TabSyncer.handleChange.bind(this));
 
     // instantiate plugins
@@ -38,10 +38,10 @@ export default class TabSyncer {
       instances.forEach((i) => this.push(i.factory));
     });
 
-    this.registerTab(document.location.href);
+    this.registerTab(document.location!.href);
 
     window.addEventListener('beforeunload', () => {
-      this.unregisterTab(document.location.href);
+      this.unregisterTab(document.location!.href);
     });
   }
 
@@ -55,7 +55,7 @@ export default class TabSyncer {
     this.store.setValue(TabSyncer.TAB_LIST, list);
   }
 
-  private static handleChange(event: any, key: string, newValue: any, oldValue: any, url: string) {
+  private static handleChange(_event: any, key: string, newValue: any, oldValue: any, url: string) {
     console.log('change in local storage', key, newValue, oldValue, url);
   }
 

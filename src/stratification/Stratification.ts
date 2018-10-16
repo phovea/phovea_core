@@ -23,7 +23,7 @@ import StratificationVector from './StratificationVector';
  * @internal
  */
 export default class Stratification extends ADataType<IStratificationDataDescription> implements IStratification {
-  private _v: Promise<ICategoricalVector>;
+  private _v: Promise<ICategoricalVector> | null = null;
 
   constructor(desc: IStratificationDataDescription, private loader: IStratificationLoader) {
     super(desc);
@@ -41,7 +41,7 @@ export default class Stratification extends ADataType<IStratificationDataDescrip
     return new StratificationGroup(this, group, this.groups[group]);
   }
 
-  async hist(bins?: number, range?: Range): Promise<IHistogram> {
+  async hist(_bins?: number, _range?: Range): Promise<IHistogram> {
     //TODO
     return rangeHist(await this.range());
   }
@@ -59,7 +59,7 @@ export default class Stratification extends ADataType<IStratificationDataDescrip
 
   origin(): Promise<IDataType> {
     if ('origin' in this.desc) {
-      return getFirstByFQName(this.desc.origin);
+      return getFirstByFQName(this.desc.origin!);
     }
     return Promise.reject('no origin specified');
   }

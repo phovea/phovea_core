@@ -14,7 +14,6 @@ import GraphProxy from '../graph/GraphProxy';
 import RemoteStoreGraph from '../graph/RemoteStorageGraph';
 import {resolveImmediately} from '../internal/promise';
 import {IDataType} from '../datatype';
-import {AGraph} from '../graph';
 
 export default class RemoteStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private options = {
@@ -45,7 +44,7 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     return this.import(graph.persist(), desc);
   }
 
-  private importImpl(json: {nodes: any[], edges: any[]}, desc: any = {}): PromiseLike<AGraph> {
+  private importImpl(json: {nodes: any[], edges: any[]}, desc: any = {}): PromiseLike<RemoteStoreGraph> {
     const pdesc: any = mixin({
       type: 'graph',
       attrs: {
@@ -61,7 +60,7 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
       edges: json.edges
     }, desc);
     return upload(pdesc).then((base: IDataType) => {
-      return (<GraphProxy>base).impl(provenanceGraphFactory());
+      return <Promise<RemoteStoreGraph>>(<GraphProxy>base).impl(provenanceGraphFactory());
     });
   }
 
@@ -87,7 +86,7 @@ export default class RemoteStorageProvenanceGraphManager implements IProvenanceG
     const base = graph instanceof ProvenanceGraph ? graph.desc : graph;
     mixin(base, desc);
     const graphProxy = await getData(base.id);
-    await modify(graphProxy, desc);
+    await modify(graphProxy!, desc);
     return base;
   }
 

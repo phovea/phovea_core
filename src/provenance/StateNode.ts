@@ -70,7 +70,7 @@ export default class StateNode extends GraphNode {
     return this.outgoing.filter(isType('next')).map((e) => <ActionNode>e.target).filter((s) => !s.isInverse);
   }
 
-  get previousState(): StateNode {
+  get previousState(): StateNode | null {
     const a = this.creator;
     if (a) {
       return a.previous;
@@ -79,14 +79,16 @@ export default class StateNode extends GraphNode {
   }
 
   get previousStates(): StateNode[] {
-    return this.resultsFrom.map((n) => n.previous);
+    const r = this.resultsFrom;
+    return r ? r.map((n) => n.previous!) : [];
   }
 
   get nextStates(): StateNode[] {
-    return this.next.map((n) => n.resultsIn);
+    const r = this.next;
+    return r ? r.map((n) => n.resultsIn!) : [];
   }
 
-  get nextState(): StateNode {
+  get nextState(): StateNode | null {
     const r = this.next[0];
     return r ? r.resultsIn : null;
   }

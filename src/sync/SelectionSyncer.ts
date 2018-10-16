@@ -17,17 +17,17 @@ export interface ISelectionSyncerOptions {
 }
 
 function syncIDType(store: Store, idType: IDType, options: ISelectionSyncerOptions) {
-  options.selectionTypes.forEach((type) => {
+  options.selectionTypes!.forEach((type) => {
     const key = `${PREFIX}${idType.id}-${type}`;
     let disable = false;
-    idType.on('select-' + type, (event, type: string, selection: Range) => {
+    idType.on('select-' + type, (_event: any, _type: string, selection: Range) => {
       if (disable) {
         return;
       }
       // sync just the latest state
       store.setValue(key, selection.toString());
     });
-    store.on(key, (event: any, newValue: string) => {
+    store.on(key, (_event: any, newValue: string) => {
       disable = true; //don't track on changes
       idType.select(type, newValue);
       disable = false;
@@ -43,13 +43,13 @@ export function create(store: Store, options?: ISelectionSyncerOptions) {
   }, options);
 
   // store existing
-  const toSync = listIDTypes().filter((idType) => (idType instanceof IDType && options.filter(<IDType>idType)));
-  toSync.forEach((idType) => syncIDType(store, <IDType>idType, options));
+  const toSync = listIDTypes().filter((idType) => (idType instanceof IDType && options!.filter!(<IDType>idType)));
+  toSync.forEach((idType) => syncIDType(store, <IDType>idType, options!));
 
   // watch new ones
-  globalOn('register.idtype', (event: any, idType: IDType) => {
-    if (options.filter(idType)) {
-      syncIDType(store, idType, options);
+  globalOn('register.idtype', (_event: any, idType: IDType) => {
+    if (options!.filter!(idType)) {
+      syncIDType(store, idType, options!);
     }
   });
   return null;

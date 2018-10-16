@@ -181,7 +181,7 @@ export class AVisInstance extends EventHandler {
   readonly id = uniqueId('vis');
   private _built = false;
 
-  option(name: string, value?: any): any {
+  option(_name: string, _value?: any): any {
     //dummy
     //if (value) {
     //  this.fire('option', name, value, null);
@@ -219,12 +219,12 @@ export class AVisInstance extends EventHandler {
     return Promise.all(range.map((r) => this.locateImpl(ids.indexOf(r))));
   }
 
-  locateImpl(range: Range) {
+  locateImpl(_range: Range) {
     //no resolution by default
     return Promise.resolve(null);
   }
 
-  restore(persisted: any): Promise<AVisInstance> {
+  restore(_persisted: any): Promise<AVisInstance> {
     return Promise.resolve(this);
   }
 

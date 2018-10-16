@@ -6,7 +6,6 @@
  */
 import {GraphNode, GraphEdge, AGraph, IGraph, IGraphDataDescription} from './graph';
 export {IGraphDataDescription} from './graph';
-import {resolveImmediately} from '../internal/promise';
 
 export interface IGraphFactory {
   makeNode(p: any): GraphNode;
@@ -59,7 +58,7 @@ export default class GraphBase extends AGraph implements IGraph {
     return this;
   }
 
-  removeNode(n: GraphNode): this|PromiseLike<this> {
+  removeNode(n: GraphNode): null|this|PromiseLike<this> {
     const i = this.nodes.indexOf(n);
     if (i < 0) {
       return null;
@@ -85,7 +84,7 @@ export default class GraphBase extends AGraph implements IGraph {
     return this;
   }
 
-  removeEdge(e: GraphEdge): this|PromiseLike<this> {
+  removeEdge(e: GraphEdge): null|this|PromiseLike<this> {
     const i = this.edges.indexOf(e);
     if (i < 0) {
       return null;
@@ -111,7 +110,7 @@ export default class GraphBase extends AGraph implements IGraph {
     return r;
   }
 
-  restore(dump: any) {
+  restore(_dump: any) {
     return this;
   }
 }

@@ -104,6 +104,7 @@ export default class RemoteStoreGraph extends GraphBase {
     this.flushTimeout = <any>setTimeout(() => {
       this.sendQueued();
     }, wait);
+    return resolveImmediately(null);
   }
 
   private sendNow(type: 'node'|'edge', op: 'add'|'update'|'remove', elem: GraphNode|GraphEdge) {
@@ -225,13 +226,15 @@ export default class RemoteStoreGraph extends GraphBase {
     this.edges.forEach((n) => n.off('setAttr', this.updateHandler));
     super.clear();
 
-    this.flush().then(() => {
+    return Promise.resolve(this.flush().then(() => {
       this.fire('sync_start', ++this.waitForSynced, 'clear');
       //clear all nodes
-      return sendAPI(`/dataset/graph/${this.desc.id}/node`, {}, 'DELETE');
+      return sendAPI(`/dataset/graph/${this.desc.id}/node`, {}, 'DELETE').catch((error) => {
+        console.error('cannot clear graph', this.desc.id, error);
+      })
     }).then(() => {
       this.fire('sync');
       return this;
-    });
+    }));
   }
 }

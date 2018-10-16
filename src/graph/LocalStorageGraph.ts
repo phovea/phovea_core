@@ -75,18 +75,18 @@ export default class LocalStorageGraph extends GraphBase implements IGraph {
     if (this.storage.getItem(`${uid}.nodes`) == null) {
       return;
     }
-    const nodeIds: string[] = JSON.parse(this.storage.getItem(`${uid}.nodes`));
+    const nodeIds: string[] = JSON.parse(this.storage.getItem(`${uid}.nodes`)!);
     const lookup = new Map<number, GraphNode>();
     nodeIds.forEach((id) => {
-      const n = JSON.parse(this.storage.getItem(`${uid}.node.${id}`));
+      const n = JSON.parse(this.storage.getItem(`${uid}.node.${id}`)!);
       const nn = factory.makeNode(n);
       lookup.set(nn.id, nn);
       nn.on('setAttr', this.updateHandler);
       super.addNode(nn);
     });
-    const edgeIds: string[] = JSON.parse(this.storage.getItem(`${uid}.edges`));
+    const edgeIds: string[] = JSON.parse(this.storage.getItem(`${uid}.edges`)!);
     edgeIds.forEach((id) => {
-      const n = JSON.parse(this.storage.getItem(`${uid}.edge.${id}`));
+      const n = JSON.parse(this.storage.getItem(`${uid}.edge.${id}`)!);
       const nn = factory.makeEdge(n, lookup.get.bind(lookup));
       nn.on('setAttr', this.updateHandler);
       super.addEdge(nn);
@@ -107,8 +107,9 @@ export default class LocalStorageGraph extends GraphBase implements IGraph {
     return true;
   }
 
-  static update(desc: IGraphDataDescription, storage: Storage = sessionStorage) {
-    const uid = `graph${desc.id}`;
+  static update(desc: IGraphDataDescription, _storage: Storage = sessionStorage) {
+    // const _uid = `graph${desc.id}`;
+    // TODO
   }
 
   restoreDump(persisted: any, factory: IGraphFactory) {
@@ -196,11 +197,11 @@ export default class LocalStorageGraph extends GraphBase implements IGraph {
     this.edges.forEach((n) => n.off('setAttr', this.updateHandler));
     super.clear();
     const uid = this.uid;
-    JSON.parse(this.storage.getItem(uid + '.nodes')).forEach((id: string) => {
+    JSON.parse(this.storage.getItem(uid + '.nodes')!).forEach((id: string) => {
       this.storage.removeItem(`${uid}.node.${id}`);
     });
     this.storage.removeItem(`${uid}.nodes`);
-    JSON.parse(this.storage.getItem(uid + '.edges')).forEach((id: string) => {
+    JSON.parse(this.storage.getItem(uid + '.edges')!).forEach((id: string) => {
       this.storage.removeItem(`${uid}.edge.${id}`);
     });
     this.storage.removeItem(`${uid}.edges`);

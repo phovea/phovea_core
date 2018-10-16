@@ -35,14 +35,14 @@ export default class StratificationGroup extends SelectAble implements IStratifi
     if (groupIndex === 0) {
       return this;
     }
-    return null; //can't sub a single group
+    throw new Error('cannot sub a single group');
   }
 
   get idtype() {
     return this.root.idtype;
   }
 
-  async hist(bins?: number, range: RangeLike = all()): Promise<IHistogram> {
+  async hist(_bins?: number, _range: RangeLike = all()): Promise<IHistogram> {
     //FIXME
     return rangeHist(await this.range());
   }
@@ -52,7 +52,7 @@ export default class StratificationGroup extends SelectAble implements IStratifi
   }
 
   asVector(): Promise<ICategoricalVector> {
-    return Promise.all<any>([this.root.asVector(), this.rangeGroup()]).then((arr: [ICategoricalVector, Range1DGroup]) => arr[0].view(list(arr[1])));
+    return Promise.all([this.root.asVector(), this.rangeGroup()]).then((arr: [ICategoricalVector, Range1DGroup]) => arr[0].view(list(arr[1])));
   }
 
   origin(): Promise<IDataType> {
@@ -87,7 +87,7 @@ export default class StratificationGroup extends SelectAble implements IStratifi
     return this.root.ids(r);
   }
 
-  idView(idRange: RangeLike = all()): Promise<any> {
+  idView(_idRange: RangeLike = all()): Promise<any> {
     return Promise.reject('not implemented');
   }
 
@@ -118,7 +118,7 @@ export default class StratificationGroup extends SelectAble implements IStratifi
     };
   }
 
-  restore(persisted: any) {
+  restore(_persisted: any) {
     return this;
   }
 }
