@@ -17,7 +17,7 @@ export interface IIntersectionParam {
 }
 
 export interface IShape {
-  asIntersectionParams(): IIntersectionParam;
+  asIntersectionParams(): IIntersectionParam | undefined;
 }
 
 function param(name: string, params: any[]): IIntersectionParam {
@@ -582,7 +582,7 @@ export class Intersection {
     if (result.points.length > 0) {
       result.status = 'Intersection';
     } else {
-      result.status = inter.status;
+      result.status = inter ? inter.status : 'Intersection';
     }
     return result;
   }
@@ -1222,8 +1222,8 @@ class Polynomial {
 
   getCubicRoots() {
     const results: number[] = [];
-    let disrim;
     if (this.getDegree() === 3) {
+      let disrim: number | undefined = undefined;
       const c3 = this.coefs[3];
       const c2 = this.coefs[2] / c3;
       const c1 = this.coefs[1] / c3;
@@ -1378,16 +1378,18 @@ export class Path {
     z: <string[]>[]
   };
 
-  private segments: IPathSegment[];
+  private segments: IPathSegment[] | undefined;
 
   constructor(path: string) {
-    this.segments = null;
+    this.segments = undefined;
     this.parseData(path);
   }
 
   appendPathSegment(segment: IPathSegment) {
-    segment.previous = this.segments[this.segments.length - 1];
-    this.segments.push(segment);
+    segment.previous = this.segments ? this.segments[this.segments.length - 1] : undefined;
+    if(this.segments) {
+      this.segments.push(segment);
+    }
   }
 
   parseData(d: string) {
@@ -1425,9 +1427,9 @@ export class Path {
             throw new Error('Parameter type is not a number: ' + mode + ',' + n.text);
           }
         }
-        let segment;
+        let segment:IPathSegment;
         const length = this.segments.length;
-        const previous = (length === 0) ? null : this.segments[length - 1];
+        const previous = (length === 0) ? undefined : this.segments[length - 1];
         switch (mode) {
           case'A':
             segment = new AbsoluteArcPath(params, this, previous);
@@ -1480,7 +1482,9 @@ export class Path {
           default:
             throw new Error('Unsupported segment type: ' + mode);
         }
-        this.segments.push(segment);
+        if(segment){
+          this.segments.push(segment);
+        }
         index += paramLength;
         token = tokens[index];
         if (mode === 'M') {
@@ -1516,9 +1520,11 @@ export class Path {
 
   intersectShape(shape: IShape) {
     const result = new Intersection();
-    for (const segment of this.segments) {
-      const inter = Intersection.intersectShapes(segment, shape);
-      result.appendPoints(inter.points);
+    if(this.segments){
+      for (const segment of this.segments) {
+        const inter = Intersection.intersectShapes(segment, shape);
+        result.appendPoints(inter.points);
+      }
     }
     return result;
   }
@@ -1531,13 +1537,13 @@ export class Path {
 interface IPathSegment extends IShape {
   command: string;
   lastPoint: Vector2D;
-  previous: IPathSegment;
+  previous: IPathSegment | undefined;
 }
 
 class AbsolutePathSegment implements IPathSegment {
   points: Vector2D[] = [];
 
-  constructor(public command: string, params: string[], public owner: Path, public previous: IPathSegment) {
+  constructor(public command: string, params: string[], public owner: Path, public previous: IPathSegment | undefined) {
     let index = 0;
     while (index < params.length) {
       this.points.push(new Vector2D(parseFloat(params[index]), parseFloat(params[index + 1])));
@@ -1548,7 +1554,7 @@ class AbsolutePathSegment implements IPathSegment {
   toString() {
     const points = this.points.map((v) => v.toString());
     let command = '';
-    if (this.previous.command !== this.command) {
+    if (this.previous && this.previous.command !== this.command) {
       command = this.command;
     }
     return command + points.join(' ');
@@ -1558,8 +1564,8 @@ class AbsolutePathSegment implements IPathSegment {
     return this.points[this.points.length - 1];
   }
 
-  asIntersectionParams(): IIntersectionParam {
-    return null;
+  asIntersectionParams(): IIntersectionParam | undefined {
+    return undefined;
   }
 }
 
@@ -1570,18 +1576,19 @@ class AbsoluteArcPath extends AbsolutePathSegment {
   arcFlag: number;
   sweepFlag: number;
 
-  constructor(params: string[], owner: Path, previous: IPathSegment) {
+  constructor(params: string[], owner: Path, previous: IPathSegment|undefined) {
     super('A', params.slice(params.length - 2), owner, previous);
-    this.rx = parseFloat(params.shift());
-    this.ry = parseFloat(params.shift());
-    this.angle = parseFloat(params.shift());
-    this.arcFlag = parseFloat(params.shift());
-    this.sweepFlag = parseFloat(params.shift());
+    let param;
+    this.rx = parseFloat((param = params.shift()) === undefined ? '' : param);
+    this.ry = parseFloat((param = params.shift()) === undefined ? '' : param);
+    this.angle = parseFloat((param = params.shift()) === undefined ? '' : param);
+    this.arcFlag = parseFloat((param = params.shift()) === undefined ? '' : param);
+    this.sweepFlag = parseFloat((param = params.shift()) === undefined ? '' : param);
   }
 
   toString() {
     let command = '';
-    if (this.previous.command !== this.command) {
+    if (this.previous && this.previous.command !== this.command) {
       command = this.command;
     }
     return command + [this.rx, this.ry, this.angle, this.arcFlag, this.sweepFlag, this.points[0].toString()].join(',');
@@ -1592,7 +1599,7 @@ class AbsoluteArcPath extends AbsolutePathSegment {
   }
 
   get center() {
-    const startPoint = this.previous.lastPoint;
+    const startPoint = this.previous ? this.previous.lastPoint : new Vector2D(0, 0);
     const endPoint = this.points[0];
     let rx = this.rx;
     let ry = this.ry;
@@ -1631,7 +1638,7 @@ class AbsoluteArcPath extends AbsolutePathSegment {
   }
 }
 class AbsoluteCurveto2 extends AbsolutePathSegment {
-  constructor(params: string[], owner: Path, previous: IPathSegment) {
+  constructor(params: string[], owner: Path, previous: IPathSegment | undefined) {
     super('Q', params, owner, previous);
   }
 
@@ -1640,11 +1647,11 @@ class AbsoluteCurveto2 extends AbsolutePathSegment {
   }
 
   asIntersectionParams() {
-    return param('Bezier2', [this.previous.lastPoint, this.points[0], this.points[1]]);
+    return param('Bezier2', [this.previous ? this.previous.lastPoint : new Vector2D(0, 0), this.points[0], this.points[1]]);
   }
 }
 class AbsoluteCurveto3 extends AbsolutePathSegment {
-  constructor(params: string[], owner: Path, previous: IPathSegment) {
+  constructor(params: string[], owner: Path, previous: IPathSegment | undefined) {
     super('C', params, owner, previous);
   }
 
@@ -1653,41 +1660,42 @@ class AbsoluteCurveto3 extends AbsolutePathSegment {
   }
 
   asIntersectionParams() {
-    return param('Bezier3', [this.previous.lastPoint, this.points[0], this.points[1], this.points[2]]);
+    return param('Bezier3',  [this.previous ? this.previous.lastPoint : new Vector2D(0, 0), this.points[0], this.points[1], this.points[2]]);
   }
 }
 class AbsoluteHLineto extends AbsolutePathSegment {
-  constructor(params: string[], owner: Path, previous: IPathSegment) {
-    super('H', [params.pop(), String(previous.lastPoint.y)], owner, previous);
+  constructor(params: string[], owner: Path, previous: IPathSegment | undefined) {
+    const pop = params.pop();
+    super('H', [pop ? pop : '', previous ? String(previous.lastPoint.y) : ''], owner, previous);
   }
 
   toString() {
     let command = '';
-    if (this.previous.command !== this.command) {
+    if (this.previous && this.previous.command !== this.command) {
       command = this.command;
     }
     return command + this.points[0].x;
   }
 }
 class AbsoluteLineto extends AbsolutePathSegment {
-  constructor(params: string[], owner: Path, previous: IPathSegment) {
+  constructor(params: string[], owner: Path, previous: IPathSegment | undefined) {
     super('L', params, owner, previous);
   }
 
   toString() {
     let command = '';
-    if (this.previous.command !== this.command && this.previous.command !== 'M') {
+    if (this.previous && this.previous.command !== this.command && this.previous.command !== 'M') {
       command = this.command;
     }
     return command + this.points[0].toString();
   }
 
   asIntersectionParams() {
-    return param('Line', [this.previous.lastPoint, this.points[0]]);
+    return param('Line', [this.previous ? this.previous.lastPoint : new Vector2D(0, 0), this.points[0]]);
   }
 }
 class AbsoluteMoveto extends AbsolutePathSegment {
-  constructor(params: string[], owner: Path, previous: IPathSegment) {
+  constructor(params: string[], owner: Path, previous: IPathSegment | undefined) {
     super('M', params, owner, previous);
   }
 
@@ -1696,41 +1704,43 @@ class AbsoluteMoveto extends AbsolutePathSegment {
   }
 }
 class AbsoluteSmoothCurveto2 extends AbsolutePathSegment {
-  constructor(params: string[], owner: Path, previous: IPathSegment) {
+  constructor(params: string[], owner: Path, previous: IPathSegment | undefined) {
     super('T', params, owner, previous);
   }
 
   get controlPoint() {
-    const lastPoint = this.previous.lastPoint;
     let point;
-    if (this.previous.command.match(/^[QqTt]$/)) {
-      const ctrlPoint = (<any>this.previous).controlPoint;
-      const diff = ctrlPoint.subtract(lastPoint);
-      point = lastPoint.subtract(diff);
-    } else {
-      point = lastPoint;
+    if(this.previous){
+      const lastPoint = this.previous.lastPoint;
+      if (this.previous.command.match(/^[QqTt]$/)) {
+        const ctrlPoint = (<any>this.previous).controlPoint;
+        const diff = ctrlPoint.subtract(lastPoint);
+        point = lastPoint.subtract(diff);
+      } else {
+        point = lastPoint;
+      }
     }
     return point;
   }
 
   asIntersectionParams() {
-    return param('Bezier2', [this.previous.lastPoint, this.controlPoint, this.points[0]]);
+    return param('Bezier2', [this.previous ? this.previous.lastPoint : new Vector2D(0, 0), this.controlPoint, this.points[0]]);
   }
 }
 class AbsoluteSmoothCurveto3 extends AbsolutePathSegment {
-  constructor(params: string[], owner: Path, previous: IPathSegment) {
+  constructor(params: string[], owner: Path, previous: IPathSegment | undefined) {
     super('S', params, owner, previous);
   }
 
   get firstControlPoint() {
-    const lastPoint = this.previous.lastPoint;
     let point;
-    if (this.previous.command.match(/^[SsCc]$/)) {
+    if (this.previous && this.previous.command.match(/^[SsCc]$/)) {
+      const lastPoint =  this.previous.lastPoint;
       const lastControl = (<any>this.previous).lastControlPoint;
       const diff = lastControl.subtract(lastPoint);
       point = lastPoint.subtract(diff);
     } else {
-      point = lastPoint;
+      point =  this.previous ? this.previous.lastPoint : new Vector2D(0, 0);
     }
     return point;
   }
@@ -1740,14 +1750,14 @@ class AbsoluteSmoothCurveto3 extends AbsolutePathSegment {
   }
 
   asIntersectionParams() {
-    return param('Bezier3', [this.previous.lastPoint, this.firstControlPoint, this.points[0], this.points[1]]);
+    return param('Bezier3', [this.previous ? this.previous.lastPoint : new Vector2D(0, 0), this.firstControlPoint, this.points[0], this.points[1]]);
   }
 }
 
 class RelativePathSegment implements IPathSegment {
   points: Vector2D[] = [];
 
-  constructor(public command: string, params: string[], public owner: Path, public previous: IPathSegment) {
+  constructor(public command: string, params: string[], public owner: Path, public previous: IPathSegment | undefined) {
     const lastPoint = this.previous ? this.previous.lastPoint : new Vector2D(0, 0);
     let index = 0;
     while (index < params.length) {
@@ -1775,19 +1785,19 @@ class RelativePathSegment implements IPathSegment {
     return this.points[this.points.length - 1];
   }
 
-  asIntersectionParams(): IIntersectionParam {
-    return null;
+  asIntersectionParams(): IIntersectionParam | undefined {
+    return undefined;
   }
 }
 
 class RelativeClosePath extends RelativePathSegment {
-  constructor(params: string[], owner: Path, previous: IPathSegment) {
+  constructor(params: string[], owner: Path, previous: IPathSegment | undefined) {
     super('z', params, owner, previous);
   }
 
   get lastPoint() {
     let current = this.previous;
-    let point;
+    let point = new Vector2D(0, 0);
     while (current) {
       if (current.command.match(/^[mMzZ]$/)) {
         point = current.lastPoint;
@@ -1799,11 +1809,11 @@ class RelativeClosePath extends RelativePathSegment {
   }
 
   asIntersectionParams() {
-    return param('Line', [this.previous.lastPoint, this.lastPoint]);
+    return param('Line', [this.previous ? this.previous.lastPoint : new Vector2D(0, 0), this.lastPoint]);
   }
 }
 class RelativeCurveto2 extends RelativePathSegment {
-  constructor(params: string[], owner: Path, previous: IPathSegment) {
+  constructor(params: string[], owner: Path, previous: IPathSegment | undefined) {
     super('q', params, owner, previous);
   }
 
@@ -1812,11 +1822,11 @@ class RelativeCurveto2 extends RelativePathSegment {
   }
 
   asIntersectionParams() {
-    return param('Bezier2', [this.previous.lastPoint, this.points[0], this.points[1]]);
+    return param('Bezier2', [this.previous ? this.previous.lastPoint : new Vector2D(0, 0), this.points[0], this.points[1]]);
   }
 }
 class RelativeCurveto3 extends RelativePathSegment {
-  constructor(params: string[], owner: Path, previous: IPathSegment) {
+  constructor(params: string[], owner: Path, previous: IPathSegment | undefined) {
     super('c', params, owner, previous);
   }
 
@@ -1825,11 +1835,11 @@ class RelativeCurveto3 extends RelativePathSegment {
   }
 
   asIntersectionParams() {
-    return param('Bezier3', [this.previous.lastPoint, this.points[0], this.points[1], this.points[2]]);
+    return param('Bezier3', [this.previous ? this.previous.lastPoint : new Vector2D(0, 0), this.points[0], this.points[1], this.points[2]]);
   }
 }
 class RelativeLineto extends RelativePathSegment {
-  constructor(params: string[], owner: Path, previous: IPathSegment) {
+  constructor(params: string[], owner: Path, previous: IPathSegment | undefined) {
     super('l', params, owner, previous);
   }
 
@@ -1837,19 +1847,19 @@ class RelativeLineto extends RelativePathSegment {
     const lastPoint = this.previous ? this.previous.lastPoint : new Vector2D(0, 0);
     const point = this.points[0].subtract(lastPoint);
     let command = '';
-    if (this.previous.command !== this.command && this.previous.command !== 'm') {
+    if (this.previous && this.previous.command !== this.command && this.previous.command !== 'm') {
       command = this.command;
     }
     return command + point.toString();
   }
 
   asIntersectionParams() {
-    return param('Line', [this.previous.lastPoint, this.points[0]]);
+    return param('Line', [this.previous ? this.previous.lastPoint : new Vector2D(0, 0), this.points[0]]);
   }
 }
 class RelativeMoveto extends RelativePathSegment {
 
-  constructor(params: string[], owner: Path, previous: IPathSegment) {
+  constructor(params: string[], owner: Path, previous: IPathSegment | undefined) {
     super('m', params, owner, previous);
   }
 
@@ -1858,14 +1868,14 @@ class RelativeMoveto extends RelativePathSegment {
   }
 }
 class RelativeSmoothCurveto2 extends RelativePathSegment {
-  constructor(params: string[], owner: Path, previous: IPathSegment) {
+  constructor(params: string[], owner: Path, previous: IPathSegment | undefined) {
     super('t', params, owner, previous);
   }
 
   get controlPoint() {
-    const lastPoint = this.previous.lastPoint;
+    const lastPoint = this.previous ? this.previous.lastPoint : new Vector2D(0, 0);
     let point;
-    if (this.previous.command.match(/^[QqTt]$/)) {
+    if (this.previous && this.previous.command.match(/^[QqTt]$/)) {
       const ctrlPoint = (<any>this.previous).controlPoint;
       const diff = ctrlPoint.subtract(lastPoint);
       point = lastPoint.subtract(diff);
@@ -1876,19 +1886,19 @@ class RelativeSmoothCurveto2 extends RelativePathSegment {
   }
 
   asIntersectionParams() {
-    return param('Bezier2', [this.previous.lastPoint, this.controlPoint, this.points[0]]);
+    return param('Bezier2', [this.previous ? this.previous.lastPoint : new Vector2D(0, 0), this.controlPoint, this.points[0]]);
   }
 }
 
 class RelativeSmoothCurveto3 extends RelativePathSegment {
-  constructor(params: string[], owner: Path, previous: IPathSegment) {
+  constructor(params: string[], owner: Path, previous: IPathSegment | undefined) {
     super('s', params, owner, previous);
   }
 
   get firstControlPoint() {
-    const lastPoint = this.previous.lastPoint;
+    const lastPoint = this.previous ? this.previous.lastPoint : new Vector2D(0, 0);
     let point;
-    if (this.previous.command.match(/^[SsCc]$/)) {
+    if (this.previous && this.previous.command.match(/^[SsCc]$/)) {
       const lastControl = (<any>this.previous).lastControlPoint;
       const diff = lastControl.subtract(lastPoint);
       point = lastPoint.subtract(diff);
@@ -1903,7 +1913,7 @@ class RelativeSmoothCurveto3 extends RelativePathSegment {
   }
 
   asIntersectionParams() {
-    return param('Bezier3', [this.previous.lastPoint, this.firstControlPoint, this.points[0], this.points[1]]);
+    return param('Bezier3', [this.previous ? this.previous.lastPoint : new Vector2D(0, 0), this.firstControlPoint, this.points[0], this.points[1]]);
   }
 }
 

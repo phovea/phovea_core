@@ -1,4 +1,3 @@
-/// <reference types="jasmine" />
 import {guessColor} from '../src/stratification';
 
 /*

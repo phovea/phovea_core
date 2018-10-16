@@ -1,7 +1,6 @@
 /**
  * Created by Samuel Gratzl on 07.03.2017.
  */
-/// <reference types="jasmine" />
 import {fix} from '../../../src/range/internal';
 
 describe('fix', () => {

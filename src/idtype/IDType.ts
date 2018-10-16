@@ -31,7 +31,7 @@ export default class IDType extends EventHandler implements IIDType {
   private readonly name2idCache = new Map<string, number>();
   private readonly id2nameCache = new Map<number, string>();
 
-  private canBeMappedTo: Promise<IDType[]> = null;
+  private canBeMappedTo: Promise<IDType[]> | null = null;
 
   /**
    * @param id the system identifier of this IDType
@@ -73,9 +73,10 @@ export default class IDType extends EventHandler implements IIDType {
    * @param type optional the selection type
    * @returns {Range}
    */
-  selections(type = defaultSelectionType) {
-    if (this.sel.has(type)) {
-      return this.sel.get(type);
+  selections(type = defaultSelectionType): Range {
+    const value = this.sel.get(type);
+    if (value) {
+      return value;
     }
     const v = none();
     this.sel.set(type, v);
@@ -200,7 +201,7 @@ export default class IDType extends EventHandler implements IIDType {
    * @param names the entity names to resolve
    * @returns a promise of system identifiers that match the input names
    */
-  async map(names: string[]): Promise<number[]> {
+  async map(names: string[]): Promise<(number | undefined)[]> {
     names = names.map((s) => String(s)); // ensure strings
     const toResolve = names.filter((name) => !this.name2idCache.has(name));
     if (toResolve.length === 0) {
@@ -219,13 +220,14 @@ export default class IDType extends EventHandler implements IIDType {
    * @param ids the entity names to resolve
    * @returns a promise of system identifiers that match the input names
    */
-  async unmap(ids: RangeLike): Promise<string[]> {
+  async unmap(ids: RangeLike): Promise<(string | undefined)[]> {
     const r = parse(ids);
     const toResolve: number[] = [];
     r.dim(0).forEach((name) => !(this.id2nameCache.has(name)) ? toResolve.push(name) : null);
     if (toResolve.length === 0) {
       const result: string[] = [];
-      r.dim(0).forEach((name) => result.push(this.id2nameCache.get(name)));
+      let nameCache: string | undefined;
+      r.dim(0).forEach((name) => {(nameCache = this.id2nameCache.get(name)) ? result.push(nameCache) : null});
       return resolveImmediately(result);
     }
     const result: string[] = await chooseRequestMethod(`/idtype/${this.id}/unmap`, {ids: rlist(toResolve).toString()});
@@ -235,7 +237,8 @@ export default class IDType extends EventHandler implements IIDType {
       this.name2idCache.set(r, id);
     });
     const out: string[] = [];
-    r.dim(0).forEach((name) => out.push(this.id2nameCache.get(name)));
+    let nameCache: string | undefined;
+    r.dim(0).forEach((name) => {(nameCache = this.id2nameCache.get(name)) ? out.push(nameCache) : null});
     return out;
   }
 

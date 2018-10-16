@@ -46,7 +46,7 @@ export class AIterator<T> {
   }
 
   next(): T {
-    return null;
+      throw new Error('next not implemented');
   }
 
   forEach(callbackfn: (value: T, index: number) => void, thisArg?: any): void {
@@ -232,7 +232,7 @@ export class SingleIterator<T> extends AIterator<T> implements IIterator<T> {
 
 export class ConcatIterator<T> extends AIterator<T> implements IIterator<T> {
 
-  private act: IIterator<T>;
+  private act: IIterator<T> | undefined;
 
   constructor(private its: IIterator<T>[]) {
     super();
@@ -243,10 +243,13 @@ export class ConcatIterator<T> extends AIterator<T> implements IIterator<T> {
    * whether more items are available
    */
   hasNext() {
+    if(!this.act){
+      return false;
+    }
     //based on http://grepcode.com/file/repo1.maven.org/maven2/com.google.guava/guava/r08/com/google/common/collect/Iterators.java#Iterators.concat%28java.util.Iterator%29
     let currentHasNext = false;
     while (!(currentHasNext = this.act.hasNext()) && this.its.length > 0) {
-      this.act = this.its.shift();
+      this.act = this.its.shift()!;
     }
     return currentHasNext;
   }
@@ -255,7 +258,7 @@ export class ConcatIterator<T> extends AIterator<T> implements IIterator<T> {
    * returns the next item
    */
   next() {
-    if (!this.hasNext()) {
+    if (!this.hasNext() || !this.act) {
       throw new RangeError('end of iterator');
     }
     return this.act.next();
@@ -290,7 +293,7 @@ export class ConcatIterator<T> extends AIterator<T> implements IIterator<T> {
   }
 }
 
-export class EmptyIterator<T> extends AIterator<T> implements IIterator<T> {
+export class EmptyIterator<T> extends AIterator<T> implements IIterator<T | undefined> {
   isIncreasing = false;
   isDecreasing = false;
   byOne = false;

@@ -9,11 +9,10 @@
 import {Rect, rect} from './geom';
 
 export interface ILayoutElem {
-  setBounds(x: number, y: number, w: number, h: number): Promise<void>|null;
+  setBounds(x: number, y: number, w: number, h: number): Promise<void>;
 
   getBounds(): Rect;
 
-  layoutOption<T>(name: string): T;
   layoutOption<T>(name: string, defaultValue: T): T;
 }
 
@@ -61,8 +60,7 @@ export class ALayoutElem {
   getSize() {
     return this.getBounds().size;
   }
-
-  layoutOption<T>(name: string, defaultValue: T = null): T {
+  layoutOption<T>(name: string, defaultValue: T): T {
     if (this.options.hasOwnProperty(name)) {
       return (<any>this.options)[name];
     }
@@ -80,22 +78,24 @@ class HTMLLayoutElem extends ALayoutElem implements ILayoutElem {
     super(options);
   }
 
-  setBounds(x: number, y: number, w: number, h: number): Promise<void>|null {
-    const unit = this.layoutOption('unit', 'px'),
+  setBounds(x: number, y: number, w: number, h: number): Promise<void>  {
+    return new Promise((resolve, reject) => {
+      const unit = this.layoutOption('unit', 'px'),
       style = this.node.style;
-    style.left = x + unit;
-    style.top = y + unit;
-    style.width = w + unit;
-    style.height = h + unit;
-    return null;
+      style.left = x + unit;
+      style.top = y + unit;
+      style.width = w + unit;
+      style.height = h + unit;
+    });
+
   }
 
   getBounds() {
     const unit = this.layoutOption('unit', 'px'),
       style = this.node.style;
 
-    function v(f: string) {
-      if (f.length >= unit.length && f.substring(f.length - unit.length) === unit) {
+    function v(f: string | null) {
+      if (f && f.length >= unit.length && f.substring(f.length - unit.length) === unit) {
         f = f.substring(0, f.length - unit.length);
         return parseFloat(f);
       }
@@ -303,30 +303,30 @@ export function borderLayout(horizontal: boolean, gap: number, percentages: IPad
       if (!pos.has(border)) {
         border = 'center'; //invalid one
       }
-      pos.get(border).push(elem);
+      pos.get(border)!.push(elem);
     });
 
     const promises = [];
-    if (pos.get('top').length > 0) {
+    if (pos.get('top')!.length > 0) {
       y += h * percentages.top;
       hc -= h * percentages.top;
-      promises.push(flowLayout(true, gap)(pos.get('top'), w, h * percentages.top, parent));
+      promises.push(flowLayout(true, gap)(pos.get('top')!, w, h * percentages.top, parent));
     }
-    if (pos.get('bottom').length > 0) {
+    if (pos.get('bottom')!.length > 0) {
       hc -= h * percentages.bottom;
-      promises.push(flowLayout(true, gap)(pos.get('bottom'), w, h * percentages.bottom, parent));
+      promises.push(flowLayout(true, gap)(pos.get('bottom')!, w, h * percentages.bottom, parent));
     }
-    if (pos.get('left').length > 0) {
+    if (pos.get('left')!.length > 0) {
       x += w * percentages.left;
       wc -= w * percentages.left;
-      promises.push(flowLayout(false, gap)(pos.get('left'), w * percentages.left, hc, parent));
+      promises.push(flowLayout(false, gap)(pos.get('left')!, w * percentages.left, hc, parent));
     }
-    if (pos.get('right').length > 0) {
+    if (pos.get('right')!.length > 0) {
       wc -= w * percentages.right;
-      promises.push(flowLayout(false, gap)(pos.get('right'), w * percentages.right, hc, parent));
+      promises.push(flowLayout(false, gap)(pos.get('right')!, w * percentages.right, hc, parent));
     }
-    if (pos.get('center').length > 0) {
-      promises.push(flowLayout(true, gap)(pos.get('center'), wc, hc, parent));
+    if (pos.get('center')!.length > 0) {
+      promises.push(flowLayout(true, gap)(pos.get('center')!, wc, hc, parent));
     }
 
     return waitFor(promises);

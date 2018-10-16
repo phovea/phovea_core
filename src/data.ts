@@ -58,9 +58,6 @@ function cached(desc: IDataDescription, result: Promise<IDataType>) {
  * @returns {*}
  */
 async function transformEntry(desc: IDataDescription): Promise<IDataType> {
-  if (desc === undefined) {
-    return null;
-  }
   (<any>desc).id = desc.id || fixId(desc.name + randomId(5));
   (<any>desc).fqname = desc.fqname || desc.name;
   (<any>desc).description = desc.description || '';
@@ -68,7 +65,7 @@ async function transformEntry(desc: IDataDescription): Promise<IDataType> {
   (<any>desc).ts = desc.ts || 0;
 
   if (cacheById.has(desc.id)) {
-    return cacheById.get(desc.id);
+    return cacheById.get(desc.id)!;
   }
 
   //find matching type
@@ -108,7 +105,7 @@ export async function list(filter?: ({[key: string]: string})|((d: IDataType) =>
 export interface INode {
   readonly name: string;
   readonly children: INode[];
-  data: IDataType;
+  data: IDataType | null;
 }
 
 /**
@@ -193,7 +190,7 @@ function getFirstWithCache(name: string | RegExp, cache: Map<string, Promise<IDa
  */
 async function getById(id: string) {
   if (cacheById.has(id)) {
-    return cacheById.get(id);
+    return cacheById.get(id)!;
   }
   return transformEntry(await getAPIJSON(`/dataset/${id}/desc`));
 }
@@ -203,7 +200,7 @@ async function getById(id: string) {
  * @param a persisted id or persisted object containing the id
  * @returns {Promise<IDataType>}
  */
-export async function get(persisted: any | string): Promise<IDataType> {
+export async function get(persisted: any | string): Promise<IDataType | null> {
   if (typeof persisted === 'string') {
     return getById(<string>persisted);
   }

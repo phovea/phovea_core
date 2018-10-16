@@ -170,13 +170,14 @@ export class Permission {
     switch(entity) {
       case EEntity.USER: return this.user;
       case EEntity.GROUP: return this.group;
+      case EEntity.BUDDIES: return this.buddies;
       case EEntity.OTHERS: return this.others;
     }
   }
 
   hasPermission(entity: EEntity, permission: EPermission) {
     const permissions = this.getPermissions(entity);
-    return permissions.has(permission);
+    return permissions ? permissions.has(permission) : false;
   }
 }
 

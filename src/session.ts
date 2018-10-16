@@ -50,6 +50,10 @@ export function has(key: string) {
  * @param defaultValue
  * @returns {T}
  */
-export function retrieve<T>(key: string, defaultValue: T = null): T {
-  return has(key) ? JSON.parse(context.getItem(key)) : defaultValue;
+export function retrieve<T>(key: string, defaultValue: T | null = null): T|null {
+  const value = context.getItem(key);
+  if(value) {
+    return JSON.parse(value);
+  }
+  return defaultValue;
 }

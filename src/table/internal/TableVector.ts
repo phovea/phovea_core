@@ -15,7 +15,7 @@ import AVector from '../../vector/AVector';
  */
 export default class TableVector<T,D extends IValueTypeDesc> extends AVector<T,D> implements IVector<T,D> {
   readonly desc: IVectorDataDescription<D>;
-  public readonly column: string;
+  public readonly column?: string;
 
   constructor(private table: ITable, private index: number, desc: ITableColumn<D>) {
     super(null);
@@ -72,6 +72,9 @@ export default class TableVector<T,D extends IValueTypeDesc> extends AVector<T,D
   }
 
   data(range: RangeLike = all()): Promise<T[]> {
+    if(!this.column){
+      throw new Error('column not defined.');
+    }
     return this.table.colData(this.column, range);
   }
 

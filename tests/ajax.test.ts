@@ -1,4 +1,3 @@
-/// <reference types="jasmine" />
 import {api2absURL, encodeParams} from '../src/ajax';
 
 describe('api2absURL', () => {

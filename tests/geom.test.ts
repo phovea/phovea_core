@@ -1,4 +1,3 @@
-/// <reference types="jasmine" />
 import {Circle, Rect, Ellipse, Polygon, Line, CORNER} from '../src/geom';
 import {Vector2D} from '../src/2D';
 

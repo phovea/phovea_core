@@ -9,11 +9,11 @@
  * This file defines interfaces for various data types and their metadata.
  */
 
-import {IPersistable, extendClass, mixin, uniqueString} from './index';
-import {ISelectAble, SelectAble, IDType} from './idtype';
-import {extent, IHistogram, IAdvancedStatistics, IStatistics} from './math';
-import {all, none, Range1D, RangeLike, Range1DGroup, composite, Range, CompositeRange1D} from './range';
-import {ISecureItem, currentUserNameOrAnonymous} from './security';
+import { IDType, ISelectAble, SelectAble } from './idtype';
+import { extendClass, IPersistable, mixin, uniqueString } from './index';
+import { extent, IAdvancedStatistics, IHistogram, IStatistics } from './math';
+import { all, composite, CompositeRange1D, none, Range, Range1D, Range1DGroup, RangeLike } from './range';
+import { currentUserNameOrAnonymous, ISecureItem } from './security';
 
 /**
  * Interface defining metadata for a dataset.
@@ -141,7 +141,7 @@ export function assignData(node: Element, data: IDataType) {
 
 export interface IHistAbleDataType<D extends IValueTypeDesc> extends IDataType {
   valuetype: D;
-  hist(nbins?: number): Promise<IHistogram>;
+  hist(nbins?: number): Promise<IHistogram | null>;
   readonly length: number;
 }
 
@@ -213,10 +213,10 @@ export function transpose(m: any[][]) {
   return r;
 }
 
-function maskImpl(arr: number|number[], missing: number): number|number[] {
+function maskImpl(arr: number|number[], missing: number|undefined): number|number[] {
   if (Array.isArray(arr)) {
     const vs = <number[]>arr;
-    if (vs.indexOf(missing) >= 0) {
+    if (missing && vs.indexOf(missing) >= 0) {
       return vs.map((v) => v === missing ? NaN : v);
     }
   }
@@ -229,7 +229,7 @@ export function mask(arr: number|number[], desc: INumberValueTypeDesc): number|n
   }
   if (desc.type === VALUE_TYPE_INT || desc.type === VALUE_TYPE_REAL) {
     // replace null values with Number.NaN
-    return maskImpl(arr, null);
+    return maskImpl(arr, undefined);
   }
   return arr;
 }
@@ -254,7 +254,7 @@ export interface ICategorical2PartitioningOptions {
    * labels for categories, need to match exactly
    * default: null
    */
-  labels?: string[];
+  labels?: string[] | undefined;
 }
 
 /**
@@ -274,9 +274,9 @@ export function categorical2partitioning<T>(data: T[], categories: T[], options:
 
   let groups = categories.map((d, i) => {
     return {
+      indices: [],
       name: m.labels ? m.labels[i] : d.toString(),
-      color: m.colors[Math.min(i, m.colors.length - 1)],
-      indices: []
+      color: m.colors ? m.colors[Math.min(i, m.colors.length - 1)] : 'gray',
     };
   });
   data.forEach((d, j) => {
@@ -291,7 +291,7 @@ export function categorical2partitioning<T>(data: T[], categories: T[], options:
   const granges = groups.map((g) => {
     return new Range1DGroup(g.name, g.color, Range1D.from(g.indices));
   });
-  return composite(m.name, granges);
+  return composite(m.name ? m.name : 'TODO', granges);
 }
 
 /**

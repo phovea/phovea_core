@@ -55,9 +55,9 @@ export function init(config: {offline?: boolean, server_url?: string, server_jso
     server_url,
     server_json_suffix
   }, config);
-  offline = config.offline;
-  server_url = config.server_url;
-  server_json_suffix = config.server_json_suffix;
+  offline = config.offline ? config.offline : offline;
+  server_url = config.server_url ? config.server_url : server_url;
+  server_json_suffix = config.server_json_suffix ? server_json_suffix : server_json_suffix;
 }
 
 /**
@@ -354,7 +354,7 @@ export const delayedCall = debounce;
  * @return {{left: number, top: number, width: number, height: number}}
  */
 export function offset(element: Element) {
-  if (!element) {
+  if (!element || !element.ownerDocument || !element.ownerDocument.defaultView) {
     return {left: 0, top: 0, width: 0, height: 0};
   }
   const obj = element.getBoundingClientRect();
@@ -391,7 +391,7 @@ export function bounds(element: Element) {
  */
 export function resolveIn(milliseconds: number): Promise<void> {
   if (milliseconds <= 0) {
-    return Promise.resolve<void>(null);
+    return new Promise<void>(resolve => resolve());
   }
   return new Promise<void>((resolve) => {
     setTimeout(resolve, milliseconds);

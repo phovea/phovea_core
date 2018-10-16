@@ -171,7 +171,7 @@ export function list(filter: (string | ((desc: IPluginDesc) => boolean)) = () =>
  * @param id
  * @returns {IPluginDesc}
  */
-export function get(type: string, id: string): IPluginDesc {
+export function get(type: string, id: string): IPluginDesc | undefined {
   return registry.find((d) => d.type === type && d.id === id);
 }
 

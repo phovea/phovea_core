@@ -11,7 +11,7 @@ import {all, list as rlist, RangeLike, range, asUngrouped, composite, parse} fro
 import Range from '../range/Range';
 import CompositeRange1D from '../range/CompositeRange1D';
 import {argSort, argFilter} from '../index';
-import {SelectAble, resolve as resolveIDType, IDType} from '../idtype';
+import {SelectAble, resolve as resolveIDType, IDType, IDTypeLike} from '../idtype';
 import {
   categorical2partitioning,
   ICategorical2PartitioningOptions,
@@ -41,8 +41,10 @@ import IAtom, {IAtomValue} from '../atom/IAtom';
  * @internal
  */
 export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
-  constructor(protected root: IVector<T,D>) {
+
+  constructor(protected root: IVector<T,D> | null) {
     super();
+    
   }
 
   get dim() {
@@ -58,6 +60,9 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
   }
 
   view(range: RangeLike = all()): IVector<T,D> {
+    if(!this.root){
+      throw new Error('root not set');
+    }
     return new VectorView(this.root, parse(range));
   }
 
@@ -67,14 +72,14 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
   }
 
   async stats(range: RangeLike = all()): Promise<IStatistics> {
-    if (this.root.valuetype.type !== VALUE_TYPE_INT && this.root.valuetype.type !== VALUE_TYPE_REAL) {
+    if (this.root && this.root.valuetype.type !== VALUE_TYPE_INT && this.root.valuetype.type !== VALUE_TYPE_REAL) {
       return Promise.reject('invalid value type: ' + this.root.valuetype.type);
     }
     return computeStats(await this.data(range));
   }
 
   async statsAdvanced(range: RangeLike = all()): Promise<IAdvancedStatistics> {
-    if (this.root.valuetype.type !== VALUE_TYPE_INT && this.root.valuetype.type !== VALUE_TYPE_REAL) {
+    if (this.root && this.root.valuetype.type !== VALUE_TYPE_INT && this.root.valuetype.type !== VALUE_TYPE_REAL) {
       return Promise.reject('invalid value type: ' + this.root.valuetype.type);
     }
     return computeAdvancedStats(await this.data(range));
@@ -88,6 +93,9 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
    * return the range of this vector as a grouped range, depending on the type this might be a single group or multiple ones
    */
   async groups(): Promise<CompositeRange1D> {
+    if(!this.root){
+      throw new Error('root not set');
+    }
     const v = this.root.valuetype;
     if (v.type === VALUE_TYPE_CATEGORICAL) {
       const vc = <ICategoricalValueTypeDesc><any>v;
@@ -115,10 +123,16 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
   }
 
   async asStratification(): Promise<IStratification> {
+    if(!this.root){
+      throw new Error('root not set');
+    }
     return new StratificationVector(this.root, await this.groups());
   }
 
-  async hist(bins?: number, range: RangeLike = all()): Promise<IHistogram> {
+  async hist(bins?: number, range: RangeLike = all()): Promise<IHistogram | null> {
+    if(!this.root){
+      throw new Error('root not set');
+    }  
     const v = this.root.valuetype;
     const d = await this.data(range);
     switch (v.type) {
@@ -199,10 +213,16 @@ export class VectorView<T,D extends IValueTypeDesc> extends AVector<T,D> {
   }
 
   get desc() {
+    if(!this.root){
+      throw new Error('root not set');
+    }
     return this.root.desc;
   }
 
   persist() {
+    if(!this.root){
+      throw new Error('root not set');
+    }
     return {
       root: this.root.persist(),
       range: this.range.toString()
@@ -210,27 +230,45 @@ export class VectorView<T,D extends IValueTypeDesc> extends AVector<T,D> {
   }
 
   size() {
+    if(!this.root){
+      throw new Error('root not set');
+    }
     return this.range.size(this.root.dim)[0];
   }
 
   at(i: number) {
+    if(!this.root){
+      throw new Error('root not set');
+    }
     const inverted = this.range.invert([i], this.root.dim);
     return this.root.at(inverted[0]);
   }
 
   data(range: RangeLike = all()) {
+    if(!this.root){
+      throw new Error('root not set');
+    }
     return this.root.data(this.range.preMultiply(parse(range), this.root.dim));
   }
 
   names(range: RangeLike = all()) {
+    if(!this.root){
+      throw new Error('root not set');
+    }
     return this.root.names(this.range.preMultiply(parse(range), this.root.dim));
   }
 
   ids(range: RangeLike = all()) {
+    if(!this.root){
+      throw new Error('root not set');
+    }
     return this.root.ids(this.range.preMultiply(parse(range), this.root.dim));
   }
 
-  view(range: RangeLike = all()) {
+  view(range: RangeLike = all()): IVector<T,D> {
+    if(!this.root){
+      throw new Error('root not set');
+    }
     const r = parse(range);
     if (r.isAll) {
       return this;
@@ -239,10 +277,16 @@ export class VectorView<T,D extends IValueTypeDesc> extends AVector<T,D> {
   }
 
   get valuetype() {
+    if(!this.root){
+      throw new Error('root not set');
+    }
     return this.root.valuetype;
   }
 
   get idtype() {
+    if(!this.root){
+      throw new Error('root not set');
+    }
     return this.root.idtype;
   }
 

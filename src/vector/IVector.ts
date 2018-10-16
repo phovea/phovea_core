@@ -32,7 +32,7 @@ export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<
   /**
    * id type
    */
-  readonly idtype: IDType;
+  readonly idtype: IDTypeLike;
 
   /**
    * return the associated ids of this vector
@@ -68,8 +68,7 @@ export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<
    * @param bins number of bins by default guessed
    * @param range optional subset
    */
-  hist(bins?: number, range?: RangeLike): Promise<IHistogram>;
-
+  hist(bins?: number, range?: RangeLike): Promise<IHistogram | null>;
 
   /**
    * Sorts an array.

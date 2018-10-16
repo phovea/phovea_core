@@ -88,13 +88,13 @@ export default class Vector<T,D extends IValueTypeDesc> extends AVector<T,D> {
     return this.desc.size;
   }
 
-  async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
+  async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<AVector<T,D>> {
     const d = await this.data();
     const indices = argSort(d, compareFn, thisArg);
     return this.view(rlist(indices));
   }
 
-  async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
+  async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<AVector<T,D>> {
     const d = await this.data();
     const indices = argFilter(d, callbackfn, thisArg);
     return this.view(rlist(indices));
@@ -111,7 +111,7 @@ export default class Vector<T,D extends IValueTypeDesc> extends AVector<T,D> {
  * @param desc
  * @returns {IVector}
  */
-export function create<T, D extends IValueTypeDesc>(desc: IVectorDataDescription<D>): IVector<T,D> {
+export function create<T, D extends IValueTypeDesc>(desc: IVectorDataDescription<D>): AVector<T,D> {
   if (typeof((<any>desc).loader) === 'function') {
     return new Vector(desc, <IVectorLoader<T>>(<any>desc).loader);
   }

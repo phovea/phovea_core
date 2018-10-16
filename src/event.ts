@@ -153,7 +153,9 @@ export class EventHandler implements IEventHandler {
         if (!this.handlers.has(event)) {
           this.handlers.set(event, new SingleEventHandler(event));
         }
-        this.handlers.get(event).push(handler);
+        if(handler){
+          this.handlers.get(event)!.push(handler);
+        }
       });
     } else {
       Object.keys(events).forEach((event) => {
@@ -172,8 +174,8 @@ export class EventHandler implements IEventHandler {
   off(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
     if (typeof events === 'string') {
       events.split(EventHandler.MULTI_EVENT_SEPARATOR).forEach((event) => {
-        if (this.handlers.has(event)) {
-          const h: SingleEventHandler = this.handlers.get(event);
+        if (handler && this.handlers.has(event)) {
+          const h: SingleEventHandler = this.handlers.get(event)!;
           h.remove(handler);
           if (h.length === 0) {
             this.handlers.delete(event);
@@ -216,7 +218,7 @@ export class EventHandler implements IEventHandler {
 
   private fireEvent(event: Event) {
     if (this.handlers.has(event.type)) {
-      const h: SingleEventHandler = this.handlers.get(event.type);
+      const h: SingleEventHandler = this.handlers.get(event.type)!;
       return h.fire(event);
     }
     return false;

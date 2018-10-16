@@ -266,9 +266,9 @@ function extrapolateFilter(r: {filter?: string|((data: IDataType) => boolean)}) 
   if (typeof v === 'undefined') {
     r.filter = () => true;
   } else if (typeof v === 'string') {
-    r.filter = (data) => data && data.desc.type && data.desc.type.match(v) != null;
+    r.filter = (data) => data && data.desc.type && data.desc.type.match(v[0]) ? true : false;
   } else if (Array.isArray(v)) {
-    r.filter = (data) => data && data && (data.desc.type && data.desc.type.match(v[0])) && ((<any>data.desc).value === undefined || (<any>data.desc).value.type.match(v[1]));
+    r.filter = (data) => data && (data.desc.type && data.desc.type.match(v[0])) && ((<any>data.desc).value === undefined || (<any>data.desc).value.type.match(v[1]));
   }
 }
 

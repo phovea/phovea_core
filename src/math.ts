@@ -58,7 +58,7 @@ export interface IHistogram extends IIterable<number> {
   binOf(value: any): number;
 
   readonly missing: number;
-  readonly missingRange: Range;
+  readonly missingRange: Range | null;
 
   forEach(callbackfn: (value: number, index: number) => void, thisArg?: any): void;
 }
@@ -204,8 +204,8 @@ export function wrapHist(hist: number[], valueRange: number[]) {
 class AHistogram implements IHistogram {
   private _bins: number[];
   private _missing: number = 0;
-  private _ranges: Range[];
-  private _missingRange = none();
+  private _ranges: Range[] | null = null;
+  private _missingRange: Range | null = none();
 
   constructor(bins: number, hist?: number[]) {
     this._bins = [];

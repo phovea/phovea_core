@@ -1,4 +1,3 @@
-/// <reference types="jasmine" />
 import {parse} from '../../src/range';
 
 describe('parse', () => {

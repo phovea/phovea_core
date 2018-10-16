@@ -13,12 +13,12 @@ const idCounter = new Map<string, number>();
  * @param domain
  * @return {number}
  */
-export function uniqueId(domain: string = '_default') {
+export function uniqueId(domain: string = '_default'):number {
   if (!idCounter.has(domain)) {
     idCounter.set(domain, 0);
   }
-  const v = idCounter.get(domain);
-  idCounter.set(domain, v + 1);
+  let v = idCounter.get(domain)!;
+  idCounter.set(domain, (v + 1));
   return v;
 }
 
@@ -29,7 +29,7 @@ export function flagId(domain: string, id: number) {
   if (!idCounter.has(domain)) {
     idCounter.set(domain, id + 1);
   } else {
-    idCounter.set(domain, Math.max(idCounter.get(domain), id + 1)); //use the next one afterwards
+    idCounter.set(domain, Math.max(idCounter.get(domain)!, id + 1)); //use the next one afterwards
   }
   return id;
 }

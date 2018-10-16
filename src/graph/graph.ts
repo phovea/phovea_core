@@ -99,7 +99,7 @@ export class GraphEdge extends AttributeContainer {
 
   private _id: number = NaN;
 
-  constructor(public readonly type: string = 'edge', public readonly source: GraphNode = null, public readonly target: GraphNode = null, id: number = NaN) {
+  constructor(public readonly type: string = 'edge', public readonly source: GraphNode | null = null, public readonly target: GraphNode | null = null, id: number = NaN) {
     super();
     this._id = flagId('graph_edge', id);
     if (source && target) {
@@ -115,8 +115,12 @@ export class GraphEdge extends AttributeContainer {
   }
 
   private init() {
-    this.source.outgoing.push(this);
-    this.target.incoming.push(this);
+    if(this.source) {
+      this.source.outgoing.push(this);
+    }
+    if(this.target) {
+      this.target.incoming.push(this);
+    }
   }
 
   takeDown() {
@@ -136,8 +140,12 @@ export class GraphEdge extends AttributeContainer {
     const r = super.persist();
     r.type = this.type;
     r.id = this.id;
-    r.source = this.source.id;
-    r.target = this.target.id;
+    if(this.source){
+      r.source = this.source.id;
+    }
+    if(this.target){
+      r.target = this.target.id;
+    }
     return r;
   }
 
@@ -145,8 +153,12 @@ export class GraphEdge extends AttributeContainer {
     super.restore(p);
     (<any>this).type = p.type;
     this._id = flagId('graph_edge', p.id);
-    (<any>this).source = nodes(p.source);
-    (<any>this).target = nodes(p.target);
+    if(p.source && nodes){
+      (<any>this).source = nodes(p.source);
+    }
+    if(p.target && nodes){
+      (<any>this).target = nodes(p.target);
+    }
     this.init();
     return this;
   }

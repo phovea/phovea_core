@@ -23,7 +23,7 @@ export default class StratificationVector extends AVector<string, ICategoricalVa
   readonly valuetype: ICategoricalValueTypeDesc;
   readonly desc: IVectorDataDescription<ICategoricalValueTypeDesc>;
 
-  private _cache: string[] = null;
+  private _cache: string[] | null = null;
 
   constructor(private strat: Stratification, private range: CompositeRange1D) {
     super(null);

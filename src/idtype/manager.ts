@@ -84,7 +84,7 @@ export async function listAll(): Promise<IIDType[]> {
 
 export function register(id: string, idtype: IDType|ProductIDType): IDType|ProductIDType {
   if (cache.has(id)) {
-    return cache.get(id);
+    return cache.get(id)!;
   }
   cache.set(id, idtype);
   global_fire('register.idtype', idtype);

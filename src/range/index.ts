@@ -44,7 +44,7 @@ export type RangeLike = Range | number[] | number[][] | string;
  * @param arange something like a range
  * @returns {Range}
  */
-export function parse(arange: RangeLike = null) {
+export function parse(arange: RangeLike | null = null) {
   if (arange === null) {
     return all();
   }

@@ -1,4 +1,3 @@
-/// <reference types="jasmine" />
 import {computeStats} from '../src/math';
 
 describe('computeStats', () => {
