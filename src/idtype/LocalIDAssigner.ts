@@ -33,10 +33,10 @@ export default class LocalIDAssigner {
 
   mapOne(id: string): number {
     if (this.lookup.has(id)) {
-      return this.lookup.get(id);
+      return this.lookup.get(id)!;
     }
     this.lookup.set(id, this.pool.checkOut());
-    return this.lookup.get(id);
+    return this.lookup.get(id)!;
   }
 
   map(ids: string[]): Range {

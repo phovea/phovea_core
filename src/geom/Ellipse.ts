@@ -33,7 +33,7 @@ export default class Ellipse extends AShape {
     return new Circle(this.x, this.y, Math.max(this.radiusX, this.radiusY));
   }
 
-  transform(scale: number[], rotate: number) {
+  transform(scale: number[], _rotate: number) {
     //TODO rotate
     return new Ellipse(this.x * scale[0], this.y * scale[1], this.radiusX * scale[0], this.radiusY * scale[1]);
   }

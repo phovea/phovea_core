@@ -107,7 +107,7 @@ export default class LocalStorageGraph extends GraphBase implements IGraph {
     return true;
   }
 
-  static update(desc: IGraphDataDescription, _storage: Storage = sessionStorage) {
+  static update(_desc: IGraphDataDescription, _storage: Storage = sessionStorage) {
     // const _uid = `graph${desc.id}`;
     // TODO
   }

@@ -69,7 +69,7 @@ export default class Polygon extends AShape {
     return new Circle(centroid.x, centroid.y, Math.sqrt(radius2));
   }
 
-  transform(scale: number[], rotate: number) {
+  transform(scale: number[], _rotate: number) {
     //TODO rotate
     return new Polygon(this.points.map((p) => new Vector2D(p.x * scale[0], p.y * scale[1])));
   }

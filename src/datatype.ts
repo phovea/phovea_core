@@ -165,11 +165,11 @@ export abstract class ADataType<T extends IDataDescription> extends SelectAble i
     return [];
   }
 
-  ids(range: RangeLike = all()): Promise<Range> {
+  ids(_range: RangeLike = all()): Promise<Range> {
     return Promise.resolve(none());
   }
 
-  idView(idRange?: RangeLike): Promise<ADataType<T>> {
+  idView(_idRange?: RangeLike): Promise<ADataType<T>> {
     return Promise.resolve(this);
   }
 
@@ -181,7 +181,7 @@ export abstract class ADataType<T extends IDataDescription> extends SelectAble i
     return this.desc.id;
   }
 
-  restore(persisted: any) {
+  restore(_persisted: any) {
     return this;
   }
 
@@ -274,7 +274,7 @@ export function categorical2partitioning<T>(data: T[], categories: T[], options:
 
   let groups = categories.map((d, i) => {
     return {
-      indices: [],
+      indices: <number[]>[],
       name: m.labels ? m.labels[i] : d.toString(),
       color: m.colors ? m.colors[Math.min(i, m.colors.length - 1)] : 'gray',
     };
@@ -310,7 +310,7 @@ export function defineDataType(name: string, functions: any) {
 
   extendClass(DataType, ADataType);
   DataType.prototype.toString = () => name;
-  DataType.prototype = mixin(DataType.prototype, functions);
+  mixin(DataType.prototype, functions);
 
   return DataType;
 }

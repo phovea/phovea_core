@@ -15,8 +15,6 @@ import {offline as isOffline, fixId, randomId} from './index';
 import {getAPIJSON, sendAPI} from './ajax';
 import {list as listPlugins} from './plugin';
 import {IDataDescription, IDataType, DummyDataType} from './datatype';
-import {ITable} from './table';
-import {wrapObjects} from './table/Table';
 export {random_id, fixId} from './index';
 
 //export {convertTableToVectors, convertToTable, listAsTable} from './internal/data_utils';

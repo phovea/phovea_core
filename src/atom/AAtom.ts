@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {all, list as rlist, Range, RangeLike, none, parse} from '../range';
+import {all, Range, RangeLike, none, parse} from '../range';
 import {SelectAble, resolve} from '../idtype';
 import {IValueTypeDesc} from '../datatype';
 import IAtom, {IAtomDataDescription} from './IAtom';

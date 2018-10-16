@@ -32,7 +32,7 @@ export default class Circle extends AShape {
     return this;
   }
 
-  transform(scale: number[], rotate: number) {
+  transform(scale: number[], _rotate: number) {
     return new Circle(this.x * scale[0], this.y * scale[1], this.radius * (scale[0] + scale[1]) / 2);
   }
 

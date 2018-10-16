@@ -17,7 +17,7 @@ export default class IdPool {
     if (this.free.length === 0) { //no more cached
       return this.counter++;
     } else {
-      return this.free.shift();
+      return this.free.shift()!;
     }
   }
 

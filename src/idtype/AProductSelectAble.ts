@@ -24,7 +24,7 @@ export interface IProductSelectAble extends ISelectAble {
 export abstract class AProductSelectAble extends ASelectAble {
   private numProductSelectListeners = 0;
 
-  private productSelectionListener = (event: IEvent, index: number, type: string) => {
+  private productSelectionListener = (_event: IEvent, _index: number, type: string) => {
     const cells = this.producttype.productSelections(type);
     if (cells.length === 0) {
       this.fire(ProductIDType.EVENT_SELECT_PRODUCT, type, []);

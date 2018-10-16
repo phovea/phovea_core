@@ -79,7 +79,7 @@ export default class Rect extends AShape {
     return new Circle(this.cx, this.cy, Math.sqrt(this.w * 2 + this.h * 2) / 2);
   }
 
-  transform(scale: number[], rotate: number) {
+  transform(scale: number[], _rotate: number) {
     //TODO rotate
     return new Rect(this.x * scale[0], this.y * scale[1], this.w * scale[0], this.h * scale[1]);
   }

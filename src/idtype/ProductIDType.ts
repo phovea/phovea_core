@@ -136,7 +136,7 @@ export default class ProductIDType extends EventHandler implements IIDType {
    */
   selections(type = defaultSelectionType): Range[] {
     if (this.sel.has(type)) {
-      return this.sel.get(type).slice();
+      return this.sel.get(type)!.slice();
     }
     this.sel.set(type, []);
     return [];
@@ -238,12 +238,12 @@ export default class ProductIDType extends EventHandler implements IIDType {
   }
 
   private toPerDim(sel: Range[]) {
-    return this.elems.map((elem, i) => {
+    return this.elems.map((_elem, i) => {
       if (sel.length === 0) {
         return none();
       }
       const dimselections = sel.map((r) => r.dim(i));
-      const selection = dimselections.reduce((p, a) => p ? p.union(a) : a, null);
+      const selection = dimselections.reduce((p, a) => p ? p!.union(a) : a, <Range1D | null>null)!;
       return rlist(selection);
     });
   }

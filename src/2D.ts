@@ -1223,7 +1223,7 @@ class Polynomial {
   getCubicRoots() {
     const results: number[] = [];
     if (this.getDegree() === 3) {
-      let disrim: number | undefined = undefined;
+      // let disrim: number | undefined = undefined;
       const c3 = this.coefs[3];
       const c2 = this.coefs[2] / c3;
       const c1 = this.coefs[1] / c3;
@@ -1233,9 +1233,9 @@ class Polynomial {
       const offset = c2 / 3;
       const discrim = b * b / 4 + a * a * a / 27;
       const halfB = b / 2;
-      if (Math.abs(discrim) <= Polynomial.TOLERANCE) {
-        disrim = 0;
-      }
+      // if (Math.abs(discrim) <= Polynomial.TOLERANCE) {
+      //   disrim = 0;
+      // }
       let tmp;
       if (discrim > 0) {
         const e = Math.sqrt(discrim);

@@ -48,7 +48,7 @@ export abstract class ASelectAble extends EventHandler implements ISelectAble {
 
   private numSelectListeners = 0;
   private selectionListeners: ISingleSelectionListener[] = [];
-  private singleSelectionListener = async (event: any, type: string, act: Range, added: Range, removed: Range) => {
+  private singleSelectionListener = async (_event: any, type: string, act: Range, added: Range, removed: Range) => {
     const ids = await this.ids();
     //filter to the right ids and convert to indices format
     //given all ids convert the selected ids to the indices in the data type
@@ -79,8 +79,8 @@ export abstract class ASelectAble extends EventHandler implements ISelectAble {
     return [];
   }
 
-  private selectionListener(idtype: IDType, index: number, total: number) {
-    return (event: any, type: string, act: Range, added: Range, removed: Range) => {
+  private selectionListener(_idtype: IDType, index: number, total: number) {
+    return (_event: any, type: string, act: Range, added: Range, removed: Range) => {
       this.selectionCache[index] = {act, added, removed};
       if (this.accumulateEvents < 0 || (++this.accumulateEvents) === total) {
         this.fillAndSend(type, index);
@@ -88,7 +88,7 @@ export abstract class ASelectAble extends EventHandler implements ISelectAble {
     };
   }
 
-  private fillAndSend(type: string, trigger: number) {
+  private fillAndSend(type: string, _trigger: number) {
     const ids = this.idtypes;
     const full = ids.map((id, i) => {
       const entry = this.selectionCache[i];

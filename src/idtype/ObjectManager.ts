@@ -36,7 +36,7 @@ export default class ObjectManager<T extends IHasUniqueId> extends IDType {
   }
 
   nextId(item?: T) {
-    const n = this.pool.checkOut();
+    const n = this.pool.checkOut()!;
     if (item) {
       item.id = n;
       this.instances[n] = item;
@@ -61,26 +61,20 @@ export default class ObjectManager<T extends IHasUniqueId> extends IDType {
   }
 
   get entries() {
-    return this.instances.filter((item, i) => this.pool.isCheckedOut(i));
+    return this.instances.filter((_item, i) => this.pool.isCheckedOut(i));
   }
 
-  remove(id: number): T;
-  remove(item: T): T;
-  remove(item: any): T {
+  remove(item: T|number): T {
     let old = null;
-    if (typeof item.id === 'number') {
-      item = item.id;
-    }
-    if (typeof item === 'number') {
-      old = this.instances[item];
-      delete this.instances[item];
-      this.fire('remove', item, old);
-    }
+    let id = typeof item === 'number' ? item : item.id;
+    old = this.instances[id]!;
+    delete this.instances[id];
+    this.fire('remove', id, old);
     //clear from selections
     this.selectionTypes().forEach((type) => {
-      this.select(type, [item], SelectOperation.REMOVE);
+      this.select(type, [id], SelectOperation.REMOVE);
     });
-    this.pool.checkIn(item);
+    this.pool.checkIn(id);
     return old;
   }
 

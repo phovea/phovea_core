@@ -47,7 +47,7 @@ export default class Line extends AShape {
     return new Circle(x, y, Math.sqrt(dx * dx + dy * dy) / 2);
   }
 
-  transform(scale: number[], rotate: number) {
+  transform(scale: number[], _rotate: number) {
     //TODO rotate
     return new Line(this.x1 * scale[0], this.y1 * scale[1], this.x2 * scale[0], this.y2 * scale[1]);
   }
