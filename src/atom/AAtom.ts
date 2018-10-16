@@ -46,7 +46,7 @@ export abstract class AAtom<T,D extends IValueTypeDesc> extends SelectAble {
     return this.id();
   }
 
-  idView(idRange?: RangeLike): Promise<IAtom<T,D>> {
+  idView(_idRange?: RangeLike): Promise<IAtom<T,D>> {
     return Promise.resolve(<IAtom<T,D>><any>this);
   }
 
@@ -56,7 +56,7 @@ export abstract class AAtom<T,D extends IValueTypeDesc> extends SelectAble {
     return this.desc.id;
   }
 
-  restore(persisted: any) {
+  restore(_persisted: any) {
     return this;
   }
 }

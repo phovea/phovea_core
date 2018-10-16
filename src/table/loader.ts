@@ -60,7 +60,7 @@ export function adapterOne2Two(loader: ITableLoader): ITableLoader2 {
     col: (desc: ITableDataDescription, column: string, range: Range) => loader(desc).then((d) => range.filter(d.objs.map((d) => d[column]), desc.size)),
     objs: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => filterObjects(d.objs, range, desc)),
     data: (desc: ITableDataDescription, range: Range) => loader(desc).then((d) => range.filter(toFlat(d.objs, desc.columns), desc.size)),
-    view: (desc: ITableDataDescription, name: string, args: any) => {
+    view: (_desc: ITableDataDescription, _name: string, _args: any) => {
       throw new Error('not implemented');
     }
   };
@@ -75,7 +75,7 @@ export function viaAPIViewLoader(name: string, args: IQueryArgs): ITableLoader {
     rowIds: Range;
     rows: string[];
     objs: any[];
-  }> = undefined;
+  }> | null = null;
   return (desc) => {
     if (!_loader) { //in the cache
       _loader = getAPIJSON(`/dataset/table/${desc.id}/view/${name}`, args).then((data) => {
@@ -114,10 +114,10 @@ function maskObjects(arr: IValueType[], desc: ITableDataDescription) {
  */
 export function viaAPI2Loader(): ITableLoader2 {
   const cols: any = {};
-  let rowIds: Promise<Range> = null,
-    rows: Promise<string[]> = null,
-    objs: Promise<any[]> = null,
-    data: Promise<any[][]> = null;
+  let rowIds: Promise<Range> | null = null,
+    rows: Promise<string[]> | null = null,
+    objs: Promise<any[]> | null = null,
+    data: Promise<any[][]> | null = null;
 
   function fillIds(desc: ITableDataDescription) {
     if (rowIds !== null && rows !== null) {
@@ -148,7 +148,7 @@ export function viaAPI2Loader(): ITableLoader2 {
         objs = getAPIJSON(`/dataset/table/${desc.id}/raw`).then((data) => maskObjects(data, desc));
       }
       if (range.isAll) {
-        return objs;
+        return objs!;
       }
       if (objs != null) { //already loading all
         return objs.then((d) => range.filter(d, desc.size));
@@ -161,7 +161,7 @@ export function viaAPI2Loader(): ITableLoader2 {
         data = r.objs(desc, all()).then((objs) => toFlat(objs, desc.columns));
       }
       if (range.isAll) {
-        return data;
+        return data!;
       }
       if (data != null) { //already loading all
         return data.then((d) => range.filter(d, desc.size));
@@ -192,13 +192,13 @@ export function viaAPI2Loader(): ITableLoader2 {
       //server side slicing
       return getAPIData(`/dataset/table/${desc.id}/col/${column}`, {range: range.toString()}).then((data) => maskCol(data, colDesc));
     },
-    view: (desc: ITableDataDescription, name: string, args: IQueryArgs) => viaAPIViewLoader(name, args)
+    view: (_desc: ITableDataDescription, name: string, args: IQueryArgs) => viaAPIViewLoader(name, args)
   };
   return r;
 }
 
 function toFlat(data: any[], vecs: ITableColumn<any>[]) {
-  return data.map((row) => vecs.map((col) => row[col.column]));
+  return data.map((row) => vecs.map((col) => row[col.column!]));
 }
 
 

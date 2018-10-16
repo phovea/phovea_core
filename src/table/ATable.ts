@@ -47,7 +47,7 @@ export abstract class ATable extends SelectAble implements IInternalAccess {
   }
 
   reduce<T, D extends IValueTypeDesc>(f: (row: IValueType[]) => T, thisArgument?: any, valuetype?: D, idtype?: IDType): IVector<T,D> {
-    return new MultiTableVector(this.root, f, thisArgument, valuetype, idtype);
+    return new MultiTableVector(this.root, f, thisArgument, valuetype!, idtype);
   }
 
   restore(persisted: any): IPersistable {
@@ -161,7 +161,7 @@ export class TableView extends ATable implements ITable {
     return [this.idtype];
   }
 
-  queryView(name: string, args: any): ITable {
+  queryView(_name: string, _args: any): ITable {
     throw new Error('not implemented');
   }
 }

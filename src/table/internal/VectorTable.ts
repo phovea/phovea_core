@@ -19,7 +19,7 @@ export default class VectorTable extends ATable implements ITable {
   readonly desc: ITableDataDescription;
 
   constructor(desc: IDataDescription, private vectors: IAnyVector[]) {
-    super(null);
+    super(<any>null); // hacky but in the next line set to the right value
     this.root = this;
     const ref = vectors[0].desc;
     // generate the description extras
@@ -63,7 +63,7 @@ export default class VectorTable extends ATable implements ITable {
   }
 
   dataOfColumn(column: string, range: RangeLike = all()) {
-    return this.vectors.find((d) => d.desc.name === column).data(range);
+    return this.vectors.find((d) => d.desc.name === column)!.data(range);
   }
 
 

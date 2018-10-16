@@ -73,7 +73,7 @@ export default class ProjectedAtom<T, D extends IValueTypeDesc, M, MD extends IV
     return this.id();
   }
 
-  idView(idRange?: RangeLike): Promise<IAtom<T,D>> {
+  idView(_idRange?: RangeLike): Promise<IAtom<T,D>> {
     return Promise.resolve(<IAtom<T,D>><any>this);
   }
 
@@ -86,7 +86,7 @@ export default class ProjectedAtom<T, D extends IValueTypeDesc, M, MD extends IV
     };
   }
 
-  restore(persisted: any) {
+  restore(_persisted: any) {
     return this;
   }
 }

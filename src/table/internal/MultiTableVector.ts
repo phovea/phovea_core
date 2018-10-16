@@ -15,7 +15,7 @@ import AVector from '../../vector/AVector';
 export default class MultiTableVector<T, D extends IValueTypeDesc> extends AVector<T, D> implements IVector<T,D> {
   readonly desc: IVectorDataDescription<D>;
 
-  constructor(private table: ITable, private f: (row: IValueType[]) => T, private thisArgument = table, public readonly valuetype: D = null, private _idtype = table.idtype) {
+  constructor(private table: ITable, private f: (row: IValueType[]) => T, private thisArgument = table, public readonly valuetype: D, private _idtype = table.idtype) {
     super(null);
     this.desc = {
       name: table.desc.name + '-p',

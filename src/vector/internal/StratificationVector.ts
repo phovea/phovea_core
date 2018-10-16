@@ -50,7 +50,7 @@ export default class StratificationVector extends ADataType<IStratificationDataD
     return new StratificationGroup(this, group, this.groups[group]);
   }
 
-  async hist(bins?: number, range: RangeLike = all()): Promise<IHistogram> {
+  async hist(_bins?: number, _range: RangeLike = all()): Promise<IHistogram> {
     // FIXME unused parameter
     return rangeHist(await this.range());
   }

@@ -26,10 +26,10 @@ export default class Table extends ATable implements ITable {
   private vectors: TableVector<any, IValueTypeDesc>[];
 
   constructor(public readonly desc: ITableDataDescription, private loader: ITableLoader2) {
-    super(null);
+    super(<any>null); 
+    this.root = this;
     // set default column
     desc.columns.forEach((col) => col.column = col.column || col.name);
-    this.root = this;
     this.vectors = desc.columns.map((cdesc, i) => new TableVector(this, i, cdesc));
   }
 
