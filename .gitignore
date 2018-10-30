@@ -1,6 +1,6 @@
-
 /.tscache
 /.idea
+/.vscode
 /build
 /tmp
 /dist
