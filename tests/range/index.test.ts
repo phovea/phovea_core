@@ -9,7 +9,7 @@ describe('parse', () => {
   it('start + end (multiple)', parseCheck('1:10','(1:10)'));
   it('start + end + step', parseCheck('1:2:3','(1:2:3)'));
 
-  it('negative start (single)', parseCheck('-2:-1','(-2)')); // OK: end index is excluded
+  it('negative start (single)', parseCheck('-2:-1','-2')); // OK: end index is excluded
   it('negative start (multiple)', parseCheck('-3:-1','(-3:-1)'));
   it('negative end', parseCheck('1:-1','(1:-1)'));
   it('negative end < -1', parseCheck('1:-2','(1:-2)'));

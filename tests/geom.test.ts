@@ -37,12 +37,12 @@ describe('Circle', () => {
   });
 
   describe('intersects', () => {
-    it('self', () => expect(circle.intersects(new Circle(1,1,1))));
-    it('outside', () => expect(! circle.intersects(new Circle(-1,-1,1))));
-    it('touch', () => expect(circle.intersects(new Circle(-1,1,1))));
-    it('overlap', () => expect(circle.intersects(new Circle(0,0,1))));
-    it('smaller', () => expect(! circle.intersects(new Circle(1,1,0.5))));
-    it('larger', () => expect(! circle.intersects(new Circle(1,1,2))));
+    it('self', () => expect(circle.intersects(new Circle(1,1,1)).status).toEqual('Intersection'));
+    it('outside', () => expect(circle.intersects(new Circle(-1,-1,1)).status).toEqual('Outside'));
+    it('touch', () => expect(circle.intersects(new Circle(-1,1,1)).status).toEqual('Intersection'));
+    it('overlap', () => expect(circle.intersects(new Circle(0,0,1)).status).toEqual('Intersection'));
+    it('smaller', () => expect(circle.intersects(new Circle(1,1,0.5)).status).toEqual('Inside'));
+    it('larger', () => expect(circle.intersects(new Circle(1,1,2)).status).toEqual('Inside'));
   });
 
   it('radius', () => expect(circle.radius).toEqual(1));
@@ -99,11 +99,11 @@ describe('Rect', () => {
   });
 
   describe('intersects', () => {
-    it('self', () => expect(rect.intersects(new Rect(0,0,2,2))));
-    it('outside', () => expect(! rect.intersects(new Rect(-1,-1,4,4))));
-    it('inside', () => expect(! rect.intersects(new Rect(0.5,0.5,1,1))));
-    it('touch', () => expect(rect.intersects(new Rect(-1,-1,1,1))));
-    it('overlap', () => expect(rect.intersects(new Rect(-1,-1,2,2))));
+    it('self', () => expect(rect.intersects(new Rect(0,0,2,2)).status).toEqual('Intersection'));
+    it('outside', () => expect(rect.intersects(new Rect(-1,-1,4,4)).status).toEqual('No Intersection'));
+    it('inside', () => expect(rect.intersects(new Rect(0.5,0.5,1,1)).status).toEqual('No Intersection'));
+    it('touch', () => expect(rect.intersects(new Rect(-1,-1,1,1)).status).toEqual('Intersection'));
+    it('overlap', () => expect(rect.intersects(new Rect(-1,-1,2,2)).status).toEqual('Intersection'));
   });
 
   it('toString', () => expect(rect.toString()).toEqual('Rect(x=0,y=0,w=2,h=2)'));
@@ -158,11 +158,11 @@ describe('Ellipse', () => {
   });
 
   describe('intersects', () => {
-    it('self', () => expect(ellipse.intersects(new Rect(0,0,2,2))));
-    it('outside', () => expect(! ellipse.intersects(new Rect(-1,-1,4,4))));
-    it('inside', () => expect(! ellipse.intersects(new Rect(0.5,0.5,1,1))));
-    it('touch', () => expect(ellipse.intersects(new Rect(-1,-1,1,1))));
-    it('overlap', () => expect(ellipse.intersects(new Rect(-1,-1,2,2))));
+    it('self', () => expect(ellipse.intersects(new Rect(0,0,2,2)).status).toEqual('Intersection'));
+    it('outside', () => expect(ellipse.intersects(new Rect(-1,-1,4,4)).status).toEqual('Intersection'));
+    it('inside', () => expect(ellipse.intersects(new Rect(0.5,0.5,1,1)).status).toEqual('No Intersection'));
+    it('touch', () => expect(ellipse.intersects(new Rect(-1,-1,1,1)).status).toEqual('No Intersection'));
+    it('overlap', () => expect(ellipse.intersects(new Rect(-1,-1,2,2)).status).toEqual('Intersection'));
   });
 
   it('toString', () => expect(ellipse.toString()).toEqual('Ellipse(x=1,y=2,radiusX=1,radiusY=2)'));
@@ -220,11 +220,11 @@ describe('Polygon', () => {
   });
 
   describe('intersects', () => {
-    it('self', () => expect(poly.intersects(new Rect(0,0,2,2))));
-    it('outside', () => expect(! poly.intersects(new Rect(-1,-1,4,4))));
-    it('inside', () => expect(! poly.intersects(new Rect(0.5,0.5,1,1))));
-    it('touch', () => expect(poly.intersects(new Rect(-1,-1,1,1))));
-    it('overlap', () => expect(poly.intersects(new Rect(-1,-1,2,2))));
+    it('self', () => expect(poly.intersects(new Rect(0,0,2,2)).status).toEqual('Intersection'));
+    it('outside', () => expect(poly.intersects(new Rect(-1,-1,4,4)).status).toEqual('No Intersection'));
+    it('inside', () => expect(poly.intersects(new Rect(0.5,0.5,1,1)).status).toEqual('Intersection'));
+    it('touch', () => expect(poly.intersects(new Rect(-1,-1,1,1)).status).toEqual('Intersection'));
+    it('overlap', () => expect(poly.intersects(new Rect(-1,-1,2,2)).status).toEqual('Intersection'));
   });
 
   it('toString', () => expect(poly.toString()).toEqual('Polygon(0,0,2,0,0,2)'));
@@ -285,11 +285,11 @@ describe('Line', () => {
   });
 
   describe('intersects', () => {
-    it('self', () => expect(line.intersects(new Rect(0,0,2,2))));
-    it('outside', () => expect(! line.intersects(new Rect(-1,-1,4,4))));
-    it('inside', () => expect(! line.intersects(new Rect(0.5,0.5,1,1))));
-    it('touch', () => expect(line.intersects(new Rect(-1,-1,1,1))));
-    it('overlap', () => expect(line.intersects(new Rect(-1,-1,2,2))));
+    it('self', () => expect(line.intersects(new Rect(0,0,2,2)).status).toEqual('Intersection'));
+    it('outside', () => expect(line.intersects(new Rect(-1,-1,4,4)).status).toEqual('No Intersection'));
+    it('inside', () => expect(line.intersects(new Rect(0.5,0.5,1,1)).status).toEqual('Intersection'));
+    it('touch', () => expect(line.intersects(new Rect(-1,-1,1,1)).status).toEqual('Intersection'));
+    it('overlap', () => expect(line.intersects(new Rect(-1,-1,2,2)).status).toEqual('Intersection'));
   });
 
   it('toString', () => expect(line.toString()).toEqual('Line(x1=0,y1=0,x2=2,y2=2)'));
