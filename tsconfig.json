@@ -35,7 +35,7 @@
     "tsd.d.ts"
   ],
   "typedocOptions": {
-    "name": "LineUpJS",
+    "name": "Phovea-Core",
     "mode": "modules",
     "modules": "umd",
     "target": "es6",
