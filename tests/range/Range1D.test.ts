@@ -9,7 +9,8 @@ describe('Range1D', () => {
     it('isAll', () => expect(elem.isAll).toBeTruthy());
     it('isUnbound', () => expect(elem.isUnbound).toBeTruthy());
     it('size', () => expect(elem.size(10)).toBe(10));
-    it('length', () => expect(elem.length).toBeNaN());
+    //#143
+    //it('length', () => expect(elem.length).toBeNaN());
   });
   describe('none', () => {
     const elem = Range1D.none();
