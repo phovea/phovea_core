@@ -8,25 +8,25 @@
 module.exports = function(registry) {
   //registry.push('extension-type', 'extension-id', function() { return System.import('./src/extension_impl'); }, {});
   /// #if include('datatype', 'matrix')
-  registry.push('datatype', 'matrix', function() { return System.import('./src/matrix/Matrix'); }, {});
+  registry.push('datatype', 'matrix', function() { return import('./src/matrix/Matrix'); }, {});
   /// #endif
   /// #if include('datatype', 'table')
-  registry.push('datatype', 'table', function() { return System.import('./src/table/Table'); }, {});
+  registry.push('datatype', 'table', function() { return import('./src/table/Table'); }, {});
   /// #endif
   /// #if include('datatype', 'vector')
-  registry.push('datatype', 'vector', function() { return System.import('./src/vector/Vector'); }, {});
+  registry.push('datatype', 'vector', function() { return import('./src/vector/Vector'); }, {});
   /// #endif
   /// #if include('datatype', 'stratification')
-  registry.push('datatype', 'stratification', function() { return System.import('./src/stratification/Stratification'); }, {});
+  registry.push('datatype', 'stratification', function() { return import('./src/stratification/Stratification'); }, {});
   /// #endif
   /// #if include('datatype', 'graph')
-  registry.push('datatype', 'graph', function() { return System.import('./src/graph/GraphProxy'); }, {});
+  registry.push('datatype', 'graph', function() { return import('./src/graph/GraphProxy'); }, {});
   /// #endif
   /// #if include('datatype', 'atom')
-  registry.push('datatype', 'atom', function() { return System.import('./src/atom/Atom'); }, {});
+  registry.push('datatype', 'atom', function() { return import('./src/atom/Atom'); }, {});
   /// #endif
   /// #if include('tabSyncer', 'selection')
-  registry.push('tabSyncer', 'selection', function() { return System.import('./src/sync/SelectionSyncer'); }, {});
+  registry.push('tabSyncer', 'selection', function() { return import('./src/sync/SelectionSyncer'); }, {});
   /// #endif
 };
 
