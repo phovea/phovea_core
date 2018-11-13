@@ -9,7 +9,7 @@ import SingleRangeElem from './SingleRangeElem';
 export default class RangeElem implements IRangeElem {
   constructor(public readonly from: number, public readonly to: number = -1, public readonly step: number = 1) {
     if (step === 0) {
-      throw new Error('invalid step size: ' + step);
+      throw new Error(`invalid step size: ${step}`);
     }
   }
 
@@ -48,7 +48,8 @@ export default class RangeElem implements IRangeElem {
     const t = fix(this.to, size), f = fix(this.from, size);
     if (this.step === 1) {
       return Math.max(t - f, 0);
-    } else if (this.step === -1) {
+    }
+    if (this.step === -1) {
       if(this.to === -1) {
         return Math.max(f - -1, 0);
       }
@@ -71,11 +72,11 @@ export default class RangeElem implements IRangeElem {
       const t = this.from - 1;
       const f = this.to - 1;
       return new RangeElem(f, t, -this.step);
-    } else { //step <0
-      const t = this.from - 1;
-      const f = this.to - 1;
-      return new RangeElem(f, t, -this.step);
     }
+    //step <0
+    const t = this.from - 1;
+    const f = this.to - 1;
+    return new RangeElem(f, t, -this.step);
   }
 
   invert(index: number, size?: number) {
@@ -112,11 +113,11 @@ export default class RangeElem implements IRangeElem {
         return (value <= f && value >= 0);
       }
       return (value <= f) && (value > t);
-    } else if (this.step === +1) { //+1
-      return (value >= f) && (value < t);
-    } else {
-      return this.iter(size).asList().indexOf(value) >= 0;
     }
+    if (this.step === +1) { //+1
+      return (value >= f) && (value < t);
+    }
+    return this.iter(size).asList().indexOf(value) >= 0;
   }
 
   toString() {
@@ -126,9 +127,9 @@ export default class RangeElem implements IRangeElem {
     if (this.isSingle) {
       return this.from.toString();
     }
-    let r = this.from + ':' + this.to;
+    let r = `${this.from}:${this.to}`;
     if (this.step !== 1) {
-      r += ':' + this.step;
+      r += `:${this.step}`;
     }
     return r;
   }

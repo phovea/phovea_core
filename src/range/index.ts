@@ -123,7 +123,8 @@ export function list(): Range {
   }
   if (Array.isArray(arguments[0]) && arguments[0][0] instanceof Range1D) {
     return new Range(arguments[0]);
-  } else if (Array.isArray(arguments[0])) { //array mode
+  }
+  if (Array.isArray(arguments[0])) { //array mode
     const r = new Range();
     Array.from(arguments).forEach((arr: any, i) => {
       if (arr instanceof Range1D) {
@@ -133,11 +134,13 @@ export function list(): Range {
       }
     });
     return r;
-  } else if (typeof arguments[0] === 'number') { //single slice mode
+  }
+  if (typeof arguments[0] === 'number') { //single slice mode
     const r = new Range();
     r.dim(0).setList(Array.from(arguments));
     return r;
-  } else if (arguments[0] instanceof Range1D) {
+  }
+  if (arguments[0] instanceof Range1D) {
     return new Range(Array.from(arguments));
   }
   return none();

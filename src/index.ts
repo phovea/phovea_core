@@ -37,7 +37,7 @@ declare const __APP_CONTEXT__: string;
  * server prefix ofr api calls
  * @type {string}
  */
-export let server_url: string = (__APP_CONTEXT__ || '/') + 'api';
+export let server_url: string = `${(__APP_CONTEXT__ || '/')}api`;
 /**
  * server suffix for api calls
  * @type {string}
@@ -70,18 +70,19 @@ function _init() {
     if (!node) {
       return undefined;
     }
-    return node.dataset['phovea' + camelCaseName];
+    return node.dataset[`phovea${camelCaseName}`];
   }
 
   const config: any = {};
   if ('true' === find('offline')) {
     config.offline = true;
   }
-  let v;
-  if ((v = find('server-url', 'ServerUrl')) !== undefined) {
+  let v = find('server-url', 'ServerUrl');
+  if (v !== undefined) {
     config.server_url = v;
   }
-  if ((v = find('server-json-suffix', 'ServerJsonSuffix')) !== undefined) {
+  v = find('server-json-suffix', 'ServerJsonSuffix');
+  if (v !== undefined) {
     config.server_json_suffix = v;
   }
   //init myself
@@ -391,7 +392,7 @@ export function bounds(element: Element) {
  */
 export function resolveIn(milliseconds: number): Promise<void> {
   if (milliseconds <= 0) {
-    return new Promise<void>(resolve => resolve());
+    return new Promise<void>((resolve) => resolve());
   }
   return new Promise<void>((resolve) => {
     setTimeout(resolve, milliseconds);

@@ -17,7 +17,7 @@ export function uniqueId(domain: string = '_default'):number {
   if (!idCounter.has(domain)) {
     idCounter.set(domain, 0);
   }
-  let v = idCounter.get(domain)!;
+  const v = idCounter.get(domain)!;
   idCounter.set(domain, (v + 1));
   return v;
 }

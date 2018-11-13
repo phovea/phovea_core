@@ -180,13 +180,13 @@ export abstract class ASelectAble extends EventHandler implements ISelectAble {
         r.dim(r.ndim); //create intermediate ones
       }
       return ids.indexRangeOf(r);
-    } else {
-      //just a single dimension
-      ids = ids.split()[dim];
-      range = ids.preMultiply(range);
-      types[dim].select(type, range, op);
-      return ids.indexRangeOf(range);
     }
+    //just a single dimension
+    ids = ids.split()[dim];
+    range = ids.preMultiply(range);
+    types[dim].select(type, range, op);
+    return ids.indexRangeOf(range);
+
   }
 
   /**

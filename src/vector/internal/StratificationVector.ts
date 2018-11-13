@@ -24,7 +24,7 @@ export default class StratificationVector extends ADataType<IStratificationDataD
 
   constructor(private v: IVector<any, IValueTypeDesc>, private r: CompositeRange1D) {
     super({
-      id: v.desc.id + '-s',
+      id: `${v.desc.id}-s`,
       name: v.desc.name,
       description: v.desc.description,
       creator: v.desc.creator,

@@ -140,7 +140,8 @@ function waitFor(promises: Promise<any>[], redo: boolean = false): Promise<boole
   promises = promises.filter((p) => p != null);
   if (promises.length === 0) {
     return Promise.resolve(redo);
-  } else if (promises.length === 1) {
+  }
+  if (promises.length === 1) {
     return promises[0].then(() => redo);
   }
   return Promise.all(promises).then(() => redo);
@@ -158,9 +159,8 @@ export function flowLayout(horizontal: boolean, gap: number, padding = {top: 0, 
   function getSize(w: number, h: number, child: ILayoutElem, value: number) {
     if (horizontal) {
       return [value, grab(child.layoutOption('prefHeight', Number.NaN), h)];
-    } else {
-      return [grab(child.layoutOption('prefWidth', Number.NaN), w), value];
     }
+    return [grab(child.layoutOption('prefWidth', Number.NaN), w), value];
   }
 
   function FlowLayout(elems: ILayoutElem[], w: number, h: number, _parent: ILayoutElem) {
@@ -191,12 +191,13 @@ export function flowLayout(horizontal: boolean, gap: number, padding = {top: 0, 
       const ratio = elem.layoutOption('ratio', Number.NaN);
       if (isDefault(fix) && isDefault(ratio)) {
         return getSize(w, h, elem, unboundedSpace);
-      } else if (fix >= 0) {
-        return getSize(w, h, elem, fix);
-      } else { // (ratio > 0)
-        const value = (ratio / ratioMax) * freeSpace;
-        return getSize(w, h, elem, value);
       }
+      if (fix >= 0) {
+        return getSize(w, h, elem, fix);
+      }
+      // (ratio > 0)
+      const value = (ratio / ratioMax) * freeSpace;
+      return getSize(w, h, elem, value);
     });
     // set all locations
     let xAccumulator = padding.left;
@@ -221,9 +222,8 @@ export function distributeLayout(horizontal: boolean, defaultValue: number, padd
   function setBounds(x: number, y: number, w: number, h: number, child: ILayoutElem, value: number) {
     if (horizontal) {
       return child.setBounds(x, y, value, grab(child.layoutOption('prefHeight', Number.NaN), h));
-    } else {
-      return child.setBounds(x, y, grab(child.layoutOption('prefWidth', Number.NaN), w), value);
     }
+    return child.setBounds(x, y, grab(child.layoutOption('prefWidth', Number.NaN), w), value);
   }
 
   function DistributeLayout(elems: ILayoutElem[], w: number, h: number, _parent: ILayoutElem) {

@@ -17,10 +17,10 @@ export default class ProjectedAtom<T, D extends IValueTypeDesc, M, MD extends IV
     super();
 
     this.desc = {
-      name: v.desc.name + '-p',
-      fqname: v.desc.fqname + '-p',
+      name: `${v.desc.name}-p`,
+      fqname: `${v.desc.fqname}-p`,
       type: 'atom',
-      id: v.desc.id + '-p',
+      id:`${v.desc.id}-p`,
       idtype: v.idtype,
       value: this.valuetype,
       description: v.desc.description,

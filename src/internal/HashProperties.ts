@@ -85,8 +85,8 @@ export default class HashProperties extends PropertyHandler {
       }
     }
     window.removeEventListener('hashchange', this.updated, false);
-    history.pushState(this.toObject(), 'State ' + Date.now(), '#' + this.toString());
+    history.pushState(this.toObject(), `State ${Date.now()}`, `#${this.toString()}`);
     window.addEventListener('hashchange', this.updated, false);
-    this.fire(HashProperties.EVENT_STATE_PUSHED, 'State ' + Date.now(), '#' + this.toString());
+    this.fire(HashProperties.EVENT_STATE_PUSHED, `State ${Date.now()}`, `#${this.toString()}`);
   }
 }

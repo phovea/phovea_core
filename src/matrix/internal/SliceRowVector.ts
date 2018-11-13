@@ -25,9 +25,9 @@ export default class SliceRowVector<T, D extends IValueTypeDesc> extends AVector
     super(null);
     this.rowRange = Range1D.from([this.row]);
     this.desc = {
-      name: m.desc.name + '-r' + row,
-      fqname: m.desc.fqname + '-r' + row,
-      id: m.desc.id + '-r' + row,
+      name: `${m.desc.name}-c${row}`,
+      fqname: `${m.desc.fqname}-c${row}`,
+      id: `${m.desc.id}-c${row}`,
       type: 'vector',
       idtype: m.coltype,
       size: m.ncol,

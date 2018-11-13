@@ -113,21 +113,6 @@ export interface IStringValueTypeDesc extends IValueTypeDesc {
 
 export declare type IValueType = number | string | any;
 
-/**
- * since there is no instanceOf for interfaces
- * @param v
- * @return {any}
- */
-export function isDataType(v: IDataType) {
-  if (v === null || v === undefined) {
-    return false;
-  }
-  if (v instanceof ADataType) {
-    return true;
-  }
-  //sounds good
-  return (typeof(v.idView) === 'function' && typeof(v.persist) === 'function' && typeof(v.restore) === 'function' && v instanceof SelectAble && ('desc' in v) && ('dim' in v));
-}
 
 /**
  * utility to assign a dataset to an html element, similar to d3
@@ -195,6 +180,22 @@ export class DummyDataType extends ADataType<IDataDescription> {
     super(desc);
   }
 
+}
+
+/**
+ * since there is no instanceOf for interfaces
+ * @param v
+ * @return {any}
+ */
+export function isDataType(v: IDataType) {
+  if (v === null || v === undefined) {
+    return false;
+  }
+  if (v instanceof ADataType) {
+    return true;
+  }
+  //sounds good
+  return (typeof(v.idView) === 'function' && typeof(v.persist) === 'function' && typeof(v.restore) === 'function' && v instanceof SelectAble && ('desc' in v) && ('dim' in v));
 }
 
 /**

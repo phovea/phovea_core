@@ -33,7 +33,7 @@ export class AttributeContainer extends EventHandler implements IPersistable {
       return;
     }
     this.attrMap.set(attr, value);
-    this.fire('attr-' + attr, value, bak);
+    this.fire(`attr-${attr}`, value, bak);
     this.fire('setAttr', attr, value, bak);
   }
 
@@ -140,10 +140,10 @@ export class GraphEdge extends AttributeContainer {
     const r = super.persist();
     r.type = this.type;
     r.id = this.id;
-    if(this.source){
+    if(this.source) {
       r.source = this.source.id;
     }
-    if(this.target){
+    if(this.target) {
       r.target = this.target.id;
     }
     return r;
@@ -153,10 +153,10 @@ export class GraphEdge extends AttributeContainer {
     super.restore(p);
     (<any>this).type = p.type;
     this._id = flagId('graph_edge', p.id);
-    if(p.source && nodes){
+    if(p.source && nodes) {
       (<any>this).source = nodes(p.source);
     }
-    if(p.target && nodes){
+    if(p.target && nodes) {
       (<any>this).target = nodes(p.target);
     }
     this.init();

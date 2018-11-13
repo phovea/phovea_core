@@ -274,16 +274,16 @@ export default class Range {
     const ndim = this.ndim;
     const iter = (ids: number[]) => {
       const act = ids.length;
-      if (act < ndim) {
-        const dim = this.dims[act];
-        dim.iter(size ? size[act]! : undefined).forEach((id) => {
-          ids.push(id);
-          iter(ids);
-          ids.pop();
-        });
-      } else {
+      if (act >= ndim) {
         callback(ids.slice());
+        return;
       }
+      const dim = this.dims[act];
+      dim.iter(size ? size[act]! : undefined).forEach((id) => {
+        ids.push(id);
+        iter(ids);
+        ids.pop();
+      });
     };
     iter([]);
   }

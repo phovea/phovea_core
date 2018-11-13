@@ -23,14 +23,15 @@ export default class Store extends EventHandler {
     super();
 
     window.addEventListener('storage', (event: StorageEvent) => {
-      if (event.storageArea === storage && event.key!.startsWith(prefix)) {
-        const key = event.key!.substring(prefix.length);
-        // send specific and generic event
-        const newValue= parse(event.newValue!);
-        const oldValue = parse(event.oldValue!);
-        this.fire(key, newValue, oldValue, event.url);
-        this.fire(Store.EVENT_CHANGED, key, newValue, oldValue, event.url);
+      if (event.storageArea !== storage || !event.key!.startsWith(prefix)) {
+        return;
       }
+      const key = event.key!.substring(prefix.length);
+      // send specific and generic event
+      const newValue= parse(event.newValue!);
+      const oldValue = parse(event.oldValue!);
+      this.fire(key, newValue, oldValue, event.url);
+      this.fire(Store.EVENT_CHANGED, key, newValue, oldValue, event.url);
     });
   }
 

@@ -23,10 +23,10 @@ export default class TableVector<T,D extends IValueTypeDesc> extends AVector<T,D
     this.root = this;
     this.desc = {
       type: 'vector',
-      id: table.desc.id + '_' + desc.name,
+      id: `${table.desc.id}_${desc.name}`,
       name: desc.name,
       description: desc.description || '',
-      fqname: table.desc.fqname + '/' + desc.name,
+      fqname: `${table.desc.fqname}/${desc.name}`,
       idtype: table.idtype.id,
       size: table.nrow,
       value: desc.value,
@@ -72,7 +72,7 @@ export default class TableVector<T,D extends IValueTypeDesc> extends AVector<T,D
   }
 
   data(range: RangeLike = all()): Promise<T[]> {
-    if(!this.column){
+    if(!this.column) {
       throw new Error('column not defined.');
     }
     return this.table.colData(this.column, range);

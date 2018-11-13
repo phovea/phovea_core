@@ -18,11 +18,11 @@ export default class MultiTableVector<T, D extends IValueTypeDesc> extends AVect
   constructor(private table: ITable, private f: (row: IValueType[]) => T, private thisArgument = table, public readonly valuetype: D, private _idtype = table.idtype) {
     super(null);
     this.desc = {
-      name: table.desc.name + '-p',
-      fqname: table.desc.fqname + '-p',
+      name: `${table.desc.name}-p`,
+      fqname: `${table.desc.fqname}-p`,
       description: f.toString(),
       type: 'vector',
-      id: fixId(table.desc.id + '-p' + f.toString()),
+      id: fixId(`${table.desc.id}-p${f.toString()}`),
       idtype: table.desc.idtype,
       size: table.nrow,
       value: valuetype,

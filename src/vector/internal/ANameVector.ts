@@ -20,7 +20,7 @@ export abstract class ANameVector<T extends IDataType> extends AVector<string, I
       name: base.desc.name,
       fqname: base.desc.fqname,
       description: base.desc.description,
-      id: base.desc.id + '_names',
+      id: `${base.desc.id}_names`,
       value: {
         type: 'string'
       },

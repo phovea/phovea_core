@@ -59,8 +59,9 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
     return this.size();
   }
 
+  /* tslint:disable:no-use-before-declare */
   view(range: RangeLike = all()): IVector<T,D> {
-    if(!this.root){
+    if(!this.root) {
       throw new Error('root not set');
     }
     return new VectorView(this.root, parse(range));
@@ -73,14 +74,14 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
 
   async stats(range: RangeLike = all()): Promise<IStatistics> {
     if (this.root && this.root.valuetype.type !== VALUE_TYPE_INT && this.root.valuetype.type !== VALUE_TYPE_REAL) {
-      return Promise.reject('invalid value type: ' + this.root.valuetype.type);
+      return Promise.reject(`invalid value type: ${this.root.valuetype.type}`);
     }
     return computeStats(await this.data(range));
   }
 
   async statsAdvanced(range: RangeLike = all()): Promise<IAdvancedStatistics> {
     if (this.root && this.root.valuetype.type !== VALUE_TYPE_INT && this.root.valuetype.type !== VALUE_TYPE_REAL) {
-      return Promise.reject('invalid value type: ' + this.root.valuetype.type);
+      return Promise.reject(`invalid value type: ${this.root.valuetype.type}`);
     }
     return computeAdvancedStats(await this.data(range));
   }
@@ -93,29 +94,28 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
    * return the range of this vector as a grouped range, depending on the type this might be a single group or multiple ones
    */
   async groups(): Promise<CompositeRange1D> {
-    if(!this.root){
+    if(!this.root) {
       throw new Error('root not set');
     }
     const v = this.root.valuetype;
-    if (v.type === VALUE_TYPE_CATEGORICAL) {
-      const vc = <ICategoricalValueTypeDesc><any>v;
-      const d = await this.data();
-      const options: ICategorical2PartitioningOptions = {
-        name: this.root.desc.id
-      };
-      if (typeof vc.categories[0] !== 'string') {
-        const vcc = <ICategory[]>vc.categories;
-        if (vcc[0].color) {
-          options.colors = vcc.map((d) => d.color!);
-        }
-        if (vcc[0].label) {
-          options.labels = vcc.map((d) => d.label!);
-        }
-      }
-      return categorical2partitioning(d, vc.categories.map((d) => typeof d === 'string' ? d : d.name), options);
-    } else {
+    if (v.type !== VALUE_TYPE_CATEGORICAL) {
       return Promise.resolve(composite(this.root.desc.id, [asUngrouped(this.indices.dim(0))]));
     }
+    const vc = <ICategoricalValueTypeDesc><any>v;
+    const d = await this.data();
+    const options: ICategorical2PartitioningOptions = {
+      name: this.root.desc.id
+    };
+    if (typeof vc.categories[0] !== 'string') {
+      const vcc = <ICategory[]>vc.categories;
+      if (vcc[0].color) {
+        options.colors = vcc.map((d) => d.color!);
+      }
+      if (vcc[0].label) {
+        options.labels = vcc.map((d) => d.label!);
+      }
+    }
+    return categorical2partitioning(d, vc.categories.map((d) => typeof d === 'string' ? d : d.name), options);
   }
 
   stratification(): Promise<IStratification> {
@@ -123,14 +123,14 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
   }
 
   async asStratification(): Promise<IStratification> {
-    if(!this.root){
+    if(!this.root) {
       throw new Error('root not set');
     }
     return new StratificationVector(this.root, await this.groups());
   }
 
   async hist(bins?: number, range: RangeLike = all()): Promise<IHistogram | null> {
-    if(!this.root){
+    if(!this.root) {
       throw new Error('root not set');
     }
     const v = this.root.valuetype;
@@ -189,7 +189,8 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
       /* tslint:disable:no-eval */
       return this.reduceAtom(eval(persisted.f), this, persisted.valuetype, persisted.idtype ? resolveIDType(persisted.idtype) : undefined);
       /* tslint:enable:no-eval */
-    } else if (persisted && persisted.range) { //some view onto it
+    }
+    if (persisted && persisted.range) { //some view onto it
       r = r.view(parse(persisted.range));
     }
     return r;
@@ -213,14 +214,14 @@ export class VectorView<T,D extends IValueTypeDesc> extends AVector<T,D> {
   }
 
   get desc() {
-    if(!this.root){
+    if(!this.root) {
       throw new Error('root not set');
     }
     return this.root.desc;
   }
 
   persist() {
-    if(!this.root){
+    if(!this.root) {
       throw new Error('root not set');
     }
     return {
@@ -230,14 +231,14 @@ export class VectorView<T,D extends IValueTypeDesc> extends AVector<T,D> {
   }
 
   size() {
-    if(!this.root){
+    if(!this.root) {
       throw new Error('root not set');
     }
     return this.range.size(this.root.dim)[0];
   }
 
   at(i: number) {
-    if(!this.root){
+    if(!this.root) {
       throw new Error('root not set');
     }
     const inverted = this.range.invert([i], this.root.dim);
@@ -245,28 +246,28 @@ export class VectorView<T,D extends IValueTypeDesc> extends AVector<T,D> {
   }
 
   data(range: RangeLike = all()) {
-    if(!this.root){
+    if(!this.root) {
       throw new Error('root not set');
     }
     return this.root.data(this.range.preMultiply(parse(range), this.root.dim));
   }
 
   names(range: RangeLike = all()) {
-    if(!this.root){
+    if(!this.root) {
       throw new Error('root not set');
     }
     return this.root.names(this.range.preMultiply(parse(range), this.root.dim));
   }
 
   ids(range: RangeLike = all()) {
-    if(!this.root){
+    if(!this.root) {
       throw new Error('root not set');
     }
     return this.root.ids(this.range.preMultiply(parse(range), this.root.dim));
   }
 
   view(range: RangeLike = all()): IVector<T,D> {
-    if(!this.root){
+    if(!this.root) {
       throw new Error('root not set');
     }
     const r = parse(range);
@@ -277,14 +278,14 @@ export class VectorView<T,D extends IValueTypeDesc> extends AVector<T,D> {
   }
 
   get valuetype() {
-    if(!this.root){
+    if(!this.root) {
       throw new Error('root not set');
     }
     return this.root.valuetype;
   }
 
   get idtype() {
-    if(!this.root){
+    if(!this.root) {
       throw new Error('root not set');
     }
     return this.root.idtype;

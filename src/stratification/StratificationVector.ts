@@ -37,7 +37,7 @@ export default class StratificationVector extends AVector<string, ICategoricalVa
       name: d.name,
       fqname: d.fqname,
       description: d.description,
-      id: d.id + '-v',
+      id: `${d.id}-v`,
       type: 'vector',
       size: d.size,
       idtype: d.idtype,

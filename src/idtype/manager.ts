@@ -39,9 +39,9 @@ function fillUpData(entries: IIDType[]) {
 
 function toPlural(name: string) {
   if (name[name.length - 1] === 'y') {
-    return name.slice(0, name.length - 1) + 'ies';
+    return `${name.slice(0, name.length - 1)}ies`;
   }
-  return name + 's';
+  return `${name}s`;
 }
 
 export declare type IDTypeLike = string|IDType;
@@ -49,11 +49,11 @@ export declare type IDTypeLike = string|IDType;
 export function resolve(id: IDTypeLike): IDType {
   if (id instanceof IDType) {
     return id;
-  } else {
-    const sid = <string>id;
-    return <IDType>register(sid, new IDType(sid, sid, toPlural(sid)));
   }
+  const sid = <string>id;
+  return <IDType>register(sid, new IDType(sid, sid, toPlural(sid)));
 }
+
 export function resolveProduct(...idtypes: IDType[]): ProductIDType {
   const p = new ProductIDType(idtypes);
   return <ProductIDType>register(p.id, p);

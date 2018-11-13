@@ -67,22 +67,24 @@ export function viaAPI2Loader(): IMatrixLoader2<any> {
     stats: Promise<IAdvancedStatistics> | null = null;
 
   function fillRowIds(desc: IMatrixDataDescription<any>) {
-    if (rowIds !== null && rows !== null) {
-      Promise.all([rowIds, rows]).then(([rowIdValues, rowValues]) => {
-        const idType = resolve(desc.rowtype);
-        const rowIds = parse(rowIdValues);
-        idType.fillMapCache(rowIds.dim(0).asList(rowValues.length), rowValues);
-      });
+    if (rowIds === null || rows === null) {
+      return;
     }
+    Promise.all([rowIds, rows]).then(([rowIdValues, rowValues]) => {
+      const idType = resolve(desc.rowtype);
+      const rowIds = parse(rowIdValues);
+      idType.fillMapCache(rowIds.dim(0).asList(rowValues.length), rowValues);
+    });
   }
   function fillColumnIds(desc: IMatrixDataDescription<any>) {
-    if (colIds !== null && cols !== null) {
-      Promise.all([colIds, cols]).then(([colIdValues, colValues]) => {
-        const idType = resolve(desc.coltype);
-        const colIds = parse(colIdValues);
-        idType.fillMapCache(colIds.dim(0).asList(colValues.length), colValues);
-      });
+    if (colIds === null || cols === null) {
+      return;
     }
+    Promise.all([colIds, cols]).then(([colIdValues, colValues]) => {
+      const idType = resolve(desc.coltype);
+      const colIds = parse(colIdValues);
+      idType.fillMapCache(colIds.dim(0).asList(colValues.length), colValues);
+    });
   }
   const r = {
     rowIds: (desc: IMatrixDataDescription<any>, range: Range) => {

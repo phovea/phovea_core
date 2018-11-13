@@ -92,7 +92,7 @@ export default class PropertyHandler extends EventHandler {
   toString() {
     const r: string[] = [];
     this.map.forEach((v, key) => {
-      r.push(encodeURIComponent(key) + '=' + encodeURIComponent(v));
+      r.push(`${encodeURIComponent(key)}=${encodeURIComponent(v)}`);
     });
     return r.join('&');
   }
@@ -112,15 +112,15 @@ export default class PropertyHandler extends EventHandler {
       const s = item.split('='),
         k = decodeURIComponent(s[0]),
         v = s[1] && decodeURIComponent(s[1]);
-      if (this.map.has(k)) {
-        const old = this.map.get(k);
-        if (!Array.isArray(old)) {
-          this.map.set(k, [old, v]);
-        } else {
-          this.map.get(k).push(v);
-        }
-      } else {
+      if (!this.map.has(k)) {
         this.map.set(k, v);
+        return;
+      }
+      const old = this.map.get(k);
+      if (!Array.isArray(old)) {
+        this.map.set(k, [old, v]);
+      } else {
+        this.map.get(k).push(v);
       }
     });
 

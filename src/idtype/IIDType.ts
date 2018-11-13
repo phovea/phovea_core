@@ -46,7 +46,8 @@ export function toSelectOperation(event: any) {
   }
   if (ctryKeyDown || shiftDown) {
     return SelectOperation.ADD;
-  } else if (altDown || metaDown) {
+  }
+  if (altDown || metaDown) {
     return SelectOperation.REMOVE;
   }
   return SelectOperation.SET;

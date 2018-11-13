@@ -73,7 +73,7 @@ async function transformEntry(desc: IDataDescription): Promise<IDataType> {
     return cached(desc, Promise.resolve(new DummyDataType(desc)));
   }
   //take the first matching one
-  return cached(desc, plugin[0].load().then((d) =>d.factory(desc)));
+  return cached(desc, plugin[0].load().then((d) => d.factory(desc)));
 }
 
 /**
@@ -206,10 +206,9 @@ export async function get(persisted: any | string): Promise<IDataType | null> {
   if (persisted.root) {
     const parent = await get(persisted.root);
     return parent ? <IDataType>parent.restore(persisted) : null;
-  } else {
-    //can't restore non root and non data id
-    return Promise.reject('cannot restore non root and non data id');
   }
+  //can't restore non root and non data id
+  return Promise.reject('cannot restore non root and non data id');
 }
 
 /**

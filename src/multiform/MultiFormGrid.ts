@@ -83,11 +83,11 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
     const dims = this.dims = range.dims.map((dim) => {
       if (dim instanceof CompositeRange1D) {
         return (<CompositeRange1D>dim).groups;
-      } else if (dim instanceof Range1DGroup) {
-        return [<Range1DGroup>dim];
-      } else {
-        return [asUngrouped(dim)];
       }
+      if (dim instanceof Range1DGroup) {
+        return [<Range1DGroup>dim];
+      }
+      return [asUngrouped(dim)];
     });
     const grid: GridElem[] = this.grid = [];
 
@@ -253,13 +253,14 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
       for (const g of this.grid) {
         const matched = g.subrange(range);
 
-        if (!matched.isNone) { //direct group hit
-          inElems.push({
-            g,
-            pos: relativePos(g.location),
-            r: matched
-          });
+        if (matched.isNone) { //direct group hit
+          continue;
         }
+        inElems.push({
+          g,
+          pos: relativePos(g.location),
+          r: matched
+        });
       }
       return inElems;
     };
@@ -302,14 +303,12 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
       }
       if (visses.length === 1) {
         return visses[0].locate.apply(visses[0], range);
-      } else {
-        //multiple groups
-        if (range.length === 1) {
-          return this.locateGroup(range[0]);
-        } else {
-          return Promise.all(range.map((arg) => this.locateGroup(arg)));
-        }
       }
+      //multiple groups
+      if (range.length === 1) {
+        return this.locateGroup(range[0]);
+      }
+      return Promise.all(range.map((arg) => this.locateGroup(arg)));
     });
   }
 
@@ -321,14 +320,12 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
       }
       if (visses.length === 1) {
         return visses[0].locateById.apply(visses[0], range);
-      } else {
-        //multiple groups
-        if (range.length === 1) {
-          return this.locateGroupById(range[0]);
-        } else {
-          return Promise.all(range.map((arg) => this.locateGroupById(arg)));
-        }
       }
+      //multiple groups
+      if (range.length === 1) {
+        return this.locateGroupById(range[0]);
+      }
+      return Promise.all(range.map((arg) => this.locateGroupById(arg)));
     });
   }
 
@@ -355,15 +352,15 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
         rows: sizes.map((s) => s[1]),
         grid: sizes.map((s) => [s])
       };
-    } else { //if (this.dims.length === 2)
-      const cols = this.dims[1].length;
-      const grid = this.dims[0].map((_row, i) => sizes.slice(i * cols, (i + 1) * cols));
-      return {
-        cols: this.dims[1].map((_d, i) => <number>max(grid, (row) => row[i][0])),
-        rows: grid.map((row) => <number>max(row, (s) => s[1])),
-        grid
-      };
     }
+    //if (this.dims.length === 2)
+    const cols = this.dims[1].length;
+    const grid = this.dims[0].map((_row, i) => sizes.slice(i * cols, (i + 1) * cols));
+    return {
+      cols: this.dims[1].map((_d, i) => <number>max(grid, (row) => row[i][0])),
+      rows: grid.map((row) => <number>max(row, (s) => s[1])),
+      grid
+    };
   }
 
   get size(): [number, number] {
@@ -397,31 +394,30 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
     this.fire('change', vis, bak);
     this.actVisPromise = null;
 
-    if (vis) {
-      //load the plugin and create the instance
-      const r = vis.load().then((plugin: any) => {
-        if (this.actDesc !== vis) { //changed in the meanwhile
-          return [];
-        }
-        const options = mixin({}, this.options.all, this.options[vis.id] || {});
-        const r = this.grid.map((elem) => elem.build(plugin, options));
-        let c = r.length;
-        r.forEach((ri) => {
-          ri.on('ready', () => {
-            c--;
-            if (c === 0) { //all built
-              this.markReady();
-            }
-          });
-        });
-        this.fire('changed', vis, bak);
-        return r;
-      });
-      this.actVisPromise = r;
-      return r;
-    } else {
+    if (!vis) {
       return Promise.resolve([]);
     }
+    //load the plugin and create the instance
+    const r = vis.load().then((plugin: any) => {
+      if (this.actDesc !== vis) { //changed in the meanwhile
+        return [];
+      }
+      const options = mixin({}, this.options.all, this.options[vis.id] || {});
+      const r = this.grid.map((elem) => elem.build(plugin, options));
+      let c = r.length;
+      r.forEach((ri) => {
+        ri.on('ready', () => {
+          c--;
+          if (c === 0) { //all built
+            this.markReady();
+          }
+        });
+      });
+      this.fire('changed', vis, bak);
+      return r;
+    });
+    this.actVisPromise = r;
+    return r;
   }
 
   addIconVisChooser(toolbar: HTMLElement) {

@@ -75,7 +75,7 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
   get indices(): Range {
     return range([0, this.nrow], [0, this.ncol]);
   }
-
+  /* tslint:disable:no-use-before-declare */
   view(range: RangeLike = all()): IMatrix<T, D> {
     const r = parse(range);
     if (r.isAll) {
@@ -93,7 +93,7 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
     if (v.type === VALUE_TYPE_INT || v.type === VALUE_TYPE_REAL) {
       return computeStats(...<any>await this.data(range));
     }
-    return Promise.reject('invalid value type: ' + v.type);
+    return Promise.reject(`invalid value type: ${v.type}`);
   }
 
   async statsAdvanced(range: RangeLike = all()): Promise<IAdvancedStatistics> {
@@ -101,7 +101,7 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
     if (v.type === VALUE_TYPE_INT || v.type === VALUE_TYPE_REAL) {
       return computeAdvancedStats([].concat(...<any>await this.data(range)));
     }
-    return Promise.reject('invalid value type: ' + v.type);
+    return Promise.reject(`invalid value type: ${v.type}`);
   }
 
   async hist(bins?: number, range: RangeLike = all(), containedIds = 0): Promise<IHistogram> {
@@ -119,7 +119,7 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
         const vn = <INumberValueTypeDesc><any>v;
         return hist(<any[]>flat.data, flat.indices, flat.data.length, bins ? bins : Math.round(Math.sqrt(this.length)), vn.range);
       default:
-        return Promise.reject<IHistogram>('invalid value type: ' + v.type); //cant create hist for unique objects or other ones
+        return Promise.reject<IHistogram>(`invalid value type: ${v.type}`); //cant create hist for unique objects or other ones
     }
   }
 
@@ -141,17 +141,20 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
       /* tslint:disable:no-eval */
       return this.reduce(eval(persisted.f), this, persisted.valuetype, persisted.idtype ? resolveIDType(persisted.idtype) : undefined);
       /* tslint:enable:no-eval */
-    } else if (persisted && persisted.range) { //some view onto it
-      return this.view(parse(persisted.range));
-    } else if (persisted && persisted.transposed) {
-      return (<IMatrix<T, D>>(<any>this)).t;
-    } else if (persisted && persisted.col) {
-      return this.slice(+persisted.col);
-    } else if (persisted && persisted.row) {
-      return this.t.slice(+persisted.row);
-    } else {
-      return <IPersistable>(<any>this);
     }
+    if (persisted && persisted.range) { //some view onto it
+      return this.view(parse(persisted.range));
+    }
+    if (persisted && persisted.transposed) {
+      return (<IMatrix<T, D>>(<any>this)).t;
+    }
+    if (persisted && persisted.col) {
+      return this.slice(+persisted.col);
+    }
+    if (persisted && persisted.row) {
+      return this.t.slice(+persisted.row);
+    }
+    return <IPersistable>(<any>this);
   }
 
 }

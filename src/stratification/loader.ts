@@ -32,7 +32,7 @@ export function viaAPILoader(): IStratificationLoader {
   let _data: Promise<ILoadedStratification> | null = null;
   return (desc) => {
     if (!_data) { //in the cache
-      _data = getAPIJSON('/dataset/' + desc.id).then((data) => {
+      _data = getAPIJSON(`/dataset/${desc.id}`).then((data) => {
         const idType = resolve(desc.idtype);
         const rowIds = parse(data.rowIds);
         idType.fillMapCache(rowIds.dim(0).asList(data.rows.length), data.rows);

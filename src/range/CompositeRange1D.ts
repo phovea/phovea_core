@@ -62,7 +62,7 @@ export default class CompositeRange1D extends Range1D implements ICompositeRange
   }
 
   toString(): string {
-    return '"' + this.name + '"{' + this.groups.join(',') + '}';
+    return `"${this.name}"{${this.groups.join(',')}}`;
   }
 
   fromLikeComposite(groups: Range1DGroup[]): ICompositeRange1D {

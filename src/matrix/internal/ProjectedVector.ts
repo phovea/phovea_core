@@ -23,10 +23,10 @@ export default class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends 
   constructor(private m: IMatrix<M, MD>, private f: (row: M[]) => T, private thisArgument = m, public readonly valuetype: D = <any>m.valuetype, private _idtype = m.rowtype) {
     super(null);
     this.desc = {
-      name: m.desc.name + '-p',
-      fqname: m.desc.fqname + '-p',
+      name: `${m.desc.name}-p`,
+      fqname: `${m.desc.fqname}-p`,
       type: 'vector',
-      id: m.desc.id + '-p',
+      id: `${m.desc.id}-p`,
       size: this.dim[0],
       idtype: m.rowtype,
       value: this.valuetype,

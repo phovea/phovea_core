@@ -120,13 +120,14 @@ export function viaAPI2Loader(): ITableLoader2 {
     data: Promise<any[][]> | null = null;
 
   function fillIds(desc: ITableDataDescription) {
-    if (rowIds !== null && rows !== null) {
-      Promise.all([rowIds, rows]).then(([rowIdValues, rowValues]) => {
-        const idType = resolve(desc.idtype);
-        const rowIds = parse(rowIdValues);
-        idType.fillMapCache(rowIds.dim(0).asList(rowValues.length), rowValues);
-      });
+    if (rowIds === null || rows === null) {
+      return;
     }
+    Promise.all([rowIds, rows]).then(([rowIdValues, rowValues]) => {
+      const idType = resolve(desc.idtype);
+      const rowIds = parse(rowIdValues);
+      idType.fillMapCache(rowIds.dim(0).asList(rowValues.length), rowValues);
+    });
   }
   const r: ITableLoader2 = {
     rowIds: (desc: ITableDataDescription, range: Range) => {

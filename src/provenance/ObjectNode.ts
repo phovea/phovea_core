@@ -68,7 +68,7 @@ export interface IObjectRef<T> {
  * @param hash
  * @returns {{v: T, name: string, category: string}}
  */
-export function ref<T>(v: T, name: string, category = cat.data, hash = name + '_' + category): IObjectRef<T> {
+export function ref<T>(v: T, name: string, category = cat.data, hash = `${name}_${category}`): IObjectRef<T> {
   return {
     v: resolveImmediately(v),
     value: v,
@@ -130,7 +130,7 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
   private _promise: PromiseLike<T> | null = null;
   private _persisted: any = null;
 
-  constructor(private _v: T, name: string, category = cat.data, hash = name + '_' + category, description = '') {
+  constructor(private _v: T, name: string, category = cat.data, hash = `${name}_${category}`, description = '') {
     super('object');
     if (_v != null) { //if the value is given, auto generate a promise for it
       this._promise = resolveImmediately(_v);
@@ -156,15 +156,16 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
    * checks whether the persisted value was already restored
    */
   private checkPersisted() {
-    if (this._persisted != null) {
-      this._promise = restoreData(this._persisted);
-      if (this._promise) {
-        this._promise.then((v) => {
-          this._v = v;
-        });
-      }
-      this._persisted = null;
+    if (this._persisted === null) {
+      return;
     }
+    this._promise = restoreData(this._persisted);
+    if (this._promise) {
+      this._promise.then((v) => {
+        this._v = v;
+      });
+    }
+    this._persisted = null;
   }
 
   get v() {
@@ -206,7 +207,7 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
   }
 
   static restore(p: any) {
-    const r = new ObjectNode<any>(null, p.attrs.name, p.attrs.category, p.attrs.hash || p.attrs.name + '_' + p.attrs.category);
+    const r = new ObjectNode<any>(null, p.attrs.name, p.attrs.category, p.attrs.hash || `${p.attrs.name}_${p.attrs.category}`);
     return r.restore(p);
   }
 

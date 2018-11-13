@@ -97,9 +97,8 @@ export default class GridElem implements IPersistable {
     if (this.actVis) {
       if (arguments.length > 0) {
         return this.actVis.transform(scale || [1, 1], rotate || 0);
-      } else {
-        return this.actVis.transform();
       }
+      return this.actVis.transform();
     }
     return {
       scale: [1, 1],

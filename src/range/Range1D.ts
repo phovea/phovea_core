@@ -7,10 +7,7 @@ import RangeElem from './internal/RangeElem';
 import {IIterator, Iterator, forList, concat} from '../iterator';
 import Range1DGroup from './Range1DGroup';
 
-export interface ICompositeRange1D extends Range1D {
-  groups: Range1DGroup[];
-  fromLikeComposite(groups: Range1DGroup[]): Range1D;
-}
+
 
 function sortNumeric(a: number, b: number) {
   return a - b;
@@ -52,7 +49,8 @@ export default class Range1D {
   private static compress(indices: number[]): IRangeElem[] {
     if (indices.length === 0) {
       return [];
-    } else if (indices.length === 1) {
+    }
+    if (indices.length === 1) {
       return [RangeElem.single(indices[0])];
     }
     //return indices.map(RangeElem.single);
@@ -65,15 +63,13 @@ export default class Range1D {
       }
       if (act === start + 1) { //just a single item used
         r.push(RangeElem.single(indices[start]));
-      } else {
         //+1 since end is excluded
         //fix while just +1 is allowed and -1 is not allowed
-        if (deltas[start] === 1) {
-          r.push(RangeElem.range(indices[start], indices[act - 1] + deltas[start], deltas[start]));
-        } else {
-          for (i = start; i < act; i++) {
-            r.push(RangeElem.single(indices[i]));
-          }
+      } else if (deltas[start] === 1) {
+        r.push(RangeElem.range(indices[start], indices[act - 1] + deltas[start], deltas[start]));
+      } else {
+        for (i = start; i < act; i++) {
+          r.push(RangeElem.single(indices[i]));
         }
       }
       start = act;
@@ -105,9 +101,11 @@ export default class Range1D {
     function p(item: any) {
       if (typeof item === 'string') {
         return RangeElem.parse(item.toString());
-      } else if (typeof item === 'number') {
+      }
+      if (typeof item === 'number') {
         return RangeElem.single(<number>item);
-      } else if (Array.isArray(item)) {
+      }
+      if (Array.isArray(item)) {
         return new RangeElem(item[0], item[1], item[2]);
       }
       return <RangeElem>item;
@@ -202,9 +200,8 @@ export default class Range1D {
     if (typeof (<ICompositeRange1D>sub).fromLikeComposite === 'function') {
       const csub = <ICompositeRange1D>sub;
       return csub.fromLikeComposite(<any>csub.groups.map(mapImpl));
-    } else {
-      return mapImpl(sub);
     }
+    return mapImpl(sub);
   }
 
   /**
@@ -390,11 +387,10 @@ export default class Range1D {
         g.forEach((d) => mapImpl(d, result));
         return g.fromLike(result);
       }));
-    } else {
-      const result: number[] = [];
-      r.forEach((d) => mapImpl(d, result));
-      return r.fromLike(result);
     }
+    const result: number[] = [];
+    r.forEach((d) => mapImpl(d, result));
+    return r.fromLike(result);
   }
 
   /**
@@ -415,13 +411,12 @@ export default class Range1D {
       //  var d = data.slice();
       //  d.reverse();
       //  return d;
-    } else {
-      const r = [];
-      while (it.hasNext()) {
-        r.push(transform(data[it.next()]));
-      }
-      return r;
     }
+    const r = [];
+    while (it.hasNext()) {
+      r.push(transform(data[it.next()]));
+    }
+    return r;
   }
 
   /**
@@ -505,7 +500,7 @@ export default class Range1D {
     if (this.length === 1) {
       return this.arr[0].toString();
     }
-    return '(' + this.arr.join(',') + ')';
+    return `(${this.arr.join(',')})`;
   }
 
   eq(other: Range1D) {
@@ -519,4 +514,9 @@ export default class Range1D {
   fromLike(indices: number[]) {
     return Range1D.from(indices);
   }
+}
+
+export interface ICompositeRange1D extends Range1D {
+  groups: Range1DGroup[];
+  fromLikeComposite(groups: Range1DGroup[]): Range1D;
 }

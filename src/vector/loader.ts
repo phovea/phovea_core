@@ -40,7 +40,7 @@ export function viaAPILoader<T>() {
     if (_loader) { //in the cache
       return _loader;
     }
-    return _loader = getAPIJSON('/dataset/' + desc.id).then((data) => {
+    return _loader = getAPIJSON(`/dataset/${desc.id}`).then((data) => {
       const range = parse(data.rowIds);
       data.rowIds = range;
       data.data = mask(data.data, desc.value);

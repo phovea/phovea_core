@@ -20,7 +20,7 @@ function syncIDType(store: Store, idType: IDType, options: ISelectionSyncerOptio
   options.selectionTypes!.forEach((type) => {
     const key = `${PREFIX}${idType.id}-${type}`;
     let disable = false;
-    idType.on('select-' + type, (_event: any, _type: string, selection: Range) => {
+    idType.on(`select-${type}`, (_event: any, _type: string, selection: Range) => {
       if (disable) {
         return;
       }

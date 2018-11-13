@@ -40,7 +40,7 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
   listSync(): IProvenanceGraphDataDescription[] {
     const lists : string[] = this.loadFromLocalStorage('_provenance_graphs', []);
     return lists
-      .map((id) => <any>this.loadFromLocalStorage('_provenance_graph.' + id, {}))
+      .map((id) => <any>this.loadFromLocalStorage(`_provenance_graph.${id}`, {}))
       // filter to right application
       .filter((d: IProvenanceGraphDataDescription) => d.attrs && d.attrs.of === this.options.application);
   }
@@ -74,30 +74,30 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
   }
 
   delete(desc: IProvenanceGraphDataDescription) {
-    const lists = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
+    const lists = JSON.parse(this.options.storage.getItem(`${this.options.prefix}_provenance_graphs`) || '[]');
     lists.splice(lists.indexOf(desc.id), 1);
     LocalStorageGraph.delete(desc, this.options.storage);
     //just remove from the list
-    this.options.storage.removeItem(this.options.prefix + '_provenance_graph.' + desc.id);
-    this.options.storage.setItem(this.options.prefix + '_provenance_graphs', JSON.stringify(lists));
+    this.options.storage.removeItem(`${this.options.prefix}_provenance_graph.${desc.id}`);
+    this.options.storage.setItem(`${this.options.prefix}_provenance_graphs`, JSON.stringify(lists));
     return resolveImmediately(true);
   }
 
   edit(graph: ProvenanceGraph|IProvenanceGraphDataDescription, desc: any = {}) {
     const base = graph instanceof ProvenanceGraph ? graph.desc : graph;
     mixin(base, desc);
-    this.options.storage.setItem(this.options.prefix + '_provenance_graph.' + base.id, JSON.stringify(base));
+    this.options.storage.setItem(`${this.options.prefix}_provenance_graph.${base.id}`, JSON.stringify(base));
     return resolveImmediately(base);
   }
 
   private createDesc(overrides: any = {}) {
-    const lists: string[] = JSON.parse(this.options.storage.getItem(this.options.prefix + '_provenance_graphs') || '[]');
+    const lists: string[] = JSON.parse(this.options.storage.getItem(`${this.options.prefix}_provenance_graphs`) || '[]');
     const uid = (lists.length > 0 ? String(1 + Math.max(...lists.map((d) => parseInt(d.slice(this.options.prefix.length), 10)))) : '0');
     const id = this.options.prefix + uid;
     const desc: IProvenanceGraphDataDescription = mixin({
       type: 'provenance_graph',
-      name: 'Temporary Session ' + uid,
-      fqname: this.options.prefix + 'Temporary Session ' + uid,
+      name: `Temporary Session ${uid}`,
+      fqname: `${this.options.prefix}Temporary Session ${uid}`,
       id,
       local: true,
       size: <[number, number]>[0, 0],
@@ -111,8 +111,8 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
       description: ''
     }, overrides);
     lists.push(id);
-    this.options.storage.setItem(this.options.prefix + '_provenance_graphs', JSON.stringify(lists));
-    this.options.storage.setItem(this.options.prefix + '_provenance_graph.' + id, JSON.stringify(desc));
+    this.options.storage.setItem(`${this.options.prefix}_provenance_graphs`, JSON.stringify(lists));
+    this.options.storage.setItem(`${this.options.prefix}_provenance_graph. ${id}`, JSON.stringify(desc));
     return desc;
   }
 

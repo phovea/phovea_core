@@ -34,6 +34,7 @@ export abstract class ATable extends SelectAble implements IInternalAccess {
 
   abstract size(): number[];
 
+  /* tslint:disable:no-use-before-declare */
   view(range: RangeLike = all()): ITable {
     return new TableView(this.root, parse(range));
   }
@@ -55,11 +56,11 @@ export abstract class ATable extends SelectAble implements IInternalAccess {
       /* tslint:disable:no-eval */
       return this.reduce(eval(persisted.f), this, persisted.valuetype, persisted.idtype ? idtypes_resolve(persisted.idtype) : undefined);
       /* tslint:enable:no-eval */
-    } else if (persisted && persisted.range) { //some view onto it
-      return this.view(parse(persisted.range));
-    } else {
-      return <IPersistable>(<any>this);
     }
+    if (persisted && persisted.range) { //some view onto it
+      return this.view(parse(persisted.range));
+    }
+    return <IPersistable>(<any>this);
   }
 }
 

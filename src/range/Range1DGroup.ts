@@ -34,7 +34,7 @@ export default class Range1DGroup extends Range1D {
   }
 
   toString() {
-    return '"' + this.name + '""' + this.color + '"' + super.toString();
+    return `"${this.name}""${this.color}"${super.toString()}`;
   }
 
   toSet(size?: number): Range1DGroup {

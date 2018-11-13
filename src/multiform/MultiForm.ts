@@ -106,9 +106,8 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
       const vis = aa.length > 0 ? aa[0] : undefined;
       if (vis && typeof(vis.locate) === 'function') {
         return vis.locate.apply(vis, args);
-      } else {
-        return Promise.resolve((aa.length === 1 ? undefined : new Array(args.length)));
       }
+      return Promise.resolve((aa.length === 1 ? undefined : new Array(args.length)));
     });
   }
 
@@ -118,9 +117,8 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
       const vis = aa.length > 0 ? aa[0] : undefined;
       if (vis && typeof(vis.locateById) === 'function') {
         return vis.locateById.apply(vis, args);
-      } else {
-        return Promise.resolve((aa.length === 1 ? undefined : new Array(args.length)));
       }
+      return Promise.resolve((aa.length === 1 ? undefined : new Array(args.length)));
     });
   }
 
@@ -128,15 +126,14 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
     if (this.actVis) {
       if (arguments.length === 0) {
         return this.actVis.transform();
-      } else {
-        const t = (_event: any, newValue: ITransform, old: ITransform) => {
-          this.fire('transform', newValue, old);
-        };
-        this.actVis.on('transform', t);
-        const r = this.actVis.transform(scale || [1, 1], rotate || 0);
-        this.actVis.off('transform', t);
-        return r;
       }
+      const t = (_event: any, newValue: ITransform, old: ITransform) => {
+        this.fire('transform', newValue, old);
+      };
+      this.actVis.on('transform', t);
+      const r = this.actVis.transform(scale || [1, 1], rotate || 0);
+      this.actVis.off('transform', t);
+      return r;
     }
     if (this.actVisPromise && arguments.length > 0) {
       //2nd try
@@ -201,26 +198,25 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
     this.actVis = null;
     this.actVisPromise = null;
 
-    if (vis) {
-      //load the plugin and create the instance
-      return this.actVisPromise = vis.load().then((plugin: any) => {
-        if (this.actDesc !== vis) { //changed in the meanwhile
-          return null;
-        }
-        this.actVis = plugin.factory(this.data, this.content, mixin({}, this.options.all, this.options[vis.id] || {}));
-        if (this.actVis!.isBuilt) {
-          this.markReady();
-        } else {
-          this.actVis!.on('ready', () => {
-            this.markReady();
-          });
-        }
-        this.fire('changed', vis, bak);
-        return this.actVis;
-      });
-    } else {
+    if (!vis) {
       return Promise.resolve(null);
     }
+      //load the plugin and create the instance
+    return this.actVisPromise = vis.load().then((plugin: any) => {
+      if (this.actDesc !== vis) { //changed in the meanwhile
+        return null;
+      }
+      this.actVis = plugin.factory(this.data, this.content, mixin({}, this.options.all, this.options[vis.id] || {}));
+      if (this.actVis!.isBuilt) {
+        this.markReady();
+      } else {
+        this.actVis!.on('ready', () => {
+          this.markReady();
+        });
+      }
+      this.fire('changed', vis, bak);
+      return this.actVis;
+    });
   }
 
   addIconVisChooser(toolbar: HTMLElement) {

@@ -140,7 +140,7 @@ export function asStratification(rows: string[], range: CompositeRange1D, option
 
 export function wrapCategoricalVector(v: ICategoricalVector) {
   if (v.valuetype.type !== VALUE_TYPE_CATEGORICAL) {
-    throw new Error('invalid vector value type: ' + v.valuetype.type);
+    throw new Error(`invalid vector value type: ${v.valuetype.type}`);
   }
   const toGroup = (g: string|ICategory) => {
     if (typeof g === 'string') {
@@ -151,10 +151,10 @@ export function wrapCategoricalVector(v: ICategoricalVector) {
   };
   const cats = v.desc.value.categories.map(toGroup);
   const desc: IStratificationDataDescription = {
-    id: v.desc.id + '-s',
+    id: `${v.desc.id}-s`,
     type: 'stratification',
-    name: v.desc.name + '-s',
-    fqname: v.desc.fqname + '-s',
+    name: `${v.desc.name}-s`,
+    fqname: `${v.desc.fqname}-s`,
     description: v.desc.description,
     idtype: v.idtype.id,
     ngroups: cats.length,

@@ -48,11 +48,11 @@ export default function parseRange(code: string) {
       default:
         if (c.match(/\s/)) {
           act++;
-        } else {
-          t = parseRange1D(code, act);
-          act = t.act + 1; //skip ,
-          dims.push(t.dim);
+          break;
         }
+        t = parseRange1D(code, act);
+        act = t.act + 1; //skip ,
+        dims.push(t.dim);
         break;
     }
   }

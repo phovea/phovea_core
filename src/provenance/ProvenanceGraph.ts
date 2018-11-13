@@ -171,7 +171,7 @@ function createLazyCmdFunctionFactory(): ICmdFunctionFactory {
     if (factory) {
       return factory.load().then((f) => f.factory(id));
     }
-    return Promise.reject('no factory found for ' + id);
+    return Promise.reject(`no factory found for ${id}`);
   }
 
   const lazyFunction = (id: string) => {
@@ -296,17 +296,17 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   }
 
   selectState(state: StateNode, op: SelectOperation = SelectOperation.SET, type = defaultSelectionType, extras = {}) {
-    this.fire('select_state,select_state_' + type, state, type, op, extras);
+    this.fire(`select_state,select_state_${type}`, state, type, op, extras);
     this.select(ProvenanceGraphDim.State, type, state ? [this._states.indexOf(state)] : [], op);
   }
 
   selectSlide(state: SlideNode, op: SelectOperation = SelectOperation.SET, type = defaultSelectionType, extras = {}) {
-    this.fire('select_slide,select_slide_' + type, state, type, op, extras);
+    this.fire(`select_slide,select_slide_${type}`, state, type, op, extras);
     this.select(ProvenanceGraphDim.Slide, type, state ? [this._slides.indexOf(state)] : [], op);
   }
 
   selectAction(action: ActionNode, op: SelectOperation = SelectOperation.SET, type = defaultSelectionType) {
-    this.fire('select_action,select_action_' + type, action, type, op);
+    this.fire(`select_action,select_action_${type}`, action, type, op);
     this.select(ProvenanceGraphDim.Action, type, action ? [this._actions.indexOf(action)] : [], op);
   }
 
@@ -461,10 +461,9 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     return this.inOrder(() => {
       if (arg instanceof ActionMetaData) {
         return this.run(this.createAction(<ActionMetaData>arg, functionId, f!, inputs, parameter), null);
-      } else {
-        const a = <IAction>arg;
-        return this.run(this.createAction(a.meta, a.id, a.f, a.inputs || [], a.parameter || {}), null);
       }
+      const a = <IAction>arg;
+      return this.run(this.createAction(a.meta, a.id, a.f, a.inputs || [], a.parameter || {}), null);
     });
   }
 
@@ -484,15 +483,15 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   }
 
 
-  addObject<T>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = name + '_' + category) {
+  addObject<T>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = `${name}_${category}`) {
     return this.addObjectImpl(value, name, category, hash, true);
   }
 
-  addJustObject<T>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = name + '_' + category) {
+  addJustObject<T>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = `${name}_${category}`) {
     return this.addObjectImpl(value, name, category, hash, false);
   }
 
-  private addObjectImpl<T>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = name + '_' + category, createEdge = false) {
+  private addObjectImpl<T>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = `${name}_${category}`, createEdge = false) {
     const r = new ObjectNode<T>(value, name, category, hash);
     this._objects.push(r);
     this.backend.addNode(r);
@@ -560,29 +559,28 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
         return r;
       }
       return this.addObjectImpl(j.value, j.name, j.category, j.hash, createEdge);
-    } else { //raw value
-      r = this._objects.find((obj) => (obj.value === null || obj.value === i) && (name === null || obj.name === name) && (type === null || type === obj.category));
-      if (r) {
-        if (r.value === null) { //restore instance
-          r.value = <T>i;
-        }
-        return r;
-      }
-      return this.addObjectImpl(<any>i, name, type, name + '_' + type, createEdge);
     }
+    //raw value
+    r = this._objects.find((obj) => (obj.value === null || obj.value === i) && (name === null || obj.name === name) && (type === null || type === obj.category));
+    if (r) {
+      if (r.value === null) { //restore instance
+        r.value = <T>i;
+      }
+      return r;
+    }
+    return this.addObjectImpl(<any>i, name, type, `${name}_${type}`, createEdge);
   }
 
   private inOrder(f: () => PromiseLike<any>): PromiseLike<any> {
-    if (this.currentlyRunning) {
-      let helper: ()=>any;
-      const r = new Promise((resolve) => {
-        helper = resolve.bind(this);
-      });
-      this.nextQueue.push(helper!);
-      return r.then(f);
-    } else {
+    if (!this.currentlyRunning) {
       return f();
     }
+    let helper: ()=>any;
+    const r = new Promise((resolve) => {
+      helper = resolve.bind(this);
+    });
+    this.nextQueue.push(helper!);
+    return r.then(f);
   }
 
   private executedAction(action: ActionNode, newState: boolean, result: ICmdResult) {
@@ -657,7 +655,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     }
     this.fire('execute', action);
     if (hash.has('debug')) {
-      console.log('execute ' + action.meta + ' ' + action.f_id);
+      console.log(`execute ${action.meta} ${action.f_id}`);
     }
     this.currentlyRunning = true;
 
@@ -742,9 +740,8 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     if (this.lastAction.inverses != null) {
       //undo and undoing should still go one up
       return this.jumpTo(this.act.previousState!);
-    } else {
-      return this.inOrder(() => this.run(this.lastAction!.getOrCreateInverse(this)!, null));
     }
+    return this.inOrder(() => this.run(this.lastAction!.getOrCreateInverse(this)!, null));
   }
 
   jumpTo(state: StateNode, withinMilliseconds = -1) {

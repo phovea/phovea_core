@@ -227,7 +227,12 @@ export default class IDType extends EventHandler implements IIDType {
     if (toResolve.length === 0) {
       const result: string[] = [];
       let nameCache: string | undefined;
-      r.dim(0).forEach((name) => {(nameCache = this.id2nameCache.get(name)) ? result.push(nameCache) : null});
+      r.dim(0).forEach((name) => {
+        nameCache = this.id2nameCache.get(name);
+        if(nameCache) {
+          result.push(nameCache);
+        }
+      });
       return resolveImmediately(result);
     }
     const result: string[] = await chooseRequestMethod(`/idtype/${this.id}/unmap`, {ids: rlist(toResolve).toString()});
@@ -238,7 +243,12 @@ export default class IDType extends EventHandler implements IIDType {
     });
     const out: string[] = [];
     let nameCache: string | undefined;
-    r.dim(0).forEach((name) => {(nameCache = this.id2nameCache.get(name)) ? out.push(nameCache) : null});
+    r.dim(0).forEach((name) => {
+      nameCache = this.id2nameCache.get(name);
+      if(nameCache) {
+        out.push(nameCache);
+      }
+    });
     return out;
   }
 

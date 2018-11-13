@@ -88,7 +88,7 @@ export default class PopupProxy<T extends INodeVis> {
     this.parent.classList.add('as-popup');
     this.current = null;
     // use a callback function similar to jsonp, don't know why the popup state if overridden
-    const name = 'popupCallback' + randomId(8);
+    const name = `popupCallback${randomId(8)}`;
     (<any>window)[name] = (popupBody: HTMLElement) => {
       this.build(popupBody);
       delete (<any>window)[name];

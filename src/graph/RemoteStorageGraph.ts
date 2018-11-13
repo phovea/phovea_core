@@ -84,10 +84,9 @@ export default class RemoteStoreGraph extends GraphBase {
   private send(type: 'node'|'edge', op: 'add'|'update'|'remove', elem: GraphNode|GraphEdge) {
     if (this.batchSize <= 1) {
       return this.sendNow(type, op, elem);
-    } else {
-      const item: ISyncItem = {type, op, id: elem.id, desc: elem.persist()};
-      return this.enqueue(item);
     }
+    const item: ISyncItem = {type, op, id: elem.id, desc: elem.persist()};
+    return this.enqueue(item);
   }
 
   private enqueue(item: ISyncItem) {
@@ -231,7 +230,7 @@ export default class RemoteStoreGraph extends GraphBase {
       //clear all nodes
       return sendAPI(`/dataset/graph/${this.desc.id}/node`, {}, 'DELETE').catch((error) => {
         console.error('cannot clear graph', this.desc.id, error);
-      })
+      });
     }).then(() => {
       this.fire('sync');
       return this;

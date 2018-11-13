@@ -32,7 +32,7 @@ export default class ObjectManager<T extends IHasUniqueId> extends IDType {
   private readonly pool = new IdPool();
 
   constructor(id: string, name: string) {
-    super(id, name, name + 's', true);
+    super(id, name, `${name}s`, true);
   }
 
   nextId(item?: T) {
@@ -66,7 +66,7 @@ export default class ObjectManager<T extends IHasUniqueId> extends IDType {
 
   remove(item: T|number): T {
     let old = null;
-    let id = typeof item === 'number' ? item : item.id;
+    const id = typeof item === 'number' ? item : item.id;
     old = this.instances[id]!;
     delete this.instances[id];
     this.fire('remove', id, old);

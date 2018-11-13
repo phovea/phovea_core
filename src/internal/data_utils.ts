@@ -10,7 +10,7 @@ import {list} from '../data';
  */
 export function convertToTable(list: IDataType[]) {
   return wrapObjects({
-    id: '_data' + randomId(5),
+    id: `_data${randomId(5)}`,
     name: 'data',
     description: 'list of data types',
     fqname: 'custom/data',

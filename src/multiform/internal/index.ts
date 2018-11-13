@@ -47,8 +47,9 @@ export function selectVis(initial: number|string|IVisPluginDesc, visses: IVisPlu
  */
 export function clearNode(parent: Element) {
   let node = parent.firstChild;
-  while ((node = parent.firstChild) != null) {
+  while (node !== null) {
     parent.removeChild(node);
+    node = parent.firstChild;
   }
 }
 /**

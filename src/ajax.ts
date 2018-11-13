@@ -24,9 +24,8 @@ class AjaxError extends Error {
 function checkStatus(response: Response) {
   if (response.ok) {
     return response;
-  } else {
-    throw new AjaxError(response);
   }
+  throw new AjaxError(response);
 }
 
 function parseType(expectedDataType: string, response: Response) {
@@ -185,7 +184,7 @@ export function encodeParams(data: any = null) {
         add(prefix, `${key}[${v}]`, value[v]);
       });
     } else {
-      s.push(encodeURIComponent(prefix + key) + '=' + encodeURIComponent(value));
+      s.push(`${encodeURIComponent(prefix + key)}=${encodeURIComponent(value)}`);
     }
   }
 

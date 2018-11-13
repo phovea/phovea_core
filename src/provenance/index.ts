@@ -41,8 +41,9 @@ export function findLatestPath(state: StateNode) {
   const path = state.path.slice();
   let s: StateNode | null = state;
   //compute the first path to the end
-  while ((s = s.nextState) != null && (path.indexOf(s) < 0)) {
+  while (s !== null && (path.indexOf(s) < 0)) {
     path.push(s!);
+    s = s.nextState;
   }
   return path;
 }

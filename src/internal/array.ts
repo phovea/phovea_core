@@ -50,9 +50,8 @@ export function indexOf<T>(arr: T[], f: (v: T) => boolean): number {
 export function argList(args: IArguments) {
   if (arguments.length > 1) {
     return Array.prototype.slice.call(arguments);
-  } else {
-    return Array.prototype.slice.call(args);
   }
+  return Array.prototype.slice.call(args);
 }
 
 /**

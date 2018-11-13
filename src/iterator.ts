@@ -61,6 +61,7 @@ export class AIterator<T> {
    * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
    * @param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
    */
+  /* tslint:disable:no-use-before-declare */
   map<U>(callbackfn: (value: T) => U, thisArg?: any): IIterator<U> {
     return new TransformIterator(this, callbackfn, thisArg);
   }
@@ -148,7 +149,8 @@ export class Iterator extends AIterator<number> implements IIterator<number> {
   get size() {
     if (this.byOne) {
       return Math.max(this.to - this.from, 0);
-    } else if (this.byMinusOne) {
+    }
+    if (this.byMinusOne) {
       return Math.max(this.from - this.to, 0);
     }
     const d = this.isIncreasing ? (this.to - this.from + 1) : (this.from - this.to + 1);
@@ -243,13 +245,14 @@ export class ConcatIterator<T> extends AIterator<T> implements IIterator<T> {
    * whether more items are available
    */
   hasNext() {
-    if(!this.act){
+    if(!this.act) {
       return false;
     }
     //based on http://grepcode.com/file/repo1.maven.org/maven2/com.google.guava/guava/r08/com/google/common/collect/Iterators.java#Iterators.concat%28java.util.Iterator%29
-    let currentHasNext = false;
-    while (!(currentHasNext = this.act.hasNext()) && this.its.length > 0) {
+    let currentHasNext = this.act.hasNext();
+    while (!currentHasNext && this.its.length > 0) {
       this.act = this.its.shift()!;
+      currentHasNext = this.act.hasNext();
     }
     return currentHasNext;
   }
@@ -368,7 +371,8 @@ export function empty<T>() {
 export function concat<T>(...its: IIterator<T>[]) {
   if (its.length === 0) {
     return empty();
-  } else if (its.length === 1) {
+  }
+  if (its.length === 1) {
     return its[0];
   }
   return new ConcatIterator<T>(its);
