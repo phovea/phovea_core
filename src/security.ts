@@ -156,18 +156,20 @@ export class Permission {
   }
 
   encode() {
-    return encode(this.user, this.group, this.others);
+    return encode(this.user, this.group, this.others, this.buddies);
   }
 
   toString() {
+    const buddiesEncoded = toString(this.buddies);
     const userEncoded = toString(this.user);
     const groupEncoded = toString(this.group);
     const othersEncoded = toString(this.others);
-    return userEncoded + groupEncoded + othersEncoded;
+    return buddiesEncoded + userEncoded + groupEncoded + othersEncoded;
   }
 
   getPermissions(entity: EEntity) {
-    switch(entity) {
+    switch (entity) {
+      case EEntity.BUDDIES: return this.buddies;
       case EEntity.USER: return this.user;
       case EEntity.GROUP: return this.group;
       case EEntity.OTHERS: return this.others;
