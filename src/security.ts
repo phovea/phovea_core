@@ -5,6 +5,8 @@
 
 import {retrieve, store, remove} from './session';
 import {fire} from './event';
+import {list} from './plugin';
+import {PHOVEA_LOGIN, PHOVEA_LOGOUT} from './extensions';
 
 export const GLOBAL_EVENT_USER_LOGGED_IN = 'USER_LOGGED_IN';
 export const GLOBAL_EVENT_USER_LOGGED_OUT = 'USER_LOGGED_OUT';
@@ -47,6 +49,11 @@ export function login(user: IUser) {
   store('logged_in', true);
   store('username', user.name);
   store('user', user);
+
+  list(PHOVEA_LOGIN).map((desc) => {
+    desc.load().then((plugin) => plugin.factory(user));
+  });
+
   fire(GLOBAL_EVENT_USER_LOGGED_IN, user);
 }
 
@@ -57,6 +64,10 @@ export function logout() {
   const wasLoggedIn = isLoggedIn();
   reset();
   if (wasLoggedIn) {
+    list(PHOVEA_LOGOUT).map((desc) => {
+      desc.load().then((plugin) => plugin.factory());
+    });
+
     fire(GLOBAL_EVENT_USER_LOGGED_OUT);
   }
 }
