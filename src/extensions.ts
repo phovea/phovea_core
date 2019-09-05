@@ -1,10 +1,12 @@
 /**
- * Triggered when a user got logged in
+ * Triggered when a user was logged in
+ *
+ * @factoryParam {User} user The user object that was logged in
  */
-export const PHOVEA_LOGIN = 'phoveaLogin';
+export const EP_PHOVEA_CORE_LOGIN = 'epPhoveaCoreLogin';
 
 /**
- * Triggered when a user got logged out
+ * Triggered when a user was logged out. Does not provide any further information.
  */
-export const PHOVEA_LOGOUT = 'phoveaLogout';
+export const EP_PHOVEA_CORE_LOGOUT = 'epPhoveaCoreLogout';
 
