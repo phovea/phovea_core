@@ -67,9 +67,8 @@
     "release:pre": "npm version prerelease && npm publish --tag=next && git push --follow-tags"
   },
   "dependencies": {
-    "tslib": "^1.9.3",
-    "@types/whatwg-streams": "^0.0.7",
-    "@types/handlebars": "^4.0.39"
+    "tslib": "^1.10.0",
+    "@types/whatwg-streams": "^0.0.7"
   },
   "devDependencies": {
     "@types/jest": "^24.0.18",
