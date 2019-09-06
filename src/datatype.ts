@@ -303,7 +303,7 @@ export function categorical2partitioning<T extends Object>(data: T[], categories
  */
 export function defineDataType(name: string, functions: any) {
   function DataType(this: any, desc: IDataDescription) {
-    ADataType.call(this, desc);
+    (<any>ADataType).call(this, desc);
     if (typeof(this.init) === 'function') {
       this.init.apply(this, Array.from(arguments));
     }
