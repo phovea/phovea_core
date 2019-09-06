@@ -330,7 +330,7 @@ export default class Range1D {
    * @return {*}
    */
   indexOf(): any {
-    if (arguments[0] instanceof Range) {
+    if (arguments[0] instanceof Range1D) {
       return this.indexRangeOf(arguments[0], arguments[1]);
     }
     let arr: number[];
@@ -428,7 +428,7 @@ export default class Range1D {
       return forList(this.arr.map((d) => (<any>d).from));
     }
     const its: IIterator<number>[] = this.arr.map((d) => d.iter(size));
-    return concat.apply(null, its);
+    return (<any>concat).apply(null, its);
   }
 
   get __iterator__() {
