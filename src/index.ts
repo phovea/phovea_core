@@ -339,8 +339,7 @@ export function debounce(this: any, callback: () => void, timeToDelay = 100) {
       clearTimeout(tm);
       tm = -1;
     }
-    args.unshift(this);
-    tm = self.setTimeout(callback.bind.apply(callback, args), timeToDelay);
+    tm = self.setTimeout(callback.bind.apply(callback, [this, ...args]), timeToDelay);
   };
 }
 

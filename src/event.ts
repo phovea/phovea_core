@@ -101,7 +101,7 @@ class SingleEventHandler {
     if (this.listeners.length === 0) {
       return false;
     }
-    const largs = [event].concat(event.args);
+    const largs: [IEvent, ...any[]] = [event, ...event.args];
     if (this.listeners.length === 1) {
       this.listeners[0].apply(event, largs);
     } else {
