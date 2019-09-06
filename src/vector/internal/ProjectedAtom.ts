@@ -31,7 +31,7 @@ export default class ProjectedAtom<T, D extends IValueTypeDesc, M, MD extends IV
 
   private load() {
     if (this.cache === null) {
-      this.cache = Promise.all<any>([this.v.data(), this.v.ids(), this.v.names()]).then((arr: any[]) => {
+      this.cache = Promise.all([this.v.data(), this.v.ids(), this.v.names()]).then((arr: [M[], Range, string[]]) => {
         return this.f.apply(this.thisArgument, arr);
       });
     }
