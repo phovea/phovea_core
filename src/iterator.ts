@@ -368,7 +368,7 @@ export function empty<T>() {
   return new EmptyIterator<T>();
 }
 
-export function concat<T>(...its: IIterator<T>[]) {
+export function concat<T>(...its: IIterator<T>[]): IIterator<T> {
   if (its.length === 0) {
     return empty();
   }
