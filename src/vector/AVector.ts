@@ -164,7 +164,7 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
 
   async reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U> {
     function helper() {
-      return callbackfn.apply(thisArg, Array.from(arguments));
+      return callbackfn.apply(thisArg, <[U, T, number]>Array.from(arguments));
     }
 
     return (await this.data()).reduce(helper, initialValue);
@@ -172,7 +172,7 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
 
   async reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U, thisArg?: any): Promise<U> {
     function helper() {
-      return callbackfn.apply(thisArg, Array.from(arguments));
+      return callbackfn.apply(thisArg, <[U, T, number]>Array.from(arguments));
     }
 
     return (await this.data()).reduceRight(helper, initialValue);
