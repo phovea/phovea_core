@@ -60,8 +60,8 @@ export function argList(args: IArguments) {
  * @returns {any[]}
  */
 function indexRange(n: number): number[] {
-  //http://stackoverflow.com/questions/3746725/create-a-javascript-array-containing-1-n
-  return Array.apply(null, {length: n}).map(Number.call, Number);
+  // https://stackoverflow.com/a/38213213
+  return Array.from({length: n}, (_, k) => k);
 }
 
 /**
