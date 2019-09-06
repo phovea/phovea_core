@@ -63,13 +63,14 @@ export function login(user: IUser) {
 export function logout() {
   const wasLoggedIn = isLoggedIn();
   reset();
-  if (wasLoggedIn) {
-    list(EP_PHOVEA_CORE_LOGOUT).map((desc) => {
-      desc.load().then((plugin) => plugin.factory());
-    });
-
-    fire(GLOBAL_EVENT_USER_LOGGED_OUT);
+  if (!wasLoggedIn) {
+    return;
   }
+  list(EP_PHOVEA_CORE_LOGOUT).map((desc) => {
+    desc.load().then((plugin) => plugin.factory());
+  });
+
+  fire(GLOBAL_EVENT_USER_LOGGED_OUT);
 }
 
 
