@@ -149,7 +149,7 @@ export class GraphEdge extends AttributeContainer {
     return r;
   }
 
-  restore(p: any, nodes?: (id: number) => GraphNode) {
+  restore(p: any, nodes?: (id: number) => GraphNode | undefined) {
     super.restore(p);
     (<any>this).type = p.type;
     this._id = flagId('graph_edge', p.id);

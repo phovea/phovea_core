@@ -9,7 +9,7 @@ export {IGraphDataDescription} from './graph';
 
 export interface IGraphFactory {
   makeNode(p: any): GraphNode;
-  makeEdge(p: any, lookup: (id: number) => GraphNode): GraphEdge;
+  makeEdge(p: any, lookup: (id: number) => GraphNode | undefined): GraphEdge;
 }
 
 export const defaultGraphFactory: IGraphFactory = {
