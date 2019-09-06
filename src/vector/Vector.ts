@@ -136,5 +136,5 @@ export function asVector<T>(rows: string[], data: T[], options: IAsVectorOptions
   }, options);
 
   const rowAssigner = options.rowassigner || createLocalAssigner();
-  return new Vector(desc, viaDataLoader(rows, rowAssigner(rows), data));
+  return new Vector(desc, viaDataLoader(rows, rowAssigner(rows).dim(0).asList(), data));
 }

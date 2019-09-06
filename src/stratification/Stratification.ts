@@ -135,7 +135,7 @@ export function asStratification(rows: string[], range: CompositeRange1D, option
   }, options);
 
   const rowAssigner = options.rowassigner || createLocalAssigner();
-  return new Stratification(desc, viaDataLoader(rows, rowAssigner(rows), range));
+  return new Stratification(desc, viaDataLoader(rows, rowAssigner(rows).dim(0).asList(), range));
 }
 
 export function wrapCategoricalVector(v: ICategoricalVector) {
