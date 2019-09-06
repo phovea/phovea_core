@@ -483,15 +483,15 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   }
 
 
-  addObject<T>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = `${name}_${category}`) {
+  addObject<T extends Object>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = `${name}_${category}`) {
     return this.addObjectImpl(value, name, category, hash, true);
   }
 
-  addJustObject<T>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = `${name}_${category}`) {
+  addJustObject<T extends Object>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = `${name}_${category}`) {
     return this.addObjectImpl(value, name, category, hash, false);
   }
 
-  private addObjectImpl<T>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = `${name}_${category}`, createEdge = false) {
+  private addObjectImpl<T extends Object>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = `${name}_${category}`, createEdge = false) {
     const r = new ObjectNode<T>(value, name, category, hash);
     this._objects.push(r);
     this.backend.addNode(r);

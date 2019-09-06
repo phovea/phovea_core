@@ -265,7 +265,7 @@ export interface ICategorical2PartitioningOptions {
  * @param options
  * @return {CompositeRange1D}
  */
-export function categorical2partitioning<T>(data: T[], categories: T[], options: ICategorical2PartitioningOptions = {}): CompositeRange1D {
+export function categorical2partitioning<T extends Object>(data: T[], categories: T[], options: ICategorical2PartitioningOptions = {}): CompositeRange1D {
   const m: ICategorical2PartitioningOptions = mixin({
     skipEmptyCategories: true,
     colors: ['gray'],
