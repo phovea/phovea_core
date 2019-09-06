@@ -45,7 +45,7 @@ export default class LocalIDAssigner {
   }
 }
 
-export function createLocalAssigner() {
+export function createLocalAssigner(): (ids: string[]) => Range {
   const r = new LocalIDAssigner();
   return r.map.bind(r);
 }

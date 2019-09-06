@@ -53,10 +53,14 @@ export function asAtom<T>(name: string, value: T, options: IAsAtomOptions = {}) 
   }, options);
 
   const rowAssigner = options.rowassigner || createLocalAssigner();
-  const atom = {
+  const id = rowAssigner([name]).first;
+  if(id === null) {
+    throw new Error('id of row assigner is null');
+  }
+  const atom: IAtomValue<T> = {
     name,
     value,
-    id: rowAssigner([name]).first
+    id
   };
   return new Atom(desc, atom);
 }
