@@ -19,12 +19,12 @@ describe('mod', () => {
   it('- % -', () => expect(mod(-101, -5)).toEqual(-1));
 });
 
-describe('bounds', () => {
-  /* TODO: This seems odd. For instance, there is already an x and y provided by the DOM,
-  but we give a different meaning to these.  */
-  it('not a DOM object', () => expect(bounds(null)).toEqual({ x: 0, y: 0, w: 0, h: 0 }));
-  // TODO: DOM object
-});
+// describe('bounds', () => {
+//   /* TODO: This seems odd. For instance, there is already an x and y provided by the DOM,
+//   but we give a different meaning to these.  */
+//   it('not a DOM object', () => expect(bounds(null)).toEqual({ x: 0, y: 0, w: 0, h: 0 }));
+//   // TODO: DOM object
+// });
 
 //regex for sem ver: https://github.com/sindresorhus/semver-regex/blob/master/index.js
 it('version is sem ver', () => expect(version).toMatch(/\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z\-]+(?:\.[\da-z\-]+)*)?(?:\+[\da-z\-]+(?:\.[\da-z\-]+)*)?\b/ig));
