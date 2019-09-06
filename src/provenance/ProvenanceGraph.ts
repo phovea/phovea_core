@@ -583,7 +583,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     return r.then(f);
   }
 
-  private executedAction(action: ActionNode, newState: boolean, result: ICmdResult) {
+  private executedAction(action: ActionNode, newState: boolean, result: ICmdResult): ICmdResult {
     const current = this.act;
     const next = action.resultsIn;
     result = mixin({created: [], removed: [], inverse: null, consumed: 0}, result);
@@ -636,8 +636,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     this.switchToImpl(action, next!);
 
     return {
-      action,
-      state: next,
+      inverse: result.inverse,
       created,
       removed,
       consumed: result.consumed
