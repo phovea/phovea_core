@@ -242,7 +242,7 @@ function generateWebpack(options) {
     // base.plugins.push(new webpack.optimize.ModuleConcatenationPlugin());
   } else if (options.isDev) {
     // switch to def settings
-    base.module.rules.find((d) => d.use === tsLoader).use = tsLoaderDev;
+    // base.module.rules.find((d) => d.use === tsLoader).use = tsLoaderDev;
     base.plugins.push(new ForkTsCheckerWebpackPlugin({checkSyntacticErrors: true, tsconfig: './tsconfig.dev.json'}));
   }
 
