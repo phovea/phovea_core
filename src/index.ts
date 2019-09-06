@@ -141,7 +141,7 @@ export function mod(n: number, m: number) {
  * @returns {function(): any}
  */
 export function bind(f: () => any, thisArg: any, ...args: any[]) {
-  return f.bind(thisArg, ...args);
+  return f.bind.apply(f, [thisArg, ...args]);
 }
 
 /**
