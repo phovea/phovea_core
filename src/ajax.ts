@@ -15,6 +15,11 @@ import {fire} from './event';
 export const GLOBAL_EVENT_AJAX_PRE_SEND = 'ajaxPreSend';
 export const GLOBAL_EVENT_AJAX_POST_SEND = 'ajaxPostSend';
 
+/**
+ * Maximum number of characters of a valid URL
+ */
+export const MAX_URL_LENGTH = 4096;
+
 class AjaxError extends Error {
   constructor(public readonly response: Response, message?: string) {
     super(message ? message : response.statusText);
