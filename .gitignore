@@ -11,6 +11,7 @@
 src/**/*.js
 src/**/*.css
 src/**/*.d.ts
+tests/**/*.js
 /node_modules/
 .cache-loader
 /build2
