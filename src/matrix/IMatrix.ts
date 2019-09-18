@@ -34,6 +34,16 @@ export interface IHeatMapUrlOptions {
   missing?: string;
 }
 
+export interface IHeatMapUrlParameter {
+  format: string;
+  range: string;
+  format_transpose?: boolean;
+  format_min?: number;
+  format_max?: number;
+  format_palette?: string;
+  format_missing?: string;
+}
+
 export interface IMatrixDataDescription<D extends IValueTypeDesc> extends IDataDescription {
   loadAtOnce?: boolean;
   value: D;
