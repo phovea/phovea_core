@@ -11,7 +11,7 @@ import {getAPIJSON, api2absURL, getAPIData} from '../ajax';
 import {list as rlist, Range, all, join, parse} from '../range';
 import {mask, INumberValueTypeDesc, VALUE_TYPE_INT, VALUE_TYPE_REAL} from '../datatype';
 import {IHistogram, wrapHist, IAdvancedStatistics, computeAdvancedStats} from '../math';
-import {IMatrixDataDescription, IHeatMapUrlOptions} from './IMatrix';
+import {IMatrixDataDescription, IHeatMapUrlOptions, IHeatMapUrlParameter} from './IMatrix';
 import {resolve} from '../idtype';
 
 export interface IMatrixLoader<T> {
@@ -170,25 +170,36 @@ export function viaAPI2Loader(): IMatrixLoader2<any> {
       return getAPIData(`/dataset/matrix/${desc.id}/raw`, {range: range.toString()}).then(maskIt(desc));
     },
     heatmapUrl: (desc: IMatrixDataDescription<any>, range: Range, options: IHeatMapUrlOptions) => {
-      const args: any = {
-        format: options.format || 'png',
-        range: range.toString()
-      };
-      if (options.transpose === true) {
-        args.format_transpose = true;
-      }
-      if (options.range) {
-        args.format_min = options.range[0];
-        args.format_max = options.range[1];
-      }
-      if (options.palette) {
-        args.format_palette = options.palette.toString();
-      }
-      if (options.missing) {
-        args.format_missing = options.missing;
-      }
-      return api2absURL(`/dataset/matrix/${desc.id}/data`, args);
+      const params: IHeatMapUrlParameter = prepareHeatmapUrlParameter(range, options);
+      return api2absURL(`/dataset/matrix/${desc.id}/data`, params);
     }
   };
   return r;
 }
+
+/**
+ * Prepare the URL Parameters to load the Heatmap with the given range and options
+ * @param range range for the subset of the matrix
+ * @param options options for the URL configuration
+ */
+export function prepareHeatmapUrlParameter(range: Range, options: IHeatMapUrlOptions): IHeatMapUrlParameter {
+  const args: IHeatMapUrlParameter = {
+    format: options.format || 'png',
+    range: range.toString()
+  };
+  if (options.transpose === true) {
+    args.format_transpose = true;
+  }
+  if (options.range) {
+    args.format_min = options.range[0];
+    args.format_max = options.range[1];
+  }
+  if (options.palette) {
+    args.format_palette = options.palette.toString();
+  }
+  if (options.missing) {
+    args.format_missing = options.missing;
+  }
+  return args;
+}
+
