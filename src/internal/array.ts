@@ -41,20 +41,6 @@ export function indexOf<T>(arr: T[], f: (v: T) => boolean): number {
 }
 
 /**
- * converts the given arguments object into an array
- * @param args
- * @deprecated use Array.from(arguments) instead
- * @internal
- * @returns {*|Array}
- */
-export function argList(args: IArguments) {
-  if (arguments.length > 1) {
-    return Array.prototype.slice.call(arguments);
-  }
-  return Array.prototype.slice.call(args);
-}
-
-/**
  * array with indices of 0...n-1
  * @param n
  * @returns {any[]}
