@@ -17,8 +17,8 @@
     "url": "https://github.com/phovea/phovea_core.git"
   },
   "engines": {
-    "npm": ">= 6.4",
-    "node": ">= 8.16"
+    "npm": ">= 6.12",
+    "node": ">= 12.13"
   },
   "main": "build/phovea_core.js",
   "files": [
