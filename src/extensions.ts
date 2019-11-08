@@ -10,3 +10,7 @@ export const EP_PHOVEA_CORE_LOGIN = 'epPhoveaCoreLogin';
  */
 export const EP_PHOVEA_CORE_LOGOUT = 'epPhoveaCoreLogout';
 
+/**
+ * Load locale JSON files with translations
+ */
+export const EP_PHOVEA_CORE_LOCALE = 'epPhoveaCoreLocale';

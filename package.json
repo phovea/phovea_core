@@ -50,6 +50,7 @@
     "dist": "mkdirp dist && cd build && tar cvzf ../dist/phovea_core.tar.gz *"
   },
   "dependencies": {
+    "i18next": "^17.0.18",
     "tslib": "1.9.0",
     "@types/whatwg-streams": "0.0.4",
     "@types/whatwg-fetch": "0.0.33",

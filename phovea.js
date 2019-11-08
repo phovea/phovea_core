@@ -28,5 +28,17 @@ module.exports = function(registry) {
   /// #if include('tabSyncer', 'selection')
   registry.push('tabSyncer', 'selection', function() { return System.import('./src/sync/SelectionSyncer'); }, {});
   /// #endif
+
+  registry.push('epPhoveaCoreLocale', 'phoveaCoreLocaleEN', function() {
+    return System.import('./src/assets/locales/en/phovea.json').then(function(json) {
+      return {
+        create: function() {
+          return json;
+        }
+      };
+    });
+  }, {
+    lng: 'en'
+  });
 };
 
