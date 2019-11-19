@@ -6,15 +6,15 @@ import {IUser} from './security';
  */
 export const EP_PHOVEA_CORE_LOGIN = 'epPhoveaCoreLogin';
 
-export interface ILoginExtension {
+export interface ILoginExtensionPoint {
   /**
    * @param user {IUser} The user object that was logged in
    */
   factory(user: IUser): void;
 }
 
-export interface ILoginExtensionDesc extends IPluginDesc {
-  load(): Promise<IPlugin & ILoginExtension>;
+export interface ILoginExtensionPointDesc extends IPluginDesc {
+  load(): Promise<IPlugin & ILoginExtensionPoint>;
 }
 
 
@@ -23,10 +23,10 @@ export interface ILoginExtensionDesc extends IPluginDesc {
  */
 export const EP_PHOVEA_CORE_LOGOUT = 'epPhoveaCoreLogout';
 
-export interface ILogoutExtension {
+export interface ILogoutExtensionPoint {
   factory(): void;
 }
 
-export interface ILogoutExtensionDesc extends IPluginDesc {
-  load(): Promise<IPlugin & ILogoutExtension>;
+export interface ILogoutExtensionPointDesc extends IPluginDesc {
+  load(): Promise<IPlugin & ILogoutExtensionPoint>;
 }
