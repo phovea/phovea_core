@@ -1,10 +1,5 @@
 {
-  "phovea": {
-    "common": {
-      "query": "Query from CORE",
-      "test": {
-        "foo": "bar from CORE"
-      }
-    }
+  "core": {
+
   }
 }
