@@ -70,12 +70,12 @@ i18next
     defaultNS: 'phovea',
     fallbackNS: 'phovea'
     // initImmediate: false
-  }); 
+  });
 
-console.log(i18next.t('phovea:common.group'));
+// console.log(i18next.t('phovea:common.group'));
 list(EP_PHOVEA_CORE_LOCALE).forEach((pluginDesc) => {
   pluginDesc.load().then((locale) => {
-    console.log('load json', locale.factory());
+    // console.log('load json', locale.factory());
   });
 });
 
