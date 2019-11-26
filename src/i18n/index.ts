@@ -1,6 +1,6 @@
 import i18next from 'i18next';
 import {list} from '../plugin';
-import {EP_PHOVEA_CORE_LOCALE} from '../extensions';
+import {EP_PHOVEA_CORE_LOCALE, ILocaleEPDesc} from '../extensions';
 
 const DEFAULT_LANGUAGE = 'en';
 
@@ -23,8 +23,8 @@ export async function initializeI18next() {
 
   return i18next
     .init({
-      debug: true,
       appendNamespaceToCIMode: true,
+      debug: true,
       interpolation: {
         escapeValue: true,
         format: (value, format) => {
@@ -34,9 +34,7 @@ export async function initializeI18next() {
         }
       },
       lng: DEFAULT_LANGUAGE,
-      // ns: ['namespace1','namespace2','namespace3', ...],
-      defaultNS: '',
-      // fallbackNS: 'fallback namespace',
+      fallbackLng: DEFAULT_LANGUAGE,
     })
     .then(() => {
       /* For each plugin add the resources to the i18next configuration
