@@ -99,7 +99,7 @@ export function getFactoryMethod(instance: any, factory: string) {
   }
   if (f.startsWith('new ')) {
     const className = f.substring('new '.length);
-    return (...args:any[]) => new instance[className](...args);
+    return (...args: any[]) => new instance[className](...args);
   }
   return instance[f];
 }
@@ -118,7 +118,7 @@ function push(type: string, idOrLoader: string | (() => any), descOrLoader: any,
     description: '',
     version: '1.0.0',
     load: async (): Promise<IPlugin> => {
-      const instance= await Promise.resolve(loader());
+      const instance = await Promise.resolve(loader());
       return {desc: p, factory: getFactoryMethod(instance, p.factory)};
     }
   }, typeof descOrLoader === 'function' ? desc : descOrLoader);
@@ -177,4 +177,18 @@ export function get(type: string, id: string): IPluginDesc {
 
 export function load(desc: IPluginDesc[]) {
   return Promise.all(desc.map((d) => d.load()));
+}
+
+/**
+ * Helper function to simplify importing of  resource files (e.g., JSON).
+ * The imported resource file is returned as it is.
+ *
+ * @param data Imported JSON file
+ */
+export function asResource(data) {
+  return {
+    create: function () {
+      return data;
+    }
+  };
 }

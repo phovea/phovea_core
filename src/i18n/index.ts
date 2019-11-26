@@ -13,10 +13,10 @@ export async function initializeI18next() {
   const plugins = await Promise.all(list(EP_PHOVEA_CORE_LOCALE).map((pluginDesc) => {
     return pluginDesc.load().then((locale) => {
       return {
-        lng: pluginDesc.lng,
+        lng: pluginDesc.lng || DEFAULT_LANGUAGE,
         ns: pluginDesc.ns,
         resources: locale.factory(),
-        order: pluginDesc.order
+        order: pluginDesc.order || 0
       };
     });
   }));
