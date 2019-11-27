@@ -185,10 +185,8 @@ export function load(desc: IPluginDesc[]) {
  *
  * @param data Imported JSON file
  */
-export function asResource(data) {
+export function asResource(data: any) {
   return {
-    create: function () {
-      return data;
-    }
+    create: () => data
   };
 }
