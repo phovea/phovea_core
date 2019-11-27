@@ -21,7 +21,7 @@ export interface ILocaleEPDesc extends IPluginDesc {
   /**
    * Locale namespace that usually matches the resource filename (e.g., `phovea` and `phovea.json`)
    */
-  ns: string;
+  ns?: string;
 
   /**
    * Language following the [IETF language tag](https://en.wikipedia.org/wiki/IETF_language_tag) (e.g., `en` or `en-US`)
