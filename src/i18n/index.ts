@@ -3,7 +3,7 @@ import {list} from '../plugin';
 import {EP_PHOVEA_CORE_LOCALE, ILocaleEPDesc} from '../extensions';
 
 const DEFAULT_LANGUAGE = 'en';
-
+const DEFAULT_NAMESPACE = 'default_namespace';
 
 /**
  *  Awaits the translation files registered at the EP_PHOVEA_CORE_LOCALE extension point
@@ -14,7 +14,7 @@ export async function initializeI18n() {
     return pluginDesc.load().then((locale) => {
       return {
         lng: pluginDesc.lng || DEFAULT_LANGUAGE,
-        ns: pluginDesc.ns,
+        ns: pluginDesc.ns || DEFAULT_NAMESPACE,
         resources: locale.factory(),
         order: pluginDesc.order || 0
       };
@@ -33,6 +33,8 @@ export async function initializeI18n() {
           return value;
         }
       },
+      ns: DEFAULT_NAMESPACE,
+      defaultNS: DEFAULT_NAMESPACE,
       lng: DEFAULT_LANGUAGE,
       fallbackLng: DEFAULT_LANGUAGE,
     })
