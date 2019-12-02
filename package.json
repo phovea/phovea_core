@@ -17,8 +17,8 @@
     "url": "https://github.com/phovea/phovea_core.git"
   },
   "engines": {
-    "npm": ">= 3",
-    "node": ">= 6",
+    "npm": ">= 6.12",
+    "node": ">= 12.13",
     "iojs": ">= 3"
   },
   "main": "build/phovea_core.js",
@@ -31,8 +31,8 @@
   ],
   "scripts": {
     "compile": "tsc",
-    "lint": "tslint -c tslint.json src/**/*.ts tests/**/*.ts",
-    "docs": "typedoc --options typedoc.json",
+    "lint": "tslint -c tslint.json -p . 'src/**/*.ts?(x)' 'tests/**/*.ts?(x)'",
+    "docs": "typedoc --options typedoc.json src/**.ts",
     "prebuild": "node -e \"process.exit(process.env.PHOVEA_SKIP_TESTS === undefined?1:0)\" || npm run test",
     "pretest": "npm run compile",
     "test": "test ! -d tests || karma start",
@@ -82,7 +82,7 @@
     "tslib": "1.9.0",
     "tslint": "5.9.1",
     "typedoc": "0.11.1",
-    "typescript": "2.7.2",
+    "typescript": "2.8.1",
     "url-loader": "0.5.8",
     "webpack": "2.3.3",
     "webpack-dev-server": "2.4.2",
