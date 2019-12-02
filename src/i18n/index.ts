@@ -10,7 +10,7 @@ const DEFAULT_NAMESPACE = 'default_namespace';
  *  Initialize I18next with the translation files
  */
 export async function initI18n() {
-  const plugins = await Promise.all(list(EP_PHOVEA_CORE_LOCALE).map((pluginDesc) => {
+  const plugins = await Promise.all(list(EP_PHOVEA_CORE_LOCALE).map((pluginDesc: ILocaleEPDesc) => {
     return pluginDesc.load().then((locale) => {
       return {
         lng: pluginDesc.lng || DEFAULT_LANGUAGE,
