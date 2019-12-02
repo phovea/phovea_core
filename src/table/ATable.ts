@@ -35,6 +35,8 @@ export abstract class ATable extends SelectAble implements IInternalAccess {
   abstract size(): number[];
 
   view(range: RangeLike = all()): ITable {
+    // tslint:disable:no-use-before-declare
+    // Disabled the rule, because the classes below reference each other in a way that it is impossible to find a successful order.
     return new TableView(this.root, parse(range));
   }
 
