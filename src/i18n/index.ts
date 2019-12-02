@@ -9,7 +9,7 @@ const DEFAULT_NAMESPACE = 'default_namespace';
  *  Awaits the translation files registered at the EP_PHOVEA_CORE_LOCALE extension point
  *  Initialize I18next with the translation files
  */
-export async function initializeI18n() {
+export async function initI18n() {
   const plugins = await Promise.all(list(EP_PHOVEA_CORE_LOCALE).map((pluginDesc) => {
     return pluginDesc.load().then((locale) => {
       return {
@@ -24,7 +24,6 @@ export async function initializeI18n() {
   return i18next
     .init({
       appendNamespaceToCIMode: true,
-      debug: true,
       interpolation: {
         escapeValue: true,
         format: (value, format) => {

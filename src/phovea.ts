@@ -1,7 +1,7 @@
 import {IRegistry, asResource} from './plugin';
 
 export default function (registry: IRegistry) {
- //registry.push('extension-type', 'extension-id', function() { return System.import('./extension_impl'); }, {});
+  //registry.push('extension-type', 'extension-id', function() { return System.import('./extension_impl'); }, {});
   /// #if include('datatype', 'matrix')
   registry.push('datatype', 'matrix', function () {return System.import('./matrix/Matrix');}, {});
   /// #endif
@@ -27,6 +27,6 @@ export default function (registry: IRegistry) {
   registry.push('epPhoveaCoreLocale', 'phoveaCoreLocaleEN', function () {
     return System.import('./assets/locales/en/phovea.json').then(asResource);
   }, {
-      ns: 'phovea',
-    });
+    ns: 'phovea',
+  });
 }
