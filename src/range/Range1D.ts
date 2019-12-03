@@ -7,11 +7,6 @@ import RangeElem from './internal/RangeElem';
 import {IIterator, Iterator, forList, concat} from '../iterator';
 import Range1DGroup from './Range1DGroup';
 
-export interface ICompositeRange1D extends Range1D {
-  groups: Range1DGroup[];
-  fromLikeComposite(groups: Range1DGroup[]): Range1D;
-}
-
 function sortNumeric(a: number, b: number) {
   return a - b;
 }
@@ -519,4 +514,9 @@ export default class Range1D {
   fromLike(indices: number[]) {
     return Range1D.from(indices);
   }
+}
+
+export interface ICompositeRange1D extends Range1D {
+  groups: Range1DGroup[];
+  fromLikeComposite(groups: Range1DGroup[]): Range1D;
 }
