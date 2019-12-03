@@ -182,25 +182,6 @@ export function computeAdvancedStats(arr: number[]): IAdvancedStatistics {
   return r;
 }
 
-export function hist(arr: IIterable<number>, indices: Range1D, size: number, bins: number, range: number[]): IHistogram {
-  const r = new Histogram(bins, range);
-  r.pushAll(arr, indices, size);
-  return r;
-}
-
-export function categoricalHist<T>(arr: IIterable<T>, indices: Range1D, size: number, categories: T[], labels: string[], colors: string[]): IHistogram {
-  const r = new CatHistogram(categories, labels, colors);
-  r.pushAll(arr, indices, size);
-  return r;
-}
-
-export function rangeHist(range: CompositeRange1D) {
-  return new RangeHistogram(range);
-}
-export function wrapHist(hist: number[], valueRange: number[]) {
-  return new Histogram(hist.length, valueRange, hist);
-}
-
 class AHistogram implements IHistogram {
   private _bins: number[];
   private _missing: number = 0;
@@ -388,6 +369,25 @@ class RangeHistogram implements ICatHistogram {
   forEach(callbackfn: (value: number, index: number) => void, thisArg?: any) {
     return this._range.groups.forEach((g, i) => callbackfn.call(thisArg, g.length, i));
   }
+}
+
+export function hist(arr: IIterable<number>, indices: Range1D, size: number, bins: number, range: number[]): IHistogram {
+  const r = new Histogram(bins, range);
+  r.pushAll(arr, indices, size);
+  return r;
+}
+
+export function categoricalHist<T>(arr: IIterable<T>, indices: Range1D, size: number, categories: T[], labels: string[], colors: string[]): IHistogram {
+  const r = new CatHistogram(categories, labels, colors);
+  r.pushAll(arr, indices, size);
+  return r;
+}
+
+export function rangeHist(range: CompositeRange1D) {
+  return new RangeHistogram(range);
+}
+export function wrapHist(hist: number[], valueRange: number[]) {
+  return new Histogram(hist.length, valueRange, hist);
 }
 
 /**
