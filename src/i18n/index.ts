@@ -22,7 +22,13 @@ export async function initI18n() {
   }));
 
   return i18next
+    .use({
+      type: 'postProcessor',
+      name: 'showKeyDebugger',
+      process: (value, key, option, translator) => translator.options.debug ? key : value
+    })
     .init({
+      debug: false,
       appendNamespaceToCIMode: true,
       interpolation: {
         escapeValue: true,
@@ -36,6 +42,7 @@ export async function initI18n() {
       defaultNS: DEFAULT_NAMESPACE,
       lng: DEFAULT_LANGUAGE,
       fallbackLng: DEFAULT_LANGUAGE,
+      postProcess: ['showKeyDebugger']
     })
     .then(() => {
       /* For each plugin add the resources to the i18next configuration
