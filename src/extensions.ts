@@ -23,12 +23,12 @@ export interface ILoginExtensionPointDesc extends IPluginDesc {
  */
 export const EP_PHOVEA_CORE_LOGOUT = 'epPhoveaCoreLogout';
 
-export interface ILogoutExtensionPoint {
+export interface ILogoutEP {
   factory(): void;
 }
 
-export interface ILogoutExtensionPointDesc extends IPluginDesc {
-  load(): Promise<IPlugin & ILogoutExtensionPoint>;
+export interface ILogoutEPDesc extends IPluginDesc {
+  load(): Promise<IPlugin & ILogoutEP>;
 }
 
 /**

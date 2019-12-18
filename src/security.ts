@@ -6,7 +6,7 @@
 import {retrieve, store, remove} from './session';
 import {fire} from './event';
 import {list} from './plugin';
-import {EP_PHOVEA_CORE_LOGIN, EP_PHOVEA_CORE_LOGOUT, ILoginExtensionPointDesc, ILogoutExtensionPoint, ILogoutExtensionPointDesc, ILoginExtensionPoint} from './extensions';
+import {EP_PHOVEA_CORE_LOGIN, EP_PHOVEA_CORE_LOGOUT, ILoginExtensionPointDesc, ILogoutEP, ILogoutEPDesc, ILoginExtensionPoint} from './extensions';
 
 export const GLOBAL_EVENT_USER_LOGGED_IN = 'USER_LOGGED_IN';
 export const GLOBAL_EVENT_USER_LOGGED_OUT = 'USER_LOGGED_OUT';
@@ -64,8 +64,8 @@ export function logout() {
   const wasLoggedIn = isLoggedIn();
   reset();
   if (wasLoggedIn) {
-    list(EP_PHOVEA_CORE_LOGOUT).map((desc: ILogoutExtensionPointDesc) => {
-      desc.load().then((plugin: ILogoutExtensionPoint) => plugin.factory());
+    list(EP_PHOVEA_CORE_LOGOUT).map((desc: ILogoutEPDesc) => {
+      desc.load().then((plugin: ILogoutEP) => plugin.factory());
     });
 
     fire(GLOBAL_EVENT_USER_LOGGED_OUT);
