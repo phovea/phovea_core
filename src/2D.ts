@@ -4,6 +4,9 @@
  * Licensed under the new BSD license, available at http://caleydo.org/license
  **************************************************************************** */
 
+// tslint:disable:no-use-before-declare
+// Disabled the rule, because the classes below reference each other in a way that it is impossible to find a successful order.
+
 /**
  * The intersection is based on Kevin Lindsey
  * http://www.kevlindev.com/gui/index.htm

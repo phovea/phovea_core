@@ -58,6 +58,8 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
   }
 
   view(range: RangeLike = all()): IVector<T,D> {
+    // tslint:disable:no-use-before-declare
+    // Disabled the rule, because the classes below reference each other in a way that it is impossible to find a successful order.
     return new VectorView(this.root, parse(range));
   }
 
