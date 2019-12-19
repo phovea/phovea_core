@@ -86,7 +86,7 @@
     "typescript": "2.8.1",
     "url-loader": "0.5.8",
     "webpack": "2.3.3",
-    "webpack-dev-server": "2.4.2",
+    "webpack-dev-server": "3.1.11",
     "cache-loader": "1.2.0",
     "ifdef-loader": "2.0.0",
     "fork-ts-checker-webpack-plugin": "0.4.1",
