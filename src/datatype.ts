@@ -113,45 +113,6 @@ export interface IStringValueTypeDesc extends IValueTypeDesc {
 
 export declare type IValueType = number | string | any;
 
-/**
- * since there is no instanceOf for interfaces
- * @param v
- * @return {any}
- */
-export function isDataType(v: IDataType) {
-  if (v === null || v === undefined) {
-    return false;
-  }
-  if (v instanceof ADataType) {
-    return true;
-  }
-  //sounds good
-  return (typeof(v.idView) === 'function' && typeof(v.persist) === 'function' && typeof(v.restore) === 'function' && v instanceof SelectAble && ('desc' in v) && ('dim' in v));
-}
-
-/**
- * utility to assign a dataset to an html element, similar to d3
- * @param node
- * @param data
- */
-export function assignData(node: Element, data: IDataType) {
-  (<any>node).__data__ = data;
-}
-
-
-export interface IHistAbleDataType<D extends IValueTypeDesc> extends IDataType {
-  valuetype: D;
-  hist(nbins?: number): Promise<IHistogram>;
-  readonly length: number;
-}
-
-export interface IStatsAbleDataType<D extends IValueTypeDesc> extends IDataType {
-  valuetype: D;
-  stats(): Promise<IStatistics>;
-  statsAdvanced(): Promise<IAdvancedStatistics>;
-  readonly length: number;
-}
-
 
 /**
  * dummy data type just holding the description
@@ -196,6 +157,46 @@ export class DummyDataType extends ADataType<IDataDescription> {
   }
 
 }
+
+/**
+ * since there is no instanceOf for interfaces
+ * @param v
+ * @return {any}
+ */
+export function isDataType(v: IDataType) {
+  if (v === null || v === undefined) {
+    return false;
+  }
+  if (v instanceof ADataType) {
+    return true;
+  }
+  //sounds good
+  return (typeof(v.idView) === 'function' && typeof(v.persist) === 'function' && typeof(v.restore) === 'function' && v instanceof SelectAble && ('desc' in v) && ('dim' in v));
+}
+
+/**
+ * utility to assign a dataset to an html element, similar to d3
+ * @param node
+ * @param data
+ */
+export function assignData(node: Element, data: IDataType) {
+  (<any>node).__data__ = data;
+}
+
+
+export interface IHistAbleDataType<D extends IValueTypeDesc> extends IDataType {
+  valuetype: D;
+  hist(nbins?: number): Promise<IHistogram>;
+  readonly length: number;
+}
+
+export interface IStatsAbleDataType<D extends IValueTypeDesc> extends IDataType {
+  valuetype: D;
+  stats(): Promise<IStatistics>;
+  statsAdvanced(): Promise<IAdvancedStatistics>;
+  readonly length: number;
+}
+
 
 /**
  * transpose the given matrix

@@ -81,6 +81,8 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
     if (r.isAll) {
       return this.root;
     }
+    // tslint:disable:no-use-before-declare
+    // Disabled the rule, because the classes below reference each other in a way that it is impossible to find a successful order.
     return new MatrixView(this.root, r);
   }
 

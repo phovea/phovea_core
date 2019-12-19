@@ -1,14 +1,14 @@
 {
   "name": "phovea_core",
-  "version": "2.2.0",
-  "homepage": "https://phovea.caleydo.org",
   "description": "Phovea Core including plugin registry, data definition (+ common types: tables, matrix, vector, stratification), ajax, selections",
+  "version": "3.0.0",
   "author": {
     "name": "The Caleydo Team",
     "email": "contact@caleydo.org",
     "url": "https://caleydo.org"
   },
   "license": "BSD-3-Clause",
+  "homepage": "https://phovea.caleydo.org",
   "bugs": {
     "url": "https://github.com/phovea/phovea_core/issues"
   },
@@ -17,8 +17,8 @@
     "url": "https://github.com/phovea/phovea_core.git"
   },
   "engines": {
-    "npm": ">= 3",
-    "node": ">= 6",
+    "npm": ">= 6.12",
+    "node": ">= 12.13",
     "iojs": ">= 3"
   },
   "main": "build/phovea_core.js",
@@ -31,8 +31,8 @@
   ],
   "scripts": {
     "compile": "tsc",
-    "lint": "tslint -c tslint.json src/**/*.ts tests/**/*.ts",
-    "docs": "typedoc --options typedoc.json",
+    "lint": "tslint -c tslint.json -p . 'src/**/*.ts?(x)' 'tests/**/*.ts?(x)'",
+    "docs": "typedoc --options typedoc.json src/**.ts",
     "prebuild": "node -e \"process.exit(process.env.PHOVEA_SKIP_TESTS === undefined?1:0)\" || npm run test",
     "pretest": "npm run compile",
     "test": "test ! -d tests || karma start",
@@ -50,6 +50,7 @@
     "dist": "mkdirp dist && cd build && tar cvzf ../dist/phovea_core.tar.gz *"
   },
   "dependencies": {
+    "i18next": "^17.0.18",
     "tslib": "1.9.0",
     "@types/whatwg-streams": "0.0.4",
     "@types/whatwg-fetch": "0.0.33",
@@ -74,7 +75,7 @@
     "karma-sourcemap-loader": "0.3.7",
     "karma-webpack": "2.0.3",
     "mkdirp": "0.5.1",
-    "node-sass": "4.7.2",
+    "node-sass": "^4.12.0",
     "null-loader": "0.1.1",
     "raw-loader": "0.5.1",
     "sass-loader": "6.0.7",
@@ -82,7 +83,7 @@
     "tslib": "1.9.0",
     "tslint": "5.9.1",
     "typedoc": "0.11.1",
-    "typescript": "2.7.2",
+    "typescript": "2.8.1",
     "url-loader": "0.5.8",
     "webpack": "2.3.3",
     "webpack-dev-server": "2.4.2",
