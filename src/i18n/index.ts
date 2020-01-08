@@ -6,6 +6,13 @@ const DEFAULT_LANGUAGE = 'en';
 const DEFAULT_NAMESPACE = 'default_namespace';
 
 /**
+ * Create a unique i18next instance
+ * Thus allowing the existence of multiple i18next instances with different configurations
+ * without one overwriting the other
+ */
+const i18n = i18next.createInstance();
+
+/**
  *  Awaits the translation files registered at the EP_PHOVEA_CORE_LOCALE extension point
  *  Initialize I18next with the translation files
  */
@@ -21,7 +28,7 @@ export async function initI18n() {
     });
   }));
 
-  return i18next
+  return i18n
     .use({
       type: 'postProcessor',
       name: 'showKeyDebugger',
@@ -50,9 +57,8 @@ export async function initI18n() {
          overwrites the others
       */
       plugins.sort((pluginA, pluginB) => pluginA.order - pluginB.order).forEach((plugin) => {
-        i18next.addResourceBundle(plugin.lng, plugin.ns, plugin.resources, true, true);
+        i18n.addResourceBundle(plugin.lng, plugin.ns, plugin.resources, true, true);
       });
     });
 }
-
-export default i18next;
+export default i18n;
