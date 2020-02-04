@@ -31,6 +31,7 @@ export const version = __VERSION__;
  */
 export let offline = false;
 declare const __APP_CONTEXT__: string;
+export const context = __APP_CONTEXT__;
 
 /* tslint:disable:variable-name */
 /**
