@@ -200,7 +200,7 @@ export function flowLayout(horizontal: boolean, gap: number, padding = {top: 0, 
     // set all locations
     let xAccumulator = padding.left;
     let yAccumulator = padding.top;
-    const promises : Promise<void>[] = [];
+    const promises: Promise<void>[] = [];
     elems.forEach((elem, i) => {
       const s = sizes[i];
       promises.push(elem.setBounds(xAccumulator, yAccumulator, s[0], s[1]));

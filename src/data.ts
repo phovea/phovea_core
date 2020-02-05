@@ -118,7 +118,7 @@ export interface INode {
  */
 export function convertToTree(list: IDataType[]): INode {
   //create a tree out of the list by the fqname
-  const root :INode = {children: [], name: '/', data: null};
+  const root: INode = {children: [], name: '/', data: null};
 
   list.forEach((entry) => {
     const path = entry.desc.fqname.split('/');
