@@ -1,6 +1,6 @@
 /// <reference types="jest" />
 import {api2absURL, encodeParams} from '../src/ajax';
-import {context} from 'phovea_core/src';
+import {context} from '../src';
 
 describe('api2absURL', () => {
   it('one arg',
