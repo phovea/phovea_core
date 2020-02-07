@@ -1,5 +1,7 @@
-/// <reference types="jasmine" />
-import {argFilter, argSort, bounds, mod, version, uniqueId, uniqueString, resolveIn, randomId, flagId} from '../src';
+/// <reference types="jest" />
+import {argFilter, argSort, bounds, mod, uniqueId, uniqueString, resolveIn, randomId, flagId} from '../src';
+import * as pkg from '../package.json';
+
 
 describe('argFilter', () => {
   it('evens', () => expect(argFilter([1, 3, 5, 2, 4, 6, 7, 9, 11], (d) => d % 2 === 0))
@@ -28,7 +30,7 @@ describe('bounds', () => {
 });
 
 //regex for sem ver: https://github.com/sindresorhus/semver-regex/blob/master/index.js
-it('version is sem ver', () => expect(version).toMatch(/\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z\-]+(?:\.[\da-z\-]+)*)?(?:\+[\da-z\-]+(?:\.[\da-z\-]+)*)?\b/ig));
+it('version is sem ver', () => expect(pkg.version).toMatch(/\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z\-]+(?:\.[\da-z\-]+)*)?(?:\+[\da-z\-]+(?:\.[\da-z\-]+)*)?\b/ig));
 
 describe('uniqueId', () => {
   it('first time', () => expect(uniqueId()).toEqual(0));
