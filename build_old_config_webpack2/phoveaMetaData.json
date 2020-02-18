@@ -1,0 +1,8 @@
+{
+ "name": "phovea_core",
+ "version": "3.1.1-20200218-080405",
+ "repository": "https://github.com/phovea/phovea_core.git",
+ "homepage": "https://phovea.caleydo.org",
+ "description": "Phovea Core including plugin registry, data definition (+ common types: tables, matrix, vector, stratification), ajax, selections",
+ "screenshot": null
+}
