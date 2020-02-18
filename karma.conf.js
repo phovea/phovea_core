@@ -4,7 +4,7 @@
  * Licensed under the new BSD license, available at http://caleydo.org/license
  **************************************************************************** */
 
-const webpack = require('./webpack.config.js');
+const webpack = require('./config/webpack.dev.js');
 
 module.exports = (config) => {
   config.set({
@@ -24,7 +24,7 @@ module.exports = (config) => {
       'tests.webpack.js': ['webpack', 'sourcemap']
     },
 
-    webpack: webpack('test'),
+    webpack: webpack,
 
     failOnEmptyTestSuite: false,
 
