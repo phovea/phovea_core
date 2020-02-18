@@ -35,7 +35,7 @@ const config = {
         exclude: /(node_modules|bower_components)/,
         loader: 'babel-loader',
         options: {
-          plugins: ["@babel/plugin-proposal-class-properties", {"loose": true}]
+          plugins: ["@babel/plugin-proposal-class-properties"]
         }
       }
     ],
