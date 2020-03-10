@@ -1,4 +1,4 @@
-import i18next from 'i18next';
+import { default as i18next } from 'i18next';
 import {list} from '../plugin';
 import {EP_PHOVEA_CORE_LOCALE, ILocaleEPDesc} from '../extensions';
 
