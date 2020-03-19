@@ -328,7 +328,7 @@ export default class Range1D {
    * @return {*}
    */
   indexOf(): any {
-    if (arguments[0] instanceof Range) {
+    if (arguments[0] instanceof Range1D) {
       return this.indexRangeOf(arguments[0], arguments[1]);
     }
     let arr: number[];
