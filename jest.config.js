@@ -11,7 +11,6 @@ module.exports = {
     "\\.xml$": "jest-raw-loader"
   },
   testRegex: "(.*(test|spec))\\.(tsx?)$",
-  testURL: "http://localhost/",
   moduleFileExtensions: [
     "ts",
     "tsx",
