@@ -36,7 +36,11 @@ module.exports = {
   transformIgnorePatterns: [`../node_modules/${pluginsToTransform}`, `node_modules/${pluginsToTransform}`],
   globals: {
     "__VERSION__": "TEST_VERSION",
-    "__APP_CONTEXT__": "TEST_CONTEXT"
+    "__APP_CONTEXT__": "TEST_CONTEXT",
+    // has to be set to true, otherwise i18n import fails
+    "tsConfig": {
+      "esModuleInterop": true
+    }
   },
   moduleNameMapper: {
     "^.+\\.(css|less|scss|sass)$": "identity-obj-proxy",
