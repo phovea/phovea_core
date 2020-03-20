@@ -1,5 +1,4 @@
-import { default as i18next } from 'i18next';
-// const i18n = require('i18next').default;
+import i18next from 'i18next';
 import {list} from '../plugin';
 import {EP_PHOVEA_CORE_LOCALE, ILocaleEPDesc} from '../extensions';
 
