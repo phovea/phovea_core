@@ -1,4 +1,4 @@
-/// <reference types="jasmine" />
+/// <reference types="jest" />
 import {argFilter, argSort, bounds, mod, version, uniqueId, uniqueString, resolveIn, randomId, flagId} from '../src';
 
 describe('argFilter', () => {
