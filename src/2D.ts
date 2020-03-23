@@ -1358,7 +1358,7 @@ export class Path {
   static COMMAND = 0;
   static NUMBER = 1;
   static EOD = 2;
-  static PARAMS : {[key: string]: string[]}= {
+  static PARAMS: {[key: string]: string[]}= {
     A: ['rx', 'ry', 'x-axis-rotation', 'large-arc-flag', 'sweep-flag', 'x', 'y'],
     a: ['rx', 'ry', 'x-axis-rotation', 'large-arc-flag', 'sweep-flag', 'x', 'y'],
     C: ['x1', 'y1', 'x2', 'y2', 'x', 'y'],

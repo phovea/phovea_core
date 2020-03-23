@@ -335,7 +335,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     }
     const lookup = new Map<number, SlideNode>();
     this._slides.forEach((s) => lookup.set(s.id, s));
-    const nodes :SlideNode[] = [];
+    const nodes: SlideNode[] = [];
     sel.dim(0).forEach((id) => {
       const n = lookup.get(id);
       if (n) {
