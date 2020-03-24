@@ -74,7 +74,6 @@
     "rimraf": "^3.0.0",
     "sass-loader": "6.0.7",
     "style-loader": "0.16.1",
-    "ts-jest": "25.2.1",
     "extract-loader": "0.1.0",
     "thread-loader": "1.1.2",
     "ts-loader": "4.0.1",
