@@ -1,7 +1,7 @@
 /**
  * Created by Samuel Gratzl on 07.03.2017.
  */
-/// <reference types="jasmine" />
+/// <reference types="jest" />
 import RangeElem from '../../../src/range/internal/RangeElem';
 
 describe('RangeElem', () => {

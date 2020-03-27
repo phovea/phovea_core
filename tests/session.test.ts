@@ -1,4 +1,4 @@
-/// <reference types="jasmine" />
+/// <reference types="jest" />
 import {has, retrieve, store, remove} from '../src/session';
 
 describe('methods', () => {

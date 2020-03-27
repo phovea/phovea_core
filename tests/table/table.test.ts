@@ -4,7 +4,7 @@
 import {ITable, asTable} from '../../src/table';
 import {resolve} from '../../src/idtype';
 
-/// <reference types="jasmine" />
+/// <reference types="jest" />
 
 const data = [
   { a: 1, b: 'row1', c: 5.2},
