@@ -1,4 +1,4 @@
-/// <reference types="jasmine" />
+/// <reference types="jest" />
 import {parse} from '../../src/range';
 
 describe('parse', () => {

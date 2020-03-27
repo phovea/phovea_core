@@ -38,7 +38,7 @@ export default class LocalStorageProvenanceGraphManager implements IProvenanceGr
   }
 
   listSync(): IProvenanceGraphDataDescription[] {
-    const lists : string[] = this.loadFromLocalStorage('_provenance_graphs', []);
+    const lists: string[] = this.loadFromLocalStorage('_provenance_graphs', []);
     return lists
       .map((id) => <any>this.loadFromLocalStorage('_provenance_graph.' + id, {}))
       // filter to right application
