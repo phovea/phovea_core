@@ -64,13 +64,25 @@ const config = {
     ],
   },
   plugins: [
+    // minification is not required in development
+    // extracts css in separate file -> not needed in development
+    // cleans output.path folder (removes old files before new build)
+    new CleanWebpackPlugin({
+      cleanOnceBeforeBuildPatterns: [
+        '**/*',
+        path.join(process.cwd(), 'build/**/*')
+      ]
+    }),
+    // changes file names in index.html automatically (hash) -> created index.html in dist folder
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, './index.html'),
+      title: 'Setting up webpack 4',
+      template: 'index.html',
+      inject: true,
       minify: {
         removeComments: true,
-        collapseWhitespace: true,
+        collapseWhitespace: true
       },
-    }),
+    })
   ],
 };
 
