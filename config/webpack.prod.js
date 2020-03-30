@@ -13,9 +13,35 @@ const config = {
   mode: 'production',
   devtool: 'source-map',
   output: {
-    path: path.join(__dirname, '../build'),
-    filename: 'js/main.[contentHash].js',
-    publicPath: './',
+    filename: '[name].[contenthash:8].js',
+    path: path.resolve(__dirname, './../dist'),
+    publicPath: '',
+    library: libName,
+    libraryTarget: 'umd'
+  },
+  optimization: {
+    splitChunks: {
+      chunks: "all",
+      // otherwise react would be too small to be bundled separately
+      minSize: 10000,
+      automaticNameDelimiter: '_'
+    }
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(css)$/,
+        use: [
+          MiniCssExtractPlugin.loader, 'css-loader'
+        ]
+      },
+      {
+        test: /\.(scss)$/,
+        use: [
+          MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'
+        ]
+      }
+    ]
   },
   plugins: [
     // TerserPlugin is added by default in production mode
