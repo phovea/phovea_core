@@ -1,8 +1,12 @@
 const path = require('path');
+// const {entries} = require('./../.yo-rc.json')['generator-phovea'];
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const config = {
-  entry: path.join(__dirname, '../src/index'),
+  entry: {
+    'main': path.join(__dirname, './../index.js')
+  },
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
   },
