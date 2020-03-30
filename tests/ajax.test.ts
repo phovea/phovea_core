@@ -1,15 +1,16 @@
-/// <reference types="jasmine" />
+/// <reference types="jest" />
 import {api2absURL, encodeParams} from '../src/ajax';
+import {context} from '../src';
 
 describe('api2absURL', () => {
   it('one arg',
-      () => expect(api2absURL('/path')).toEqual('/api/path'));
+      () => expect(api2absURL('/path')).toEqual(context + 'api/path'));
   it('empty query',
-      () => expect(api2absURL('/path', {})).toEqual('/api/path'));
+      () => expect(api2absURL('/path', {})).toEqual(context + 'api/path'));
   it('query',
-      () => expect(api2absURL('/path', {foo: 'bar'})).toEqual('/api/path?foo=bar'));
+      () => expect(api2absURL('/path', {foo: 'bar'})).toEqual(context + 'api/path?foo=bar'));
   it('url w/ query',
-      () => expect(api2absURL('/path?query=fake', {foo: 'bar'})).toEqual('/api/path?query=fake&foo=bar'));
+      () => expect(api2absURL('/path?query=fake', {foo: 'bar'})).toEqual(context + 'api/path?query=fake&foo=bar'));
 });
 
 describe('encodeParams', () => {

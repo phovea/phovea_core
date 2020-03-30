@@ -2,6 +2,7 @@
   "compilerOptions": {
     "module": "es6",
     "target": "es5",
+    "downlevelIteration": true, // required as long as target is `es5`
     "importHelpers": true,
     "sourceMap": true,
     "moduleResolution": "node",
@@ -16,9 +17,8 @@
     "baseUrl": "../",
     "noImplicitAny": false,
     "skipLibCheck": true,
-
     "esModuleInterop": false,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true // required for i18next
   },
   "include": [
     "src/**/*.ts",

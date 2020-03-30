@@ -1,7 +1,7 @@
 /**
  * Created by Samuel Gratzl on 07.03.2017.
  */
-/// <reference types="jasmine" />
+/// <reference types="jest" />
 import Range1D from '../../src/range/Range1D';
 
 describe('Range1D', () => {
