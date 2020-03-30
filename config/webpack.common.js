@@ -70,11 +70,10 @@ const config = {
     new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns: [
         '**/*',
-        path.join(process.cwd(), './../build/**/*'),
-        path.join(process.cwd(), './../dist/**/*')
+        path.join(process.cwd(), './../build/**/*')
       ]
     }),
-    // changes file names in index.html automatically (hash) -> created index.html in dist folder
+    // changes file names in index.html automatically (hash) -> created index.html in build folder
     new HtmlWebpackPlugin({
       title: 'Setting up webpack 4',
       template: 'index.html',

@@ -14,7 +14,7 @@ const config = {
   devtool: 'source-map',
   output: {
     filename: '[name].[contenthash:8].js',
-    path: path.resolve(__dirname, './../dist'),
+    path: path.resolve(__dirname, './../build'),
     publicPath: '',
     library: libName,
     libraryTarget: 'umd'
@@ -53,7 +53,7 @@ const config = {
     new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns: [
         '**/*',
-        path.join(process.cwd(), 'dist/**/*')
+        path.join(process.cwd(), './../build/**/*')
       ]
     }),
     new HtmlWebpackPlugin({
