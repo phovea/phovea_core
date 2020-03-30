@@ -16,6 +16,11 @@ const config = {
     library: libName,
     libraryTarget: 'umd'
   },
+  devServer: {
+    port: 1234,
+    index: 'index.html',
+    contentBase: path.join(__dirname, './../build/')
+  }
 };
 
 module.exports = merge(common, config);
