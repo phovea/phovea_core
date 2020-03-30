@@ -15,10 +15,23 @@ const config = {
       {
         test: /\.(ts)x?$/,
         exclude: /node_modules/,
-        loader: 'babel-loader',
-        options: {
-          plugins: ["@babel/plugin-proposal-class-properties"]
-        }
+        use: [
+          {
+            loader: 'ts-loader',
+          }
+        ]
+      },
+      {
+        test: /\.(xml)$/,
+        use: [
+          'xml-loader'
+        ]
+      },
+      {
+        test: /\.(png|jpg)$/,
+        use: [
+          'file-loader'
+        ]
       },
       {
         test: /\.css$/i,
@@ -33,6 +46,12 @@ const config = {
             },
           },
         ],
+      },
+      {
+        test: /\.(scss)$/,
+        use: [
+          'style-loader', 'css-loader', 'sass-loader'
+        ]
       },
       {
         test: /\.(js|jsx)$/,
