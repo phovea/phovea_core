@@ -14,7 +14,8 @@ const config = {
     filename: '[name].[contenthash:8].js',
     publicPath: '/',
     library: libName,
-    libraryTarget: 'umd'
+    libraryTarget: 'umd',
+    umdNamedDefine: true
   },
   devServer: {
     port: 1234,

@@ -17,7 +17,8 @@ const config = {
     path: path.resolve(__dirname, './../build'),
     publicPath: '',
     library: libName,
-    libraryTarget: 'umd'
+    libraryTarget: 'umd',
+    umdNamedDefine: true
   },
   optimization: {
     splitChunks: {
