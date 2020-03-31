@@ -100,8 +100,13 @@ const config = {
         removeComments: true,
         collapseWhitespace: true
       },
+    }),
+    new BundleAnalyzerPlugin({
+      // set to 'server' to start analyzer during build
+      analyzerMode: 'disabled',
+      generateStatsFile: true,
+      statsOptions: { source: false }
     })
-    // , new BundleAnalyzerPlugin()
   ],
 };
 

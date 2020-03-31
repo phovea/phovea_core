@@ -42,6 +42,7 @@
     "posttest": "npm run lint",
     "build:dev": "webpack --mode development --config config/webpack.dev.js",
     "build": "webpack --mode production --config config/webpack.prod.js",
+    "bundle-report": "webpack-bundle-analyzer --port 4200 build/stats.json",
     "start": "webpack-dev-server --mode development --inline --config config/webpack.dev.js",
     "start:hot": "webpack-dev-server --inline --hot",
     "watch": "webpack --watch",
