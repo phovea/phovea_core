@@ -60,7 +60,24 @@ const config = {
         options: {
           plugins: ["@babel/plugin-proposal-class-properties"]
         }
-      }
+      },
+      {
+        test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        loader: 'url-loader',
+        options: {
+          limit: 10000, // inline <= 10kb
+          mimetype: 'application/font-woff'
+        }
+      },
+      {
+        test: /\.svg(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        loader: 'url-loader',
+        options: {
+          limit: 10000, // inline <= 10kb
+          mimetype: 'image/svg+xml'
+        }
+      },
+      {test: /\.(ttf|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'file-loader'}
     ],
   },
   plugins: [
