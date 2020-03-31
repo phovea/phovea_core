@@ -5,9 +5,11 @@
     "downlevelIteration": true, // required as long as target is `es5`
     "importHelpers": true,
     "sourceMap": true,
+    "declaration": true,
     "moduleResolution": "node",
     "jsx": "react",
     "experimentalDecorators": true,
+    "outDir": "lib",
     "lib": [
       "dom",
       "es2015",
