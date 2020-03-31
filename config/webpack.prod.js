@@ -70,8 +70,9 @@ const config = {
     new HtmlWebpackPlugin({
       filename: 'index.html',
       // which bundles should be included; vendors includes common libraries
-      chunks: ['index', 'vendors_index'],
+      chunks: ['main', 'vendors_main'],
       title: 'Hello World Chunk',
+      inject: true,
       meta: {
         description: 'chunk description'
       }
