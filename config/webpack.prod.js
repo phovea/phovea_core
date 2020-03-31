@@ -26,7 +26,17 @@ const config = {
       // otherwise react would be too small to be bundled separately
       minSize: 10000,
       automaticNameDelimiter: '_'
-    }
+    },
+    chunkIds: 'named',
+    minimizer: [
+      (compiler) => {
+        const TerserPlugin = require('terser-webpack-plugin');
+        new TerserPlugin({
+            cache: true,
+            parallel: true
+        }).apply(compiler);
+      }
+    ],
   },
   module: {
     rules: [
