@@ -11,7 +11,8 @@ let libName = /phovea_.*/.test(pkg.name) ? ['phovea', pkg.name.slice(7)] : pkg.n
 
 const config = {
   mode: 'production',
-  devtool: 'source-map',
+  // see https://webpack.js.org/configuration/devtool/#devtool
+  // devtool: 'source-map',
   output: {
     filename: '[name].min.js',
     path: path.resolve(__dirname, './../build'),
