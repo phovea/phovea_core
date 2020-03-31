@@ -11,7 +11,7 @@ const config = {
   devtool: 'inline-source-map',
   output: {
     path: path.join(__dirname, './../build'),
-    filename: '[name].[contenthash:8].js',
+    filename: '[name].js',
     publicPath: '/',
     library: libName,
     libraryTarget: 'umd',

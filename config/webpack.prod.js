@@ -13,7 +13,7 @@ const config = {
   mode: 'production',
   devtool: 'source-map',
   output: {
-    filename: '[name].[contenthash:8].js',
+    filename: '[name].min.js',
     path: path.resolve(__dirname, './../build'),
     publicPath: '',
     library: libName,
