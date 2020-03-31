@@ -20,7 +20,34 @@ const config = {
   devServer: {
     port: 1234,
     index: 'index.html',
-    contentBase: path.join(__dirname, './../build/')
+    contentBase: path.join(__dirname, './../build/'),
+    proxy: {
+      '/api/*': {
+        target: 'http://localhost:9000',
+        secure: false,
+        ws: true
+      },
+      '/login': {
+        target: 'http://localhost:9000',
+        secure: false
+      },
+      '/logout': {
+        target: 'http://localhost:9000',
+        secure: false
+      },
+      '/loggedinas': {
+        target: 'http://localhost:9000',
+        secure: false
+      },
+      watchOptions: {
+        aggregateTimeout: 500,
+        ignored: /node_modules/
+      }
+    },
+    watchOptions: {
+      aggregateTimeout: 500,
+      ignored: /node_modules/
+    }
   }
 };
 
