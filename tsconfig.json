@@ -8,8 +8,9 @@
     "declaration": true,
     "moduleResolution": "node",
     "jsx": "react",
+    "allowJs": true,
+    "declarationDir": "build/types/",
     "experimentalDecorators": true,
-    "outDir": "build/types",
     "lib": [
       "dom",
       "es2015",
@@ -25,8 +26,9 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "tests/**/*.ts",
-    "index.ts",
     "tsd.d.ts"
+  ],
+  "exclude": [
+    "../../src/**/*.d.ts"
   ]
 }
