@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "module": "es6",
-    "target": "es5",
+    "module": "ES2020",
+    "target": "ES2019",
     "downlevelIteration": true, // required as long as target is `es5`
     "importHelpers": true,
     "sourceMap": true,

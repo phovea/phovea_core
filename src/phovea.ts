@@ -2,31 +2,31 @@ import {IRegistry, asResource} from './plugin';
 import {EP_PHOVEA_CORE_LOCALE, ILocaleEPDesc} from './extensions';
 
 export default function (registry: IRegistry) {
-  //registry.push('extension-type', 'extension-id', function() { return System.import('./extension_impl'); }, {});
+  //registry.push('extension-type', 'extension-id', function() { return import('./extension_impl'); }, {});
   /// #if include('datatype', 'matrix')
-  registry.push('datatype', 'matrix', function () {return System.import('./matrix/Matrix');}, {});
+  registry.push('datatype', 'matrix', function () {return import('./matrix/Matrix');}, {});
   /// #endif
   /// #if include('datatype', 'table')
-  registry.push('datatype', 'table', function () {return System.import('./table/Table');}, {});
+  registry.push('datatype', 'table', function () {return import('./table/Table');}, {});
   /// #endif
   /// #if include('datatype', 'vector')
-  registry.push('datatype', 'vector', function () {return System.import('./vector/Vector');}, {});
+  registry.push('datatype', 'vector', function () {return import('./vector/Vector');}, {});
   /// #endif
   /// #if include('datatype', 'stratification')
-  registry.push('datatype', 'stratification', function () {return System.import('./stratification/Stratification');}, {});
+  registry.push('datatype', 'stratification', function () {return import('./stratification/Stratification');}, {});
   /// #endif
   /// #if include('datatype', 'graph')
-  registry.push('datatype', 'graph', function () {return System.import('./graph/GraphProxy');}, {});
+  registry.push('datatype', 'graph', function () {return import('./graph/GraphProxy');}, {});
   /// #endif
   /// #if include('datatype', 'atom')
-  registry.push('datatype', 'atom', function () {return System.import('./atom/Atom');}, {});
+  registry.push('datatype', 'atom', function () {return import('./atom/Atom');}, {});
   /// #endif
   /// #if include('tabSyncer', 'selection')
-  registry.push('tabSyncer', 'selection', function () {return System.import('./sync/SelectionSyncer');}, {});
+  registry.push('tabSyncer', 'selection', function () {return import('./sync/SelectionSyncer');}, {});
   /// #endif
 
   registry.push(EP_PHOVEA_CORE_LOCALE, 'phoveaCoreLocaleEN', function () {
-    return System.import('./assets/locales/en/phovea.json').then(asResource);
+    return import('./assets/locales/en/phovea.json').then(asResource);
   }, <ILocaleEPDesc>{
     ns: 'phovea',
   });
