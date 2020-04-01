@@ -1,0 +1,12 @@
+/.tscache
+/.idea
+/build/
+/dist/
+node_modules/
+/src/**/*.ts
+/tests/**/*
+*.map
+*.css
+*.log
+/.cache-loader
+package-lock.json
