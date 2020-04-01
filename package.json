@@ -21,8 +21,7 @@
     "node": ">= 12.13",
     "iojs": ">= 3"
   },
-  "main": "build/phovea_core.js",
-  "types": "build/types/*",
+  "types": "./dist/index.d.ts",
   "files": [
     "build",
     "src/**/*.js",
