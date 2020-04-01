@@ -22,6 +22,7 @@
     "iojs": ">= 3"
   },
   "main": "build/phovea_core.js",
+  "types": "build/types/*",
   "files": [
     "build",
     "src/**/*.js",
