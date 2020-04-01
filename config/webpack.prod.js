@@ -28,7 +28,7 @@ const config = {
       chunks: "all",
       // otherwise react would be too small to be bundled separately
       minSize: 10000,
-      automaticNameDelimiter: '_'
+      automaticNameDelimiter: '~'
     },
     chunkIds: 'named',
     minimizer: [
@@ -73,11 +73,11 @@ const config = {
     new HtmlWebpackPlugin({
       filename: 'index.html',
       // which bundles should be included; vendors includes common libraries
-      chunks: ['main', 'vendors_main'],
-      title: 'Hello World Chunk',
+      chunks: ['phovea_core', 'vendors~phovea_core'],
+      title: 'phovea_core',
       inject: true,
       meta: {
-        description: 'chunk description'
+        description: 'library description'
       }
     })
   ]
