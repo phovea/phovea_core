@@ -23,11 +23,12 @@
   },
   "main": "build/phovea_core.js",
   "files": [
-    "src",
-    "index.js",
+    "build",
+    "src/**/*.js",
+    "src/**/*.d.ts",
+    "src/assets",
     "phovea.js",
-    "phovea_registry.js",
-    "build"
+    "phovea_registry.js"
   ],
   "scripts": {
     "clean": "rimraf build dist && npm run clean:compile",
