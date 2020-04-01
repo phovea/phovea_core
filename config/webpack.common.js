@@ -1,5 +1,4 @@
 const path = require('path');
-// const {entries} = require('./../.yo-rc.json')['generator-phovea'];
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
