@@ -14,12 +14,14 @@ const config = {
   // see https://webpack.js.org/configuration/devtool/#devtool
   // devtool: 'source-map',
   output: {
-    filename: '[name].min.js',
+    // filename: '[name].min.js',
+    filename: '[name].js',
+    chunkFilename: '[chunkhash].js',
     path: path.resolve(__dirname, './../build'),
     publicPath: '',
-    library: libName,
+    library: 'phovea_core',
     libraryTarget: 'umd',
-    umdNamedDefine: true
+    umdNamedDefine: false
   },
   optimization: {
     splitChunks: {
