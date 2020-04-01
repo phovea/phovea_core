@@ -6,7 +6,7 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 
 const config = {
   entry: {
-    'main': path.join(__dirname, './../index.js')
+    'phovea_core': path.join(__dirname, './../index.js')
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
