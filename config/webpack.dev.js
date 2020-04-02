@@ -5,8 +5,6 @@ const pkg = require('./../package.json');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 
-let libName = /phovea_.*/.test(pkg.name) ? ['phovea', pkg.name.slice(7)] : pkg.name;
-
 const config = {
   mode: 'development',
   devtool: 'inline-source-map',
@@ -14,7 +12,7 @@ const config = {
     path: path.join(__dirname, './../build'),
     filename: '[name].js',
     publicPath: '/',
-    library: libName,
+    library: 'phovea_core',
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
@@ -53,8 +51,7 @@ const config = {
   plugins: [
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      // which bundles should be included; vendors includes common libraries
-      chunks: ['main'],
+      chunks: ['phovea_core'],
       title: 'Hello Development Chunk',
       inject: true,
       meta: {

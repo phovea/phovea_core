@@ -30,7 +30,6 @@ const config = {
       minSize: 10000,
       automaticNameDelimiter: '~'
     },
-    chunkIds: 'named',
     minimizer: [
       (compiler) => {
         const TerserPlugin = require('terser-webpack-plugin');
@@ -57,8 +56,8 @@ const config = {
       }
     ]
   },
+  // TerserPlugin is added by default in production mode
   plugins: [
-    // TerserPlugin is added by default in production mode
     // extracts css in separate file
     new MiniCssExtractPlugin({
       filename: 'styles.[name].[contenthash].css'
