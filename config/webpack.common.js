@@ -17,9 +17,6 @@ const config = {
         test: /\.(ts)x?$/,
         use: [
           {
-            loader: 'cache-loader'
-          },
-          {
             loader: 'ts-loader'
           }
         ],
