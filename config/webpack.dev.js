@@ -20,6 +20,7 @@ const config = {
     port: 1234,
     index: 'index.html',
     contentBase: path.join(__dirname, './../build/'),
+    hot: true,
     proxy: {
       '/api/*': {
         target: 'http://localhost:9000',
