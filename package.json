@@ -26,9 +26,7 @@
     "build",
     "src/**/*.js",
     "src/**/*.d.ts",
-    "src/assets",
-    "phovea.js",
-    "phovea_registry.js"
+    "src/assets"
   ],
   "scripts": {
     "clean": "rimraf build dist && npm run clean:compile",
