@@ -14,25 +14,19 @@ const config = {
     rules: [
       {
         test: /\.(ts)x?$/,
-        exclude: /node_modules/,
         use: [
           {
-            loader: 'ts-loader',
+            loader: 'cache-loader'
+          },
+          {
+            loader: 'ts-loader'
           }
-        ]
+        ],
+        // include: path.resolve('src'),
+        exclude: /node_modules/
       },
-      {
-        test: /\.(xml)$/,
-        use: [
-          'xml-loader'
-        ]
-      },
-      {
-        test: /\.(png|jpg)$/,
-        use: [
-          'file-loader'
-        ]
-      },
+      { test: /\.(xml)$/, use: 'xml-loader' },
+      { test: /\.(png|jpg)$/, loader: 'file-loader' },
       {
         test: /\.css$/i,
         use: [
@@ -69,7 +63,7 @@ const config = {
           mimetype: 'image/svg+xml'
         }
       },
-      {test: /\.(ttf|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'file-loader'}
+      { test: /\.(ttf|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'file-loader' }
     ],
   },
   plugins: [
