@@ -18,6 +18,7 @@ const config = {
     filename: '[name].js',
     chunkFilename: '[chunkhash].js',
     path: path.resolve(__dirname, './../build'),
+    pathinfo: false,
     publicPath: '',
     library: 'phovea_core',
     libraryTarget: 'umd',
