@@ -2,6 +2,7 @@ const path = require('path');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const ManifestPlugin = require('webpack-manifest-plugin');
 
 const config = {
   entry: {
@@ -88,7 +89,8 @@ const config = {
       analyzerMode: 'disabled',
       generateStatsFile: true,
       statsOptions: { source: false }
-    })
+    }),
+    new ManifestPlugin()
   ],
 };
 
