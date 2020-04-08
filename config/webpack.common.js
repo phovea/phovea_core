@@ -6,7 +6,7 @@ const ManifestPlugin = require('webpack-manifest-plugin');
 
 const config = {
   entry: {
-    'phovea_core': path.join(__dirname, './../index.js')
+    'main': path.join(__dirname, './../index.js')
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
