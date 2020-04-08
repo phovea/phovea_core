@@ -4,6 +4,8 @@ const common = require('./webpack.common');
 const pkg = require('./../package.json');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+const libName = pkg.name;
+const libDesc = pkg.description;
 
 const config = {
   mode: 'development',
@@ -12,7 +14,7 @@ const config = {
     path: path.join(__dirname, './../build'),
     filename: '[name].js',
     publicPath: '/',
-    library: 'phovea_core',
+    library: libName,
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
@@ -75,11 +77,11 @@ const config = {
   plugins: [
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      chunks: ['phovea_core'],
-      title: 'Hello Development Chunk',
+      chunks: ['main'],
+      title: libName,
       inject: true,
       meta: {
-        description: 'dev description'
+        description: libDesc
       }
     })
   ]
