@@ -18,7 +18,7 @@ const config = {
     // filename: '[name].min.js',
     filename: '[name].js',
     chunkFilename: '[chunkhash].js',
-    path: path.resolve(__dirname, './../build'),
+    path: path.resolve(__dirname, './../bundles'),
     pathinfo: false,
     publicPath: '',
     library: libName,
@@ -68,7 +68,7 @@ const config = {
     new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns: [
         '**/*',
-        path.join(process.cwd(), './../build/**/*')
+        path.join(process.cwd(), './../bundles/**/*')
       ]
     }),
     new HtmlWebpackPlugin({

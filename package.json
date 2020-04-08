@@ -23,13 +23,10 @@
   },
   "types": "./dist/index.d.ts",
   "files": [
-    "build",
-    "src/**/*.js",
-    "src/**/*.d.ts",
-    "src/assets"
+    "bundles"
   ],
   "scripts": {
-    "clean": "rimraf build dist && npm run clean:compile",
+    "clean": "rimraf bundles dist && npm run clean:compile",
     "clean:compile": "rimraf src/**/*.map src/**/*.js src/**/*.d.ts tests/**/*.js tests/**/*.map tests/**/*.d.ts demo/**/*.js demo/**/*.map demo/**/*.d.ts",
     "compile": "tsc",
     "lint": "tslint -c tslint.json -p . 'src/**/*.ts?(x)' 'tests/**/*.ts?(x)'",
@@ -41,15 +38,15 @@
     "posttest": "npm run lint",
     "build:dev": "webpack --mode development --config config/webpack.dev.js",
     "build": "webpack --mode production --config config/webpack.prod.js",
-    "bundle-report": "webpack-bundle-analyzer --port 4200 build/stats.json",
+    "bundle-report": "webpack-bundle-analyzer --port 4200 bundles/stats.json",
     "start": "webpack-dev-server --inline",
     "start:hot": "webpack-dev-server --inline --hot",
     "watch": "webpack --watch",
     "release:major": "npm version major && npm publish && git push --follow-tags",
     "release:minor": "npm version minor && npm publish && git push --follow-tags",
     "release:patch": "npm version patch && npm publish && git push --follow-tags",
-    "predist": "npm run build && npm run docs",
-    "dist": "mkdir dist && cd build && tar cvzf ../dist/phovea_core.tar.gz *"
+    "predist": "npm run bundles && npm run docs",
+    "dist": "mkdir dist && cd bundles && tar cvzf ../dist/phovea_core.tar.gz *"
   },
   "dependencies": {
     "i18next": "^19.3.2"

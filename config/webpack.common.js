@@ -57,7 +57,7 @@ const config = {
     new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns: [
         '**/*',
-        path.join(process.cwd(), './../build/**/*')
+        path.join(process.cwd(), './../bundles/**/*')
       ]
     }),
     new HtmlWebpackPlugin({

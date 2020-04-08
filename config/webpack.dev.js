@@ -11,7 +11,7 @@ const config = {
   mode: 'development',
   devtool: 'inline-source-map',
   output: {
-    path: path.join(__dirname, './../build'),
+    path: path.join(__dirname, './../bundles'),
     filename: '[name].js',
     publicPath: '/',
     library: libName,
@@ -45,7 +45,7 @@ const config = {
   devServer: {
     port: 1234,
     index: 'index.html',
-    contentBase: path.join(__dirname, './../build/'),
+    contentBase: path.join(__dirname, './../bundles/'),
     proxy: {
       '/api/*': {
         target: 'http://localhost:9000',
