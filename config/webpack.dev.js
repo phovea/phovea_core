@@ -16,6 +16,30 @@ const config = {
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: [
+          {
+            loader: 'style-loader',
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true,
+            },
+          },
+        ],
+      },
+      {
+        test: /\.(scss)$/,
+        use: [
+          'style-loader', 'css-loader', 'sass-loader'
+        ]
+      }
+    ]
+  },
   devServer: {
     port: 1234,
     index: 'index.html',
