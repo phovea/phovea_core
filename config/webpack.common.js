@@ -26,26 +26,6 @@ const config = {
       { test: /\.(xml)$/, use: 'xml-loader' },
       { test: /\.(png|jpg)$/, loader: 'file-loader' },
       {
-        test: /\.css$/i,
-        use: [
-          {
-            loader: 'style-loader',
-          },
-          {
-            loader: 'css-loader',
-            options: {
-              modules: true,
-            },
-          },
-        ],
-      },
-      {
-        test: /\.(scss)$/,
-        use: [
-          'style-loader', 'css-loader', 'sass-loader'
-        ]
-      },
-      {
         test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
         loader: 'url-loader',
         options: {
