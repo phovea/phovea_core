@@ -1,8 +1,16 @@
 const path = require('path');
+const pkg = require('./../package.json');
+const webpack = require('webpack');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const ManifestPlugin = require('webpack-manifest-plugin');
+
+const year = (new Date()).getFullYear();
+const banner = '/*! ' + (pkg.title || pkg.name) + ' - v' + pkg.version + ' - ' + year + '\n' +
+  (pkg.homepage ? '* ' + pkg.homepage + '\n' : '') +
+  '* Copyright (c) ' + year + ' ' + pkg.author.name + ';' +
+  ' Licensed ' + pkg.license + '*/\n';
 
 const config = {
   entry: {
@@ -61,13 +69,17 @@ const config = {
         collapseWhitespace: true
       },
     }),
-    new BundleAnalyzerPlugin({
-      // set to 'server' to start analyzer during build
-      analyzerMode: 'disabled',
-      generateStatsFile: true,
-      statsOptions: { source: false }
-    }),
-    new ManifestPlugin()
+    // new BundleAnalyzerPlugin({
+    //   // set to 'server' to start analyzer during build
+    //   analyzerMode: 'disabled',
+    //   generateStatsFile: true,
+    //   statsOptions: { source: false }
+    // }),
+    new ManifestPlugin(),
+    new webpack.BannerPlugin({
+      banner: banner,
+      raw: true
+    })
   ],
 };
 
