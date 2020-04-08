@@ -13,7 +13,7 @@ const libDesc = pkg.description;
 const config = {
   mode: 'production',
   // see https://webpack.js.org/configuration/devtool/#devtool
-  // devtool: 'source-map',
+  devtool: 'source-map',
   output: {
     // filename: '[name].min.js',
     filename: '[name].js',
@@ -37,7 +37,8 @@ const config = {
         const TerserPlugin = require('terser-webpack-plugin');
         new TerserPlugin({
             cache: true,
-            parallel: true
+            parallel: true,
+            sourceMap: true
         }).apply(compiler);
       }
     ],
