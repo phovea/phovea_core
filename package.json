@@ -45,7 +45,7 @@
     "release:major": "npm version major && npm publish && git push --follow-tags",
     "release:minor": "npm version minor && npm publish && git push --follow-tags",
     "release:patch": "npm version patch && npm publish && git push --follow-tags",
-    "predist": "npm run bundles && npm run docs",
+    "predist": "npm run build && npm run docs",
     "dist": "mkdir dist && cd bundles && tar cvzf ../dist/phovea_core.tar.gz *"
   },
   "dependencies": {
