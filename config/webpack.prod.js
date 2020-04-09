@@ -15,8 +15,8 @@ const config = {
   // see https://webpack.js.org/configuration/devtool/#devtool
   devtool: 'source-map',
   output: {
-    // filename: '[name].min.js',
-    filename: '[name].js',
+    filename: '[name].min.js',
+    // filename: '[name].js',
     chunkFilename: '[chunkhash].js',
     path: path.resolve(__dirname, './../bundles'),
     pathinfo: false,
@@ -26,11 +26,35 @@ const config = {
     umdNamedDefine: false
   },
   optimization: {
+    runtimeChunk: 'single',
     splitChunks: {
-      chunks: "all",
-      // otherwise react would be too small to be bundled separately
-      minSize: 10000,
-      automaticNameDelimiter: '~'
+      chunks: 'all',
+      automaticNameDelimiter: '~',
+      maxInitialRequests: Infinity,
+      minSize: 0,
+      cacheGroups: {
+        vendors: {
+          test: /[\\/]node_modules[\\/]((?!(phovea_.*|tdp_.*)).*)[\\/]/,
+          name(module) {
+            const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+            return `vendor.${packageName.replace('@', '')}`;
+          },
+        },
+        phovea: {
+          test: /[\\/]node_modules[\\/]((phovea_.*).*)[\\/]/,
+          name(module) {
+            const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+            return `phovea.${packageName.replace('@', '')}`;
+          },
+        },
+        tdp: {
+          test: /[\\/]node_modules[\\/]((tdp_.*).*)[\\/]/,
+          name(module) {
+            const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+            return `tdp.${packageName.replace('@', '')}`;
+          },
+        },
+      },
     },
     minimizer: [
       (compiler) => {
