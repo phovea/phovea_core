@@ -69,12 +69,12 @@ const config = {
         collapseWhitespace: true
       },
     }),
-    // new BundleAnalyzerPlugin({
-    //   // set to 'server' to start analyzer during build
-    //   analyzerMode: 'disabled',
-    //   generateStatsFile: true,
-    //   statsOptions: { source: false }
-    // }),
+    new BundleAnalyzerPlugin({
+    // set to 'server' to start analyzer during build
+      analyzerMode: 'disabled',
+      generateStatsFile: true,
+      statsOptions: { source: false }
+    }),
     new ManifestPlugin(),
     new webpack.BannerPlugin({
       banner: banner,
