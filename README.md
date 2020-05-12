@@ -1,5 +1,6 @@
-phovea_core [![Phovea][phovea-image]][phovea-url] [![NPM version][npm-image]][npm-url] [![Build Status][circleci-image]][circleci-url]
+phovea_core
 =====================
+ [![Phovea][phovea-image]][phovea-url] [![NPM version][npm-image]][npm-url] [![Build Status][circleci-image]][circleci-url]
 
 Phovea is a framework for developing web-based visualization applications. This is the core repository, but you will find the code distributed among [many repositories](http://phovea.caleydo.org/list_of_plugins).
 
