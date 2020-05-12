@@ -1,4 +1,4 @@
-phovea_core [![Phovea][phovea-image]][phovea-url] [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
+phovea_core [![Phovea][phovea-image]][phovea-url] [![NPM version][npm-image]][npm-url] [![Build Status][circleci-image]][circleci-url]
 =====================
 
 Phovea is a framework for developing web-based visualization applications. This is the core repository, but you will find the code distributed among [many repositories](http://phovea.caleydo.org/list_of_plugins).
@@ -42,5 +42,3 @@ This repository is part of **[Phovea](http://phovea.caleydo.org/)**, a platform 
 [npm-url]: https://npmjs.org/package/phovea_core
 [circleci-image]: https://circleci.com/gh/phovea/phovea_core.svg?style=shield
 [circleci-url]: https://circleci.com/gh/phovea/phovea_core
-[daviddm-image]: https://david-dm.org/phovea/phovea_core/status.svg
-[daviddm-url]: https://david-dm.org/phovea/phovea_core
