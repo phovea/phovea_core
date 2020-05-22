@@ -3,7 +3,7 @@
  */
 
 
-import {UniqueIdManager} from '../app/UniqueIdManager';
+import {UniqueIdManager} from './UniqueIdManager';
 
 
 export type IDragEffect = 'none' | 'copy' | 'copyLink' | 'copyMove' | 'link' | 'linkMove' | 'move' | 'all';
@@ -18,7 +18,7 @@ export interface IDropResult {
   data: { [mimeType: string]: string };
 }
 
-class DnDUtils {
+export class DnDUtils {
 
   /**
    * utility for drag-n-drop support

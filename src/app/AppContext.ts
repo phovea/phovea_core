@@ -21,7 +21,7 @@ export class AppContext {
    * whether the standard api calls should be prevented
    * @type {boolean}
    */
-  private offline = false;
+  public offline = false;
   public static __APP_CONTEXT__: string;
   public static context = AppContext.__APP_CONTEXT__;
 

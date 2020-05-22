@@ -7,7 +7,6 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 export * from './ArrayUtils';
-export * from './DndUtils';
 export * from './IdPool';
 export * from './promise';
 export * from './RemoveNodeObserver';

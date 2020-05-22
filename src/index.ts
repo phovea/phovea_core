@@ -10,6 +10,7 @@ export * from './2D';
 export * from './base';
 export * from './security';
 export * from './app';
+export * from './i18n';
 export * from './idtype';
 export * from './geom';
 export * from './range';

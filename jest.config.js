@@ -1,7 +1,6 @@
 // test dependencies that require transformation
 let pluginsToTransform = [
   'tdp_*',
-  'phovea_*',
   'lineupjs'
 ].join('|');
 
@@ -30,8 +29,7 @@ module.exports = {
     "node"
   ],
   modulePaths: [
-    "src",
-    "../"
+    "src"
   ],
   transformIgnorePatterns: [`../node_modules/${pluginsToTransform}`, `node_modules/${pluginsToTransform}`],
   globals: {
