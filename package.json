@@ -21,6 +21,7 @@
     "node": ">= 12.13",
     "iojs": ">= 3"
   },
+  "type":"module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
