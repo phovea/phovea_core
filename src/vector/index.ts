@@ -3,6 +3,10 @@
  */
 
 
-export {IVector, IVectorDataDescription, ICategoricalVector, INumericalVector, IAnyVector} from './IVector';
-export {asVector, IAsVectorOptions} from './Vector';
-export {asNameVector} from './internal/VectorNameVector';
+export * from './IVector';
+export * from './VectorUtils';
+export * from './ProjectedAtom';
+export * from './AVector';
+export * from './loader';
+export * from './Vector';
+

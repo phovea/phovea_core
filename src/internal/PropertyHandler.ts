@@ -1,10 +1,10 @@
 /**
  * Created by Samuel Gratzl on 27.12.2016.
  */
-import {EventHandler} from '../event';
+import {EventHandler} from '../base/event';
 
 
-export default class PropertyHandler extends EventHandler {
+export class PropertyHandler extends EventHandler {
   static readonly EVENT_CHANGED = 'changed';
   static readonly EVENT_ENTRY_CHANGED = 'entryChanged';
 

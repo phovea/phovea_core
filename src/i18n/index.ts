@@ -1,6 +1,6 @@
 import i18next from 'i18next';
-import {list} from '../plugin';
-import {EP_PHOVEA_CORE_LOCALE, ILocaleEPDesc} from '../extensions';
+import {PluginRegistry} from '../app/PluginRegistry';
+import {LocaleExtensionPointDesc, ILocaleEPDesc} from '../app/extensions';
 
 const DEFAULT_LANGUAGE = 'en';
 const DEFAULT_NAMESPACE = 'default_namespace';
@@ -17,7 +17,7 @@ const i18n = i18next.createInstance();
  *  Initialize I18next with the translation files
  */
 export async function initI18n() {
-  const plugins = await Promise.all(list(EP_PHOVEA_CORE_LOCALE).map((pluginDesc: ILocaleEPDesc) => {
+  const plugins = await Promise.all(PluginRegistry.getInstance().listPlugins(LocaleExtensionPointDesc.EP_PHOVEA_CORE_LOCALE).map((pluginDesc: ILocaleEPDesc) => {
     return pluginDesc.load().then((locale) => {
       return {
         lng: pluginDesc.lng || DEFAULT_LANGUAGE,

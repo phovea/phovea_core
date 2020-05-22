@@ -2,20 +2,20 @@
  * Created by Samuel Gratzl on 27.12.2016.
  */
 
-import {IPersistable} from '../index';
-import {Range, all, parse, RangeLike, list as rlist} from '../range';
-import {SelectAble, resolve as idtypes_resolve, IDType} from '../idtype';
+import {IPersistable} from '../base/IPersistable';
+import {Range, ParseRangeUtils, RangeLike} from '../range';
+import {IDTypeManager, IDType, ASelectAble} from '../idtype';
 import {IVector} from '../vector';
 import {ITable, IQueryArgs} from './ITable';
-import MultiTableVector from './internal/MultiTableVector';
-import {IValueType, IValueTypeDesc} from '../datatype';
-import {IInternalAccess} from './internal';
+import {MultiTableVector} from './internal/MultiTableVector';
+import {IValueType, IValueTypeDesc} from '../data';
+import {IInternalAccess} from './internal/InternalAccess';
 
 /**
  * base class for different Table implementations, views, transposed,...
  * @internal
  */
-export abstract class ATable extends SelectAble implements IInternalAccess {
+export abstract class ATable extends ASelectAble implements IInternalAccess {
   constructor(protected root: ITable & IInternalAccess) {
     super();
   }
@@ -34,18 +34,18 @@ export abstract class ATable extends SelectAble implements IInternalAccess {
 
   abstract size(): number[];
 
-  view(range: RangeLike = all()): ITable {
+  view(range: RangeLike = Range.all()): ITable {
     // tslint:disable:no-use-before-declare
     // Disabled the rule, because the classes below reference each other in a way that it is impossible to find a successful order.
-    return new TableView(this.root, parse(range));
+    return new TableView(this.root, ParseRangeUtils.parseRangeLike(range));
   }
 
   abstract dataOfColumn<T>(column: string, range?: RangeLike): Promise<T[]>;
 
   abstract queryView(name: string, args: IQueryArgs): ITable;
 
-  async idView(idRange: RangeLike = all()): Promise<ITable> {
-    return this.view((await this.ids()).indexOf(parse(idRange)));
+  async idView(idRange: RangeLike = Range.all()): Promise<ITable> {
+    return this.view((await this.ids()).indexOf(ParseRangeUtils.parseRangeLike(idRange)));
   }
 
   reduce<T, D extends IValueTypeDesc>(f: (row: IValueType[]) => T, thisArgument?: any, valuetype?: D, idtype?: IDType): IVector<T,D> {
@@ -55,17 +55,15 @@ export abstract class ATable extends SelectAble implements IInternalAccess {
   restore(persisted: any): IPersistable {
     if (persisted && persisted.f) {
       /* tslint:disable:no-eval */
-      return this.reduce(eval(persisted.f), this, persisted.valuetype, persisted.idtype ? idtypes_resolve(persisted.idtype) : undefined);
+      return this.reduce(eval(persisted.f), this, persisted.valuetype, persisted.idtype ? IDTypeManager.getInstance().resolveIdType(persisted.idtype) : undefined);
       /* tslint:enable:no-eval */
     } else if (persisted && persisted.range) { //some view onto it
-      return this.view(parse(persisted.range));
+      return this.view(ParseRangeUtils.parseRangeLike(persisted.range));
     } else {
       return <IPersistable>(<any>this);
     }
   }
 }
-
-export default ATable;
 
 // circular dependency thus not extractable
 
@@ -78,7 +76,7 @@ export class TableView extends ATable implements ITable {
   constructor(root: ITable & IInternalAccess, private range: Range) {
     super(root);
     this.range = range;
-    this.vectors = this.root.cols(rlist(range.dim(1))).map((v) => v.view(rlist(range.dim(0))));
+    this.vectors = this.root.cols(Range.list(range.dim(1))).map((v) => v.view(Range.list(range.dim(0))));
   }
 
   get desc() {
@@ -95,7 +93,7 @@ export class TableView extends ATable implements ITable {
   restore(persisted: any) {
     let r: ITable = this;
     if (persisted && persisted.range) { //some view onto it
-      r = r.view(parse(persisted.range));
+      r = r.view(ParseRangeUtils.parseRangeLike(persisted.range));
     }
     return r;
   }
@@ -113,42 +111,42 @@ export class TableView extends ATable implements ITable {
     return <any>this.vectors[i]; // TODO prevent `<any>` by using `<IVector<any, IValueTypeDesc>>` leads to TS compile errors
   }
 
-  cols(range: RangeLike = all()) {
-    return parse(range).filter(this.vectors, [this.ncol]);
+  cols(range: RangeLike = Range.all()) {
+    return ParseRangeUtils.parseRangeLike(range).filter(this.vectors, [this.ncol]);
   }
 
-  data(range: RangeLike = all()) {
-    return this.root.data(this.range.preMultiply(parse(range), this.root.dim));
+  data(range: RangeLike = Range.all()) {
+    return this.root.data(this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim));
   }
 
   colData<T>(column: string, range?: RangeLike): Promise<T[]> {
     return this.dataOfColumn(column, range);
   }
 
-  dataOfColumn<T>(column: string, range: RangeLike = all()) {
+  dataOfColumn<T>(column: string, range: RangeLike = Range.all()) {
     // since we directly accessing the column by name there is no need for the column part of the range
-    const rowRange = this.range.dim(0).preMultiply(parse(range).dim(0), this.root.dim[0]);
+    const rowRange = this.range.dim(0).preMultiply(ParseRangeUtils.parseRangeLike(range).dim(0), this.root.dim[0]);
     return this.root.dataOfColumn<T>(column, new Range([rowRange]));
   }
 
-  objects(range: RangeLike = all()) {
-    return this.root.objects(this.range.preMultiply(parse(range), this.root.dim));
+  objects(range: RangeLike = Range.all()) {
+    return this.root.objects(this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim));
   }
 
-  rows(range: RangeLike = all()) {
-    return this.root.rows(this.range.preMultiply(parse(range), this.root.dim));
+  rows(range: RangeLike = Range.all()) {
+    return this.root.rows(this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim));
   }
 
-  rowIds(range: RangeLike = all()) {
-    return this.root.rowIds(this.range.preMultiply(parse(range), this.root.dim));
+  rowIds(range: RangeLike = Range.all()) {
+    return this.root.rowIds(this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim));
   }
 
-  ids(range: RangeLike = all()) {
+  ids(range: RangeLike = Range.all()) {
     return this.rowIds(range);
   }
 
-  view(range: RangeLike = all()) {
-    const r = parse(range);
+  view(range: RangeLike = Range.all()) {
+    const r = ParseRangeUtils.parseRangeLike(range);
     if (r.isAll) {
       return this;
     }

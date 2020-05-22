@@ -1,12 +1,13 @@
 /**
  * Created by Samuel Gratzl on 27.12.2016.
  */
-import {IIntersectionParam, Vector2D} from '../2D';
-import AShape from './AShape';
-import Circle from './Circle';
-import Rect from './Rect';
+import {Vector2D} from '../2D/Vector2D';
+import {IIntersectionParam} from '../2D/IIntersectionParam';
+import {AShape} from './AShape';
+import {Circle} from './Circle';
+import {Rect} from './Rect';
 
-export default class Polygon extends AShape {
+export class Polygon extends AShape {
   constructor(private points: Vector2D[] = []) {
     super();
   }
@@ -53,6 +54,11 @@ export default class Polygon extends AShape {
       }
     });
     return new Rect(minX, minY, maxX - minX, maxY - minY);
+  }
+
+  get center(): Vector2D {
+    const c = this.bs();
+    return c.xy;
   }
 
   bs(): Circle {
@@ -155,4 +161,13 @@ export default class Polygon extends AShape {
       params: [this.points.slice()]
     };
   }
+  static polygon(...points: Vector2D[]): Polygon;
+  static polygon(points: Vector2D[]): Polygon;
+  static polygon(): Polygon {
+    if (Array.isArray(arguments[0])) {
+      return new Polygon(arguments[0]);
+    }
+    return new Polygon(Array.from(arguments));
+  }
+
 }

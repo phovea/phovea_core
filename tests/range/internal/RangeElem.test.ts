@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 07.03.2017.
  */
 /// <reference types="jest" />
-import RangeElem from '../../../src/range/internal/RangeElem';
+import {RangeElem} from '../../../src/range/internal/RangeElem';
 
 describe('RangeElem', () => {
   describe('from', () => {

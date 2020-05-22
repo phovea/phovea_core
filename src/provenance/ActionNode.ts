@@ -2,97 +2,38 @@
  * Created by sam on 12.02.2015.
  */
 
-import {GraphNode, AttributeContainer, isType} from '../graph/graph';
-import ObjectNode, {op, cat, IObjectRef} from './ObjectNode';
-import StateNode from './StateNode';
-import ProvenanceGraph, {ICmdFunction, ICmdResult, IInverseActionCreator, ICmdFunctionFactory} from './ProvenanceGraph';
-import {currentUserNameOrAnonymous} from '../security';
-import {resolveImmediately} from '../internal/promise';
+import {GraphNode, AttributeContainer, GraphEdge} from '../graph/graph';
+import {ObjectNode, IObjectRef} from './ObjectNode';
+import {ICmdFunction, IInverseActionCreator, ICmdFunctionFactory, IAction} from './ICmd';
+import {ActionMetaData} from './ActionMeta';
 
-/**
- * additional data about a performed action
- */
-export class ActionMetaData {
-  constructor(public readonly category: string, public readonly operation: string, public readonly name: string, public readonly timestamp: number = Date.now(), public readonly user: string = currentUserNameOrAnonymous()) {
 
-  }
-
-  static restore(p: any) {
-    return new ActionMetaData(p.category, p.operation, p.name, p.timestamp, p.user);
-  }
-
-  eq(that: ActionMetaData) {
-    return this.category === that.category && this.operation === that.operation && this.name === that.name;
-  }
-
+export class ActionUtils {
   /**
-   * checks whether this metadata are the inverse of the given one in terms of category and operation
-   * @param that
-   * @returns {boolean}
+   * creates an action given the data
+   * @param meta
+   * @param id
+   * @param f
+   * @param inputs
+   * @param parameter
+   * @returns {{meta: ActionMetaData, id: string, f: (function(IObjectRef<any>[], any, ProvenanceGraph): ICmdResult), inputs: IObjectRef<any>[], parameter: any}}
    */
-  inv(that: ActionMetaData) {
-    if (this.category !== that.category) {
-      return false;
-    }
-    if (this.operation === op.update) {
-      return that.operation === op.update;
-    }
-    return this.operation === op.create ? that.operation === op.remove : that.operation === op.create;
-  }
-
-  toString() {
-    return `${this.category}:${this.operation} ${this.name}`;
+  static action(meta: ActionMetaData, id: string, f: ICmdFunction, inputs: IObjectRef<any>[] = [], parameter: any = {}): IAction {
+    return {
+      meta,
+      id,
+      f,
+      inputs,
+      parameter
+    };
   }
 }
 
-export function meta(name: string, category: string = cat.data, operation: string = op.update, timestamp: number = Date.now(), user: string = currentUserNameOrAnonymous()) {
-  return new ActionMetaData(category, operation, name, timestamp, user);
-}
 
-export interface IAction {
-  readonly meta: ActionMetaData;
-  readonly id: string;
-  readonly f: ICmdFunction;
-  readonly inputs?: IObjectRef<any>[];
-  readonly parameter?: any;
-}
+export class ActionNode extends GraphNode {
+  public inverter: IInverseActionCreator;
 
-/**
- * creates an action given the data
- * @param meta
- * @param id
- * @param f
- * @param inputs
- * @param parameter
- * @returns {{meta: ActionMetaData, id: string, f: (function(IObjectRef<any>[], any, ProvenanceGraph): ICmdResult), inputs: IObjectRef<any>[], parameter: any}}
- */
-export function action(meta: ActionMetaData, id: string, f: ICmdFunction, inputs: IObjectRef<any>[] = [], parameter: any = {}): IAction {
-  return {
-     meta,
-    id,
-    f,
-    inputs,
-    parameter
-  };
-}
-
-/**
- * comparator by index
- * @param a
- * @param b
- * @returns {number}
- */
-function byIndex(a: AttributeContainer, b: AttributeContainer) {
-  const ai = +a.getAttr('index', 0);
-  const bi = +b.getAttr('index', 0);
-  return ai - bi;
-}
-
-
-export default class ActionNode extends GraphNode {
-  private inverter: IInverseActionCreator;
-
-  constructor(meta: ActionMetaData, functionId: string, private f: ICmdFunction, parameter: any = {}) {
+  constructor(meta: ActionMetaData, functionId: string, public f: ICmdFunction, parameter: any = {}) {
     super('action');
     super.setAttr('meta', meta);
     super.setAttr('f_id', functionId);
@@ -143,7 +84,7 @@ export default class ActionNode extends GraphNode {
   }
 
   get inversedBy() {
-    const r = this.incoming.filter(isType('inverses'))[0];
+    const r = this.incoming.filter(GraphEdge.isGraphType('inverses'))[0];
     return r ? <ActionNode>r.source : null;
   }
 
@@ -152,44 +93,12 @@ export default class ActionNode extends GraphNode {
    * @returns {ActionNode}
    */
   get inverses() {
-    const r = this.outgoing.filter(isType('inverses'))[0];
+    const r = this.outgoing.filter(GraphEdge.isGraphType('inverses'))[0];
     return r ? <ActionNode>r.target : null;
   }
 
   get isInverse() {
-    return this.outgoing.filter(isType('inverses'))[0] != null;
-  }
-
-  getOrCreateInverse(graph: ProvenanceGraph) {
-    const i = this.inversedBy;
-    if (i) {
-      return i;
-    }
-    if (this.inverter) {
-      return graph.createInverse(this, this.inverter);
-    }
-    this.inverter = null; //not needed anymore
-    return null;
-  }
-
-  updateInverse(graph: ProvenanceGraph, inverter: IInverseActionCreator) {
-    const i = this.inversedBy;
-    if (i) { //update with the actual values / parameter only
-      const c = inverter.call(this, this.requires, this.creates, this.removes);
-      i.parameter = c.parameter;
-      this.inverter = null;
-    } else if (!this.isInverse) {
-      //create inverse action immediatelly
-      graph.createInverse(this, inverter);
-      this.inverter = null;
-    } else {
-      this.inverter = inverter;
-    }
-  }
-
-  execute(graph: ProvenanceGraph, withinMilliseconds: number): PromiseLike<ICmdResult> {
-    const r = this.f.call(this, this.requires, this.parameter, graph, <number>withinMilliseconds);
-    return resolveImmediately(r);
+    return this.outgoing.filter(GraphEdge.isGraphType('inverses'))[0] != null;
   }
 
   equals(that: ActionNode): boolean {
@@ -202,30 +111,26 @@ export default class ActionNode extends GraphNode {
     //TODO check parameters if they are the same
     return true;
   }
-
   get uses(): ObjectNode<any>[] {
-    return this.outgoing.filter(isType(/(creates|removes|requires)/)).map((e) => <ObjectNode<any>>e.target);
+    return this.outgoing.filter(GraphEdge.isGraphType(/(creates|removes|requires)/)).map((e) => <ObjectNode<any>>e.target);
   }
 
   get creates(): ObjectNode<any>[] {
-    return this.outgoing.filter(isType('creates')).map((e) => <ObjectNode<any>>e.target);
+    return this.outgoing.filter(GraphEdge.isGraphType('creates')).map((e) => <ObjectNode<any>>e.target);
   }
 
   get removes(): ObjectNode<any>[] {
-    return this.outgoing.filter(isType('removes')).sort(byIndex).map((e) => <ObjectNode<any>>e.target);
+    return this.outgoing.filter(GraphEdge.isGraphType('removes')).sort(AttributeContainer.byIndex).map((e) => <ObjectNode<any>>e.target);
   }
 
   get requires(): ObjectNode<any>[] {
-    return this.outgoing.filter(isType('requires')).sort(byIndex).map((e) => <ObjectNode<any>>e.target);
+    return this.outgoing.filter(GraphEdge.isGraphType('requires')).sort(AttributeContainer.byIndex).map((e) => <ObjectNode<any>>e.target);
   }
+}
 
-  get resultsIn(): StateNode {
-    const r = this.outgoing.filter(isType('resultsIn'))[0];
-    return r ? <StateNode>r.target : null;
-  }
-
-  get previous(): StateNode {
-    const r = this.incoming.filter(isType('next'))[0];
-    return r ? <StateNode>r.source : null;
-  }
+/**
+ * an action compressor is used to compress a series of action to fewer one, e.g. create and remove can be annihilated
+ */
+export interface IActionCompressor {
+  (path: ActionNode[]): ActionNode[];
 }

@@ -2,11 +2,11 @@
  * Created by Samuel Gratzl on 27.12.2016.
  */
 
-import PropertyHandler from './PropertyHandler';
+import {PropertyHandler} from './PropertyHandler';
 /**
  * manages the hash location property helper
  */
-export default class HashProperties extends PropertyHandler {
+export class HashProperties extends PropertyHandler {
   static readonly EVENT_STATE_PUSHED = 'pushedState';
   static readonly EVENT_HASH_CHANGED = 'hashChanged';
 

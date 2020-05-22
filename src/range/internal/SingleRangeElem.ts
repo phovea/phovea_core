@@ -2,10 +2,11 @@
  * Created by Samuel Gratzl on 27.12.2016.
  */
 
-import {IRangeElem, fix} from './index';
-import {single, IIterator} from '../../iterator';
+import {IRangeElem} from './IRangeElem';
+import {RangeUtils} from './RangeUtils';
+import {SingleIterator, IIterator} from '../../base/iterator';
 
-export default class SingleRangeElem implements IRangeElem {
+export class SingleRangeElem implements IRangeElem {
   constructor(public readonly from: number) {
   }
 
@@ -38,7 +39,7 @@ export default class SingleRangeElem implements IRangeElem {
   }
 
   contains(value: number, size?: number) {
-    return fix(this.from, size) === value;
+    return RangeUtils.fixRange(this.from, size) === value;
   }
 
   reverse() {
@@ -46,11 +47,11 @@ export default class SingleRangeElem implements IRangeElem {
   }
 
   invert(index: number, size?: number) {
-    return fix(this.from, size) + index;
+    return RangeUtils.fixRange(this.from, size) + index;
   }
 
   iter(size?: number): IIterator<number> {
-    return single(fix(this.from, size));
+    return SingleIterator.create(RangeUtils.fixRange(this.from, size));
   }
 
   get __iterator__() {

@@ -7,11 +7,10 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {mixin} from '../index';
 import {RangeLike} from '../range';
-import Range from '../range/Range';
-import IDType from '../idtype/IDType';
-import {IDataType, IValueType, IValueTypeDesc, IDataDescription, createDefaultDataDesc} from '../datatype';
+import {Range} from '../range/Range';
+import {IDType} from '../idtype/IDType';
+import {IDataType, IValueType, IValueTypeDesc, IDataDescription, DataUtils} from '../data';
 import {IVector} from '../vector';
 import {IAnyVector} from '../vector/IVector';
 
@@ -154,16 +153,4 @@ export interface ITable extends IDataType {
    * @param range
    */
   objects(range?: RangeLike): Promise<any[]>;
-}
-
-export default ITable;
-
-
-export function createDefaultTableDesc(): ITableDataDescription {
-  return <ITableDataDescription>mixin(createDefaultDataDesc(), {
-    type: 'table',
-    idtype: '_rows',
-    columns: [],
-    size: [0, 0]
-  });
 }

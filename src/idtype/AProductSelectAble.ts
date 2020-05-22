@@ -7,11 +7,11 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {IEvent, IEventListener} from '../event';
-import {Range, RangeLike, parse} from '../range';
-import {SelectOperation, defaultSelectionType, fillWithNone, asSelectOperation} from './IIDType';
-import ASelectAble, {ISelectAble} from './ASelectAble';
-import ProductIDType from './ProductIDType';
+import {IEvent, IEventListener} from '../base/event';
+import {Range, RangeLike, ParseRangeUtils} from '../range';
+import {SelectOperation, SelectionUtils} from './SelectionUtils';
+import {ASelectAble, ISelectAble} from './ASelectAble';
+import {ProductIDType} from './ProductIDType';
 
 export interface IProductSelectAble extends ISelectAble {
   producttype: ProductIDType;
@@ -38,7 +38,7 @@ export abstract class AProductSelectAble extends ASelectAble {
         return;
       }
       //ensure the right number of dimensions
-      act.forEach((a) => fillWithNone(a, ids.ndim));
+      act.forEach((a) => SelectionUtils.fillWithNone(a, ids.ndim));
 
       this.fire(ProductIDType.EVENT_SELECT_PRODUCT, type, act);
       this.fire(`${ProductIDType.EVENT_SELECT_PRODUCT}-${type}`, act);
@@ -67,12 +67,12 @@ export abstract class AProductSelectAble extends ASelectAble {
     return super.off(events, handler);
   }
 
-  productSelections(type = defaultSelectionType): Promise<Range[]> {
+  productSelections(type = SelectionUtils.defaultSelectionType): Promise<Range[]> {
     return this.ids().then((ids: Range) => {
       const cells = this.producttype.productSelections(type);
       const act = cells.map((c) => ids.indexRangeOf(c)).filter((c) => !c.isNone);
       //ensure the right number of dimensions
-      act.forEach((a) => fillWithNone(a, ids.ndim));
+      act.forEach((a) => SelectionUtils.fillWithNone(a, ids.ndim));
       return act;
     });
   }
@@ -81,13 +81,13 @@ export abstract class AProductSelectAble extends ASelectAble {
   selectProduct(type: string, range: RangeLike[], op?: SelectOperation): Promise<Range[]>;
   selectProduct() {
     const a = Array.from(arguments);
-    const type = (typeof a[0] === 'string') ? a.shift() : defaultSelectionType,
-      range = a[0].map(parse),
-      op = asSelectOperation(a[1]);
+    const type = (typeof a[0] === 'string') ? a.shift() : SelectionUtils.defaultSelectionType,
+      range = a[0].map(ParseRangeUtils.parseRangeLike),
+      op = SelectionUtils.asSelectOperation(a[1]);
     return this.selectProductImpl(range, op, type);
   }
 
-  private selectProductImpl(cells: Range[], op = SelectOperation.SET, type: string = defaultSelectionType): Promise<Range[]> {
+  private selectProductImpl(cells: Range[], op = SelectOperation.SET, type: string = SelectionUtils.defaultSelectionType): Promise<Range[]> {
     return this.ids().then((ids: Range) => {
       cells = cells.map((c) => ids.preMultiply(c));
       return this.producttype.select(type, cells, op);
@@ -106,9 +106,7 @@ export abstract class AProductSelectAble extends ASelectAble {
     if (typeof a[0] === 'number') {
       a.shift();
     }
-    const type = (typeof a[0] === 'string') ? a[0] : defaultSelectionType;
-    return this.selectProductImpl([], SelectOperation.SET, type || defaultSelectionType);
+    const type = (typeof a[0] === 'string') ? a[0] : SelectionUtils.defaultSelectionType;
+    return this.selectProductImpl([], SelectOperation.SET, type || SelectionUtils.defaultSelectionType);
   }
 }
-
-export default AProductSelectAble;

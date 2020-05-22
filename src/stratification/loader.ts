@@ -7,10 +7,10 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {getAPIJSON} from '../ajax';
-import {parse, Range1DGroup, composite, Range, list as rlist, CompositeRange1D} from '../range';
+import {AppContext} from '../app/AppContext';
+import {ParseRangeUtils, Range1DGroup, Range, CompositeRange1D} from '../range';
 import {IStratificationDataDescription} from './IStratification';
-import {resolve} from '../idtype';
+import {IDTypeManager} from '../idtype';
 
 export interface ILoadedStratification {
   readonly rowIds: Range;
@@ -23,40 +23,42 @@ export interface IStratificationLoader {
 }
 
 function createRangeFromGroups(name: string, groups: any[]) {
-  return composite(name, groups.map((g) => {
-    return new Range1DGroup(g.name, g.color || 'gray', parse(g.range).dim(0));
+  return CompositeRange1D.composite(name, groups.map((g) => {
+    return new Range1DGroup(g.name, g.color || 'gray', ParseRangeUtils.parseRangeLike(g.range).dim(0));
   }));
 }
 
-export function viaAPILoader(): IStratificationLoader {
-  let _data: Promise<ILoadedStratification> = undefined;
-  return (desc) => {
-    if (!_data) { //in the cache
-      _data = getAPIJSON('/dataset/' + desc.id).then((data) => {
-        const idType = resolve(desc.idtype);
-        const rowIds = parse(data.rowIds);
-        idType.fillMapCache(rowIds.dim(0).asList(data.rows.length), data.rows);
-        return {
-          rowIds,
-          rows: data.rows,
-          range: createRangeFromGroups(desc.name, data.groups)
-        };
-      });
-    }
-    return _data;
-  };
-}
+export class StratificationLoaderUtils {
+  static viaAPILoader(): IStratificationLoader {
+    let _data: Promise<ILoadedStratification> = undefined;
+    return (desc) => {
+      if (!_data) { //in the cache
+        _data = AppContext.getInstance().getAPIJSON('/dataset/' + desc.id).then((data) => {
+          const idType = IDTypeManager.getInstance().resolveIdType(desc.idtype);
+          const rowIds = ParseRangeUtils.parseRangeLike(data.rowIds);
+          idType.fillMapCache(rowIds.dim(0).asList(data.rows.length), data.rows);
+          return {
+            rowIds,
+            rows: data.rows,
+            range: createRangeFromGroups(desc.name, data.groups)
+          };
+        });
+      }
+      return _data;
+    };
+  }
 
-export function viaDataLoader(rows: string[], rowIds: number[], range: CompositeRange1D): IStratificationLoader {
-  let _data: Promise<ILoadedStratification> = undefined;
-  return () => {
-    if (!_data) { //in the cache
-      _data = Promise.resolve({
-        rowIds: rlist(rowIds),
-        rows,
-        range
-      });
-    }
-    return _data;
-  };
+  static viaDataLoader(rows: string[], rowIds: number[], range: CompositeRange1D): IStratificationLoader {
+    let _data: Promise<ILoadedStratification> = undefined;
+    return () => {
+      if (!_data) { //in the cache
+        _data = Promise.resolve({
+          rowIds: Range.list(rowIds),
+          rows,
+          range
+        });
+      }
+      return _data;
+    };
+  }
 }

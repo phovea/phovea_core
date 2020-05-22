@@ -7,12 +7,12 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {getAPIJSON} from '../ajax';
-import {parse} from '../range';
-import Range from '../range/Range';
-import {IValueType, mask} from '../datatype';
+import {AppContext} from '../app/AppContext';
+import {ParseRangeUtils} from '../range';
+import {Range} from '../range/Range';
+import {IValueType, ValueTypeUtils} from '../data';
 import {IVectorDataDescription} from './IVector';
-import {resolve} from '../idtype';
+import {IDTypeManager} from '../idtype/IDTypeManager';
 
 /**
  * @internal
@@ -30,42 +30,43 @@ export interface IVectorLoader<T> {
   (desc: IVectorDataDescription<any>): Promise<IVectorLoaderResult<T>>;
 }
 
+export class VectorLoaderUtils {
+  /**
+   * @internal
+   */
+  static viaAPILoader<T>() {
+    let _loader: Promise<IVectorLoaderResult<T>> = undefined;
+    return (desc: IVectorDataDescription<any>) => {
+      if (_loader) { //in the cache
+        return _loader;
+      }
+      return _loader = AppContext.getInstance().getAPIJSON('/dataset/' + desc.id).then((data) => {
+        const range = ParseRangeUtils.parseRangeLike(data.rowIds);
+        data.rowIds = range;
+        data.data = ValueTypeUtils.mask(data.data, desc.value);
 
-/**
- * @internal
- */
-export function viaAPILoader<T>() {
-  let _loader: Promise<IVectorLoaderResult<T>> = undefined;
-  return (desc: IVectorDataDescription<any>) => {
-    if (_loader) { //in the cache
-      return _loader;
-    }
-    return _loader = getAPIJSON('/dataset/' + desc.id).then((data) => {
-      const range = parse(data.rowIds);
-      data.rowIds = range;
-      data.data = mask(data.data, desc.value);
-
-      const idType = resolve(desc.idtype);
-      idType.fillMapCache(range.dim(0).asList(data.rows.length), data.rows);
-      return data;
-    });
-  };
-}
-
-/**
- * @internal
- */
-export function viaDataLoader<T>(rows: string[], rowIds: number[], data: IValueType[]) {
-  let _data: IVectorLoaderResult<T> = undefined;
-  return () => {
-    if (_data) { //in the cache
-      return Promise.resolve(_data);
-    }
-    _data = {
-      rowIds: parse(rowIds),
-      rows,
-      data
+        const idType = IDTypeManager.getInstance().resolveIdType(desc.idtype);
+        idType.fillMapCache(range.dim(0).asList(data.rows.length), data.rows);
+        return data;
+      });
     };
-    return Promise.resolve(_data);
-  };
+  }
+
+  /**
+   * @internal
+   */
+  static viaDataLoader<T>(rows: string[], rowIds: number[], data: IValueType[]) {
+    let _data: IVectorLoaderResult<T> = undefined;
+    return () => {
+      if (_data) { //in the cache
+        return Promise.resolve(_data);
+      }
+      _data = {
+        rowIds: ParseRangeUtils.parseRangeLike(rowIds),
+        rows,
+        data
+      };
+      return Promise.resolve(_data);
+    };
+  }
 }

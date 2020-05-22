@@ -1,11 +1,11 @@
 /**
  * Created by Samuel Gratzl on 16.03.2017.
  */
-import {ITable} from '../';
-import {RangeLike, all} from '../../range';
-import ANameVector, {IStringVector} from '../../vector/internal/ANameVector';
+import {ITable} from '../ITable';
+import {RangeLike, Range} from '../../range';
+import {ANameVector, IStringVector} from '../../stratification/vector/ANameVector';
 
-export default class TableNameVector extends ANameVector<ITable> implements IStringVector {
+export class TableNameVector extends ANameVector<ITable> implements IStringVector {
 
   constructor(table: ITable) {
     super(table);
@@ -16,25 +16,24 @@ export default class TableNameVector extends ANameVector<ITable> implements IStr
     return this.base.idtype;
   }
 
-  names(range: RangeLike = all()) {
+  names(range: RangeLike = Range.all()) {
     return this.base.rows(range);
   }
 
-  ids(range: RangeLike = all()) {
+  ids(range: RangeLike = Range.all()) {
     return this.base.rowIds(range);
   }
 
   size() {
     return this.base.nrow;
   }
-}
 
-
-/**
- * converts the rows of the given table as a string vector
- * @param table
- * @return {IStringVector}
- */
-export function asNameVector(table: ITable): IStringVector {
-  return new TableNameVector(table);
+  /**
+   * converts the rows of the given table as a string vector
+   * @param table
+   * @return {IStringVector}
+   */
+  static asNameVector(table: ITable): IStringVector {
+    return new TableNameVector(table);
+  }
 }

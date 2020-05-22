@@ -1,0 +1,218 @@
+/**
+ * Created by sam on 26.12.2016.
+ */
+
+
+import {AppContext} from '../app/AppContext';
+import {EventHandler} from '../base/event';
+import {IIDType} from './IIDType';
+import {SelectionUtils} from './SelectionUtils';
+import {IDType, IDTypeLike} from './IDType';
+import {ProductIDType} from './ProductIDType';
+import {PluginRegistry} from '../app/PluginRegistry';
+import {RangeLike, ParseRangeUtils} from '../range';
+
+
+export class IDTypeManager {
+
+  public static EXTENSION_POINT_IDTYPE = 'idType';
+  public static EVENT_REGISTER_IDTYPE = 'register.idtype';
+
+
+  private cache = new Map<string, IDType|ProductIDType>();
+  private filledUp = false;
+
+
+  private fillUpData(entries: IIDType[]) {
+    entries.forEach(function (row) {
+      let entry = this.cache.get(row.id);
+      let newOne = false;
+      if (entry) {
+        if (entry instanceof IDType) {
+          (<any>entry).name = row.name;
+          (<any>entry).names = row.names;
+        }
+      } else {
+        entry = new IDType(row.id, row.name, row.names);
+        newOne = true;
+      }
+      this.cache.set(row.id, entry);
+      if (newOne) {
+        EventHandler.getInstance().fire(IDTypeManager.EVENT_REGISTER_IDTYPE, entry);
+      }
+    });
+  }
+
+
+  private toPlural(name: string) {
+    if (name[name.length - 1] === 'y') {
+      return name.slice(0, name.length - 1) + 'ies';
+    }
+    return name + 's';
+  }
+
+
+
+  public resolveIdType(id: IDTypeLike): IDType {
+    if (id instanceof IDType) {
+      return id;
+    } else {
+      const sid = <string>id;
+      return <IDType>this.registerIdType(sid, new IDType(sid, sid, this.toPlural(sid)));
+    }
+  }
+  public resolveProduct(...idtypes: IDType[]): ProductIDType {
+    const p = new ProductIDType(idtypes);
+    return <ProductIDType>this.registerIdType(p.id, p);
+  }
+
+  /**
+   * list currently resolved idtypes
+   * @returns {Array<IDType|ProductIDType>}
+   */
+  public listIdTypes(): IIDType[] {
+    return Array.from(this.cache.values());
+  }
+
+
+  /**
+   * Get a list of all IIDTypes available on both the server and the client.
+   * @returns {any}
+   */
+  public async listAllIdTypes(): Promise<IIDType[]> {
+    if (this.filledUp) {
+      return Promise.resolve(this.listIdTypes());
+    }
+    const c = await <Promise<IIDType[]>>AppContext.getInstance().getAPIJSON('/idtype/', {}, []);
+    this.filledUp = true;
+    this.fillUpData(c);
+    return this.listIdTypes();
+  }
+
+  public registerIdType(id: string, idtype: IDType|ProductIDType): IDType|ProductIDType {
+    if (this.cache.has(id)) {
+      return this.cache.get(id);
+    }
+    this.cache.set(id, idtype);
+    EventHandler.getInstance().fire('register.idtype', idtype);
+    return idtype;
+  }
+
+  public persistIdTypes() {
+    const r: any = {};
+
+    this.cache.forEach((v, id) => {
+      r[id] = v.persist();
+    });
+    return r;
+  }
+
+  public restoreIdType(persisted: any) {
+    Object.keys(persisted).forEach((id) => {
+      this.resolveIdType(id).restore(persisted[id]);
+    });
+  }
+
+  public clearSelection(type = SelectionUtils.defaultSelectionType) {
+    this.cache.forEach((v) => v.clear(type));
+  }
+
+
+  /**
+   * whether the given idtype is an internal one or not, i.e. the internal flag is set or it starts with an underscore
+   * @param idtype
+   * @return {boolean}
+   */
+  public isInternalIDType(idtype: IIDType) {
+    return idtype.internal || idtype.id.startsWith('_');
+  }
+
+  /**
+   * search for all matching ids for a given pattern
+   * @param pattern
+   * @param limit maximal number of results
+   * @return {Promise<void>}
+   */
+  public searchMapping(idType: IDType, pattern: string, toIDType: string|IDType, limit = 10): Promise<{match: string, to: string}[]> {
+    const target = IDTypeManager.getInstance().resolveIdType(toIDType);
+    return AppContext.getInstance().getAPIJSON(`/idtype/${idType.id}/${target.id}/search`, {q: pattern, limit});
+  }
+
+  /**
+   * returns the list of idtypes that this type can be mapped to
+   * @returns {Promise<IDType[]>}
+   */
+  public getCanBeMappedTo(idType: IDType) {
+    if (idType.canBeMappedTo === null) {
+      idType.canBeMappedTo = AppContext.getInstance().getAPIJSON(`/idtype/${idType.id}/`).then((list) => list.map(IDTypeManager.getInstance().resolveIdType));
+    }
+    return idType.canBeMappedTo;
+  }
+
+  public mapToFirstName(idType: IDType, ids: RangeLike, toIDType: IDTypeLike): Promise<string[]> {
+    const target = IDTypeManager.getInstance().resolveIdType(toIDType);
+    const r = ParseRangeUtils.parseRangeLike(ids);
+    return IDType.chooseRequestMethod(`/idtype/${idType.id}/${target.id}`, {ids: r.toString(), mode: 'first'});
+  }
+
+  public mapNameToFirstName(idType: IDType, names: string[], toIDtype: IDTypeLike): Promise<string[]> {
+    const target = IDTypeManager.getInstance().resolveIdType(toIDtype);
+    return IDType.chooseRequestMethod(`/idtype/${idType.id}/${target.id}`, {q: names, mode: 'first'});
+  }
+
+  public mapToName(idType: IDType, ids: RangeLike, toIDType: string|IDType): Promise<string[][]> {
+    const target = IDTypeManager.getInstance().resolveIdType(toIDType);
+    const r = ParseRangeUtils.parseRangeLike(ids);
+    return IDType.chooseRequestMethod(`/idtype/${idType.id}/${target.id}`, {ids: r.toString()});
+  }
+
+  public mapNameToName(idType: IDType, names: string[], toIDtype: IDTypeLike): Promise<string[][]> {
+    const target = IDTypeManager.getInstance().resolveIdType(toIDtype);
+    return IDType.chooseRequestMethod(`/idtype/${idType.id}/${target.id}`, {q: names});
+  }
+
+  public mapToFirstID(idType: IDType, ids: RangeLike, toIDType: IDTypeLike): Promise<number[]> {
+    const target = IDTypeManager.getInstance().resolveIdType(toIDType);
+    const r = ParseRangeUtils.parseRangeLike(ids);
+    return IDType.chooseRequestMethod(`/idtype/${idType.id}/${target.id}/map`, {ids: r.toString(), mode: 'first'});
+  }
+
+  public mapToID(idType: IDType, ids: RangeLike, toIDType: IDTypeLike): Promise<number[][]> {
+    const target = IDTypeManager.getInstance().resolveIdType(toIDType);
+    const r = ParseRangeUtils.parseRangeLike(ids);
+    return IDType.chooseRequestMethod(`/idtype/${idType.id}/${target.id}/map`, {ids: r.toString()});
+  }
+
+  public mapNameToFirstID(idType: IDType, names: string[], toIDType: IDTypeLike): Promise<number[]> {
+    const target = IDTypeManager.getInstance().resolveIdType(toIDType);
+    return IDType.chooseRequestMethod(`/idtype/${idType.id}/${target.id}/map`, {q: names, mode: 'first'});
+  }
+
+  public mapNameToID(idType: IDType, names: string[], toIDType: IDTypeLike): Promise<number[][]> {
+    const target = IDTypeManager.getInstance().resolveIdType(toIDType);
+    return IDType.chooseRequestMethod(`/idtype/${idType.id}/${target.id}/map`, {q: names});
+  }
+
+
+
+  constructor() {
+    //register known idtypes via registry
+    PluginRegistry.getInstance().listPlugins(IDTypeManager.EXTENSION_POINT_IDTYPE).forEach((plugin) => {
+      const id = plugin.id;
+      const name = plugin.name;
+      const names = plugin.names || this.toPlural(name);
+      const internal = Boolean(plugin.internal);
+      this.registerIdType(id, new IDType(id, name, names, internal));
+    });
+  }
+
+  private static instance: IDTypeManager;
+
+  public static getInstance(): IDTypeManager {
+    if (!IDTypeManager.instance) {
+      IDTypeManager.instance = new IDTypeManager();
+    }
+
+    return IDTypeManager.instance;
+  }
+}

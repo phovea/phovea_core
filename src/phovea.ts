@@ -1,5 +1,6 @@
-import {IRegistry, asResource} from './plugin';
-import {EP_PHOVEA_CORE_LOCALE, ILocaleEPDesc} from './extensions';
+import {IRegistry} from './base/plugin';
+import {PluginRegistry} from './app/PluginRegistry';
+import {LocaleExtensionPointDesc, ILocaleEPDesc} from './app/extensions';
 
 export default function (registry: IRegistry) {
   //registry.push('extension-type', 'extension-id', function() { return System.import('./extension_impl'); }, {});
@@ -25,8 +26,8 @@ export default function (registry: IRegistry) {
   registry.push('tabSyncer', 'selection', function () {return System.import('./sync/SelectionSyncer');}, {});
   /// #endif
 
-  registry.push(EP_PHOVEA_CORE_LOCALE, 'phoveaCoreLocaleEN', function () {
-    return System.import('./assets/locales/en/phovea.json').then(asResource);
+  registry.push(LocaleExtensionPointDesc.EP_PHOVEA_CORE_LOCALE, 'phoveaCoreLocaleEN', function () {
+    return System.import('./assets/locales/en/phovea.json').then(PluginRegistry.getInstance().asResource);
   }, <ILocaleEPDesc>{
     ns: 'phovea',
   });

@@ -1,12 +1,14 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import ProvenanceGraph, {IProvenanceGraphManager, IProvenanceGraphDataDescription} from './ProvenanceGraph';
-import LocalStorageProvenanceGraphManager from './LocalStorageProvenanceGraphManager';
-import RemoteStorageProvenanceGraphManager from './RemoteStorageProvenanceGraphManager';
-import GraphBase from '../graph/GraphBase';
+import {ProvenanceGraph} from './ProvenanceGraph';
+import {IProvenanceGraphManager} from './provenance';
+import {IProvenanceGraphDataDescription} from './ICmd';
+import {LocalStorageProvenanceGraphManager} from './LocalStorageProvenanceGraphManager';
+import {RemoteStorageProvenanceGraphManager} from './RemoteStorageProvenanceGraphManager';
+import {GraphBase} from '../graph/GraphBase';
 
-export default class MixedStorageProvenanceGraphManager implements IProvenanceGraphManager {
+export class MixedStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private remote: RemoteStorageProvenanceGraphManager;
   private local: LocalStorageProvenanceGraphManager;
 

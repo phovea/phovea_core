@@ -7,12 +7,13 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {mixin} from '../index';
 import {Range, RangeLike, CompositeRange1D} from '../range';
-import {IDataType, IDataDescription, createDefaultDataDesc} from '../datatype';
+import {IDataType, IDataDescription} from '../data';
 import {IDType} from '../idtype';
-import {IHistogram} from '../math';
+import {IHistogram} from '../data/histogram';
 import {ICategoricalVector} from '../vector/IVector';
+
+
 
 export interface IGroup {
   readonly name: string;
@@ -20,19 +21,6 @@ export interface IGroup {
   readonly size: number;
 }
 
-export function guessColor(stratification: string, group: string) {
-  switch (group.toLowerCase()) {
-    case 'male':
-      return 'blue';
-    case 'female':
-      return 'red';
-    case 'deceased':
-      return '#e41a1b';
-    case 'living':
-      return '#377eb8';
-  }
-  return 'gray';
-}
 
 export interface IStratificationDataDescription extends IDataDescription {
   readonly idtype: string;
@@ -73,16 +61,6 @@ export interface IStratification extends IDataType {
   group(group: number): IStratification;
 
   origin(): Promise<IDataType>;
-}
-export default IStratification;
 
-
-export function createDefaultStratificationDesc(): IStratificationDataDescription {
-  return <IStratificationDataDescription>mixin(createDefaultDataDesc(), {
-    type: 'stratification',
-    idtype: '_rows',
-    size: 0,
-    groups: [],
-    ngroups: 0
-  });
+  size(): any;
 }

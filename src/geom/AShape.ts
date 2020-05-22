@@ -1,24 +1,30 @@
 /**
  * Created by Samuel Gratzl on 27.12.2016.
  */
-import {Vector2D, IShape, IIntersectionParam, Intersection, vec} from '../2D';
-import Rect from './Rect';
-import Circle from './Circle';
+import {IShape} from '../2D/IShape';
+import {IRect} from './IRect';
+import {ICircle} from './ICircle';
+import {Vector2D} from '../2D/Vector2D';
+import {Intersection} from '../2D/Intersection';
+import {IIntersectionParam} from '../2D/IIntersectionParam';
 
-export const CORNER: any = <any>[];
-CORNER.N = CORNER[0] = 'n';
-CORNER.NE = CORNER[1] = 'ne';
-CORNER.E = CORNER[2] = 'e';
-CORNER.SE = CORNER[3] = 'se';
-CORNER.S = CORNER[4] = 's';
-CORNER.SW = CORNER[5] = 'sw';
-CORNER.W = CORNER[6] = 'w';
-CORNER.NW = CORNER[7] = 'nw';
+export module Corner {
+  export const CORNER: any = <any>[];
+  CORNER.N = CORNER[0] = 'n';
+  CORNER.NE = CORNER[1] = 'ne';
+  CORNER.E = CORNER[2] = 'e';
+  CORNER.SE = CORNER[3] = 'se';
+  CORNER.S = CORNER[4] = 's';
+  CORNER.SW = CORNER[5] = 'sw';
+  CORNER.W = CORNER[6] = 'w';
+  CORNER.NW = CORNER[7] = 'nw';
+}
 
 /**
  * a simple basic shape
  */
 export abstract class AShape implements IShape {
+
   /**
    * shift the shape by the given amount
    * @param x
@@ -40,16 +46,14 @@ export abstract class AShape implements IShape {
 
   /**
    * center of this shape
-   * @returns {Circle}
+   * @returns {Vector2D}
    */
-  get center(): Vector2D {
-    return this.bs().xy;
-  }
+  abstract get center(): Vector2D;
 
   /**
    * axis aligned bounding box (ro)
    */
-  abstract aabb(): Rect;
+  abstract aabb(): IRect;
 
   /**
    * a specific corner of th axis aligned bounding box
@@ -59,30 +63,25 @@ export abstract class AShape implements IShape {
   corner(corner: string): Vector2D {
     const r = this.aabb();
     switch (corner) {
-      case CORNER.N:
-        return vec(r.cx, r.y);
-      case CORNER.S:
-        return vec(r.cx, r.y2);
-      case CORNER.W:
-        return vec(r.x, r.cy);
-      case CORNER.E:
-        return vec(r.x2, r.cy);
-      case CORNER.NE:
-        return vec(r.x2, r.y);
-      case CORNER.NW:
+      case Corner.CORNER.N:
+        return Vector2D.vec(r.cx, r.y);
+      case Corner.CORNER.S:
+        return Vector2D.vec(r.cx, r.y2);
+      case Corner.CORNER.W:
+        return Vector2D.vec(r.x, r.cy);
+      case Corner.CORNER.E:
+        return Vector2D.vec(r.x2, r.cy);
+      case Corner.CORNER.NE:
+        return Vector2D.vec(r.x2, r.y);
+      case Corner.CORNER.NW:
         return r.xy;
-      case CORNER.SE:
-        return vec(r.x2, r.y2);
-      case CORNER.SW:
-        return vec(r.x, r.y2);
+      case Corner.CORNER.SE:
+        return Vector2D.vec(r.x2, r.y2);
+      case Corner.CORNER.SW:
+        return Vector2D.vec(r.x, r.y2);
     }
     return this.center;
   }
-
-  /**
-   * bounding sphere (ro)
-   */
-  abstract bs(): Circle;
 
   protected abstract shiftImpl(x: number, y: number): void;
 
@@ -92,5 +91,3 @@ export abstract class AShape implements IShape {
     return Intersection.intersectShapes(this, other);
   }
 }
-
-export default AShape;

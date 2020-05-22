@@ -1,11 +1,8 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import {GraphNode, isType} from '../graph/graph';
-import StateNode from './StateNode';
-
-export const DEFAULT_DURATION = 1500; //ms
-export const DEFAULT_TRANSITION = 0; //ms
+import {GraphNode, GraphEdge} from '../graph/graph';
+import {StateNode} from './StateNode';
 
 
 export interface IStateAnnotation {
@@ -33,7 +30,11 @@ export interface IFrameStateAnnotation extends IStateAnnotation {
 }
 
 
-export default class SlideNode extends GraphNode {
+export class SlideNode extends GraphNode {
+
+  public static DEFAULT_DURATION = 1500; //ms
+  public static DEFAULT_TRANSITION = 0; //ms
+
   constructor() {
     super('story');
   }
@@ -55,11 +56,11 @@ export default class SlideNode extends GraphNode {
   }
 
   get isTextOnly() {
-    return !this.outgoing.some(isType('jumpTo'));
+    return !this.outgoing.some(GraphEdge.isGraphType('jumpTo'));
   }
 
   get state() {
-    const edge = this.outgoing.filter(isType('jumpTo'))[0];
+    const edge = this.outgoing.filter(GraphEdge.isGraphType('jumpTo'))[0];
     return edge ? <StateNode>edge.target : null;
   }
 
@@ -68,16 +69,16 @@ export default class SlideNode extends GraphNode {
   }
 
   get next() {
-    const n = this.outgoing.filter(isType('next'))[0];
+    const n = this.outgoing.filter(GraphEdge.isGraphType('next'))[0];
     return n ? <SlideNode>n.target : null;
   }
 
   get nexts() {
-    return this.outgoing.filter(isType('next')).map((n) => <SlideNode>n.target);
+    return this.outgoing.filter(GraphEdge.isGraphType('next')).map((n) => <SlideNode>n.target);
   }
 
   get previous() {
-    const n = this.incoming.filter(isType('next'))[0];
+    const n = this.incoming.filter(GraphEdge.isGraphType('next'))[0];
     return n ? <SlideNode>n.source : null;
   }
 
@@ -87,7 +88,7 @@ export default class SlideNode extends GraphNode {
   }
 
   get duration() {
-    return <number>this.getAttr('duration', DEFAULT_DURATION);
+    return <number>this.getAttr('duration', SlideNode.DEFAULT_DURATION);
   }
 
   set duration(value: number) {
@@ -99,7 +100,7 @@ export default class SlideNode extends GraphNode {
    * @returns {number}
    */
   get transition() {
-    return <number>this.getAttr('transition', DEFAULT_TRANSITION);
+    return <number>this.getAttr('transition', SlideNode.DEFAULT_TRANSITION);
   }
 
   set transition(value: number) {
@@ -156,4 +157,18 @@ export default class SlideNode extends GraphNode {
     }
     return s;
   }
+
+
+  static toSlidePath(s?: SlideNode) {
+    const r: SlideNode[] = [];
+    while (s) {
+      if (r.indexOf(s) >= 0) {
+        return r;
+      }
+      r.push(s);
+      s = s.next;
+    }
+    return r;
+  }
+
 }

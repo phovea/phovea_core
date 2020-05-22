@@ -2,11 +2,12 @@
  * Created by Samuel Gratzl on 27.12.2016.
  */
 
-import {IRangeElem, fix} from './index';
-import {range as iRange, IIterator} from '../../iterator';
-import SingleRangeElem from './SingleRangeElem';
+import {IRangeElem} from './IRangeElem';
+import {RangeUtils} from './RangeUtils';
+import {Iterator, IIterator} from '../../base/iterator';
+import {SingleRangeElem} from './SingleRangeElem';
 
-export default class RangeElem implements IRangeElem {
+export class RangeElem implements IRangeElem {
   constructor(public readonly from: number, public readonly to: number = -1, public readonly step: number = 1) {
     if (step === 0) {
       throw new Error('invalid step size: ' + step);
@@ -45,7 +46,7 @@ export default class RangeElem implements IRangeElem {
   }
 
   size(size?: number): number {
-    const t = fix(this.to, size), f = fix(this.from, size);
+    const t = RangeUtils.fixRange(this.to, size), f = RangeUtils.fixRange(this.from, size);
     if (this.step === 1) {
       return Math.max(t - f, 0);
     } else if (this.step === -1) {
@@ -82,7 +83,7 @@ export default class RangeElem implements IRangeElem {
     if (this.isAll) {
       return index;
     }
-    return fix(this.from, size) + index * this.step;
+    return RangeUtils.fixRange(this.from, size) + index * this.step;
   }
 
   /**
@@ -92,9 +93,9 @@ export default class RangeElem implements IRangeElem {
   iter(size?: number): IIterator<number> {
     if (this.step < 0 && this.to === -1) {
       // keep negative to have 0 included
-      return iRange(fix(this.from, size), -1, this.step);
+      return Iterator.create(RangeUtils.fixRange(this.from, size), -1, this.step);
     }
-    return iRange(fix(this.from, size), fix(this.to, size), this.step);
+    return Iterator.create(RangeUtils.fixRange(this.from, size), RangeUtils.fixRange(this.to, size), this.step);
   }
 
   get __iterator__() {
@@ -105,8 +106,8 @@ export default class RangeElem implements IRangeElem {
     if (this.isAll) {
       return true;
     }
-    const f = fix(this.from, size);
-    const t = fix(this.to, size);
+    const f = RangeUtils.fixRange(this.from, size);
+    const t = RangeUtils.fixRange(this.to, size);
     if (this.step === -1) {
       if (this.to === -1) {
         return (value <= f && value >= 0);

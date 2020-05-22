@@ -7,16 +7,16 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {all, list as rlist, Range, RangeLike, none, parse} from '../range';
-import {SelectAble, resolve} from '../idtype';
-import {IValueTypeDesc} from '../datatype';
-import IAtom, {IAtomDataDescription} from './IAtom';
+import {Range, RangeLike, ParseRangeUtils} from '../range';
+import {ASelectAble, IDTypeManager} from '../idtype';
+import {IValueTypeDesc} from '../data/valuetype';
+import {IAtom, IAtomDataDescription} from './IAtom';
 
 /**
  * base class for different Atom implementations
  * @internal
  */
-export abstract class AAtom<T,D extends IValueTypeDesc> extends SelectAble {
+export abstract class AAtom<T,D extends IValueTypeDesc> extends ASelectAble {
 
   constructor(public readonly desc: IAtomDataDescription<D>) {
     super();
@@ -31,17 +31,17 @@ export abstract class AAtom<T,D extends IValueTypeDesc> extends SelectAble {
   }
 
   get idtype() {
-    return resolve(this.desc.idtype);
+    return IDTypeManager.getInstance().resolveIdType(this.desc.idtype);
   }
 
   get idtypes() {
     return [this.idtype];
   }
 
-  ids(range = all()): Promise<Range> {
-    range = parse(range);
+  ids(range = Range.all()): Promise<Range> {
+    range = ParseRangeUtils.parseRangeLike(range);
     if (range.isNone) {
-      return Promise.resolve(none());
+      return Promise.resolve(Range.none());
     }
     return this.id();
   }
@@ -60,5 +60,3 @@ export abstract class AAtom<T,D extends IValueTypeDesc> extends SelectAble {
     return this;
   }
 }
-
-export default AAtom;

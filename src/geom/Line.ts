@@ -2,12 +2,13 @@
  * Created by Samuel Gratzl on 27.12.2016.
  */
 
-import {IIntersectionParam, Vector2D} from '../2D';
-import AShape from './AShape';
-import Circle from './Circle';
-import Rect from './Rect';
+import {Vector2D} from '../2D/Vector2D';
+import {IIntersectionParam} from '../2D/IIntersectionParam';
+import {AShape} from './AShape';
+import {Circle} from './Circle';
+import {Rect} from './Rect';
 
-export default class Line extends AShape {
+export class Line extends AShape {
   constructor(public x1 = 0, public y1 = 0, public x2 = 0, public y2 = 0) {
     super();
   }
@@ -39,6 +40,11 @@ export default class Line extends AShape {
     return new Rect(Math.min(this.x1, this.x2), Math.min(this.y1, this.y2), Math.abs(this.x1 - this.x2), Math.abs(this.y1 - this.y2));
   }
 
+  get center(): Vector2D {
+    const c = this.bs();
+    return c.xy;
+  }
+
   bs(): Circle {
     const x = 0.5 * (this.x1 + this.x2);
     const y = 0.5 * (this.y1 + this.y2);
@@ -57,6 +63,9 @@ export default class Line extends AShape {
       name: 'Line',
       params: [this.xy, this.x2y2]
     };
+  }
+  static line(x1: number, y1: number, x2: number, y2: number): Line {
+    return new Line(x1, y1, x2, y2);
   }
 }
 

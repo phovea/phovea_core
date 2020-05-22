@@ -2,17 +2,18 @@
  * Created by Samuel Gratzl on 27.12.2016.
  */
 
-import {fixId, argFilter, argSort} from '../../index';
-import {parse, RangeLike, list as rlist} from '../../range';
-import {IValueTypeDesc, IValueType} from '../../datatype';
+import {ArrayUtils} from '../../internal/ArrayUtils';
+import {BaseUtils} from '../../base/BaseUtils';
+import {ParseRangeUtils, RangeLike, Range} from '../../range';
+import {IValueTypeDesc, IValueType} from '../../data';
 import {IVector, IVectorDataDescription} from '../../vector';
 import {ITable} from '../ITable';
-import AVector from '../../vector/AVector';
+import {AVector} from '../../vector/AVector';
 
 /**
  * @internal
  */
-export default class MultiTableVector<T, D extends IValueTypeDesc> extends AVector<T, D> implements IVector<T,D> {
+export class MultiTableVector<T, D extends IValueTypeDesc> extends AVector<T, D> implements IVector<T,D> {
   readonly desc: IVectorDataDescription<D>;
 
   constructor(private table: ITable, private f: (row: IValueType[]) => T, private thisArgument = table, public readonly valuetype: D = null, private _idtype = table.idtype) {
@@ -22,7 +23,7 @@ export default class MultiTableVector<T, D extends IValueTypeDesc> extends AVect
       fqname: table.desc.fqname + '-p',
       description: f.toString(),
       type: 'vector',
-      id: fixId(table.desc.id + '-p' + f.toString()),
+      id: BaseUtils.fixId(table.desc.id + '-p' + f.toString()),
       idtype: table.desc.idtype,
       size: table.nrow,
       value: valuetype,
@@ -52,7 +53,7 @@ export default class MultiTableVector<T, D extends IValueTypeDesc> extends AVect
   restore(persisted: any) {
     let r: IVector<T,D> = this;
     if (persisted && persisted.range) { //some view onto it
-      r = r.view(parse(persisted.range));
+      r = r.view(ParseRangeUtils.parseRangeLike(persisted.range));
     }
     return r;
   }
@@ -77,7 +78,7 @@ export default class MultiTableVector<T, D extends IValueTypeDesc> extends AVect
    * @param i
    */
   async at(i: number): Promise<any> {
-    return this.f.call(this.thisArgument, (await this.table.data(rlist(i)))[0]);
+    return this.f.call(this.thisArgument, (await this.table.data(Range.list(i)))[0]);
   }
 
   /**
@@ -90,13 +91,13 @@ export default class MultiTableVector<T, D extends IValueTypeDesc> extends AVect
 
   async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
     const d = await this.data();
-    const indices = argSort(d, compareFn, thisArg);
-    return this.view(rlist(indices));
+    const indices = ArrayUtils.argSort(d, compareFn, thisArg);
+    return this.view(Range.list(indices));
   }
 
   async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
     const d = await this.data();
-    const indices = argFilter(d, callbackfn, thisArg);
-    return this.view(rlist(indices));
+    const indices = ArrayUtils.argFilter(d, callbackfn, thisArg);
+    return this.view(Range.list(indices));
   }
 }

@@ -4,16 +4,13 @@
 /**
  * Created by Samuel Gratzl on 22.10.2014.
  */
-import {SelectOperation, resolve as idtypes_resolve, SelectAble} from '../idtype';
-import {all, parse, RangeLike, list} from '../range';
-import {IPersistable, flagId, uniqueId} from '../index';
-import {EventHandler} from '../event';
-import {IDataType, IDataDescription} from '../datatype';
+import {SelectOperation, IDTypeManager, ASelectAble} from '../idtype';
+import {ParseRangeUtils, RangeLike, Range} from '../range';
+import {UniqueIdManager} from '../app/UniqueIdManager';
+import {IPersistable} from '../base/IPersistable';
+import {EventHandler} from '../base/event';
+import {IDataType, IDataDescription} from '../data';
 
-export const DIM_NODES = 0;
-export const IDTYPE_NODES = '_nodes';
-export const DIM_EDGES = 1;
-export const IDTYPE_EDGES = '_edges';
 
 export class AttributeContainer extends EventHandler implements IPersistable {
   private attrMap = new Map<string, any>();
@@ -58,6 +55,18 @@ export class AttributeContainer extends EventHandler implements IPersistable {
     }
     return this;
   }
+
+  /**
+   * comparator by index
+   * @param a
+   * @param b
+   * @returns {number}
+   */
+  static byIndex(a: AttributeContainer, b: AttributeContainer) {
+    const ai = +a.getAttr('index', 0);
+    const bi = +b.getAttr('index', 0);
+    return ai - bi;
+  }
 }
 /**
  * a simple graph none
@@ -70,12 +79,12 @@ export class GraphNode extends AttributeContainer {
 
   constructor(public readonly type: string = 'node', id: number = NaN) {
     super();
-    this._id = flagId('graph_node', id);
+    this._id = UniqueIdManager.getInstance().flagId('graph_node', id);
   }
 
   get id() {
     if (isNaN(this._id)) {
-      this._id = uniqueId('graph_node');
+      this._id = UniqueIdManager.getInstance().uniqueId('graph_node');
     }
     return this._id;
   }
@@ -90,7 +99,7 @@ export class GraphNode extends AttributeContainer {
   restore(persisted: any) {
     super.restore(persisted);
     (<any>this).type = persisted.type;
-    this._id = flagId('graph_node', persisted.id);
+    this._id = UniqueIdManager.getInstance().flagId('graph_node', persisted.id);
     return this;
   }
 }
@@ -101,7 +110,7 @@ export class GraphEdge extends AttributeContainer {
 
   constructor(public readonly type: string = 'edge', public readonly source: GraphNode = null, public readonly target: GraphNode = null, id: number = NaN) {
     super();
-    this._id = flagId('graph_edge', id);
+    this._id = UniqueIdManager.getInstance().flagId('graph_edge', id);
     if (source && target) {
       this.init();
     }
@@ -109,7 +118,7 @@ export class GraphEdge extends AttributeContainer {
 
   get id() {
     if (isNaN(this._id)) {
-      this._id = uniqueId('graph_edge');
+      this._id = UniqueIdManager.getInstance().uniqueId('graph_edge');
     }
     return this._id;
   }
@@ -144,16 +153,15 @@ export class GraphEdge extends AttributeContainer {
   restore(p: any, nodes?: (id: number) => GraphNode) {
     super.restore(p);
     (<any>this).type = p.type;
-    this._id = flagId('graph_edge', p.id);
+    this._id = UniqueIdManager.getInstance().flagId('graph_edge', p.id);
     (<any>this).source = nodes(p.source);
     (<any>this).target = nodes(p.target);
     this.init();
     return this;
   }
-}
-
-export function isType(type: string|RegExp) {
-  return (edge: GraphEdge) => type instanceof RegExp ? type.test(edge.type) : edge.type === type;
+  static isGraphType(type: string|RegExp) {
+    return (edge: GraphEdge) => type instanceof RegExp ? type.test(edge.type) : edge.type === type;
+  }
 }
 
 
@@ -196,7 +204,13 @@ export interface IGraph extends IDataType {
 }
 
 
-export abstract class AGraph extends SelectAble {
+export abstract class AGraph extends ASelectAble {
+
+  public static DIM_NODES = 0;
+  public static IDTYPE_NODES = '_nodes';
+  public static DIM_EDGES = 1;
+  public static IDTYPE_EDGES = '_edges';
+
   abstract get nodes(): GraphNode[];
 
   get nnodes() {
@@ -213,39 +227,39 @@ export abstract class AGraph extends SelectAble {
     return [this.nodes.length, this.edges.length];
   }
 
-  ids(range: RangeLike = all()) {
-    const ids = (list(this.nodes.map((n) => n.id), this.edges.map((n) => n.id)));
-    return Promise.resolve(ids.preMultiply(parse(range)));
+  ids(range: RangeLike = Range.all()) {
+    const ids = (Range.list(this.nodes.map((n) => n.id), this.edges.map((n) => n.id)));
+    return Promise.resolve(ids.preMultiply(ParseRangeUtils.parseRangeLike(range)));
   }
 
-  idView(idRange: RangeLike = all()): Promise<IGraph> {
+  idView(idRange: RangeLike = Range.all()): Promise<IGraph> {
     throw Error('not implemented');
   }
 
   selectNode(node: GraphNode, op = SelectOperation.SET) {
-    this.select(DIM_NODES, [this.nodes.indexOf(node)], op);
+    this.select(AGraph.DIM_NODES, [this.nodes.indexOf(node)], op);
   }
 
   async selectedNodes(): Promise<GraphNode[]> {
     const r = await this.selections();
     const nodes: GraphNode[] = [];
-    r.dim(DIM_NODES).forEach((index) => nodes.push(this.nodes[index]));
+    r.dim(AGraph.DIM_NODES).forEach((index) => nodes.push(this.nodes[index]));
     return nodes;
   }
 
   selectEdge(edge: GraphEdge, op = SelectOperation.SET) {
-    this.select(DIM_EDGES, [this.edges.indexOf(edge)], op);
+    this.select(AGraph.DIM_EDGES, [this.edges.indexOf(edge)], op);
   }
 
   async selectedEdges(): Promise<GraphEdge[]> {
     const r = await this.selections();
     const edges: GraphEdge[] = [];
-    r.dim(DIM_EDGES).forEach((index) => edges.push(this.edges[index]));
+    r.dim(AGraph.DIM_EDGES).forEach((index) => edges.push(this.edges[index]));
     return edges;
   }
 
   get idtypes() {
-    return [IDTYPE_NODES, IDTYPE_EDGES].map(idtypes_resolve);
+    return [AGraph.IDTYPE_NODES, AGraph.IDTYPE_EDGES].map(IDTypeManager.getInstance().resolveIdType);
   }
 
 }

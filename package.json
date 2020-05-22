@@ -52,7 +52,8 @@
     "dist": "mkdir dist && cd build && tar cvzf ../dist/phovea_core.tar.gz *"
   },
   "dependencies": {
-    "i18next": "^19.3.2"
+    "i18next": "^19.3.2",
+    "madge": "^3.9.0"
   },
   "devDependencies": {
     "@types/jest": "25.1.4",

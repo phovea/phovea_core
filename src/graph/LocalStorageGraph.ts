@@ -4,12 +4,12 @@
 /**
  * Created by Samuel Gratzl on 22.10.2014.
  */
-import {IEvent} from '../event';
-import GraphBase, {IGraphFactory, IGraphDataDescription} from './GraphBase';
-import {GraphEdge, GraphNode, IGraph} from './graph';
-import {resolveImmediately} from '../internal/promise';
+import {IEvent} from '../base/event';
+import {GraphBase, IGraphFactory} from './GraphBase';
+import {GraphEdge, GraphNode, IGraph, IGraphDataDescription} from './graph';
+import {ResolveNow} from '../internal/promise';
 
-export default class LocalStorageGraph extends GraphBase implements IGraph {
+export class LocalStorageGraph extends GraphBase implements IGraph {
 
   private updateHandler = (event: IEvent) => {
     const s = event.target;
@@ -41,7 +41,7 @@ export default class LocalStorageGraph extends GraphBase implements IGraph {
   }
 
   static migrate(graph: GraphBase, storage = sessionStorage) {
-    return resolveImmediately(graph.migrate()).then(({nodes, edges}) => {
+    return ResolveNow.resolveImmediately(graph.migrate()).then(({nodes, edges}) => {
       return new LocalStorageGraph(graph.desc, nodes, edges, storage);
     });
   }
