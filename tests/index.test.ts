@@ -1,6 +1,6 @@
 /// <reference types="jest" />
 import {BaseUtils} from '../src/base/BaseUtils';
-import {ArrayUtils} from '../src/internal/ArrayUtils';
+import {ArrayUtils} from '../src/base/ArrayUtils';
 import {UniqueIdManager} from '../src/app/UniqueIdManager';
 
 

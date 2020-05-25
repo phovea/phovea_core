@@ -7,7 +7,7 @@
 import {IEvent} from '../base/event';
 import {GraphBase, IGraphFactory} from './GraphBase';
 import {GraphEdge, GraphNode, IGraph, IGraphDataDescription} from './graph';
-import {ResolveNow} from '../internal/promise';
+import {ResolveNow} from '../base/promise';
 
 export class LocalStorageGraph extends GraphBase implements IGraph {
 

@@ -1,7 +1,7 @@
 /**
  * Created by Samuel Gratzl on 27.12.2016.
  */
-import { ArrayUtils } from '../../internal/ArrayUtils';
+import { ArrayUtils } from '../../base/ArrayUtils';
 import { Range, ParseRangeUtils } from '../../range';
 import { AVector } from '../../vector/AVector';
 /**

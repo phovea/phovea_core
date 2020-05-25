@@ -5,7 +5,7 @@ import {AppContext} from '../app/AppContext';
 import {IEvent} from '../base/event';
 import {GraphBase, IGraphFactory} from './GraphBase';
 import {GraphEdge, GraphNode, IGraphDataDescription} from './graph';
-import {ResolveNow} from '../internal/promise';
+import {ResolveNow} from '../base/promise';
 
 interface ISyncItem {
   type: 'node'|'edge';

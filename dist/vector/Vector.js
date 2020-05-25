@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 import { BaseUtils } from '../base/BaseUtils';
-import { ArrayUtils } from '../internal/ArrayUtils';
+import { ArrayUtils } from '../base/ArrayUtils';
 import { Range, ParseRangeUtils } from '../range';
 import { IDTypeManager, LocalIDAssigner } from '../idtype';
 import { ValueTypeUtils } from '../data';

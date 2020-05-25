@@ -8,7 +8,7 @@ import { LocalStorageGraph } from '../graph/LocalStorageGraph';
 import { UserSession } from '../app/UserSession';
 import { Permission } from '../security/Permission';
 import { MemoryGraph } from '../graph/MemoryGraph';
-import { ResolveNow } from '../internal/promise';
+import { ResolveNow } from '../base/promise';
 export class LocalStorageProvenanceGraphManager {
     constructor(options = {}) {
         this.options = {

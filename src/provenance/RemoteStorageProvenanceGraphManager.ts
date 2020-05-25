@@ -11,7 +11,7 @@ import {GraphBase} from '../graph/GraphBase';
 import {UserSession} from '../app/UserSession';
 import {GraphProxy} from '../graph/GraphProxy';
 import {RemoteStoreGraph} from '../graph/RemoteStorageGraph';
-import {ResolveNow} from '../internal/promise';
+import {ResolveNow} from '../base/promise';
 import {IDataType} from '../data/datatype';
 import {AGraph} from '../graph';
 

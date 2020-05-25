@@ -11,7 +11,7 @@ import { StateNode, } from './StateNode';
 import { ActionNode } from './ActionNode';
 import { SlideNode } from './SlideNode';
 import { GraphEdge } from '../graph/graph';
-import { ResolveNow } from '../internal/promise';
+import { ResolveNow } from '../base/promise';
 import { ProvenanceGraphDim } from './provenance';
 import { ProvenanceGraphUtils } from './ProvenanceGraphUtils';
 import { MemoryGraph } from '../graph/MemoryGraph';

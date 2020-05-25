@@ -4,7 +4,7 @@
 import { DataCache } from '../data/DataCache';
 import { ADataType } from '../data/datatype';
 import { GraphNode } from '../graph/graph';
-import { ResolveNow } from '../internal/promise';
+import { ResolveNow } from '../base/promise';
 export class ObjectRefUtils {
     /**
      * creates an object reference to the given object

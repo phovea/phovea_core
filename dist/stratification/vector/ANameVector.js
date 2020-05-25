@@ -3,7 +3,7 @@
  */
 import { AVector } from '../../vector/AVector';
 import { ParseRangeUtils, Range } from '../../range';
-import { ArrayUtils } from '../../internal/ArrayUtils';
+import { ArrayUtils } from '../../base/ArrayUtils';
 export class ANameVector extends AVector {
     constructor(base) {
         super(null);

@@ -8,7 +8,7 @@ import {ActionNode, IActionCompressor} from './ActionNode';
 import {SlideNode} from './SlideNode';
 import {GraphEdge} from '../graph/graph';
 import {IGraphFactory} from '../graph/GraphBase';
-import {ResolveNow} from '../internal/promise';
+import {ResolveNow} from '../base/promise';
 import {ICmdFunctionFactory, ICmdResult} from './ICmd';
 import {ActionMetaData} from './ActionMeta';
 

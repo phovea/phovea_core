@@ -1,6 +1,6 @@
 import { GraphBase } from './GraphBase';
 import { GraphEdge, GraphNode } from './graph';
-import { ResolveNow } from '../internal/promise';
+import { ResolveNow } from '../base/promise';
 export class LocalStorageGraph extends GraphBase {
     constructor(desc, nodes = [], edges = [], storage = sessionStorage) {
         super(desc, nodes, edges);

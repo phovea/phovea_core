@@ -8,7 +8,7 @@
  */
 import { Range, Range1DGroup, ParseRangeUtils } from '../range';
 import { CompositeRange1D } from '../range/CompositeRange1D';
-import { ArrayUtils } from '../internal/ArrayUtils';
+import { ArrayUtils } from '../base/ArrayUtils';
 import { ASelectAble, IDTypeManager } from '../idtype';
 import { Categorical2PartioningUtils, ValueTypeUtils } from '../data';
 import { Histogram, CatHistogram } from '../data/histogram';

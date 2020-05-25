@@ -6,7 +6,7 @@ import { DataCache } from '../data/DataCache';
 import { ProvenanceGraph } from './ProvenanceGraph';
 import { ProvenanceGraphUtils } from './ProvenanceGraphUtils';
 import { UserSession } from '../app/UserSession';
-import { ResolveNow } from '../internal/promise';
+import { ResolveNow } from '../base/promise';
 export class RemoteStorageProvenanceGraphManager {
     constructor(options = {}) {
         this.options = {

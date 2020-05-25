@@ -6,7 +6,7 @@
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
-import { ArrayUtils } from '../internal/ArrayUtils';
+import { ArrayUtils } from '../base/ArrayUtils';
 import { Range, ParseRangeUtils } from '../range';
 import { ValueTypeUtils } from '../data';
 import { AVector } from '../vector/AVector';

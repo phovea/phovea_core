@@ -9,7 +9,7 @@
 
 
 import {BaseUtils} from '../base/BaseUtils';
-import {ArrayUtils} from '../internal/ArrayUtils';
+import {ArrayUtils} from '../base/ArrayUtils';
 import {Range, RangeLike, ParseRangeUtils} from '../range';
 import {IDTypeManager, LocalIDAssigner} from '../idtype';
 import {

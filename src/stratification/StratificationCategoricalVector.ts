@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {ArrayUtils} from '../internal/ArrayUtils';
+import {ArrayUtils} from '../base/ArrayUtils';
 import {RangeLike, Range, CompositeRange1D, ParseRangeUtils} from '../range';
 import {ICategoricalValueTypeDesc, ValueTypeUtils} from '../data';
 import {ICategoricalVector, IVectorDataDescription} from '../vector';

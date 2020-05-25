@@ -7,4 +7,6 @@ export * from './iterator';
 export * from './BaseUtils';
 export * from './Session';
 export * from './statistics';
+export * from './promise';
+export * from './BaseUtils';
 //# sourceMappingURL=index.js.map

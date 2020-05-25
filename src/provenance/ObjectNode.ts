@@ -4,7 +4,7 @@
 import {DataCache} from '../data/DataCache';
 import {ADataType, IDataType} from '../data/datatype';
 import {GraphNode} from '../graph/graph';
-import {ResolveNow} from '../internal/promise';
+import {ResolveNow} from '../base/promise';
 
 /**
  * an object reference is a common description of an object node in the provenance graph

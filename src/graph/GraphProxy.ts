@@ -9,7 +9,7 @@ import {GraphFactoryUtils, IGraphFactory} from './GraphBase';
 import {RemoteStoreGraph} from './RemoteStorageGraph';
 import {MemoryGraph} from './MemoryGraph';
 import {LocalStorageGraph} from './LocalStorageGraph';
-import {ResolveNow} from '../internal/promise';
+import {ResolveNow} from '../base/promise';
 
 export class GraphProxy extends ADataType<IGraphDataDescription> {
   private cache: PromiseLike<AGraph> = null;

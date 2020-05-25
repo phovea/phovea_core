@@ -9,3 +9,5 @@ export * from './IIterable';
 export * from './BaseUtils';
 export * from './Session';
 export * from './statistics';
+export * from './promise';
+export * from './BaseUtils';

@@ -13,7 +13,7 @@ import {IAction} from './ICmd';
 import {SlideNode} from './SlideNode';
 import {GraphEdge, GraphNode} from '../graph/graph';
 import {GraphBase} from '../graph/GraphBase';
-import {ResolveNow} from '../internal/promise';
+import {ResolveNow} from '../base/promise';
 import {ProvenanceGraphDim} from './provenance';
 import {IProvenanceGraphDataDescription, ICmdFunction, IInverseActionCreator, ICmdResult, IProvenanceGraph} from './ICmd';
 import {ProvenanceGraphUtils} from './ProvenanceGraphUtils';

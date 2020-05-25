@@ -7,7 +7,7 @@ import { StateNode, } from './StateNode';
 import { ActionNode } from './ActionNode';
 import { SlideNode } from './SlideNode';
 import { GraphEdge } from '../graph/graph';
-import { ResolveNow } from '../internal/promise';
+import { ResolveNow } from '../base/promise';
 import { ActionMetaData } from './ActionMeta';
 export class ProvenanceGraphUtils {
     static removeNoops(path) {

@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 27.12.2016.
  */
 
-import {ArrayUtils} from '../../internal/ArrayUtils';
+import {ArrayUtils} from '../../base/ArrayUtils';
 import {Range, RangeLike, ParseRangeUtils} from '../../range';
 import {IValueTypeDesc} from '../../data';
 import {IVector, IVectorDataDescription} from '../../vector';

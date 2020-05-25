@@ -5,7 +5,7 @@ import {AVector} from '../../vector/AVector';
 import {IStringValueTypeDesc, IDataType} from '../../data';
 import {IVector, IVectorDataDescription} from '../../vector';
 import {RangeLike, ParseRangeUtils, Range} from '../../range';
-import {ArrayUtils} from '../../internal/ArrayUtils';
+import {ArrayUtils} from '../../base/ArrayUtils';
 import {IDType} from '../../idtype/IDType';
 
 export declare type IStringVector = IVector<string, IStringValueTypeDesc>;

@@ -13,7 +13,7 @@ import {EventHandler} from '../base/event';
 import {Range, RangeLike, ParseRangeUtils} from '../range';
 import {IIDType} from './IIDType';
 import {SelectOperation, SelectionUtils} from './SelectionUtils';
-import {ResolveNow} from '../internal/promise';
+import {ResolveNow} from '../base/promise';
 /**
  * An IDType is a semantic aggregation of an entity type, like Patient and Gene.
  *

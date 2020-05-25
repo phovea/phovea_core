@@ -133,7 +133,11 @@ export interface IEventListener {
  * EventHandler base class
  */
 export class EventHandler implements IEventHandler {
-  static readonly MULTI_EVENT_SEPARATOR = ',';
+
+  public static readonly EVENT_STATE_PUSHED = 'pushedState';
+  public static readonly EVENT_HASH_CHANGED = 'hashChanged';
+  public static readonly MULTI_EVENT_SEPARATOR = ',';
+
   private readonly handlers = new Map<string, SingleEventHandler>();
 
   private readonly propagationHandler: IEventListener = (event: IEvent) => {

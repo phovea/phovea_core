@@ -78,6 +78,4 @@ export class HashProperties extends PropertyHandler {
         this.fire(HashProperties.EVENT_STATE_PUSHED, 'State ' + Date.now(), '#' + this.toString());
     }
 }
-HashProperties.EVENT_STATE_PUSHED = 'pushedState';
-HashProperties.EVENT_HASH_CHANGED = 'hashChanged';
 //# sourceMappingURL=HashProperties.js.map

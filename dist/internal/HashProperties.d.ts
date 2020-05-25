@@ -6,8 +6,6 @@ import { PropertyHandler } from './PropertyHandler';
  * manages the hash location property helper
  */
 export declare class HashProperties extends PropertyHandler {
-    static readonly EVENT_STATE_PUSHED = "pushedState";
-    static readonly EVENT_HASH_CHANGED = "hashChanged";
     private updated;
     private debounceTimer;
     constructor();

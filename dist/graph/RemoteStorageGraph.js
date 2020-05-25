@@ -4,7 +4,7 @@
 import { AppContext } from '../app/AppContext';
 import { GraphBase } from './GraphBase';
 import { GraphEdge, GraphNode } from './graph';
-import { ResolveNow } from '../internal/promise';
+import { ResolveNow } from '../base/promise';
 export class RemoteStoreGraph extends GraphBase {
     constructor(desc) {
         super(desc);
