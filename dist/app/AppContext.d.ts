@@ -9,7 +9,7 @@ export declare class AppContext {
      * whether the standard api calls should be prevented
      * @type {boolean}
      */
-    public offline: boolean;
+    offline: boolean;
     static __APP_CONTEXT__: string;
     static context: string;
     /**
