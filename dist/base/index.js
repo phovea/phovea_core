@@ -3,6 +3,7 @@
  */
 export * from './event';
 export * from './ajax';
+export * from './ArrayUtils';
 export * from './iterator';
 export * from './BaseUtils';
 export * from './Session';

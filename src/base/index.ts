@@ -4,6 +4,7 @@
 
 export * from './event';
 export * from './ajax';
+export * from './ArrayUtils';
 export * from './plugin';
 export * from './iterator';
 export * from './IIterable';
