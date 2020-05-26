@@ -9,7 +9,7 @@ import {Line} from './Line';
 import {Polygon} from './Polygon';
 
 
-class ShapeUtils {
+export class ShapeUtils {
 
 
   static wrapToShape(obj: any): AShape {
