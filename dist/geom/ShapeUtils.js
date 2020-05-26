@@ -7,7 +7,7 @@ import { Circle } from './Circle';
 import { Ellipse } from './Ellipse';
 import { Line } from './Line';
 import { Polygon } from './Polygon';
-export class ShapeUtils {
+class ShapeUtils {
     static wrapToShape(obj) {
         if (!obj) {
             return obj;
