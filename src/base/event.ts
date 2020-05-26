@@ -134,8 +134,7 @@ export interface IEventListener {
  */
 export class EventHandler implements IEventHandler {
 
-  public static readonly EVENT_STATE_PUSHED = 'pushedState';
-  public static readonly EVENT_HASH_CHANGED = 'hashChanged';
+
   public static readonly MULTI_EVENT_SEPARATOR = ',';
 
   private readonly handlers = new Map<string, SingleEventHandler>();

@@ -47,8 +47,6 @@ export interface IEventListener {
  * EventHandler base class
  */
 export declare class EventHandler implements IEventHandler {
-    static readonly EVENT_STATE_PUSHED = "pushedState";
-    static readonly EVENT_HASH_CHANGED = "hashChanged";
     static readonly MULTI_EVENT_SEPARATOR = ",";
     private readonly handlers;
     private readonly propagationHandler;

@@ -7,8 +7,8 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 import { RemoveNodeObserver } from '../internal/RemoveNodeObserver';
-import { HashProperties } from '../internal/HashProperties';
-import { PropertyHandler } from '../internal/PropertyHandler';
+import { HashProperties } from '../base/HashProperties';
+import { PropertyHandler } from '../base/PropertyHandler';
 import { BaseUtils } from '../base/BaseUtils';
 import { Ajax } from '../base/ajax';
 export class AppContext {

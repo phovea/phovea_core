@@ -1,7 +1,7 @@
 /**
  * Created by Samuel Gratzl on 27.12.2016.
  */
-import { EventHandler } from '../base/event';
+import { EventHandler } from './event';
 export class PropertyHandler extends EventHandler {
     constructor(code) {
         super();

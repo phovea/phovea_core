@@ -181,7 +181,5 @@ export class EventHandler {
         return EventHandler.instance;
     }
 }
-EventHandler.EVENT_STATE_PUSHED = 'pushedState';
-EventHandler.EVENT_HASH_CHANGED = 'hashChanged';
 EventHandler.MULTI_EVENT_SEPARATOR = ',';
 //# sourceMappingURL=event.js.map

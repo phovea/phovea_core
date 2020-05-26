@@ -1,8 +1,8 @@
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
-import { HashProperties } from '../internal/HashProperties';
-import { PropertyHandler } from '../internal/PropertyHandler';
+import { HashProperties } from '../base/HashProperties';
+import { PropertyHandler } from '../base/PropertyHandler';
 declare type OfflineGenerator = ((data: any, url: string) => Promise<any>) | Promise<any> | any;
 export declare class AppContext {
     /**

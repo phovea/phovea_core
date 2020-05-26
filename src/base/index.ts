@@ -12,3 +12,5 @@ export * from './Session';
 export * from './statistics';
 export * from './promise';
 export * from './BaseUtils';
+export * from './PropertyHandler';
+export * from './HashProperties';

@@ -8,6 +8,8 @@ import {PropertyHandler} from './PropertyHandler';
  */
 export class HashProperties extends PropertyHandler {
 
+  public static readonly EVENT_STATE_PUSHED = 'pushedState';
+  public static readonly EVENT_HASH_CHANGED = 'hashChanged';
 
   private updated = () => {
     this.parse(location.hash);
