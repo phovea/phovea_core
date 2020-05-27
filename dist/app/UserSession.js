@@ -5,7 +5,7 @@ import { Session } from '../base/Session';
 import { UserUtils, Permission, EPermission, EEntity } from '../security';
 import { EventHandler } from '../base/event';
 import { PluginRegistry } from './PluginRegistry';
-import { LoginExtensionPoint, LogoutExtensionPoint } from './extensions';
+import { EP_PHOVEA_CORE_LOGIN, EP_PHOVEA_CORE_LOGOUT } from './extensions';
 export class UserSession extends Session {
     /**
      * resets the stored session data that will be automatically filled during login
@@ -30,7 +30,7 @@ export class UserSession extends Session {
         this.store('logged_in', true);
         this.store('username', user.name);
         this.store('user', user);
-        PluginRegistry.getInstance().listPlugins(LoginExtensionPoint.EP_PHOVEA_CORE_LOGIN).map((desc) => {
+        PluginRegistry.getInstance().listPlugins(EP_PHOVEA_CORE_LOGIN).map((desc) => {
             desc.load().then((plugin) => plugin.factory(user));
         });
         EventHandler.getInstance().fire(UserSession.GLOBAL_EVENT_USER_LOGGED_IN, user);
@@ -42,7 +42,7 @@ export class UserSession extends Session {
         const wasLoggedIn = this.isLoggedIn();
         this.reset();
         if (wasLoggedIn) {
-            PluginRegistry.getInstance().listPlugins(LogoutExtensionPoint.EP_PHOVEA_CORE_LOGOUT).map((desc) => {
+            PluginRegistry.getInstance().listPlugins(EP_PHOVEA_CORE_LOGOUT).map((desc) => {
                 desc.load().then((plugin) => plugin.factory());
             });
             EventHandler.getInstance().fire(UserSession.GLOBAL_EVENT_USER_LOGGED_OUT);

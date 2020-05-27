@@ -7,7 +7,7 @@ import {Session} from '../base/Session';
 import {IUser,UserUtils,ISecureItem, Permission, EPermission, EEntity} from '../security';
 import {EventHandler} from '../base/event';
 import {PluginRegistry} from './PluginRegistry';
-import {ILoginExtensionPointDesc, ILogoutEP, ILogoutEPDesc, ILoginExtensionPoint, LoginExtensionPoint, LogoutExtensionPoint} from './extensions';
+import {ILoginExtensionPointDesc, ILogoutEP, ILogoutEPDesc, ILoginExtensionPoint, EP_PHOVEA_CORE_LOGIN, EP_PHOVEA_CORE_LOGOUT} from './extensions';
 
 
 
@@ -41,7 +41,7 @@ export class UserSession extends Session {
     this.store('username', user.name);
     this.store('user', user);
 
-    PluginRegistry.getInstance().listPlugins(LoginExtensionPoint.EP_PHOVEA_CORE_LOGIN).map((desc: ILoginExtensionPointDesc) => {
+    PluginRegistry.getInstance().listPlugins(EP_PHOVEA_CORE_LOGIN).map((desc: ILoginExtensionPointDesc) => {
       desc.load().then((plugin: ILoginExtensionPoint) => plugin.factory(user));
     });
 
@@ -55,7 +55,7 @@ export class UserSession extends Session {
     const wasLoggedIn = this.isLoggedIn();
     this.reset();
     if (wasLoggedIn) {
-      PluginRegistry.getInstance().listPlugins(LogoutExtensionPoint.EP_PHOVEA_CORE_LOGOUT).map((desc: ILogoutEPDesc) => {
+      PluginRegistry.getInstance().listPlugins(EP_PHOVEA_CORE_LOGOUT).map((desc: ILogoutEPDesc) => {
         desc.load().then((plugin: ILogoutEP) => plugin.factory());
       });
 

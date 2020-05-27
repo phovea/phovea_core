@@ -1,5 +1,5 @@
 import { PluginRegistry } from './app/PluginRegistry';
-import { LocaleExtensionPointDesc } from './app/extensions';
+import { EP_PHOVEA_CORE_LOCALE } from './app/extensions';
 export default function (registry) {
     //registry.push('extension-type', 'extension-id', function() { return import('./extension_impl'); }, {});
     /// #if include('datatype', 'matrix')
@@ -23,7 +23,7 @@ export default function (registry) {
     /// #if include('tabSyncer', 'selection')
     registry.push('tabSyncer', 'selection', function () { return import('./sync/SelectionSyncer'); }, {});
     /// #endif
-    registry.push(LocaleExtensionPointDesc.EP_PHOVEA_CORE_LOCALE, 'phoveaCoreLocaleEN', function () {
+    registry.push(EP_PHOVEA_CORE_LOCALE, 'phoveaCoreLocaleEN', function () {
         return import('./assets/locales/en/phovea.json').then(PluginRegistry.getInstance().asResource);
     }, {
         ns: 'phovea',

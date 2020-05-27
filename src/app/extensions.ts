@@ -1,12 +1,11 @@
 import {IPluginDesc, IPlugin} from '../base/plugin';
 import {IUser} from '../security';
 
-export module LoginExtensionPoint {
-  /**
-   * Triggered when a user was logged in
-   */
-  export const EP_PHOVEA_CORE_LOGIN = 'epPhoveaCoreLogin';
-}
+
+export const EP_PHOVEA_CORE_LOGIN = 'epPhoveaCoreLogin';
+export const EP_PHOVEA_CORE_LOGOUT = 'epPhoveaCoreLogout';
+export const EP_PHOVEA_CORE_LOCALE = 'epPhoveaCoreLocale';
+
 
 export interface ILoginExtensionPoint {
   /**
@@ -19,12 +18,6 @@ export interface ILoginExtensionPointDesc extends IPluginDesc {
   load(): Promise<IPlugin & ILoginExtensionPoint>;
 }
 
-export module LogoutExtensionPoint {
-  /**
-   * Triggered when a user was logged out. Does not provide any further information.
-   */
-  export const EP_PHOVEA_CORE_LOGOUT = 'epPhoveaCoreLogout';
-}
 
 export interface ILogoutEP {
   factory(): void;
@@ -34,12 +27,6 @@ export interface ILogoutEPDesc extends IPluginDesc {
   load(): Promise<IPlugin & ILogoutEP>;
 }
 
-export module LocaleExtensionPointDesc {
-  /**
-   * Load locale JSON files with translations
-   */
-  export const EP_PHOVEA_CORE_LOCALE = 'epPhoveaCoreLocale';
-}
 
 export interface ILocaleEPDesc extends IPluginDesc {
   /**
