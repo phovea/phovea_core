@@ -12,7 +12,7 @@ export class NodeUtils {
         const r = node.incoming.filter(GraphEdge.isGraphType('creates'))[0];
         return r ? r.source : null;
     }
-    static removed(node) {
+    static removedBy(node) {
         const r = node.incoming.filter(GraphEdge.isGraphType('removes'))[0];
         return r ? r.source : null;
     }

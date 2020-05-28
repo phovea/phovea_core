@@ -3,7 +3,7 @@
  */
 import {StateNode} from './StateNode';
 import {ObjectNode} from './ObjectNode';
-import {GraphEdge, AttributeContainer} from '../graph/graph';
+import {GraphEdge, AttributeContainer, GraphNode} from '../graph/graph';
 import {ActionNode} from './ActionNode';
 
 export class NodeUtils {
@@ -23,7 +23,7 @@ export class NodeUtils {
     return r ? <ActionNode>r.source : null;
   }
 
-  static removed<T>(node: ObjectNode<T>) {
+  static removedBy<T>(node: ObjectNode<T>) {
     const r = node.incoming.filter(GraphEdge.isGraphType('removes'))[0];
     return r ? <ActionNode>r.source : null;
   }
@@ -35,28 +35,28 @@ export class NodeUtils {
   static partOf<T>(node: ObjectNode<T>) {
     return node.incoming.filter(GraphEdge.isGraphType('consistsOf')).map((e) => <StateNode>e.source);
   }
-  static uses<T>(node: ObjectNode<T>): ObjectNode<any>[] {
+  static uses<T>(node: ActionNode): ObjectNode<any>[] {
     return node.outgoing.filter(GraphEdge.isGraphType(/(creates|removes|requires)/)).map((e) => <ObjectNode<any>>e.target);
   }
 
-  static creates<T>(node: ObjectNode<T>): ObjectNode<any>[] {
+  static creates<T>(node: ActionNode): ObjectNode<any>[] {
     return node.outgoing.filter(GraphEdge.isGraphType('creates')).map((e) => <ObjectNode<any>>e.target);
   }
 
-  static removes<T>(node: ObjectNode<T>): ObjectNode<any>[] {
+  static removes<T>(node: ActionNode): ObjectNode<any>[] {
     return node.outgoing.filter(GraphEdge.isGraphType('removes')).sort(AttributeContainer.byIndex).map((e) => <ObjectNode<any>>e.target);
   }
 
-  static requires<T>(node: ObjectNode<T>): ObjectNode<any>[] {
+  static requires<T>(node: ActionNode): ObjectNode<any>[] {
     return node.outgoing.filter(GraphEdge.isGraphType('requires')).sort(AttributeContainer.byIndex).map((e) => <ObjectNode<any>>e.target);
   }
 
-  static resultsIn<T>(node: ObjectNode<T>): StateNode {
+  static resultsIn(node: ActionNode): StateNode {
     const r = node.outgoing.filter(GraphEdge.isGraphType('resultsIn'))[0];
     return r ? <StateNode>r.target : null;
   }
 
-  static previous<T>(node: ObjectNode<T>): StateNode {
+  static previous(node: ActionNode): StateNode {
     const r = node.incoming.filter(GraphEdge.isGraphType('next'))[0];
     return r ? <StateNode>r.source : null;
   }

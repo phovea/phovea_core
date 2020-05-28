@@ -7,13 +7,13 @@ import { ActionNode } from './ActionNode';
 export declare class NodeUtils {
     static findLatestPath(state: StateNode): StateNode[];
     static createdBy<T>(node: ObjectNode<T>): ActionNode;
-    static removed<T>(node: ObjectNode<T>): ActionNode;
+    static removedBy<T>(node: ObjectNode<T>): ActionNode;
     static requiredBy<T>(node: ObjectNode<T>): ActionNode[];
     static partOf<T>(node: ObjectNode<T>): StateNode[];
-    static uses<T>(node: ObjectNode<T>): ObjectNode<any>[];
-    static creates<T>(node: ObjectNode<T>): ObjectNode<any>[];
-    static removes<T>(node: ObjectNode<T>): ObjectNode<any>[];
-    static requires<T>(node: ObjectNode<T>): ObjectNode<any>[];
-    static resultsIn<T>(node: ObjectNode<T>): StateNode;
-    static previous<T>(node: ObjectNode<T>): StateNode;
+    static uses<T>(node: ActionNode): ObjectNode<any>[];
+    static creates<T>(node: ActionNode): ObjectNode<any>[];
+    static removes<T>(node: ActionNode): ObjectNode<any>[];
+    static requires<T>(node: ActionNode): ObjectNode<any>[];
+    static resultsIn(node: ActionNode): StateNode;
+    static previous(node: ActionNode): StateNode;
 }
