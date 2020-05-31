@@ -11,6 +11,7 @@ import {IDType, IDTypeLike} from './IDType';
 import {ProductIDType} from './ProductIDType';
 import {PluginRegistry} from '../app/PluginRegistry';
 import {RangeLike, ParseRangeUtils} from '../range';
+import {IPluginDesc} from '../base/plugin';
 
 
 export class IDTypeManager {
@@ -193,6 +194,25 @@ export class IDTypeManager {
     return IDType.chooseRequestMethod(`/idtype/${idType.id}/${target.id}/map`, {q: names});
   }
 
+  public findMappablePlugins(target: IDType, all: IPluginDesc[]) {
+    if (!target) {
+      return [];
+    }
+    const idTypes = Array.from(new Set<string>(all.map((d) => d.idtype)));
+
+    function canBeMappedTo(idtype: string) {
+      if (idtype === target.id) {
+        return true;
+      }
+      // lookup the targets and check if our target is part of it
+      return IDTypeManager.getInstance().getCanBeMappedTo(IDTypeManager.getInstance().resolveIdType(idtype)).then((mappables: IDType[]) => mappables.some((d) => d.id === target.id));
+    }
+    // check which idTypes can be mapped to the target one
+    return Promise.all(idTypes.map(canBeMappedTo)).then((mappable: boolean[]) => {
+      const valid = idTypes.filter((d, i) => mappable[i]);
+      return all.filter((d) => valid.indexOf(d.idtype) >= 0);
+    });
+  }
 
 
   constructor() {

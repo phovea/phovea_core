@@ -5,6 +5,7 @@ import { IIDType } from './IIDType';
 import { IDType, IDTypeLike } from './IDType';
 import { ProductIDType } from './ProductIDType';
 import { RangeLike } from '../range';
+import { IPluginDesc } from '../base/plugin';
 export declare class IDTypeManager {
     static EXTENSION_POINT_IDTYPE: string;
     static EVENT_REGISTER_IDTYPE: string;
@@ -57,6 +58,7 @@ export declare class IDTypeManager {
     mapToID(idType: IDType, ids: RangeLike, toIDType: IDTypeLike): Promise<number[][]>;
     mapNameToFirstID(idType: IDType, names: string[], toIDType: IDTypeLike): Promise<number[]>;
     mapNameToID(idType: IDType, names: string[], toIDType: IDTypeLike): Promise<number[][]>;
+    findMappablePlugins(target: IDType, all: IPluginDesc[]): any[] | Promise<IPluginDesc[]>;
     constructor();
     private static instance;
     static getInstance(): IDTypeManager;

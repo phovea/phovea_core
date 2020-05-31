@@ -167,6 +167,24 @@ export class IDTypeManager {
         const target = IDTypeManager.getInstance().resolveIdType(toIDType);
         return IDType.chooseRequestMethod(`/idtype/${idType.id}/${target.id}/map`, { q: names });
     }
+    findMappablePlugins(target, all) {
+        if (!target) {
+            return [];
+        }
+        const idTypes = Array.from(new Set(all.map((d) => d.idtype)));
+        function canBeMappedTo(idtype) {
+            if (idtype === target.id) {
+                return true;
+            }
+            // lookup the targets and check if our target is part of it
+            return IDTypeManager.getInstance().getCanBeMappedTo(IDTypeManager.getInstance().resolveIdType(idtype)).then((mappables) => mappables.some((d) => d.id === target.id));
+        }
+        // check which idTypes can be mapped to the target one
+        return Promise.all(idTypes.map(canBeMappedTo)).then((mappable) => {
+            const valid = idTypes.filter((d, i) => mappable[i]);
+            return all.filter((d) => valid.indexOf(d.idtype) >= 0);
+        });
+    }
     static getInstance() {
         if (!IDTypeManager.instance) {
             IDTypeManager.instance = new IDTypeManager();
