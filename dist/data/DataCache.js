@@ -85,7 +85,7 @@ export class DataCache {
         }
         else {
             //load descriptions and create data out of them
-            r = AppContext.getInstance().getAPIJSON('/dataset/', q).then((r) => Promise.all(r.map(this.transformEntry)));
+            r = AppContext.getInstance().getAPIJSON('/dataset/', q).then((r) => Promise.all(r.map(this.transformEntry, this)));
         }
         if (f !== null) {
             r = r.then((d) => d.filter(f));

@@ -145,7 +145,7 @@ export class IDTypeManager {
    */
   public getCanBeMappedTo(idType: IDType) {
     if (idType.canBeMappedTo === null) {
-      idType.canBeMappedTo = AppContext.getInstance().getAPIJSON(`/idtype/${idType.id}/`).then((list) => list.map(IDTypeManager.getInstance().resolveIdType));
+      idType.canBeMappedTo = AppContext.getInstance().getAPIJSON(`/idtype/${idType.id}/`).then((list) => list.map(this.resolveIdType, this));
     }
     return idType.canBeMappedTo;
   }
