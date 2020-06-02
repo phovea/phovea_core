@@ -22,7 +22,7 @@ export class PluginRegistry implements IRegistry {
       description: '',
       version: '1.0.0',
       load: async (): Promise<IPlugin> => {
-        const instance = await Promise.resolve(loader());
+        const instance = desc.static === true ? loader : await Promise.resolve(loader());
         return {desc: p, factory: this.getFactoryMethod(instance, p.factory)};
       }
     }, typeof descOrLoader === 'function' ? desc : descOrLoader);

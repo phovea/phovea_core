@@ -19,7 +19,7 @@ export class PluginRegistry {
             description: '',
             version: '1.0.0',
             load: async () => {
-                const instance = await Promise.resolve(loader());
+                const instance = desc.static === true ? loader : await Promise.resolve(loader());
                 return { desc: p, factory: this.getFactoryMethod(instance, p.factory) };
             }
         }, typeof descOrLoader === 'function' ? desc : descOrLoader);
