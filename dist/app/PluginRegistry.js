@@ -34,7 +34,7 @@ export class PluginRegistry {
             return; // don't call it twice
         }
         this.knownPlugins.add(plugin);
-        generator({ push: this.push, flags: {} });
+        generator(this);
     }
     /**
      * returns a list of matching plugin descs

@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 27.12.2016.
  */
 import { IPluginDesc, IRegistry, IPlugin } from '../base/plugin';
-export declare class PluginRegistry {
+export declare class PluginRegistry implements IRegistry {
     private registry;
     push(type: string, idOrLoader: string | (() => any), descOrLoader: any, desc?: any): void;
     private knownPlugins;

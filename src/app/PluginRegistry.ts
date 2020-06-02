@@ -7,7 +7,7 @@ import {UniqueIdManager} from './UniqueIdManager';
 import {BaseUtils} from '../base/BaseUtils';
 
 
-export class PluginRegistry {
+export class PluginRegistry implements IRegistry {
 
   private registry: IPluginDesc[] = [];
 
@@ -42,7 +42,7 @@ export class PluginRegistry {
     }
     this.knownPlugins.add(plugin);
 
-    generator({push: this.push, flags: {}});
+    generator(this);
   }
 
   /**
