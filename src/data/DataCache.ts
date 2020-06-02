@@ -100,7 +100,7 @@ export class DataCache {
       r = this.getCachedEntries();
     } else {
       //load descriptions and create data out of them
-      r = AppContext.getInstance().getAPIJSON('/dataset/', q).then((r) => Promise.all<IDataType>(r.map(this.transformEntry).bind(this)));
+      r = AppContext.getInstance().getAPIJSON('/dataset/', q).then((r) => Promise.all<IDataType>(r.map(this.transformEntry.bind(this))));
     }
 
     if (f !== null) {
