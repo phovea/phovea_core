@@ -22,12 +22,12 @@ export class PluginRegistry implements IRegistry {
       description: '',
       version: '1.0.0',
       load: async (): Promise<IPlugin> => {
-        const instance = desc.static === true ? loader : await Promise.resolve(loader());
-        return {desc: p, factory: this.getFactoryMethod(instance, p.factory)};
+        const instance = await Promise.resolve(loader());
+        return {desc: p, factory: PluginRegistry.getInstance().getFactoryMethod(instance, p.factory)};
       }
     }, typeof descOrLoader === 'function' ? desc : descOrLoader);
 
-    this.registry.push(p);
+    PluginRegistry.getInstance().registry.push(p);
   }
 
   private knownPlugins = new Set<string>();
@@ -37,12 +37,12 @@ export class PluginRegistry implements IRegistry {
       //wrong type - not a function, maybe a dummy inline
       return;
     }
-    if (this.knownPlugins.has(plugin)) {
+    if (PluginRegistry.getInstance().knownPlugins.has(plugin)) {
       return; // don't call it twice
     }
-    this.knownPlugins.add(plugin);
+    PluginRegistry.getInstance().knownPlugins.add(plugin);
 
-    generator(this);
+    generator(PluginRegistry.getInstance());
   }
 
   /**
@@ -55,7 +55,7 @@ export class PluginRegistry implements IRegistry {
       const v = filter;
       filter = (desc) => desc.type === v;
     }
-    return this.registry.filter(<any>filter);
+    return PluginRegistry.getInstance().registry.filter(<any>filter);
   }
 
   /**
@@ -65,7 +65,7 @@ export class PluginRegistry implements IRegistry {
    * @returns {IPluginDesc}
    */
   public getPlugin(type: string, id: string): IPluginDesc {
-    return this.registry.find((d) => d.type === type && d.id === id);
+    return PluginRegistry.getInstance().registry.find((d) => d.type === type && d.id === id);
   }
 
   public loadPlugin(desc: IPluginDesc[]) {

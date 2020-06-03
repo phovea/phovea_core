@@ -84,7 +84,7 @@ export class EventHandler {
         this.handlers = new Map();
         this.propagationHandler = (event) => {
             if (!event.isPropagationStopped()) {
-                this.fireEvent(propagateEvent(event, this));
+                EventHandler.getInstance().fireEvent(propagateEvent(event, EventHandler.getInstance()));
             }
         };
     }
@@ -96,19 +96,19 @@ export class EventHandler {
     on(events, handler) {
         if (typeof events === 'string') {
             events.split(EventHandler.MULTI_EVENT_SEPARATOR).forEach((event) => {
-                if (!this.handlers.has(event)) {
-                    this.handlers.set(event, new SingleEventHandler(event));
+                if (!EventHandler.getInstance().handlers.has(event)) {
+                    EventHandler.getInstance().handlers.set(event, new SingleEventHandler(event));
                 }
-                this.handlers.get(event).push(handler);
+                EventHandler.getInstance().handlers.get(event).push(handler);
             });
         }
         else {
             Object.keys(events).forEach((event) => {
                 const h = events[event];
-                this.on(event, h);
+                EventHandler.getInstance().on(event, h);
             });
         }
-        return this;
+        return EventHandler.getInstance();
     }
     /**
      * unregister a global event handler
@@ -118,11 +118,11 @@ export class EventHandler {
     off(events, handler) {
         if (typeof events === 'string') {
             events.split(EventHandler.MULTI_EVENT_SEPARATOR).forEach((event) => {
-                if (this.handlers.has(event)) {
-                    const h = this.handlers.get(event);
+                if (EventHandler.getInstance().handlers.has(event)) {
+                    const h = EventHandler.getInstance().handlers.get(event);
                     h.remove(handler);
                     if (h.length === 0) {
-                        this.handlers.delete(event);
+                        EventHandler.getInstance().handlers.delete(event);
                     }
                 }
             });
@@ -130,17 +130,17 @@ export class EventHandler {
         else {
             Object.keys(events).forEach((event) => {
                 const h = events[event];
-                this.off(event, h);
+                EventHandler.getInstance().off(event, h);
             });
         }
-        return this;
+        return EventHandler.getInstance();
     }
     /**
      * list for each registered event the number of listeners
      */
     getRegisteredHandlerCount() {
         const r = {};
-        this.handlers.forEach((handler, type) => {
+        EventHandler.getInstance().handlers.forEach((handler, type) => {
             r[type] = handler.length;
         });
         return r;
@@ -152,13 +152,13 @@ export class EventHandler {
      */
     fire(events, ...args) {
         events.split(EventHandler.MULTI_EVENT_SEPARATOR).forEach((event) => {
-            this.fireEvent(createEvent(event, args, this));
+            EventHandler.getInstance().fireEvent(createEvent(event, args, EventHandler.getInstance()));
         });
-        return this;
+        return EventHandler.getInstance();
     }
     fireEvent(event) {
-        if (this.handlers.has(event.type)) {
-            const h = this.handlers.get(event.type);
+        if (EventHandler.getInstance().handlers.has(event.type)) {
+            const h = EventHandler.getInstance().handlers.get(event.type);
             return h.fire(event);
         }
         return false;
@@ -169,10 +169,10 @@ export class EventHandler {
      * @param events
      */
     propagate(progatee, ...events) {
-        progatee.on(events.join(EventHandler.MULTI_EVENT_SEPARATOR), this.propagationHandler);
+        progatee.on(events.join(EventHandler.MULTI_EVENT_SEPARATOR), EventHandler.getInstance().propagationHandler);
     }
     stopPropagation(progatee, ...events) {
-        progatee.off(events.join(EventHandler.MULTI_EVENT_SEPARATOR), this.propagationHandler);
+        progatee.off(events.join(EventHandler.MULTI_EVENT_SEPARATOR), EventHandler.getInstance().propagationHandler);
     }
     static getInstance() {
         if (!EventHandler.instance) {

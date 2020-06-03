@@ -20,7 +20,7 @@ export declare class ProductIDType extends EventHandler implements IIDType {
     constructor(elems: IDType[], internal?: boolean);
     on(events: string | {
         [key: string]: IEventListener;
-    }, listener?: IEventListener): this;
+    }, listener?: IEventListener): EventHandler;
     get id(): string;
     get name(): string;
     get names(): string;

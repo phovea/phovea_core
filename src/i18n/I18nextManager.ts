@@ -31,7 +31,7 @@ export class I18nextManager {
       });
     }));
 
-    return this.i18n
+    return I18nextManager.getInstance().i18n
       .use({
         type: 'postProcessor',
         name: 'showKeyDebugger',
@@ -60,7 +60,7 @@ export class I18nextManager {
           overwrites the others
         */
         plugins.sort((pluginA, pluginB) => pluginA.order - pluginB.order).forEach((plugin) => {
-          this.i18n.addResourceBundle(plugin.lng, plugin.ns, plugin.resources, true, true);
+          I18nextManager.getInstance().i18n.addResourceBundle(plugin.lng, plugin.ns, plugin.resources, true, true);
         });
       });
   }

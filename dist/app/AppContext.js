@@ -93,10 +93,10 @@ export class AppContext {
      */
     onDOMNodeRemoved(node, callback, thisArg) {
         if (Array.isArray(node)) {
-            node.forEach((nodeid) => this.removeNodeObserver.observe(nodeid, callback, thisArg));
+            node.forEach((nodeid) => AppContext.getInstance().removeNodeObserver.observe(nodeid, callback, thisArg));
         }
         else {
-            this.removeNodeObserver.observe(node, callback, thisArg);
+            AppContext.getInstance().removeNodeObserver.observe(node, callback, thisArg);
         }
     }
     /**
@@ -106,7 +106,7 @@ export class AppContext {
      * @returns {string}
      */
     api2absURL(url, data = null) {
-        url = `${this.server_url}${url}${this.server_json_suffix}`;
+        url = `${AppContext.getInstance().server_url}${url}${AppContext.getInstance().server_json_suffix}`;
         data = Ajax.encodeParams(data);
         if (data) {
             url += (/\?/.test(url) ? '&' : '?') + data;
@@ -114,7 +114,7 @@ export class AppContext {
         return url;
     }
     setDefaultOfflineGenerator(generator) {
-        this.defaultGenerator = generator || (() => Promise.reject('offline'));
+        AppContext.getInstance().defaultGenerator = generator || (() => Promise.reject('offline'));
     }
     /**
      * handler in case phovea is set to be in offline mode
@@ -135,11 +135,11 @@ export class AppContext {
      * @param offlineGenerator in case phovea is set to be offline
      * @returns {Promise<any>}
      */
-    sendAPI(url, data = {}, method = 'GET', expectedDataType = 'json', offlineGenerator = this.defaultGenerator) {
-        if (this.isOffline()) {
-            return this.sendOffline(offlineGenerator, url, data);
+    sendAPI(url, data = {}, method = 'GET', expectedDataType = 'json', offlineGenerator = AppContext.getInstance().defaultGenerator) {
+        if (AppContext.getInstance().isOffline()) {
+            return AppContext.getInstance().sendOffline(offlineGenerator, url, data);
         }
-        return Ajax.send(this.api2absURL(url), data, method, expectedDataType);
+        return Ajax.send(AppContext.getInstance().api2absURL(url), data, method, expectedDataType);
     }
     /**
      * api version of getJSON
@@ -148,11 +148,11 @@ export class AppContext {
      * @param offlineGenerator in case of offline flag is set what should be returned
      * @returns {Promise<any>}
      */
-    getAPIJSON(url, data = {}, offlineGenerator = this.defaultGenerator) {
-        if (this.isOffline()) {
-            return this.sendOffline(offlineGenerator, url, data);
+    getAPIJSON(url, data = {}, offlineGenerator = AppContext.getInstance().defaultGenerator) {
+        if (AppContext.getInstance().isOffline()) {
+            return AppContext.getInstance().sendOffline(offlineGenerator, url, data);
         }
-        return Ajax.getJSON(this.api2absURL(url), data);
+        return Ajax.getJSON(AppContext.getInstance().api2absURL(url), data);
     }
     /**
      * api version of getData
@@ -162,11 +162,11 @@ export class AppContext {
      * @param offlineGenerator in case of offline flag is set what should be returned
      * @returns {Promise<any>}
      */
-    getAPIData(url, data = {}, expectedDataType = 'json', offlineGenerator = () => this.defaultGenerator) {
-        if (this.isOffline()) {
-            return this.sendOffline(offlineGenerator, url, data);
+    getAPIData(url, data = {}, expectedDataType = 'json', offlineGenerator = () => AppContext.getInstance().defaultGenerator) {
+        if (AppContext.getInstance().isOffline()) {
+            return AppContext.getInstance().sendOffline(offlineGenerator, url, data);
         }
-        return Ajax.getData(this.api2absURL(url), data, expectedDataType);
+        return Ajax.getData(AppContext.getInstance().api2absURL(url), data, expectedDataType);
     }
     static getInstance() {
         if (!AppContext.instance) {

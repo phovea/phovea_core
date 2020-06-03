@@ -23,7 +23,7 @@ export class IDTypeManager {
     }
     fillUpData(entries) {
         entries.forEach(function (row) {
-            let entry = this.cache.get(row.id);
+            let entry = IDTypeManager.getInstance().cache.get(row.id);
             let newOne = false;
             if (entry) {
                 if (entry instanceof IDType) {
@@ -35,7 +35,7 @@ export class IDTypeManager {
                 entry = new IDType(row.id, row.name, row.names);
                 newOne = true;
             }
-            this.cache.set(row.id, entry);
+            IDTypeManager.getInstance().cache.set(row.id, entry);
             if (newOne) {
                 EventHandler.getInstance().fire(IDTypeManager.EVENT_REGISTER_IDTYPE, entry);
             }
@@ -53,55 +53,55 @@ export class IDTypeManager {
         }
         else {
             const sid = id;
-            return this.registerIdType(sid, new IDType(sid, sid, this.toPlural(sid)));
+            return IDTypeManager.getInstance().registerIdType(sid, new IDType(sid, sid, IDTypeManager.getInstance().toPlural(sid)));
         }
     }
     resolveProduct(...idtypes) {
         const p = new ProductIDType(idtypes);
-        return this.registerIdType(p.id, p);
+        return IDTypeManager.getInstance().registerIdType(p.id, p);
     }
     /**
      * list currently resolved idtypes
      * @returns {Array<IDType|ProductIDType>}
      */
     listIdTypes() {
-        return Array.from(this.cache.values());
+        return Array.from(IDTypeManager.getInstance().cache.values());
     }
     /**
      * Get a list of all IIDTypes available on both the server and the client.
      * @returns {any}
      */
     async listAllIdTypes() {
-        if (this.filledUp) {
-            return Promise.resolve(this.listIdTypes());
+        if (IDTypeManager.getInstance().filledUp) {
+            return Promise.resolve(IDTypeManager.getInstance().listIdTypes());
         }
         const c = await AppContext.getInstance().getAPIJSON('/idtype/', {}, []);
-        this.filledUp = true;
-        this.fillUpData(c);
-        return this.listIdTypes();
+        IDTypeManager.getInstance().filledUp = true;
+        IDTypeManager.getInstance().fillUpData(c);
+        return IDTypeManager.getInstance().listIdTypes();
     }
     registerIdType(id, idtype) {
-        if (this.cache.has(id)) {
-            return this.cache.get(id);
+        if (IDTypeManager.getInstance().cache.has(id)) {
+            return IDTypeManager.getInstance().cache.get(id);
         }
-        this.cache.set(id, idtype);
+        IDTypeManager.getInstance().cache.set(id, idtype);
         EventHandler.getInstance().fire('register.idtype', idtype);
         return idtype;
     }
     persistIdTypes() {
         const r = {};
-        this.cache.forEach((v, id) => {
+        IDTypeManager.getInstance().cache.forEach((v, id) => {
             r[id] = v.persist();
         });
         return r;
     }
     restoreIdType(persisted) {
         Object.keys(persisted).forEach((id) => {
-            this.resolveIdType(id).restore(persisted[id]);
+            IDTypeManager.getInstance().resolveIdType(id).restore(persisted[id]);
         });
     }
     clearSelection(type = SelectionUtils.defaultSelectionType) {
-        this.cache.forEach((v) => v.clear(type));
+        IDTypeManager.getInstance().cache.forEach((v) => v.clear(type));
     }
     /**
      * whether the given idtype is an internal one or not, i.e. the internal flag is set or it starts with an underscore
@@ -127,7 +127,7 @@ export class IDTypeManager {
      */
     getCanBeMappedTo(idType) {
         if (idType.canBeMappedTo === null) {
-            idType.canBeMappedTo = AppContext.getInstance().getAPIJSON(`/idtype/${idType.id}/`).then((list) => list.map(this.resolveIdType, this));
+            idType.canBeMappedTo = AppContext.getInstance().getAPIJSON(`/idtype/${idType.id}/`).then((list) => list.map(IDTypeManager.getInstance().resolveIdType));
         }
         return idType.canBeMappedTo;
     }

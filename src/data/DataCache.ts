@@ -35,24 +35,24 @@ export class DataCache {
   public clearCache(dataset?: IDataType | IDataDescription) {
     if (dataset) {
       const desc: IDataDescription = (<IDataType>dataset).desc || <IDataDescription>dataset;
-      this.cacheById.delete(desc.id);
-      this.cacheByName.delete(desc.name);
-      this.cacheByFQName.delete(desc.fqname);
+      DataCache.getInstance().cacheById.delete(desc.id);
+      DataCache.getInstance().cacheByName.delete(desc.name);
+      DataCache.getInstance().cacheByFQName.delete(desc.fqname);
     } else {
-      this.cacheById.clear();
-      this.cacheByName.clear();
-      this.cacheByFQName.clear();
+      DataCache.getInstance().cacheById.clear();
+      DataCache.getInstance().cacheByName.clear();
+      DataCache.getInstance().cacheByFQName.clear();
     }
   }
 
   private getCachedEntries(): Promise<IDataType[]> {
-    return Promise.all(Array.from(this.cacheById.values()));
+    return Promise.all(Array.from(DataCache.getInstance().cacheById.values()));
   }
 
   private cached(desc: IDataDescription, result: Promise<IDataType>) {
-    this.cacheById.set(desc.id, result);
-    this.cacheByFQName.set(desc.fqname, result);
-    this.cacheByName.set(desc.name, result);
+    DataCache.getInstance().cacheById.set(desc.id, result);
+    DataCache.getInstance().cacheByFQName.set(desc.fqname, result);
+    DataCache.getInstance().cacheByName.set(desc.name, result);
     return result;
   }
 
@@ -71,18 +71,18 @@ export class DataCache {
     (<any>desc).creator = desc.creator || 'Anonymous';
     (<any>desc).ts = desc.ts || 0;
 
-    if (this.cacheById.has(desc.id)) {
-      return this.cacheById.get(desc.id);
+    if (DataCache.getInstance().cacheById.has(desc.id)) {
+      return DataCache.getInstance().cacheById.get(desc.id);
     }
 
     //find matching type
-    const plugin = this.available.filter((p) => p.id === desc.type);
+    const plugin = DataCache.getInstance().available.filter((p) => p.id === desc.type);
     //no type there create a dummy one
     if (plugin.length === 0) {
-      return this.cached(desc, Promise.resolve(new DummyDataType(desc)));
+      return DataCache.getInstance().cached(desc, Promise.resolve(new DummyDataType(desc)));
     }
     //take the first matching one
-    return this.cached(desc, plugin[0].load().then((d) =>d.factory(desc)));
+    return DataCache.getInstance().cached(desc, plugin[0].load().then((d) =>d.factory(desc)));
   }
 
   /**
@@ -97,10 +97,10 @@ export class DataCache {
     let r: Promise<IDataType[]>;
 
     if (AppContext.getInstance().isOffline()) {
-      r = this.getCachedEntries();
+      r = DataCache.getInstance().getCachedEntries();
     } else {
       //load descriptions and create data out of them
-      r = AppContext.getInstance().getAPIJSON('/dataset/', q).then((r) => Promise.all<IDataType>(r.map(this.transformEntry.bind(this))));
+      r = AppContext.getInstance().getAPIJSON('/dataset/', q).then((r) => Promise.all<IDataType>(r.map(DataCache.getInstance().transformEntry)));
     }
 
     if (f !== null) {
@@ -139,7 +139,7 @@ export class DataCache {
    * returns a tree of all available datasets
    */
   public async tree(filter?: ({[key: string]: string})|((d: IDataType) => boolean)): Promise<INode> {
-    return this.convertToTree(await this.list(filter));
+    return DataCache.getInstance().convertToTree(await DataCache.getInstance().list(filter));
   }
 
   /**
@@ -149,12 +149,12 @@ export class DataCache {
    */
   public async getFirst(query: {[key: string]: string} | string | RegExp): Promise<IDataType> {
     if (typeof query === 'string' || query instanceof RegExp) {
-      return this.getFirstByName(<string|RegExp>query);
+      return DataCache.getInstance().getFirstByName(<string|RegExp>query);
     }
     const q = <any>query;
     q.limit = 1;
 
-    const result = await this.list(q);
+    const result = await DataCache.getInstance().list(q);
     if (result.length === 0) {
       return Promise.reject({error: 'nothing found, matching', args: q});
     }
@@ -166,10 +166,10 @@ export class DataCache {
   }*/
 
   public getFirstByName(name: string | RegExp) {
-    return this.getFirstWithCache(name, this.cacheByName, 'name');
+    return DataCache.getInstance().getFirstWithCache(name, DataCache.getInstance().cacheByName, 'name');
   }
   public getFirstByFQName(name: string | RegExp) {
-    return this.getFirstWithCache(name, this.cacheByFQName, 'fqname');
+    return DataCache.getInstance().getFirstWithCache(name, DataCache.getInstance().cacheByFQName, 'fqname');
   }
 
   private getFirstWithCache(name: string | RegExp, cache: Map<string, Promise<IDataType>>, attr: string) {
@@ -179,7 +179,7 @@ export class DataCache {
         return v;
       }
     }
-    return this.getFirst({
+    return DataCache.getInstance().getFirst({
       [attr]: typeof name === 'string' ? name : name.source
     });
   }
@@ -190,10 +190,10 @@ export class DataCache {
    * @returns {Promise<any>}
    */
   private async getById(id: string) {
-    if (this.cacheById.has(id)) {
-      return this.cacheById.get(id);
+    if (DataCache.getInstance().cacheById.has(id)) {
+      return DataCache.getInstance().cacheById.get(id);
     }
-    return this.transformEntry(await AppContext.getInstance().getAPIJSON(`/dataset/${id}/desc`));
+    return DataCache.getInstance().transformEntry(await AppContext.getInstance().getAPIJSON(`/dataset/${id}/desc`));
   }
 
   /**
@@ -203,11 +203,11 @@ export class DataCache {
    */
   public async get(persisted: any | string): Promise<IDataType> {
     if (typeof persisted === 'string') {
-      return this.getById(<string>persisted);
+      return DataCache.getInstance().getById(<string>persisted);
     }
     //resolve parent and then resolve it using restore item
     if (persisted.root) {
-      const parent = await this.get(persisted.root);
+      const parent = await DataCache.getInstance().get(persisted.root);
       return parent ? <IDataType>parent.restore(persisted) : null;
     } else {
       //can't restore non root and non data id
@@ -221,7 +221,7 @@ export class DataCache {
    * @returns {Promise<IDataType>}
    */
   public create(desc: IDataDescription): Promise<IDataType> {
-    return this.transformEntry(desc);
+    return DataCache.getInstance().transformEntry(desc);
   }
 
   private prepareData(desc: any, file?: File) {
@@ -240,8 +240,8 @@ export class DataCache {
    * @returns {Promise<*>}
    */
   public async upload(data: any, file?: File): Promise<IDataType> {
-    data = this.prepareData(data, file);
-    return this.transformEntry(await AppContext.getInstance().sendAPI('/dataset/', data, 'POST'));
+    data = DataCache.getInstance().prepareData(data, file);
+    return DataCache.getInstance().transformEntry(await AppContext.getInstance().sendAPI('/dataset/', data, 'POST'));
   }
 
   /**
@@ -249,12 +249,12 @@ export class DataCache {
    * @returns {Promise<*>} returns the update dataset
    */
   public async update(entry: IDataType, data: any, file?: File): Promise<IDataType> {
-    data = this.prepareData(data, file);
+    data = DataCache.getInstance().prepareData(data, file);
     const desc = await AppContext.getInstance().sendAPI(`/dataset/${entry.desc.id}`, data, 'PUT');
     // clear existing cache
-    this.clearCache(entry);
+    DataCache.getInstance().clearCache(entry);
     //update with current one
-    return this.transformEntry(desc);
+    return DataCache.getInstance().transformEntry(desc);
   }
 
   /**
@@ -262,10 +262,10 @@ export class DataCache {
    * @returns {Promise<*>} returns the update dataset
    */
   public async modify(entry: IDataType, data: any, file?: File): Promise<IDataType> {
-    data = this.prepareData(data, file);
+    data = DataCache.getInstance().prepareData(data, file);
     const desc = await AppContext.getInstance().sendAPI(`/dataset/${entry.desc.id}`, data, 'POST');
-    this.clearCache(entry);
-    return this.transformEntry(desc);
+    DataCache.getInstance().clearCache(entry);
+    return DataCache.getInstance().transformEntry(desc);
   }
 
   /**
@@ -277,7 +277,7 @@ export class DataCache {
     const desc: IDataDescription = (<IDataType>entry).desc || <IDataDescription>entry;
 
     await AppContext.getInstance().sendAPI(`/dataset/${desc.id}`, {}, 'DELETE');
-    this.clearCache(desc);
+    DataCache.getInstance().clearCache(desc);
     return true;
   }
 

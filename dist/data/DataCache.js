@@ -26,23 +26,23 @@ export class DataCache {
     clearCache(dataset) {
         if (dataset) {
             const desc = dataset.desc || dataset;
-            this.cacheById.delete(desc.id);
-            this.cacheByName.delete(desc.name);
-            this.cacheByFQName.delete(desc.fqname);
+            DataCache.getInstance().cacheById.delete(desc.id);
+            DataCache.getInstance().cacheByName.delete(desc.name);
+            DataCache.getInstance().cacheByFQName.delete(desc.fqname);
         }
         else {
-            this.cacheById.clear();
-            this.cacheByName.clear();
-            this.cacheByFQName.clear();
+            DataCache.getInstance().cacheById.clear();
+            DataCache.getInstance().cacheByName.clear();
+            DataCache.getInstance().cacheByFQName.clear();
         }
     }
     getCachedEntries() {
-        return Promise.all(Array.from(this.cacheById.values()));
+        return Promise.all(Array.from(DataCache.getInstance().cacheById.values()));
     }
     cached(desc, result) {
-        this.cacheById.set(desc.id, result);
-        this.cacheByFQName.set(desc.fqname, result);
-        this.cacheByName.set(desc.name, result);
+        DataCache.getInstance().cacheById.set(desc.id, result);
+        DataCache.getInstance().cacheByFQName.set(desc.fqname, result);
+        DataCache.getInstance().cacheByName.set(desc.name, result);
         return result;
     }
     /**
@@ -59,17 +59,17 @@ export class DataCache {
         desc.description = desc.description || '';
         desc.creator = desc.creator || 'Anonymous';
         desc.ts = desc.ts || 0;
-        if (this.cacheById.has(desc.id)) {
-            return this.cacheById.get(desc.id);
+        if (DataCache.getInstance().cacheById.has(desc.id)) {
+            return DataCache.getInstance().cacheById.get(desc.id);
         }
         //find matching type
-        const plugin = this.available.filter((p) => p.id === desc.type);
+        const plugin = DataCache.getInstance().available.filter((p) => p.id === desc.type);
         //no type there create a dummy one
         if (plugin.length === 0) {
-            return this.cached(desc, Promise.resolve(new DummyDataType(desc)));
+            return DataCache.getInstance().cached(desc, Promise.resolve(new DummyDataType(desc)));
         }
         //take the first matching one
-        return this.cached(desc, plugin[0].load().then((d) => d.factory(desc)));
+        return DataCache.getInstance().cached(desc, plugin[0].load().then((d) => d.factory(desc)));
     }
     /**
      * returns a promise for getting a map of all available data
@@ -81,11 +81,11 @@ export class DataCache {
         const q = (typeof filter !== 'undefined' && typeof filter !== 'function') ? filter : {};
         let r;
         if (AppContext.getInstance().isOffline()) {
-            r = this.getCachedEntries();
+            r = DataCache.getInstance().getCachedEntries();
         }
         else {
             //load descriptions and create data out of them
-            r = AppContext.getInstance().getAPIJSON('/dataset/', q).then((r) => Promise.all(r.map(this.transformEntry.bind(this))));
+            r = AppContext.getInstance().getAPIJSON('/dataset/', q).then((r) => Promise.all(r.map(DataCache.getInstance().transformEntry)));
         }
         if (f !== null) {
             r = r.then((d) => d.filter(f));
@@ -119,7 +119,7 @@ export class DataCache {
      * returns a tree of all available datasets
      */
     async tree(filter) {
-        return this.convertToTree(await this.list(filter));
+        return DataCache.getInstance().convertToTree(await DataCache.getInstance().list(filter));
     }
     /**
      * Returns the first dataset matching the given query
@@ -128,11 +128,11 @@ export class DataCache {
      */
     async getFirst(query) {
         if (typeof query === 'string' || query instanceof RegExp) {
-            return this.getFirstByName(query);
+            return DataCache.getInstance().getFirstByName(query);
         }
         const q = query;
         q.limit = 1;
-        const result = await this.list(q);
+        const result = await DataCache.getInstance().list(q);
         if (result.length === 0) {
             return Promise.reject({ error: 'nothing found, matching', args: q });
         }
@@ -142,10 +142,10 @@ export class DataCache {
     return string.replace(/([.*+?^${}()|\[\]\/\\])/g, '\\$1');
     }*/
     getFirstByName(name) {
-        return this.getFirstWithCache(name, this.cacheByName, 'name');
+        return DataCache.getInstance().getFirstWithCache(name, DataCache.getInstance().cacheByName, 'name');
     }
     getFirstByFQName(name) {
-        return this.getFirstWithCache(name, this.cacheByFQName, 'fqname');
+        return DataCache.getInstance().getFirstWithCache(name, DataCache.getInstance().cacheByFQName, 'fqname');
     }
     getFirstWithCache(name, cache, attr) {
         const r = typeof name === 'string' ? new RegExp(name) : name;
@@ -154,7 +154,7 @@ export class DataCache {
                 return v;
             }
         }
-        return this.getFirst({
+        return DataCache.getInstance().getFirst({
             [attr]: typeof name === 'string' ? name : name.source
         });
     }
@@ -164,10 +164,10 @@ export class DataCache {
      * @returns {Promise<any>}
      */
     async getById(id) {
-        if (this.cacheById.has(id)) {
-            return this.cacheById.get(id);
+        if (DataCache.getInstance().cacheById.has(id)) {
+            return DataCache.getInstance().cacheById.get(id);
         }
-        return this.transformEntry(await AppContext.getInstance().getAPIJSON(`/dataset/${id}/desc`));
+        return DataCache.getInstance().transformEntry(await AppContext.getInstance().getAPIJSON(`/dataset/${id}/desc`));
     }
     /**
      * Returns a promise for getting a specific dataset
@@ -176,11 +176,11 @@ export class DataCache {
      */
     async get(persisted) {
         if (typeof persisted === 'string') {
-            return this.getById(persisted);
+            return DataCache.getInstance().getById(persisted);
         }
         //resolve parent and then resolve it using restore item
         if (persisted.root) {
-            const parent = await this.get(persisted.root);
+            const parent = await DataCache.getInstance().get(persisted.root);
             return parent ? parent.restore(persisted) : null;
         }
         else {
@@ -194,7 +194,7 @@ export class DataCache {
      * @returns {Promise<IDataType>}
      */
     create(desc) {
-        return this.transformEntry(desc);
+        return DataCache.getInstance().transformEntry(desc);
     }
     prepareData(desc, file) {
         const data = new FormData();
@@ -211,30 +211,30 @@ export class DataCache {
      * @returns {Promise<*>}
      */
     async upload(data, file) {
-        data = this.prepareData(data, file);
-        return this.transformEntry(await AppContext.getInstance().sendAPI('/dataset/', data, 'POST'));
+        data = DataCache.getInstance().prepareData(data, file);
+        return DataCache.getInstance().transformEntry(await AppContext.getInstance().sendAPI('/dataset/', data, 'POST'));
     }
     /**
      * updates an existing dataset with a new description and optional file
      * @returns {Promise<*>} returns the update dataset
      */
     async update(entry, data, file) {
-        data = this.prepareData(data, file);
+        data = DataCache.getInstance().prepareData(data, file);
         const desc = await AppContext.getInstance().sendAPI(`/dataset/${entry.desc.id}`, data, 'PUT');
         // clear existing cache
-        this.clearCache(entry);
+        DataCache.getInstance().clearCache(entry);
         //update with current one
-        return this.transformEntry(desc);
+        return DataCache.getInstance().transformEntry(desc);
     }
     /**
      * modifies an existing dataset with a new description and optional file, the difference to update is that this should be used for partial changes
      * @returns {Promise<*>} returns the update dataset
      */
     async modify(entry, data, file) {
-        data = this.prepareData(data, file);
+        data = DataCache.getInstance().prepareData(data, file);
         const desc = await AppContext.getInstance().sendAPI(`/dataset/${entry.desc.id}`, data, 'POST');
-        this.clearCache(entry);
-        return this.transformEntry(desc);
+        DataCache.getInstance().clearCache(entry);
+        return DataCache.getInstance().transformEntry(desc);
     }
     /**
      * removes a given dataset
@@ -244,7 +244,7 @@ export class DataCache {
     async remove(entry) {
         const desc = entry.desc || entry;
         await AppContext.getInstance().sendAPI(`/dataset/${desc.id}`, {}, 'DELETE');
-        this.clearCache(desc);
+        DataCache.getInstance().clearCache(desc);
         return true;
     }
     static getInstance() {

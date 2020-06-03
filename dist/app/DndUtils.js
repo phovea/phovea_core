@@ -35,7 +35,7 @@ export class DnDUtils {
         return false;
     }
     isEdgeDnD(e) {
-        return this.dndTransferStorage.size > 0 && this.hasDnDType(e, 'text/plain');
+        return DnDUtils.getInstance().dndTransferStorage.size > 0 && DnDUtils.getInstance().hasDnDType(e, 'text/plain');
     }
     /**
      * checks whether it is a copy operation
@@ -52,7 +52,7 @@ export class DnDUtils {
      */
     updateDropEffect(e) {
         const dT = e.dataTransfer;
-        if (this.copyDnD(e)) {
+        if (DnDUtils.getInstance().copyDnD(e)) {
             dT.dropEffect = 'copy';
         }
         else {
@@ -91,16 +91,16 @@ export class DnDUtils {
             //compatibility mode for edge
             const text = payload.data['text/plain'] || '';
             e.dataTransfer.setData('text/plain', `${id}${text ? `: ${text}` : ''}`);
-            this.dndTransferStorage.set(id, payload.data);
+            DnDUtils.getInstance().dndTransferStorage.set(id, payload.data);
         });
         node.addEventListener('dragend', (e) => {
             node.classList.remove('phovea-dragging');
             if (stopPropagation) {
                 e.stopPropagation();
             }
-            if (this.dndTransferStorage.size > 0) {
+            if (DnDUtils.getInstance().dndTransferStorage.size > 0) {
                 //clear the id
-                this.dndTransferStorage.delete(id);
+                DnDUtils.getInstance().dndTransferStorage.delete(id);
             }
         });
         node.addEventListener('dragexit', (e) => {
@@ -121,7 +121,7 @@ export class DnDUtils {
     dropAble(node, mimeTypes, onDrop, onDragOver = null, stopPropagation = false) {
         node.addEventListener('dragenter', (e) => {
             //var xy = mouse($node.node());
-            if (this.hasDnDType(e, ...mimeTypes) || this.isEdgeDnD(e)) {
+            if (DnDUtils.getInstance().hasDnDType(e, ...mimeTypes) || DnDUtils.getInstance().isEdgeDnD(e)) {
                 node.classList.add('phovea-dragover');
                 if (stopPropagation) {
                     e.stopPropagation();
@@ -134,9 +134,9 @@ export class DnDUtils {
             return;
         });
         node.addEventListener('dragover', (e) => {
-            if (this.hasDnDType(e, ...mimeTypes) || this.isEdgeDnD(e)) {
+            if (DnDUtils.getInstance().hasDnDType(e, ...mimeTypes) || DnDUtils.getInstance().isEdgeDnD(e)) {
                 e.preventDefault();
-                this.updateDropEffect(e);
+                DnDUtils.getInstance().updateDropEffect(e);
                 node.classList.add('phovea-dragover');
                 if (stopPropagation) {
                     e.stopPropagation();
@@ -165,17 +165,17 @@ export class DnDUtils {
                     cleanup.classList.remove('phovea-dragging');
                 }
             }
-            if (this.isEdgeDnD(e)) {
+            if (DnDUtils.getInstance().isEdgeDnD(e)) {
                 const base = e.dataTransfer.getData('text/plain');
                 const id = parseInt(base.indexOf(':') >= 0 ? base.substring(0, base.indexOf(':')) : base, 10);
-                if (this.dndTransferStorage.has(id)) {
-                    const data = this.dndTransferStorage.get(id);
-                    this.dndTransferStorage.delete(id);
+                if (DnDUtils.getInstance().dndTransferStorage.has(id)) {
+                    const data = DnDUtils.getInstance().dndTransferStorage.get(id);
+                    DnDUtils.getInstance().dndTransferStorage.delete(id);
                     return !onDrop({ effect, data }, e);
                 }
                 return;
             }
-            if (this.hasDnDType(e, ...mimeTypes)) {
+            if (DnDUtils.getInstance().hasDnDType(e, ...mimeTypes)) {
                 const data = {};
                 //selects the data contained in the data transfer
                 mimeTypes.forEach((mime) => {

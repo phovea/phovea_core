@@ -19,9 +19,9 @@ export class UserSession extends Session {
    * resets the stored session data that will be automatically filled during login
    */
   public reset() {
-    this.remove('logged_in');
-    this.remove('username');
-    this.remove('user');
+    UserSession.getInstance().remove('logged_in');
+    UserSession.getInstance().remove('username');
+    UserSession.getInstance().remove('user');
   }
 
   /**
@@ -29,7 +29,7 @@ export class UserSession extends Session {
    * @returns {boolean}
    */
   public isLoggedIn() {
-    return this.retrieve('logged_in') === true;
+    return UserSession.getInstance().retrieve('logged_in') === true;
   }
 
   /**
@@ -37,9 +37,9 @@ export class UserSession extends Session {
    * @param user
    */
   public login(user: IUser) {
-    this.store('logged_in', true);
-    this.store('username', user.name);
-    this.store('user', user);
+    UserSession.getInstance().store('logged_in', true);
+    UserSession.getInstance().store('username', user.name);
+    UserSession.getInstance().store('user', user);
 
     PluginRegistry.getInstance().listPlugins(EP_PHOVEA_CORE_LOGIN).map((desc: ILoginExtensionPointDesc) => {
       desc.load().then((plugin: ILoginExtensionPoint) => plugin.factory(user));
@@ -52,8 +52,8 @@ export class UserSession extends Session {
    * logs the current user out
    */
   public logout() {
-    const wasLoggedIn = this.isLoggedIn();
-    this.reset();
+    const wasLoggedIn = UserSession.getInstance().isLoggedIn();
+    UserSession.getInstance().reset();
     if (wasLoggedIn) {
       PluginRegistry.getInstance().listPlugins(EP_PHOVEA_CORE_LOGOUT).map((desc: ILogoutEPDesc) => {
         desc.load().then((plugin: ILogoutEP) => plugin.factory());
@@ -69,38 +69,38 @@ export class UserSession extends Session {
    * @returns {any}
    */
   public currentUser(): IUser|null {
-    if (!this.isLoggedIn()) {
+    if (!UserSession.getInstance().isLoggedIn()) {
       return null;
     }
-    return this.retrieve('user', UserUtils.ANONYMOUS_USER);
+    return UserSession.getInstance().retrieve('user', UserUtils.ANONYMOUS_USER);
   }
 
   /**
    * returns the current user name else an anonymous user name
    */
   public currentUserNameOrAnonymous() {
-    const u = this.currentUser();
+    const u = UserSession.getInstance().currentUser();
     return u ? u.name : UserUtils.ANONYMOUS_USER.name;
   }
 
-  public can(item: ISecureItem, permission: EPermission, user = this.currentUser()): boolean {
+  public can(item: ISecureItem, permission: EPermission, user = UserSession.getInstance().currentUser()): boolean {
     if (!user) {
       user = UserUtils.ANONYMOUS_USER;
     }
     const permissions = Permission.decode(item.permissions);
 
     // I'm the creator and have the right
-    if (this.isEqual(user.name, item.creator) && permissions.user.has(permission)) {
+    if (UserSession.getInstance().isEqual(user.name, item.creator) && permissions.user.has(permission)) {
       return true;
     }
 
     // check if I'm in the group and have the right
-    if (item.group && this.includes(user.roles, item.group) && permissions.group.has(permission)) {
+    if (item.group && UserSession.getInstance().includes(user.roles, item.group) && permissions.group.has(permission)) {
       return true;
     }
 
     // check if I'm a buddy having the right
-    if (item.buddies && Array.isArray(item.buddies) && this.includes(item.buddies, user.name) && permissions.buddies.has(permission)) {
+    if (item.buddies && Array.isArray(item.buddies) && UserSession.getInstance().includes(item.buddies, user.name) && permissions.buddies.has(permission)) {
       return true;
     }
 
@@ -114,8 +114,8 @@ export class UserSession extends Session {
    * @param user the user by default the current user
    * @returns {boolean}
    */
-  public canRead(item: ISecureItem, user = this.currentUser()) {
-    return this.can(item, EPermission.READ, user);
+  public canRead(item: ISecureItem, user = UserSession.getInstance().currentUser()) {
+    return UserSession.getInstance().can(item, EPermission.READ, user);
   }
 
   /**
@@ -124,8 +124,8 @@ export class UserSession extends Session {
    * @param user the user by default the current user
    * @returns {boolean}
    */
-  public canWrite(item: ISecureItem, user = this.currentUser()) {
-    return this.can(item, EPermission.WRITE, user);
+  public canWrite(item: ISecureItem, user = UserSession.getInstance().currentUser()) {
+    return UserSession.getInstance().can(item, EPermission.WRITE, user);
   }
 
   /**
@@ -134,8 +134,8 @@ export class UserSession extends Session {
    * @param user the user by default the current user
    * @returns {boolean}
    */
-  public canExecute(item: ISecureItem, user = this.currentUser()) {
-    return this.can(item, EPermission.EXECUTE, user);
+  public canExecute(item: ISecureItem, user = UserSession.getInstance().currentUser()) {
+    return UserSession.getInstance().can(item, EPermission.EXECUTE, user);
   }
 
 
@@ -159,7 +159,7 @@ export class UserSession extends Session {
     if (!item) {
       return false;
     }
-    return items.some((r) => this.isEqual(item, r));
+    return items.some((r) => UserSession.getInstance().isEqual(item, r));
   }
 
   private static instance: UserSession;

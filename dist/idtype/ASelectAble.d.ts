@@ -40,10 +40,10 @@ export declare abstract class ASelectAble extends EventHandler implements ISelec
     private fillAndSend;
     on(events: string | {
         [key: string]: IEventListener;
-    }, handler?: IEventListener): this;
+    }, handler?: IEventListener): EventHandler;
     off(events: string | {
         [key: string]: IEventListener;
-    }, handler?: IEventListener): this;
+    }, handler?: IEventListener): EventHandler;
     selections(type?: string): Promise<Range>;
     select(range: RangeLike): Promise<Range>;
     select(range: RangeLike, op: SelectOperation): Promise<Range>;

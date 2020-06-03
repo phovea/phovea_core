@@ -141,7 +141,7 @@ export class EventHandler implements IEventHandler {
 
   private readonly propagationHandler: IEventListener = (event: IEvent) => {
     if (!event.isPropagationStopped()) {
-      this.fireEvent(propagateEvent(event, this));
+      EventHandler.getInstance().fireEvent(propagateEvent(event, EventHandler.getInstance()));
     }
   }
 
@@ -153,18 +153,18 @@ export class EventHandler implements IEventHandler {
   on(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
     if (typeof events === 'string') {
       events.split(EventHandler.MULTI_EVENT_SEPARATOR).forEach((event) => {
-        if (!this.handlers.has(event)) {
-          this.handlers.set(event, new SingleEventHandler(event));
+        if (!EventHandler.getInstance().handlers.has(event)) {
+          EventHandler.getInstance().handlers.set(event, new SingleEventHandler(event));
         }
-        this.handlers.get(event).push(handler);
+        EventHandler.getInstance().handlers.get(event).push(handler);
       });
     } else {
       Object.keys(events).forEach((event) => {
         const h = events[event];
-        this.on(event, h);
+        EventHandler.getInstance().on(event, h);
       });
     }
-    return this;
+    return EventHandler.getInstance();
   }
 
   /**
@@ -175,21 +175,21 @@ export class EventHandler implements IEventHandler {
   off(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
     if (typeof events === 'string') {
       events.split(EventHandler.MULTI_EVENT_SEPARATOR).forEach((event) => {
-        if (this.handlers.has(event)) {
-          const h: SingleEventHandler = this.handlers.get(event);
+        if (EventHandler.getInstance().handlers.has(event)) {
+          const h: SingleEventHandler = EventHandler.getInstance().handlers.get(event);
           h.remove(handler);
           if (h.length === 0) {
-            this.handlers.delete(event);
+            EventHandler.getInstance().handlers.delete(event);
           }
         }
       });
     } else {
       Object.keys(events).forEach((event) => {
         const h = events[event];
-        this.off(event, h);
+        EventHandler.getInstance().off(event, h);
       });
     }
-    return this;
+    return EventHandler.getInstance();
   }
 
 
@@ -198,7 +198,7 @@ export class EventHandler implements IEventHandler {
    */
   getRegisteredHandlerCount(): {[key: string]: number} {
     const r: {[key: string]: number} = {};
-    this.handlers.forEach((handler, type) => {
+    EventHandler.getInstance().handlers.forEach((handler, type) => {
       r[type] = handler.length;
     });
     return r;
@@ -212,14 +212,14 @@ export class EventHandler implements IEventHandler {
    */
   fire(events: string, ...args: any[]) {
     events.split(EventHandler.MULTI_EVENT_SEPARATOR).forEach((event) => {
-      this.fireEvent(createEvent(event, args, this));
+      EventHandler.getInstance().fireEvent(createEvent(event, args, EventHandler.getInstance()));
     });
-    return this;
+    return EventHandler.getInstance();
   }
 
   private fireEvent(event: Event) {
-    if (this.handlers.has(event.type)) {
-      const h: SingleEventHandler = this.handlers.get(event.type);
+    if (EventHandler.getInstance().handlers.has(event.type)) {
+      const h: SingleEventHandler = EventHandler.getInstance().handlers.get(event.type);
       return h.fire(event);
     }
     return false;
@@ -231,11 +231,11 @@ export class EventHandler implements IEventHandler {
    * @param events
    */
   propagate(progatee: IEventHandler, ...events: string[]) {
-    progatee.on(events.join(EventHandler.MULTI_EVENT_SEPARATOR), this.propagationHandler);
+    progatee.on(events.join(EventHandler.MULTI_EVENT_SEPARATOR), EventHandler.getInstance().propagationHandler);
   }
 
   stopPropagation(progatee: IEventHandler, ...events: string[]) {
-    progatee.off(events.join(EventHandler.MULTI_EVENT_SEPARATOR), this.propagationHandler);
+    progatee.off(events.join(EventHandler.MULTI_EVENT_SEPARATOR), EventHandler.getInstance().propagationHandler);
   }
 
   private static instance: EventHandler;

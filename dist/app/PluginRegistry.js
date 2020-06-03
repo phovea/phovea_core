@@ -19,22 +19,22 @@ export class PluginRegistry {
             description: '',
             version: '1.0.0',
             load: async () => {
-                const instance = desc.static === true ? loader : await Promise.resolve(loader());
-                return { desc: p, factory: this.getFactoryMethod(instance, p.factory) };
+                const instance = await Promise.resolve(loader());
+                return { desc: p, factory: PluginRegistry.getInstance().getFactoryMethod(instance, p.factory) };
             }
         }, typeof descOrLoader === 'function' ? desc : descOrLoader);
-        this.registry.push(p);
+        PluginRegistry.getInstance().registry.push(p);
     }
     register(plugin, generator) {
         if (typeof generator !== 'function') {
             //wrong type - not a function, maybe a dummy inline
             return;
         }
-        if (this.knownPlugins.has(plugin)) {
+        if (PluginRegistry.getInstance().knownPlugins.has(plugin)) {
             return; // don't call it twice
         }
-        this.knownPlugins.add(plugin);
-        generator(this);
+        PluginRegistry.getInstance().knownPlugins.add(plugin);
+        generator(PluginRegistry.getInstance());
     }
     /**
      * returns a list of matching plugin descs
@@ -46,7 +46,7 @@ export class PluginRegistry {
             const v = filter;
             filter = (desc) => desc.type === v;
         }
-        return this.registry.filter(filter);
+        return PluginRegistry.getInstance().registry.filter(filter);
     }
     /**
      * returns an extension identified by type and id
@@ -55,7 +55,7 @@ export class PluginRegistry {
      * @returns {IPluginDesc}
      */
     getPlugin(type, id) {
-        return this.registry.find((d) => d.type === type && d.id === id);
+        return PluginRegistry.getInstance().registry.find((d) => d.type === type && d.id === id);
     }
     loadPlugin(desc) {
         return Promise.all(desc.map((d) => d.load()));

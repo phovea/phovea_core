@@ -15,11 +15,11 @@ export class UniqueIdManager {
    * @return {number}
    */
   public uniqueId(domain: string = '_default') {
-    if (!this.idCounter.has(domain)) {
-      this.idCounter.set(domain, 0);
+    if (!UniqueIdManager.getInstance().idCounter.has(domain)) {
+      UniqueIdManager.getInstance().idCounter.set(domain, 0);
     }
-    const v = this.idCounter.get(domain);
-    this.idCounter.set(domain, v + 1);
+    const v = UniqueIdManager.getInstance().idCounter.get(domain);
+    UniqueIdManager.getInstance().idCounter.set(domain, v + 1);
     return v;
   }
 
@@ -27,10 +27,10 @@ export class UniqueIdManager {
     if (isNaN(id) || id < 0) {
       return id;
     }
-    if (!this.idCounter.has(domain)) {
-      this.idCounter.set(domain, id + 1);
+    if (!UniqueIdManager.getInstance().idCounter.has(domain)) {
+      UniqueIdManager.getInstance().idCounter.set(domain, id + 1);
     } else {
-      this.idCounter.set(domain, Math.max(this.idCounter.get(domain), id + 1)); //use the next one afterwards
+      UniqueIdManager.getInstance().idCounter.set(domain, Math.max(UniqueIdManager.getInstance().idCounter.get(domain), id + 1)); //use the next one afterwards
     }
     return id;
   }
@@ -41,7 +41,7 @@ export class UniqueIdManager {
    * @return {string}
    */
   public uniqueString(domain: string = '_default') {
-    return domain + this.uniqueId(domain);
+    return domain + UniqueIdManager.getInstance().uniqueId(domain);
   }
   private static instance: UniqueIdManager;
   public static getInstance(): UniqueIdManager {

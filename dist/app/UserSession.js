@@ -11,25 +11,25 @@ export class UserSession extends Session {
      * resets the stored session data that will be automatically filled during login
      */
     reset() {
-        this.remove('logged_in');
-        this.remove('username');
-        this.remove('user');
+        UserSession.getInstance().remove('logged_in');
+        UserSession.getInstance().remove('username');
+        UserSession.getInstance().remove('user');
     }
     /**
      * whether the user is logged in
      * @returns {boolean}
      */
     isLoggedIn() {
-        return this.retrieve('logged_in') === true;
+        return UserSession.getInstance().retrieve('logged_in') === true;
     }
     /**
      * stores the given user information
      * @param user
      */
     login(user) {
-        this.store('logged_in', true);
-        this.store('username', user.name);
-        this.store('user', user);
+        UserSession.getInstance().store('logged_in', true);
+        UserSession.getInstance().store('username', user.name);
+        UserSession.getInstance().store('user', user);
         PluginRegistry.getInstance().listPlugins(EP_PHOVEA_CORE_LOGIN).map((desc) => {
             desc.load().then((plugin) => plugin.factory(user));
         });
@@ -39,8 +39,8 @@ export class UserSession extends Session {
      * logs the current user out
      */
     logout() {
-        const wasLoggedIn = this.isLoggedIn();
-        this.reset();
+        const wasLoggedIn = UserSession.getInstance().isLoggedIn();
+        UserSession.getInstance().reset();
         if (wasLoggedIn) {
             PluginRegistry.getInstance().listPlugins(EP_PHOVEA_CORE_LOGOUT).map((desc) => {
                 desc.load().then((plugin) => plugin.factory());
@@ -53,33 +53,33 @@ export class UserSession extends Session {
      * @returns {any}
      */
     currentUser() {
-        if (!this.isLoggedIn()) {
+        if (!UserSession.getInstance().isLoggedIn()) {
             return null;
         }
-        return this.retrieve('user', UserUtils.ANONYMOUS_USER);
+        return UserSession.getInstance().retrieve('user', UserUtils.ANONYMOUS_USER);
     }
     /**
      * returns the current user name else an anonymous user name
      */
     currentUserNameOrAnonymous() {
-        const u = this.currentUser();
+        const u = UserSession.getInstance().currentUser();
         return u ? u.name : UserUtils.ANONYMOUS_USER.name;
     }
-    can(item, permission, user = this.currentUser()) {
+    can(item, permission, user = UserSession.getInstance().currentUser()) {
         if (!user) {
             user = UserUtils.ANONYMOUS_USER;
         }
         const permissions = Permission.decode(item.permissions);
         // I'm the creator and have the right
-        if (this.isEqual(user.name, item.creator) && permissions.user.has(permission)) {
+        if (UserSession.getInstance().isEqual(user.name, item.creator) && permissions.user.has(permission)) {
             return true;
         }
         // check if I'm in the group and have the right
-        if (item.group && this.includes(user.roles, item.group) && permissions.group.has(permission)) {
+        if (item.group && UserSession.getInstance().includes(user.roles, item.group) && permissions.group.has(permission)) {
             return true;
         }
         // check if I'm a buddy having the right
-        if (item.buddies && Array.isArray(item.buddies) && this.includes(item.buddies, user.name) && permissions.buddies.has(permission)) {
+        if (item.buddies && Array.isArray(item.buddies) && UserSession.getInstance().includes(item.buddies, user.name) && permissions.buddies.has(permission)) {
             return true;
         }
         // check others
@@ -91,8 +91,8 @@ export class UserSession extends Session {
      * @param user the user by default the current user
      * @returns {boolean}
      */
-    canRead(item, user = this.currentUser()) {
-        return this.can(item, EPermission.READ, user);
+    canRead(item, user = UserSession.getInstance().currentUser()) {
+        return UserSession.getInstance().can(item, EPermission.READ, user);
     }
     /**
      * check whether the given user can write the given item
@@ -100,8 +100,8 @@ export class UserSession extends Session {
      * @param user the user by default the current user
      * @returns {boolean}
      */
-    canWrite(item, user = this.currentUser()) {
-        return this.can(item, EPermission.WRITE, user);
+    canWrite(item, user = UserSession.getInstance().currentUser()) {
+        return UserSession.getInstance().can(item, EPermission.WRITE, user);
     }
     /**
      * check whether the given user can execute the given item
@@ -109,8 +109,8 @@ export class UserSession extends Session {
      * @param user the user by default the current user
      * @returns {boolean}
      */
-    canExecute(item, user = this.currentUser()) {
-        return this.can(item, EPermission.EXECUTE, user);
+    canExecute(item, user = UserSession.getInstance().currentUser()) {
+        return UserSession.getInstance().can(item, EPermission.EXECUTE, user);
     }
     hasPermission(item, entity = EEntity.USER, permission = EPermission.READ) {
         const permissions = Permission.decode(item.permissions);
@@ -131,7 +131,7 @@ export class UserSession extends Session {
         if (!item) {
             return false;
         }
-        return items.some((r) => this.isEqual(item, r));
+        return items.some((r) => UserSession.getInstance().isEqual(item, r));
     }
     static getInstance() {
         if (!UserSession.instance) {
