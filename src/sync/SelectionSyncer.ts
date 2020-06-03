@@ -7,7 +7,7 @@ import {Store} from './Store';
 import {IDTypeManager, SelectionUtils} from '../idtype';
 import {IDType} from '../idtype/IDType';
 import {Range} from '../range/Range';
-import {EventHandler} from '../base/event';
+import {GlobalEventHandler} from '../base/event';
 
 const PREFIX = 'selection-idtype-';
 
@@ -49,7 +49,7 @@ export class SelectionSyncerOptionUtils {
     toSync.forEach((idType) => SelectionSyncerOptionUtils.syncIDType(store, <IDType>idType, options));
 
     // watch new ones
-    EventHandler.getInstance().on('register.idtype', (event: any, idType: IDType) => {
+    GlobalEventHandler.getInstance().on('register.idtype', (event: any, idType: IDType) => {
       if (options.filter(idType)) {
         SelectionSyncerOptionUtils.syncIDType(store, idType, options);
       }

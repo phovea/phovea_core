@@ -57,7 +57,7 @@ export declare class EventHandler implements IEventHandler {
      */
     on(events: string | {
         [key: string]: IEventListener;
-    }, handler?: IEventListener): EventHandler;
+    }, handler?: IEventListener): this;
     /**
      * unregister a global event handler
      * @param events
@@ -65,7 +65,7 @@ export declare class EventHandler implements IEventHandler {
      */
     off(events: string | {
         [key: string]: IEventListener;
-    }, handler?: IEventListener): EventHandler;
+    }, handler?: IEventListener): this;
     /**
      * list for each registered event the number of listeners
      */
@@ -77,7 +77,7 @@ export declare class EventHandler implements IEventHandler {
      * @param events name(s) of the event
      * @param args additional arguments
      */
-    fire(events: string, ...args: any[]): EventHandler;
+    fire(events: string, ...args: any[]): this;
     private fireEvent;
     /**
      * registers on the given event handler and propagates the given events to itself
@@ -86,6 +86,8 @@ export declare class EventHandler implements IEventHandler {
      */
     propagate(progatee: IEventHandler, ...events: string[]): void;
     stopPropagation(progatee: IEventHandler, ...events: string[]): void;
+}
+export declare class GlobalEventHandler extends EventHandler {
     private static instance;
-    static getInstance(): EventHandler;
+    static getInstance(): GlobalEventHandler;
 }

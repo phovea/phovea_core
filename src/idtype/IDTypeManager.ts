@@ -4,7 +4,7 @@
 
 
 import {AppContext} from '../app/AppContext';
-import {EventHandler} from '../base/event';
+import {GlobalEventHandler} from '../base/event';
 import {IIDType} from './IIDType';
 import {SelectionUtils} from './SelectionUtils';
 import {IDType, IDTypeLike} from './IDType';
@@ -39,7 +39,7 @@ export class IDTypeManager {
       }
       IDTypeManager.getInstance().cache.set(row.id, entry);
       if (newOne) {
-        EventHandler.getInstance().fire(IDTypeManager.EVENT_REGISTER_IDTYPE, entry);
+        GlobalEventHandler.getInstance().fire(IDTypeManager.EVENT_REGISTER_IDTYPE, entry);
       }
     });
   }
@@ -95,7 +95,7 @@ export class IDTypeManager {
       return IDTypeManager.getInstance().cache.get(id);
     }
     IDTypeManager.getInstance().cache.set(id, idtype);
-    EventHandler.getInstance().fire('register.idtype', idtype);
+    GlobalEventHandler.getInstance().fire('register.idtype', idtype);
     return idtype;
   }
 

@@ -84,7 +84,7 @@ export class EventHandler {
         this.handlers = new Map();
         this.propagationHandler = (event) => {
             if (!event.isPropagationStopped()) {
-                EventHandler.getInstance().fireEvent(propagateEvent(event, EventHandler.getInstance()));
+                this.fireEvent(propagateEvent(event, this));
             }
         };
     }
@@ -96,19 +96,19 @@ export class EventHandler {
     on(events, handler) {
         if (typeof events === 'string') {
             events.split(EventHandler.MULTI_EVENT_SEPARATOR).forEach((event) => {
-                if (!EventHandler.getInstance().handlers.has(event)) {
-                    EventHandler.getInstance().handlers.set(event, new SingleEventHandler(event));
+                if (!this.handlers.has(event)) {
+                    this.handlers.set(event, new SingleEventHandler(event));
                 }
-                EventHandler.getInstance().handlers.get(event).push(handler);
+                this.handlers.get(event).push(handler);
             });
         }
         else {
             Object.keys(events).forEach((event) => {
                 const h = events[event];
-                EventHandler.getInstance().on(event, h);
+                this.on(event, h);
             });
         }
-        return EventHandler.getInstance();
+        return this;
     }
     /**
      * unregister a global event handler
@@ -118,11 +118,11 @@ export class EventHandler {
     off(events, handler) {
         if (typeof events === 'string') {
             events.split(EventHandler.MULTI_EVENT_SEPARATOR).forEach((event) => {
-                if (EventHandler.getInstance().handlers.has(event)) {
-                    const h = EventHandler.getInstance().handlers.get(event);
+                if (this.handlers.has(event)) {
+                    const h = this.handlers.get(event);
                     h.remove(handler);
                     if (h.length === 0) {
-                        EventHandler.getInstance().handlers.delete(event);
+                        this.handlers.delete(event);
                     }
                 }
             });
@@ -130,17 +130,17 @@ export class EventHandler {
         else {
             Object.keys(events).forEach((event) => {
                 const h = events[event];
-                EventHandler.getInstance().off(event, h);
+                this.off(event, h);
             });
         }
-        return EventHandler.getInstance();
+        return this;
     }
     /**
      * list for each registered event the number of listeners
      */
     getRegisteredHandlerCount() {
         const r = {};
-        EventHandler.getInstance().handlers.forEach((handler, type) => {
+        this.handlers.forEach((handler, type) => {
             r[type] = handler.length;
         });
         return r;
@@ -152,13 +152,13 @@ export class EventHandler {
      */
     fire(events, ...args) {
         events.split(EventHandler.MULTI_EVENT_SEPARATOR).forEach((event) => {
-            EventHandler.getInstance().fireEvent(createEvent(event, args, EventHandler.getInstance()));
+            this.fireEvent(createEvent(event, args, this));
         });
-        return EventHandler.getInstance();
+        return this;
     }
     fireEvent(event) {
-        if (EventHandler.getInstance().handlers.has(event.type)) {
-            const h = EventHandler.getInstance().handlers.get(event.type);
+        if (this.handlers.has(event.type)) {
+            const h = this.handlers.get(event.type);
             return h.fire(event);
         }
         return false;
@@ -169,17 +169,19 @@ export class EventHandler {
      * @param events
      */
     propagate(progatee, ...events) {
-        progatee.on(events.join(EventHandler.MULTI_EVENT_SEPARATOR), EventHandler.getInstance().propagationHandler);
+        progatee.on(events.join(EventHandler.MULTI_EVENT_SEPARATOR), this.propagationHandler);
     }
     stopPropagation(progatee, ...events) {
-        progatee.off(events.join(EventHandler.MULTI_EVENT_SEPARATOR), EventHandler.getInstance().propagationHandler);
-    }
-    static getInstance() {
-        if (!EventHandler.instance) {
-            EventHandler.instance = new EventHandler();
-        }
-        return EventHandler.instance;
+        progatee.off(events.join(EventHandler.MULTI_EVENT_SEPARATOR), this.propagationHandler);
     }
 }
 EventHandler.MULTI_EVENT_SEPARATOR = ',';
+export class GlobalEventHandler extends EventHandler {
+    static getInstance() {
+        if (!GlobalEventHandler.instance) {
+            GlobalEventHandler.instance = new GlobalEventHandler();
+        }
+        return GlobalEventHandler.instance;
+    }
+}
 //# sourceMappingURL=event.js.map

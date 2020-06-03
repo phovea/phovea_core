@@ -18,10 +18,10 @@ export declare abstract class AProductSelectAble extends ASelectAble {
     abstract get producttype(): ProductIDType;
     on(events: string | {
         [key: string]: IEventListener;
-    }, handler?: IEventListener): import("../base/event").EventHandler;
+    }, handler?: IEventListener): this;
     off(events: string | {
         [key: string]: IEventListener;
-    }, handler?: IEventListener): import("../base/event").EventHandler;
+    }, handler?: IEventListener): this;
     productSelections(type?: string): Promise<Range[]>;
     selectProduct(range: RangeLike[], op?: SelectOperation): Promise<Range[]>;
     selectProduct(type: string, range: RangeLike[], op?: SelectOperation): Promise<Range[]>;

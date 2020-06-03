@@ -4,7 +4,7 @@
 import { BaseUtils } from '../base/BaseUtils';
 import { IDTypeManager, SelectionUtils } from '../idtype';
 import { IDType } from '../idtype/IDType';
-import { EventHandler } from '../base/event';
+import { GlobalEventHandler } from '../base/event';
 const PREFIX = 'selection-idtype-';
 export class SelectionSyncerOptionUtils {
     static syncIDType(store, idType, options) {
@@ -34,7 +34,7 @@ export class SelectionSyncerOptionUtils {
         const toSync = IDTypeManager.getInstance().listIdTypes().filter((idType) => (idType instanceof IDType && options.filter(idType)));
         toSync.forEach((idType) => SelectionSyncerOptionUtils.syncIDType(store, idType, options));
         // watch new ones
-        EventHandler.getInstance().on('register.idtype', (event, idType) => {
+        GlobalEventHandler.getInstance().on('register.idtype', (event, idType) => {
             if (options.filter(idType)) {
                 SelectionSyncerOptionUtils.syncIDType(store, idType, options);
             }

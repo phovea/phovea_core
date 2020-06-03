@@ -7,7 +7,7 @@
 /**
  * Created by Samuel Gratzl on 04.08.2014.
  */
-import {EventHandler} from './event';
+import {GlobalEventHandler} from './event';
 
 
 
@@ -116,10 +116,10 @@ export class Ajax {
     }
 
     // there are no typings for fetch so far
-    EventHandler.getInstance().fire(Ajax.GLOBAL_EVENT_AJAX_PRE_SEND, url, options);
+    GlobalEventHandler.getInstance().fire(Ajax.GLOBAL_EVENT_AJAX_PRE_SEND, url, options);
     const r = Ajax.checkStatus(await self.fetch(url, options));
     const output = Ajax.parseType(expectedDataType, r);
-    EventHandler.getInstance().fire(Ajax.GLOBAL_EVENT_AJAX_POST_SEND, url, options, r, output);
+    GlobalEventHandler.getInstance().fire(Ajax.GLOBAL_EVENT_AJAX_POST_SEND, url, options, r, output);
     return output;
   }
   /**

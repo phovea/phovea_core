@@ -3,7 +3,7 @@
  */
 import { Session } from '../base/Session';
 import { UserUtils, Permission, EPermission, EEntity } from '../security';
-import { EventHandler } from '../base/event';
+import { GlobalEventHandler } from '../base/event';
 import { PluginRegistry } from './PluginRegistry';
 import { EP_PHOVEA_CORE_LOGIN, EP_PHOVEA_CORE_LOGOUT } from './extensions';
 export class UserSession extends Session {
@@ -33,7 +33,7 @@ export class UserSession extends Session {
         PluginRegistry.getInstance().listPlugins(EP_PHOVEA_CORE_LOGIN).map((desc) => {
             desc.load().then((plugin) => plugin.factory(user));
         });
-        EventHandler.getInstance().fire(UserSession.GLOBAL_EVENT_USER_LOGGED_IN, user);
+        GlobalEventHandler.getInstance().fire(UserSession.GLOBAL_EVENT_USER_LOGGED_IN, user);
     }
     /**
      * logs the current user out
@@ -45,7 +45,7 @@ export class UserSession extends Session {
             PluginRegistry.getInstance().listPlugins(EP_PHOVEA_CORE_LOGOUT).map((desc) => {
                 desc.load().then((plugin) => plugin.factory());
             });
-            EventHandler.getInstance().fire(UserSession.GLOBAL_EVENT_USER_LOGGED_OUT);
+            GlobalEventHandler.getInstance().fire(UserSession.GLOBAL_EVENT_USER_LOGGED_OUT);
         }
     }
     /**

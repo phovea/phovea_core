@@ -5,7 +5,7 @@
 
 import {Session} from '../base/Session';
 import {IUser,UserUtils,ISecureItem, Permission, EPermission, EEntity} from '../security';
-import {EventHandler} from '../base/event';
+import {GlobalEventHandler} from '../base/event';
 import {PluginRegistry} from './PluginRegistry';
 import {ILoginExtensionPointDesc, ILogoutEP, ILogoutEPDesc, ILoginExtensionPoint, EP_PHOVEA_CORE_LOGIN, EP_PHOVEA_CORE_LOGOUT} from './extensions';
 
@@ -45,7 +45,7 @@ export class UserSession extends Session {
       desc.load().then((plugin: ILoginExtensionPoint) => plugin.factory(user));
     });
 
-    EventHandler.getInstance().fire(UserSession.GLOBAL_EVENT_USER_LOGGED_IN, user);
+    GlobalEventHandler.getInstance().fire(UserSession.GLOBAL_EVENT_USER_LOGGED_IN, user);
   }
 
   /**
@@ -59,7 +59,7 @@ export class UserSession extends Session {
         desc.load().then((plugin: ILogoutEP) => plugin.factory());
       });
 
-      EventHandler.getInstance().fire(UserSession.GLOBAL_EVENT_USER_LOGGED_OUT);
+      GlobalEventHandler.getInstance().fire(UserSession.GLOBAL_EVENT_USER_LOGGED_OUT);
     }
   }
 
