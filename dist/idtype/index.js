@@ -8,6 +8,7 @@
  */
 export * from './SelectionUtils';
 export * from './LocalIDAssigner';
+export * from './IIDType';
 export * from './ObjectManager';
 export * from './IDType';
 export * from './ProductIDType';

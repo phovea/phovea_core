@@ -3,6 +3,7 @@
  */
 export * from './ObjectNode';
 export * from './ActionMeta';
+export * from './ICmd';
 export * from './ActionNode';
 export * from './StateNode';
 export * from './SlideNode';
