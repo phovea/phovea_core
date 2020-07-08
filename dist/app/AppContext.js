@@ -11,6 +11,7 @@ import { HashProperties } from '../base/HashProperties';
 import { PropertyHandler } from '../base/PropertyHandler';
 import { BaseUtils } from '../base/BaseUtils';
 import { Ajax } from '../base/ajax';
+import { WebpackEnv } from '../base/WebpackEnv';
 export class AppContext {
     constructor() {
         /**
@@ -23,7 +24,7 @@ export class AppContext {
          * server prefix ofr api calls
          * @type {string}
          */
-        this.server_url = (AppContext.__APP_CONTEXT__ || '/') + 'api';
+        this.server_url = (WebpackEnv.__APP_CONTEXT__ || '/') + 'api';
         /**
          * server suffix for api calls
          * @type {string}
@@ -176,6 +177,9 @@ export class AppContext {
         return AppContext.instance;
     }
 }
-AppContext.context = AppContext.__APP_CONTEXT__;
-AppContext.version = AppContext.__VERSION__;
+AppContext.context = WebpackEnv.__APP_CONTEXT__;
+/**
+ * version of the core
+ */
+AppContext.version = WebpackEnv.__VERSION__;
 //# sourceMappingURL=AppContext.js.map

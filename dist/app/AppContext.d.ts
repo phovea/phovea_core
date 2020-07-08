@@ -10,12 +10,10 @@ export declare class AppContext {
      * @type {boolean}
      */
     offline: boolean;
-    static __APP_CONTEXT__: string;
     static context: string;
     /**
      * version of the core
      */
-    private static __VERSION__;
     static version: string;
     /**
      * server prefix ofr api calls

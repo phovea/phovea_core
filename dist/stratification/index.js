@@ -1,7 +1,6 @@
 /**
  * Created by sam on 26.12.2016.
  */
-export * from './IStratification';
 export * from './StratificationGroup';
 export * from './StratificationCategoricalVector';
 export * from './loader';

@@ -15,3 +15,4 @@ export * from './promise';
 export * from './BaseUtils';
 export * from './PropertyHandler';
 export * from './HashProperties';
+export * from './WebpackEnv';

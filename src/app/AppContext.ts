@@ -12,6 +12,7 @@ import {HashProperties} from '../base/HashProperties';
 import {PropertyHandler} from '../base/PropertyHandler';
 import {BaseUtils} from '../base/BaseUtils';
 import {Ajax} from '../base/ajax';
+import {WebpackEnv} from '../base/WebpackEnv';
 
 type OfflineGenerator = ((data: any, url: string) => Promise<any>) | Promise<any> | any;
 
@@ -22,21 +23,19 @@ export class AppContext {
    * @type {boolean}
    */
   public offline = false;
-  public static __APP_CONTEXT__: string;
-  public static context = AppContext.__APP_CONTEXT__;
+  public static context = WebpackEnv.__APP_CONTEXT__;
 
   /**
    * version of the core
    */
-  private static __VERSION__: string;
-  public static version = AppContext.__VERSION__;
+  public static version = WebpackEnv.__VERSION__;
 
   /* tslint:disable:variable-name */
   /**
    * server prefix ofr api calls
    * @type {string}
    */
-  public server_url: string = (AppContext.__APP_CONTEXT__ || '/') + 'api';
+  public server_url: string = (WebpackEnv.__APP_CONTEXT__ || '/') + 'api';
   /**
    * server suffix for api calls
    * @type {string}
