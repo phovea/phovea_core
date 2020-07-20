@@ -59,7 +59,7 @@ export declare class IDTypeManager {
     mapNameToFirstID(idType: IDType, names: string[], toIDType: IDTypeLike): Promise<number[]>;
     mapNameToID(idType: IDType, names: string[], toIDType: IDTypeLike): Promise<number[][]>;
     findMappablePlugins(target: IDType, all: IPluginDesc[]): any[] | Promise<IPluginDesc[]>;
-    constructor();
+    init(): void;
     private static instance;
     static getInstance(): IDTypeManager;
 }

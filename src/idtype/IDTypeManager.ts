@@ -215,7 +215,7 @@ export class IDTypeManager {
   }
 
 
-  constructor() {
+  init() {
     //register known idtypes via registry
     PluginRegistry.getInstance().listPlugins(IDTypeManager.EXTENSION_POINT_IDTYPE).forEach((plugin) => {
       const id = plugin.id;
@@ -231,6 +231,7 @@ export class IDTypeManager {
   public static getInstance(): IDTypeManager {
     if (!IDTypeManager.instance) {
       IDTypeManager.instance = new IDTypeManager();
+      IDTypeManager.instance.init();
     }
 
     return IDTypeManager.instance;

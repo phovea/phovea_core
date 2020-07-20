@@ -12,14 +12,6 @@ export class IDTypeManager {
     constructor() {
         this.cache = new Map();
         this.filledUp = false;
-        //register known idtypes via registry
-        PluginRegistry.getInstance().listPlugins(IDTypeManager.EXTENSION_POINT_IDTYPE).forEach((plugin) => {
-            const id = plugin.id;
-            const name = plugin.name;
-            const names = plugin.names || this.toPlural(name);
-            const internal = Boolean(plugin.internal);
-            this.registerIdType(id, new IDType(id, name, names, internal));
-        });
     }
     fillUpData(entries) {
         entries.forEach(function (row) {
@@ -185,9 +177,20 @@ export class IDTypeManager {
             return all.filter((d) => valid.indexOf(d.idtype) >= 0);
         });
     }
+    init() {
+        //register known idtypes via registry
+        PluginRegistry.getInstance().listPlugins(IDTypeManager.EXTENSION_POINT_IDTYPE).forEach((plugin) => {
+            const id = plugin.id;
+            const name = plugin.name;
+            const names = plugin.names || this.toPlural(name);
+            const internal = Boolean(plugin.internal);
+            this.registerIdType(id, new IDType(id, name, names, internal));
+        });
+    }
     static getInstance() {
         if (!IDTypeManager.instance) {
             IDTypeManager.instance = new IDTypeManager();
+            IDTypeManager.instance.init();
         }
         return IDTypeManager.instance;
     }
