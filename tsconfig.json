@@ -16,7 +16,8 @@
     "skipLibCheck": true,
     "esModuleInterop": false,
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true // required for i18next,
+    "allowSyntheticDefaultImports": true, // required for i18next,
+    "preserveWatchOutput":true
   },
   "include": [
     "src/**/*.ts",
