@@ -1,3 +1,7 @@
+/**
+ * Created by sam on 12.02.2015.
+ */
+export * from './DataDescription';
 export * from './ICategorical2PartitioningOptions';
 export * from './valuetype';
 export * from './histogram';
