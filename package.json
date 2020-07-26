@@ -30,6 +30,7 @@
   ],
   "scripts": {
     "clean": "rimraf dist lib",
+    "delete-dependencies": "rimraf node_modules",
     "compile": "tsc",
     "postcompile": "npm run copy",
     "copy": "npm run copy-assets && npm run copy-styles",
