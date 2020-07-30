@@ -8,7 +8,6 @@
  */
 
 import {IVisInstance, IVisPluginDesc} from '../vis';
-import {createNode} from './internal';
 
 export interface IMultiForm extends IVisInstance {
   readonly act: IVisPluginDesc;
@@ -22,51 +21,6 @@ export interface IMultiForm extends IVisInstance {
   addSelectVisChooser(toolbar: Element): void;
 }
 
-
-/**
- * computes the selectable vis techniques for a given set of multi form objects
- * @param forms
- * @return {*}
- */
-function toAvailableVisses(forms: IMultiForm[]) {
-  if (forms.length === 0) {
-    return [];
-  }
-  if (forms.length === 1) {
-    return forms[0].visses;
-  }
-  //intersection of all
-  return forms[0].visses.filter((vis) => forms.every((f) => f.visses.indexOf(vis) >= 0));
-}
-
-export function addIconVisChooser(toolbar: HTMLElement, ...forms: IMultiForm[]) {
-  const s = toolbar.ownerDocument.createElement('div');
-  toolbar.insertBefore(s, toolbar.firstChild);
-  const visses = toAvailableVisses(forms);
-
-  visses.forEach((v) => {
-    const child = createNode(s, 'i');
-    v.iconify(child);
-    child.onclick = () => forms.forEach((f) => f.switchTo(v));
-  });
-}
-
-export function addSelectVisChooser(toolbar: HTMLElement, ...forms: IMultiForm[]) {
-  const s = toolbar.ownerDocument.createElement('select');
-  toolbar.insertBefore(s, toolbar.firstChild);
-  const visses = toAvailableVisses(forms);
-
-  visses.forEach((v, i) => {
-    const child = createNode(s, 'option');
-    child.setAttribute('value', String(i));
-    child.textContent = v.name;
-  });
-  // use only the current selection of the first form
-  if (forms[0]) {
-    s.selectedIndex = visses.indexOf(forms[0].act);
-  }
-  s.onchange = () => forms.forEach((f) => f.switchTo(visses[s.selectedIndex]));
-}
 
 export interface IMultiFormOptions {
   /**

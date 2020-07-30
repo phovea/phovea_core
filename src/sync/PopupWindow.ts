@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 15.02.2017.
  */
 
-import {randomId, mixin} from '../';
+import {BaseUtils} from '../base/BaseUtils';
 
 export interface INodeVis {
   node: Element;
@@ -15,19 +15,19 @@ export interface IPopupProxyOptions {
 }
 
 
-export default class PopupProxy<T extends INodeVis> {
+export class PopupProxy<T extends INodeVis> {
   private current: T;
   private popup: Window;
 
   private options: IPopupProxyOptions = {
     args: [],
-    name: `${self.document.title} PopUp ${randomId(3)}`
+    name: `${self.document.title} PopUp ${BaseUtils.randomId(3)}`
   };
 
   private handler: ProxyHandler<T> = {};
 
   constructor(private readonly parent: HTMLElement, private readonly factory: (parent: HTMLElement, ...args: any[]) => T, options: IPopupProxyOptions = {}) {
-    this.options = mixin(this.options, options);
+    this.options = BaseUtils.mixin(this.options, options);
     this.build(this.parent);
   }
 
@@ -89,7 +89,7 @@ export default class PopupProxy<T extends INodeVis> {
     this.parent.classList.add('as-popup');
     this.current = null;
     // use a callback function similar to jsonp, don't know why the popup state if overridden
-    const name = 'popupCallback' + randomId(8);
+    const name = 'popupCallback' + BaseUtils.randomId(8);
     (<any>window)[name] = (popupBody) => {
       this.build(popupBody);
       delete (<any>window)[name];

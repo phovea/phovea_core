@@ -1,11 +1,11 @@
 /**
  * Created by Samuel Gratzl on 22.10.2014.
  */
-import {sendAPI} from '../ajax';
-import {IEvent} from '../event';
-import GraphBase, {IGraphFactory, IGraphDataDescription} from './GraphBase';
-import {GraphEdge, GraphNode} from './graph';
-import {resolveImmediately} from '../internal/promise';
+import {AppContext} from '../app/AppContext';
+import {IEvent} from '../base/event';
+import {GraphBase, IGraphFactory} from './GraphBase';
+import {GraphEdge, GraphNode, IGraphDataDescription} from './graph';
+import {ResolveNow} from '../base/promise';
 
 interface ISyncItem {
   type: 'node'|'edge';
@@ -15,7 +15,7 @@ interface ISyncItem {
 }
 
 
-export default class RemoteStoreGraph extends GraphBase {
+export class RemoteStoreGraph extends GraphBase {
   private static readonly DEFAULT_BATCH_SIZE = 10;
   private static readonly DEFAULT_WAIT_TIME_BEFORE_EARLY_FLUSH = 1000; //ms
   private static readonly DEFAULT_WAIT_TIME_BEFORE_FULL_FLUSH = 100; //ms
@@ -54,7 +54,7 @@ export default class RemoteStoreGraph extends GraphBase {
 
   private async load(factory: IGraphFactory) {
     this.fire('sync_load_start,sync_start', ++this.waitForSynced);
-    const r: {nodes: any[], edges: any[]} = await sendAPI(`/dataset/graph/${this.desc.id}/data`);
+    const r: {nodes: any[], edges: any[]} = await AppContext.getInstance().sendAPI(`/dataset/graph/${this.desc.id}/data`);
     this.loadImpl(r.nodes, r.edges, factory);
     this.fire('sync_load,sync', --this.waitForSynced);
     return this;
@@ -115,11 +115,11 @@ export default class RemoteStoreGraph extends GraphBase {
     const create = () => {
       switch(op) {
         case 'add':
-          return sendAPI(`/dataset/graph/${this.desc.id}/${type}`, data, 'POST');
+          return AppContext.getInstance().sendAPI(`/dataset/graph/${this.desc.id}/${type}`, data, 'POST');
         case 'update':
-          return sendAPI(`/dataset/graph/${this.desc.id}/${type}/${elem.id}`, data, 'PUT');
+          return AppContext.getInstance().sendAPI(`/dataset/graph/${this.desc.id}/${type}/${elem.id}`, data, 'PUT');
         case 'remove':
-          return sendAPI(`/dataset/graph/${this.desc.id}/${type}/${elem.id}`, {}, 'DELETE');
+          return AppContext.getInstance().sendAPI(`/dataset/graph/${this.desc.id}/${type}/${elem.id}`, {}, 'DELETE');
       }
     };
     return create().then(() => {
@@ -129,14 +129,14 @@ export default class RemoteStoreGraph extends GraphBase {
 
   private sendQueued(): PromiseLike<any> {
     if (this.queue.length === 0) {
-      return resolveImmediately(null);
+      return ResolveNow.resolveImmediately(null);
     }
     const param = JSON.stringify({operation: 'batch', items: this.queue.slice()});
     // clear
     this.queue.splice(0, this.queue.length);
 
     this.fire(`sync_start`, ++this.waitForSynced, 'batch');
-    return sendAPI(`/dataset/${this.desc.id}`, { desc: param }, 'POST').then(() => {
+    return AppContext.getInstance().sendAPI(`/dataset/${this.desc.id}`, { desc: param }, 'POST').then(() => {
       this.fire(`sync`, --this.waitForSynced, 'batch');
       return this;
     });
@@ -144,7 +144,7 @@ export default class RemoteStoreGraph extends GraphBase {
 
   private flush() {
     if (this.batchSize <= 1 || this.queue.length === 0) {
-      return resolveImmediately('nothing queued');
+      return ResolveNow.resolveImmediately('nothing queued');
     }
     return this.sendQueued();
   }
@@ -228,7 +228,7 @@ export default class RemoteStoreGraph extends GraphBase {
     this.flush().then(() => {
       this.fire('sync_start', ++this.waitForSynced, 'clear');
       //clear all nodes
-      return sendAPI(`/dataset/graph/${this.desc.id}/node`, {}, 'DELETE');
+      return AppContext.getInstance().sendAPI(`/dataset/graph/${this.desc.id}/node`, {}, 'DELETE');
     }).then(() => {
       this.fire('sync');
       return this;

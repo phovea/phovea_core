@@ -2,19 +2,19 @@
  * Created by Samuel Gratzl on 27.12.2016.
  */
 
-import {IPersistable} from '../../index';
-import {all, parse, RangeLike} from '../../range';
-import IDType from '../../idtype/IDType';
-import {IDataDescription, IValueTypeDesc} from '../../datatype';
+import {IPersistable} from '../../base/IPersistable';
+import {Range, RangeLike, ParseRangeUtils} from '../../range';
+import {IDType} from '../../idtype/IDType';
+import {IDataDescription, IValueTypeDesc} from '../../data';
 import {ITable, ITableDataDescription, IQueryArgs} from '../ITable';
-import ATable from '../ATable';
+import {ATable} from '../ATable';
 import {IAnyVector} from '../../vector/IVector';
 import {IVector} from '../../vector';
 
 /**
  * @internal
  */
-export default class VectorTable extends ATable implements ITable {
+export class VectorTable extends ATable implements ITable {
   readonly idtype: IDType;
   readonly desc: ITableDataDescription;
 
@@ -42,15 +42,15 @@ export default class VectorTable extends ATable implements ITable {
     return <any>this.vectors[i]; // TODO prevent `<any>` by using `<TableVector<any, IValueTypeDesc>>` leads to TS compile errors
   }
 
-  cols(range: RangeLike = all()) {
-    return parse(range).filter(this.vectors, [this.ncol]);
+  cols(range: RangeLike = Range.all()) {
+    return ParseRangeUtils.parseRangeLike(range).filter(this.vectors, [this.ncol]);
   }
 
   at(i: number, j: number) {
     return this.col(i).at(j);
   }
 
-  data(range: RangeLike = all()) {
+  data(range: RangeLike = Range.all()) {
     return Promise.all(this.vectors.map((v) => v.data(range))).then((arr: any[][]) => {
       const r = arr[0].map((i) => ([i]));
       arr.slice(1).forEach((ai) => ai.forEach((d, i) => r[i].push(d)));
@@ -58,17 +58,17 @@ export default class VectorTable extends ATable implements ITable {
     });
   }
 
-  colData(column: string, range: RangeLike = all()) {
+  colData(column: string, range: RangeLike = Range.all()) {
     return this.dataOfColumn(column, range);
   }
 
-  dataOfColumn(column: string, range: RangeLike = all()) {
+  dataOfColumn(column: string, range: RangeLike = Range.all()) {
     return this.vectors.find((d) => d.desc.name === column).data(range);
   }
 
 
 
-  objects(range: RangeLike = all()) {
+  objects(range: RangeLike = Range.all()) {
     return Promise.all(this.vectors.map((v) => v.data(range))).then((arr: any[][]) => {
       const names = this.vectors.map((d) => d.desc.name);
       const r = arr[0].map((i) => ( {[ names[0]]: i}));
@@ -84,15 +84,15 @@ export default class VectorTable extends ATable implements ITable {
    * return the row ids of the matrix
    * @returns {*}
    */
-  rows(range: RangeLike = all()): Promise<string[]> {
+  rows(range: RangeLike = Range.all()): Promise<string[]> {
     return this.col(0).names(range);
   }
 
-  rowIds(range: RangeLike = all()) {
+  rowIds(range: RangeLike = Range.all()) {
     return this.col(0).ids(range);
   }
 
-  ids(range: RangeLike = all()) {
+  ids(range: RangeLike = Range.all()) {
     return this.rowIds(range);
   }
 
@@ -113,5 +113,9 @@ export default class VectorTable extends ATable implements ITable {
 
   queryView(name: string, args: IQueryArgs): ITable {
     throw Error('not implemented');
+  }
+
+  static fromVectors(desc: IDataDescription, vecs: IAnyVector[]) {
+    return new VectorTable(desc, vecs);
   }
 }

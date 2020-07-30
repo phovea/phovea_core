@@ -2,11 +2,13 @@
  * Created by Samuel Gratzl on 27.12.2016.
  */
 
-import {IIntersectionParam, Vector2D} from '../2D';
-import AShape from './AShape';
-import Rect from './Rect';
+import {Vector2D} from '../2D/Vector2D';
+import {IIntersectionParam} from '../2D/IIntersectionParam';
+import {AShape} from './AShape';
+import {ICircle} from './ICircle';
+import {Rect} from './Rect';
 
-export default class Circle extends AShape {
+export class Circle extends AShape implements ICircle {
   constructor(public x = 0, public y = 0, public radius = 0) {
     super();
   }
@@ -28,8 +30,8 @@ export default class Circle extends AShape {
     return new Rect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
   }
 
-  bs(): Circle {
-    return this;
+  get center(): Vector2D {
+    return this.xy;
   }
 
   transform(scale: number[], rotate: number) {
@@ -42,4 +44,8 @@ export default class Circle extends AShape {
       params: [this.xy, this.radius]
     };
   }
+  static circle(x: number, y: number, radius: number): Circle {
+    return new Circle(x, y, radius);
+  }
 }
+

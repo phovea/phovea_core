@@ -2,14 +2,15 @@
  * Created by Samuel Gratzl on 27.12.2016.
  */
 
-import {IIntersectionParam, Vector2D} from '../2D';
-import AShape from './AShape';
-import Circle from './Circle';
+import {Vector2D} from '../2D/Vector2D';
+import {IIntersectionParam} from '../2D/IIntersectionParam';
+import {IRect} from './IRect';
+import {AShape} from './AShape';
 
 /**
  * a simple bounding rect
  */
-export default class Rect extends AShape {
+export class Rect extends AShape implements IRect {
   constructor(public x = 0, public y = 0, public w = 0, public h = 0) {
     super();
   }
@@ -75,9 +76,10 @@ export default class Rect extends AShape {
     return this;
   }
 
-  bs(): Circle {
-    return new Circle(this.cx, this.cy, Math.sqrt(this.w * 2 + this.h * 2) / 2);
+  get center(): Vector2D {
+    return new Vector2D(this.cx, this.cy);
   }
+
 
   transform(scale: number[], rotate: number) {
     //TODO rotate
@@ -90,5 +92,7 @@ export default class Rect extends AShape {
       params: [this.xy, this.x2y2]
     };
   }
-
+  static rect(x: number, y: number, w: number, h: number): Rect {
+    return new Rect(x, y, w, h);
+  }
 }

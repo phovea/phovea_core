@@ -3,18 +3,18 @@
  */
 
 
-import {Range, RangeLike, CompositeRange1D, all, list, Range1DGroup, parse} from '../range';
-import {IDataType} from '../datatype';
-import {SelectAble} from '../idtype';
+import {Range, RangeLike, CompositeRange1D, Range1DGroup, ParseRangeUtils} from '../range';
+import {IDataType} from '../data/datatype';
+import {ASelectAble} from '../idtype';
 import {ICategoricalVector} from '../vector';
-import {IHistogram, rangeHist} from '../math';
+import {IHistogram, RangeHistogram} from '../data/histogram';
 import {IStratification, IGroup} from './IStratification';
 
 /**
  * root matrix implementation holding the data
  * @internal
  */
-export default class StratificationGroup extends SelectAble implements IStratification {
+export class StratificationGroup extends ASelectAble implements IStratification {
   constructor(private root: IStratification, private groupIndex: number, private groupDesc: IGroup) {
     super();
   }
@@ -42,9 +42,9 @@ export default class StratificationGroup extends SelectAble implements IStratifi
     return this.root.idtype;
   }
 
-  async hist(bins?: number, range: RangeLike = all()): Promise<IHistogram> {
+  async hist(bins?: number, range: RangeLike = Range.all()): Promise<IHistogram> {
     //FIXME
-    return rangeHist(await this.range());
+    return RangeHistogram.rangeHist(await this.range());
   }
 
   vector() {
@@ -52,7 +52,7 @@ export default class StratificationGroup extends SelectAble implements IStratifi
   }
 
   asVector(): Promise<ICategoricalVector> {
-    return Promise.all<any>([this.root.asVector(), this.rangeGroup()]).then((arr: [ICategoricalVector, Range1DGroup]) => arr[0].view(list(arr[1])));
+    return Promise.all<any>([this.root.asVector(), this.rangeGroup()]).then((arr: [ICategoricalVector, Range1DGroup]) => arr[0].view(Range.list(arr[1])));
   }
 
   origin(): Promise<IDataType> {
@@ -75,19 +75,19 @@ export default class StratificationGroup extends SelectAble implements IStratifi
     return r.groups[this.groupIndex];
   }
 
-  async names(range: RangeLike = all()) {
+  async names(range: RangeLike = Range.all()) {
     const g = await this.rangeGroup();
-    const r = list(g).preMultiply(parse(range));
+    const r = Range.list(g).preMultiply(ParseRangeUtils.parseRangeLike(range));
     return this.root.names(r);
   }
 
-  async ids(range: RangeLike = all()): Promise<Range> {
+  async ids(range: RangeLike = Range.all()): Promise<Range> {
     const g = await this.rangeGroup();
-    const r = list(g).preMultiply(parse(range));
+    const r = Range.list(g).preMultiply(ParseRangeUtils.parseRangeLike(range));
     return this.root.ids(r);
   }
 
-  idView(idRange: RangeLike = all()): Promise<any> {
+  idView(idRange: RangeLike = Range.all()): Promise<any> {
     return Promise.reject('not implemented');
   }
 

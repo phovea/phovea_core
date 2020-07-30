@@ -7,15 +7,15 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {mixin} from '../index';
+import {BaseUtils} from '../base/BaseUtils';
 import {RangeLike, CompositeRange1D, Range} from '../range';
 import {IDType, IDTypeLike} from '../idtype';
 import {
-  IHistAbleDataType, IValueTypeDesc, IDataDescription, createDefaultDataDesc,
+  IHistAbleDataType, IValueTypeDesc, IDataDescription, DataUtils,
   INumberValueTypeDesc, ICategoricalValueTypeDesc, IStatsAbleDataType
-} from '../datatype';
-import IStratification from '../stratification/IStratification';
-import {IAdvancedStatistics, IHistogram, IStatistics} from '../math';
+} from '../data';
+import {IHistogram} from '../data/histogram';
+import {IAdvancedStatistics, IStatistics} from '../base/statistics';
 import {IAtom, IAtomValue} from '../atom/IAtom';
 
 export interface IVectorDataDescription<D extends IValueTypeDesc> extends IDataDescription {
@@ -152,30 +152,18 @@ export interface IVector<T, D extends IValueTypeDesc> extends IHistAbleDataType<
   groups(): Promise<CompositeRange1D>;
 
   /**
-   * similar to groups() but returns a stratification
+   * similar to groups() but returns a stratification --> don't add this because otherwise there is a cycle between stratification and vector
    * @deprecated use asStratification instead
    */
-  stratification(): Promise<IStratification>;
+//  stratification(): Promise<IStratification>;
 
   /**
-   * similar to groups() but returns a stratification
+   * similar to groups() but returns a stratification --> don't add this because otherwise there is a cycle between stratification and vector
    */
-  asStratification(): Promise<IStratification>;
+//  asStratification(): Promise<IStratification>;
 }
 
-export default IVector;
 
 export declare type INumericalVector = IVector<number, INumberValueTypeDesc>;
 export declare type ICategoricalVector = IVector<string, ICategoricalValueTypeDesc>;
 export declare type IAnyVector = IVector<any, IValueTypeDesc>;
-
-export function createDefaultVectorDesc(): IVectorDataDescription<IValueTypeDesc> {
-  return <IVectorDataDescription<IValueTypeDesc>>mixin(createDefaultDataDesc(), {
-    type: 'vector',
-    idtype: '_rows',
-    size: 0,
-    value: {
-      type: 'string'
-    }
-  });
-}

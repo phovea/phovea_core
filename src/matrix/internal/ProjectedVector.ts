@@ -7,17 +7,17 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {argSort, argFilter} from '../../index';
-import {list as rlist, RangeLike, parse} from '../../range';
-import {IValueTypeDesc} from '../../datatype';
+import {ArrayUtils} from '../../base/ArrayUtils';
+import {Range, RangeLike, ParseRangeUtils} from '../../range';
+import {IValueTypeDesc} from '../../data/valuetype';
 import {IVector, IVectorDataDescription} from '../../vector';
-import AVector from '../../vector/AVector';
+import {AVector} from '../../vector/AVector';
 import {IMatrix} from '../IMatrix';
 
 /**
  * a simple projection of a matrix columns to a vector
  */
-export default class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends IValueTypeDesc> extends AVector<T,D> implements IVector<T,D> {
+export class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends IValueTypeDesc> extends AVector<T,D> implements IVector<T,D> {
   readonly desc: IVectorDataDescription<D>;
 
   constructor(private m: IMatrix<M, MD>, private f: (row: M[]) => T, private thisArgument = m, public readonly valuetype: D = <any>m.valuetype, private _idtype = m.rowtype) {
@@ -49,7 +49,7 @@ export default class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends 
   restore(persisted: any) {
     let r: IVector<T,D> = this;
     if (persisted && persisted.range) { //some view onto it
-      r = r.view(parse(persisted.range));
+      r = r.view(ParseRangeUtils.parseRangeLike(persisted.range));
     }
     return r;
   }
@@ -82,7 +82,7 @@ export default class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends 
    * @param i
    */
   async at(i: number): Promise<T> {
-    const d = await this.m.data(rlist(i));
+    const d = await this.m.data(Range.list(i));
     return this.f.call(this.thisArgument, d[0]);
   }
 
@@ -96,13 +96,13 @@ export default class ProjectedVector<T, D extends IValueTypeDesc, M, MD extends 
 
   async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
     const d = await this.data();
-    const indices = argSort(d, compareFn, thisArg);
-    return this.view(rlist(indices));
+    const indices = ArrayUtils.argSort(d, compareFn, thisArg);
+    return this.view(Range.list(indices));
   }
 
   async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
     const d = await this.data();
-    const indices = argFilter(d, callbackfn, thisArg);
-    return this.view(rlist(indices));
+    const indices = ArrayUtils.argFilter(d, callbackfn, thisArg);
+    return this.view(Range.list(indices));
   }
 }

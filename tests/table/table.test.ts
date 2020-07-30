@@ -1,10 +1,10 @@
 /**
  * Created by Samuel Gratzl on 07.03.2017.
  */
-import {ITable, asTable} from '../../src/table';
-import {resolve} from '../../src/idtype';
+import {ITable, Table} from '../../src/table';
+import {IDTypeManager} from '../../src/idtype';
 
-/// <reference types="jasmine" />
+/// <reference types="jest" />
 
 const data = [
   { a: 1, b: 'row1', c: 5.2},
@@ -17,7 +17,7 @@ describe('table test', () => {
   let table: ITable;
 
   beforeEach(() => {
-    table = asTable(data);
+    table = Table.asTable(data);
   });
 
   describe('original', () => {
@@ -26,7 +26,7 @@ describe('table test', () => {
       expect(table.nrow).toBe(4);
       expect(table.dim).toEqual([4, 3]);
       expect(table.idtype.id).toBe('_rows');
-      expect(table.idtypes).toEqual([resolve('_rows')]);
+      expect(table.idtypes).toEqual([IDTypeManager.getInstance().resolveIdType('_rows')]);
     });
     it('at', async(done) => {
       expect(await table.at(0, 0)).toBe(1);

@@ -2,13 +2,13 @@
  * Created by Samuel Gratzl on 14.02.2017.
  */
 
-import {mixin} from '../index';
+import {BaseUtils} from '../base/BaseUtils';
 import {Range} from '../range';
-import {IDType, IDTypeLike} from '../idtype';
+import {IIDType, IDTypeLike} from '../idtype';
 import {
-  IDataType, IValueTypeDesc, IDataDescription, createDefaultDataDesc,
+  IDataType, IValueTypeDesc, IDataDescription, DataUtils,
   INumberValueTypeDesc, ICategoricalValueTypeDesc, IStringValueTypeDesc
-} from '../datatype';
+} from '../data';
 
 export interface IAtomValue<T> {
   name: string;
@@ -30,7 +30,7 @@ export interface IAtom<T, D extends IValueTypeDesc> extends IDataType {
   /**
    * id type
    */
-  readonly idtype: IDType;
+  readonly idtype: IIDType;
   readonly valuetype: D;
 
   name(): Promise<string>;
@@ -40,20 +40,20 @@ export interface IAtom<T, D extends IValueTypeDesc> extends IDataType {
   data(): Promise<T>;
 }
 
-export default IAtom;
-
-
 export declare type INumericalAtom = IAtom<number, INumberValueTypeDesc>;
 export declare type ICategoricalAtom = IAtom<string, ICategoricalValueTypeDesc>;
 export declare type IStringAtom = IAtom<string, IStringValueTypeDesc>;
 export declare type IAnyAtom = IAtom<any, IValueTypeDesc>;
 
-export function createDefaultAtomDesc(): IAtomDataDescription<IValueTypeDesc> {
-  return <IAtomDataDescription<IValueTypeDesc>>mixin(createDefaultDataDesc(), {
-    type: 'atom',
-    idtype: '_rows',
-    value: {
-      type: 'string'
-    }
-  });
+export class AtomUtils {
+
+  static createDefaultAtomDesc(): IAtomDataDescription<IValueTypeDesc> {
+    return <IAtomDataDescription<IValueTypeDesc>>BaseUtils.mixin(DataUtils.createDefaultDataDesc(), {
+      type: 'atom',
+      idtype: '_rows',
+      value: {
+        type: 'string'
+      }
+    });
+  }
 }

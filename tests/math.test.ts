@@ -1,10 +1,10 @@
-/// <reference types="jasmine" />
-import {computeStats} from '../src/math';
+/// <reference types="jest" />
+import {Statistics} from '../src/base/statistics';
 
 describe('computeStats', () => {
   function expectStats(input: number[], expected: any) {
     describe('stats ' + input, () => {
-      const stats = computeStats(input);
+      const stats = Statistics.computeStats(input);
       it('max', () => expect(stats.max).toEqual(expected.max));
       it('min', () => expect(stats.min).toEqual(expected.min));
       it('sum', () => expect(stats.sum).toEqual(expected.sum));

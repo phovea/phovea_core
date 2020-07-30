@@ -7,27 +7,30 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {IdPool} from '../index';
-import {SelectOperation, defaultSelectionType} from './IIDType';
-import IDType from './IDType';
+import {IdPool} from '../internal/IdPool';
+import {SelectOperation, SelectionUtils} from './SelectionUtils';
+import {IDType} from './IDType';
 
 export interface IHasUniqueId {
   id: number;
 }
 
-export function toId(elem: IHasUniqueId) {
-  return elem.id;
-}
+export class HasUniqueIdUtils {
 
-export function isId(id: number) {
-  return (elem: IHasUniqueId) => elem && elem.id === id;
+  static toId(elem: IHasUniqueId) {
+    return elem.id;
+  }
+
+  static isId(id: number) {
+    return (elem: IHasUniqueId) => elem && elem.id === id;
+  }
 }
 
 /**
  * IDType with an actual collection of entities.
  * Supports selections.
  */
-export default class ObjectManager<T extends IHasUniqueId> extends IDType {
+export class ObjectManager<T extends IHasUniqueId> extends IDType {
   private readonly instances: T[] = [];
   private readonly pool = new IdPool();
 
@@ -84,7 +87,7 @@ export default class ObjectManager<T extends IHasUniqueId> extends IDType {
     return old;
   }
 
-  selectedObjects(type = defaultSelectionType) {
+  selectedObjects(type = SelectionUtils.defaultSelectionType) {
     const s = this.selections(type);
     return s.filter(this.instances);
   }

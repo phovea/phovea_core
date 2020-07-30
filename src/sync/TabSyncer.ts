@@ -2,22 +2,21 @@
  * Created by Samuel Gratzl on 01.12.2016.
  */
 
-import {mixin} from '../';
-import Store from './Store';
-import {list as listPlugins, load as loadPlugins} from '../plugin';
+import {BaseUtils} from '../base/BaseUtils';
+import {Store} from './Store';
+import {PluginRegistry} from '../app/PluginRegistry';
 
 export interface ITabSyncerOptions {
   keyPrefix?: string;
   storage?: Storage;
 }
 
-export const SYNCER_EXTENSION_POINT = 'tabSyncer';
-
 export interface ISyncerExtension {
   (store: Store);
 }
 
-export default class TabSyncer {
+export class TabSyncer {
+  public static SYNCER_EXTENSION_POINT = 'tabSyncer';
   private static TAB_LIST = 'tabList';
 
   private options: ITabSyncerOptions = {
@@ -28,13 +27,13 @@ export default class TabSyncer {
   private store: Store;
 
   constructor(options?: ITabSyncerOptions) {
-    mixin(this.options, options);
+    BaseUtils.mixin(this.options, options);
 
     this.store = new Store(this.options.storage, this.options.keyPrefix);
     this.store.on(Store.EVENT_CHANGED, TabSyncer.handleChange.bind(this));
 
     // instantiate plugins
-    loadPlugins(listPlugins(SYNCER_EXTENSION_POINT)).then((instances) => {
+    PluginRegistry.getInstance().loadPlugin(PluginRegistry.getInstance().listPlugins(TabSyncer.SYNCER_EXTENSION_POINT)).then((instances) => {
       instances.forEach((i) => this.push(i.factory));
     });
 

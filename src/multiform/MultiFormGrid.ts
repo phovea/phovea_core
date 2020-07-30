@@ -7,22 +7,22 @@
  * Created by Samuel Gratzl on 27.08.2014.
  */
 
-import {mixin, offset} from '../index';
-import {IDataType, assignData} from '../datatype';
-import {AShape, rect} from '../geom';
+import {BaseUtils} from '../base/BaseUtils';
+import {IDataType, DataUtils} from '../data';
+import {AShape, Rect} from '../geom';
 import {
   IVisMetaData,
   IVisInstance,
   IVisPluginDesc,
   AVisInstance,
-  assignVis,
-  list as listVisses,
+  VisUtils,
   ITransform
 } from '../vis';
-import {IMultiForm, IMultiFormOptions, addSelectVisChooser, addIconVisChooser} from './IMultiForm';
-import {createNode, ProxyMetaData, selectVis} from './internal';
-import GridElem from './internal/GridElem';
-import {Range, CompositeRange1D, Range1DGroup, asUngrouped, Range1D, all, list as rlist} from '../range';
+import {IMultiForm, IMultiFormOptions} from './IMultiForm';
+import {VisChooser} from './VisChooser';
+import {FormUtils, ProxyMetaData} from './internal/internal';
+import {GridElem} from './internal/GridElem';
+import {Range, CompositeRange1D, Range1DGroup, Range1D} from '../range';
 
 
 function sum(arr: number[]) {
@@ -48,7 +48,7 @@ export interface IMultiFormGridOptions extends IMultiFormOptions {
 /**
  * a simple multi form class using a select to switch
  */
-export default class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiForm {
+export class MultiFormGrid extends AVisInstance implements IVisInstance, IMultiForm {
   readonly node: HTMLElement;
   /**
    * list of all possibles vis techniques
@@ -68,16 +68,16 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
 
   constructor(public readonly data: IDataType, public readonly range: Range, parent: HTMLElement, viewFactory: IViewFactory, private options: IMultiFormGridOptions = {}) {
     super();
-    this.options = mixin({
+    this.options = BaseUtils.mixin({
       initialVis: 0,
       singleRowOptimization: true,
       filter: () => true
     }, options);
-    this.node = createNode(parent, 'div', 'multiformgrid');
-    assignData(parent, data);
-    assignVis(this.node, this);
+    this.node = FormUtils.createNode(parent, 'div', 'multiformgrid');
+    DataUtils.assignData(parent, data);
+    VisUtils.assignVis(this.node, this);
     //find all suitable plugins
-    this.visses = listVisses(data).filter(this.options.filter);
+    this.visses = VisUtils.listVisPlugins(data).filter(this.options.filter);
 
     //compute the dimensions and build the grid
     const dims = this.dims = range.dims.map((dim) => {
@@ -86,14 +86,14 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
       } else if (dim instanceof Range1DGroup) {
         return [<Range1DGroup>dim];
       } else {
-        return [asUngrouped(dim)];
+        return [Range1DGroup.asUngrouped(dim)];
       }
     });
     const grid: GridElem[] = this.grid = [];
 
     function product(level: number, range: Range1D[], pos: number[]) {
       if (level === dims.length) {
-        const r = range.length === 0 ? all() : rlist(range.slice()); //work on a copy for safety reason
+        const r = range.length === 0 ? Range.all() : Range.list(range.slice()); //work on a copy for safety reason
         grid.push(new GridElem(r, pos.slice(), viewFactory(data, r, pos.slice())));
       } else {
         dims[level].forEach((group, i) => {
@@ -137,9 +137,9 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
     const elem = this.toElem(indices);
     const absloc = elem.location;
     const size = elem.size;
-    const parentLoc = offset(this.content);
+    const parentLoc = BaseUtils.offset(this.content);
 
-    return rect(absloc.x - parentLoc.left, absloc.y - parentLoc.top, size[0], size[1]);
+    return Rect.rect(absloc.x - parentLoc.left, absloc.y - parentLoc.top, size[0], size[1]);
   }
 
   /**
@@ -160,11 +160,11 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
     //TODO how to layout as a grid
     if (this.dims.length === 1) {
       if (this.options.singleRowOptimization) {
-        this.grid.forEach((elem) => elem.setContent(wrap(createNode(this.node, 'div', 'content gridrow'), elem.data, elem.range, elem.pos)));
+        this.grid.forEach((elem) => elem.setContent(wrap(FormUtils.createNode(this.node, 'div', 'content gridrow'), elem.data, elem.range, elem.pos)));
       } else {
         this.grid.forEach((elem) => {
-          const n = createNode(this.node, 'div', 'gridrow');
-          const nn = createNode(n, 'div', 'content');
+          const n = FormUtils.createNode(this.node, 'div', 'gridrow');
+          const nn = FormUtils.createNode(n, 'div', 'content');
           nn.style.display = 'inline-block';
           elem.setContent(wrap(nn, elem.data, elem.range, elem.pos));
         });
@@ -172,10 +172,10 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
     } else {
       const ndim = this.dimSizes;
       for (let i = 0; i < ndim[0]; ++i) {
-        const row = createNode(this.node, 'div', 'gridrow');
+        const row = FormUtils.createNode(this.node, 'div', 'gridrow');
         for (let j = 0; j < ndim[1]; ++j) {
           const elem = this.grid[i * ndim[1] + j];
-          const nn = createNode(row, 'div', 'content');
+          const nn = FormUtils.createNode(row, 'div', 'content');
           nn.style.display = 'inline-block';
           elem.setContent(wrap(nn, elem.data, elem.range, elem.pos));
         }
@@ -236,9 +236,9 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
   private locateGroup(range: Range) {
     if (range.isAll || range.isNone) {
       const s = this.size;
-      return Promise.resolve(rect(0, 0, s[0], s[1]));
+      return Promise.resolve(Rect.rect(0, 0, s[0], s[1]));
     }
-    const parentLoc = offset(this.content);
+    const parentLoc = BaseUtils.offset(this.content);
 
     function relativePos(pos: {x: number, y: number}) {
       return {
@@ -284,7 +284,7 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
         x2 = Math.min(x2, aab.x2);
         y2 = Math.min(y2, aab.y2);
       });
-      return Promise.resolve(rect(x, y, x2 - x, y2 - y));
+      return Promise.resolve(Rect.rect(x, y, x2 - x, y2 - y));
     });
   }
 
@@ -381,7 +381,7 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
    * @param param
    */
   switchTo(param: string|number|IVisPluginDesc): Promise<IVisInstance[]> {
-    const vis: IVisPluginDesc = selectVis(param, this.visses);
+    const vis: IVisPluginDesc = FormUtils.selectVis(param, this.visses);
 
     if (vis === this.actDesc) {
       return this.actVisPromise; //already selected
@@ -403,7 +403,7 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
         if (this.actDesc !== vis) { //changed in the meanwhile
           return null;
         }
-        const options = mixin({}, this.options.all, this.options[vis.id] || {});
+        const options = BaseUtils.mixin({}, this.options.all, this.options[vis.id] || {});
         const r = this.grid.map((elem) => elem.build(plugin, options));
         let c = r.length;
         r.forEach((ri) => {
@@ -423,15 +423,13 @@ export default class MultiFormGrid extends AVisInstance implements IVisInstance,
   }
 
   addIconVisChooser(toolbar: HTMLElement) {
-    return addIconVisChooser(toolbar, this);
+    return VisChooser.addIconVisChooser(toolbar, this);
   }
 
   addSelectVisChooser(toolbar: HTMLElement) {
-    return addSelectVisChooser(toolbar);
+    return VisChooser.addSelectVisChooser(toolbar);
   }
-}
-
-
-export function create(data: IDataType, range: Range, parent: HTMLElement, viewFactory: IViewFactory, options?: IMultiFormGridOptions) {
-  return new MultiFormGrid(data, range, parent, viewFactory, options);
+  static create(data: IDataType, range: Range, parent: HTMLElement, viewFactory: IViewFactory, options?: IMultiFormGridOptions) {
+    return new MultiFormGrid(data, range, parent, viewFactory, options);
+  }
 }

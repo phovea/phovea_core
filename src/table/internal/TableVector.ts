@@ -2,18 +2,18 @@
  * Created by Samuel Gratzl on 27.12.2016.
  */
 
-import {argFilter, argSort} from '../../index';
-import {all, parse, RangeLike, list as rlist} from '../../range';
-import {IValueTypeDesc} from '../../datatype';
+import {ArrayUtils} from '../../base/ArrayUtils';
+import {Range, RangeLike, ParseRangeUtils} from '../../range';
+import {IValueTypeDesc} from '../../data';
 import {IVector, IVectorDataDescription} from '../../vector';
 import {ITable, ITableColumn} from '../ITable';
-import AVector from '../../vector/AVector';
+import {AVector} from '../../vector/AVector';
 
 /**
  * root matrix implementation holding the data
  * @internal
  */
-export default class TableVector<T,D extends IValueTypeDesc> extends AVector<T,D> implements IVector<T,D> {
+export class TableVector<T,D extends IValueTypeDesc> extends AVector<T,D> implements IVector<T,D> {
   readonly desc: IVectorDataDescription<D>;
   public readonly column: string;
 
@@ -57,7 +57,7 @@ export default class TableVector<T,D extends IValueTypeDesc> extends AVector<T,D
   restore(persisted: any) {
     let r: IVector<T,D> = this;
     if (persisted && persisted.range) { //some view onto it
-      r = r.view(parse(persisted.range));
+      r = r.view(ParseRangeUtils.parseRangeLike(persisted.range));
     }
     return r;
   }
@@ -71,15 +71,15 @@ export default class TableVector<T,D extends IValueTypeDesc> extends AVector<T,D
     return this.table.at(i, this.index);
   }
 
-  data(range: RangeLike = all()): Promise<T[]> {
+  data(range: RangeLike = Range.all()): Promise<T[]> {
     return this.table.colData(this.column, range);
   }
 
-  names(range: RangeLike = all()) {
+  names(range: RangeLike = Range.all()) {
     return this.table.rows(range);
   }
 
-  ids(range: RangeLike = all()) {
+  ids(range: RangeLike = Range.all()) {
     return this.table.rowIds(range);
   }
 
@@ -89,14 +89,14 @@ export default class TableVector<T,D extends IValueTypeDesc> extends AVector<T,D
 
   async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
     const d = await this.data();
-    const indices = argSort(d, compareFn, thisArg);
-    return this.view(rlist(indices));
+    const indices = ArrayUtils.argSort(d, compareFn, thisArg);
+    return this.view(Range.list(indices));
   }
 
   async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
     const d = await this.data();
-    const indices = argFilter(d, callbackfn, thisArg);
-    return this.view(rlist(indices));
+    const indices = ArrayUtils.argFilter(d, callbackfn, thisArg);
+    return this.view(Range.list(indices));
   }
 }
 

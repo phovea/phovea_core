@@ -7,20 +7,22 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {RangeLike, all, parse} from '../../range';
-import {IValueTypeDesc, transpose} from '../../datatype';
+import {RangeLike, Range, ParseRangeUtils} from '../../range';
+import {IValueTypeDesc} from '../../data/valuetype';
+import {DataUtils} from '../../data';
 import {IMatrix, IHeatMapUrlOptions} from '../IMatrix';
-import AMatrix, {MatrixView} from '../AMatrix';
-import SliceRowVector from './SliceRowVector';
+import {AMatrix, MatrixView} from '../AMatrix';
+import {SliceRowVector} from './SliceRowVector';
 import {IVector} from '../../vector';
-import {IHistogram, IAdvancedStatistics, IStatistics} from '../../math';
+import {IHistogram} from '../../data/histogram';
+import {IAdvancedStatistics, IStatistics} from '../../base/statistics';
 
 /**
  * view on the underlying matrix as transposed version
  * @param base
  * @constructor
  */
-export default class TransposedMatrix<T, D extends IValueTypeDesc> extends AMatrix<T,D> {
+export class TransposedMatrix<T, D extends IValueTypeDesc> extends AMatrix<T,D> {
   readonly t: IMatrix<T,D>;
 
   constructor(base: IMatrix<T,D>) {
@@ -59,29 +61,29 @@ export default class TransposedMatrix<T, D extends IValueTypeDesc> extends AMatr
     return [this.rowtype, this.coltype];
   }
 
-  async ids(range: RangeLike = all()) {
-    const ids = await this.t.ids(range ? parse(range).swap() : undefined);
+  async ids(range: RangeLike = Range.all()) {
+    const ids = await this.t.ids(range ? ParseRangeUtils.parseRangeLike(range).swap() : undefined);
     return ids.swap();
   }
 
-  cols(range: RangeLike = all()): Promise<string[]> {
-    return this.t.rows(range ? parse(range).swap() : undefined);
+  cols(range: RangeLike = Range.all()): Promise<string[]> {
+    return this.t.rows(range ? ParseRangeUtils.parseRangeLike(range).swap() : undefined);
   }
 
-  colIds(range: RangeLike = all()) {
-    return this.t.rowIds(range ? parse(range).swap() : undefined);
+  colIds(range: RangeLike = Range.all()) {
+    return this.t.rowIds(range ? ParseRangeUtils.parseRangeLike(range).swap() : undefined);
   }
 
-  rows(range: RangeLike = all()): Promise<string[]> {
-    return this.t.cols(range ? parse(range).swap() : undefined);
+  rows(range: RangeLike = Range.all()): Promise<string[]> {
+    return this.t.cols(range ? ParseRangeUtils.parseRangeLike(range).swap() : undefined);
   }
 
-  rowIds(range: RangeLike = all()) {
-    return this.t.colIds(range ? parse(range).swap() : undefined);
+  rowIds(range: RangeLike = Range.all()) {
+    return this.t.colIds(range ? ParseRangeUtils.parseRangeLike(range).swap() : undefined);
   }
 
-  view(range: RangeLike = all()): IMatrix<T,D> {
-    const r = parse(range);
+  view(range: RangeLike = Range.all()): IMatrix<T,D> {
+    const r = ParseRangeUtils.parseRangeLike(range);
     if (r.isAll) {
       return this;
     }
@@ -101,24 +103,24 @@ export default class TransposedMatrix<T, D extends IValueTypeDesc> extends AMatr
     return this.t.at(j, i);
   }
 
-  async data(range: RangeLike = all()) {
-    return transpose(await this.t.data(range ? parse(range).swap() : undefined));
+  async data(range: RangeLike = Range.all()) {
+    return DataUtils.transpose(await this.t.data(range ? ParseRangeUtils.parseRangeLike(range).swap() : undefined));
   }
 
-  hist(bins?: number, range: RangeLike = all(), containedIds = 0): Promise<IHistogram> {
-    return this.t.hist(bins, range ? parse(range).swap() : undefined, 1 - containedIds);
+  hist(bins?: number, range: RangeLike = Range.all(), containedIds = 0): Promise<IHistogram> {
+    return this.t.hist(bins, range ? ParseRangeUtils.parseRangeLike(range).swap() : undefined, 1 - containedIds);
   }
 
-  stats(range: RangeLike = all()): Promise<IStatistics> {
-    return this.t.stats(range ? parse(range).swap() : undefined);
+  stats(range: RangeLike = Range.all()): Promise<IStatistics> {
+    return this.t.stats(range ? ParseRangeUtils.parseRangeLike(range).swap() : undefined);
   }
 
-  statsAdvanced(range: RangeLike = all()): Promise<IAdvancedStatistics> {
-    return this.t.statsAdvanced(range ? parse(range).swap() : undefined);
+  statsAdvanced(range: RangeLike = Range.all()): Promise<IAdvancedStatistics> {
+    return this.t.statsAdvanced(range ? ParseRangeUtils.parseRangeLike(range).swap() : undefined);
   }
 
-  heatmapUrl(range: RangeLike = all(), options: IHeatMapUrlOptions = {}) {
+  heatmapUrl(range: RangeLike = Range.all(), options: IHeatMapUrlOptions = {}) {
     options.transpose = options.transpose !== true;
-    return this.t.heatmapUrl(range ? parse(range).swap() : undefined, options);
+    return this.t.heatmapUrl(range ? ParseRangeUtils.parseRangeLike(range).swap() : undefined, options);
   }
 }

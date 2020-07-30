@@ -1,5 +1,5 @@
-/// <reference types="jasmine" />
-import {guessColor} from '../src/stratification';
+/// <reference types="jest" />
+import {Stratification} from '../src/stratification';
 
 /*
   TODO: StratificationGroup:
@@ -50,9 +50,9 @@ import {guessColor} from '../src/stratification';
 */
 
 describe('guessColor', () => {
-  it('male -> blue', () => expect(guessColor('unused', 'MALE')).toEqual('blue'));
-  it('female -> red', () => expect(guessColor('unused', 'female')).toEqual('red'));
-  it('deceased -> reddish', () => expect(guessColor('unused', 'Deceased')).toEqual('#e41a1b'));
-  it('living -> greenish', () => expect(guessColor('unused', 'lIvIng')).toEqual('#377eb8'));
-  it('other -> gray', () => expect(guessColor('unused', 'other-unknown-whatever')).toEqual('gray'));
+  it('male -> blue', () => expect(Stratification.guessColor('unused', 'MALE')).toEqual('blue'));
+  it('female -> red', () => expect(Stratification.guessColor('unused', 'female')).toEqual('red'));
+  it('deceased -> reddish', () => expect(Stratification.guessColor('unused', 'Deceased')).toEqual('#e41a1b'));
+  it('living -> greenish', () => expect(Stratification.guessColor('unused', 'lIvIng')).toEqual('#377eb8'));
+  it('other -> gray', () => expect(Stratification.guessColor('unused', 'other-unknown-whatever')).toEqual('gray'));
 });

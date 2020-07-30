@@ -5,7 +5,7 @@
 /**
  * utility class for handling a bunch of reuseable ids
  */
-export default class IdPool {
+export class IdPool {
   private counter = 0;
   private free: number[] = [];
 

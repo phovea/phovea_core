@@ -7,21 +7,20 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {IPersistable} from '../index';
-import {RangeLike, all, range, parse} from '../range';
-import Range from '../range/Range';
-import {resolve as resolveIDType} from '../idtype';
-import IDType from '../idtype/IDType';
-import AProductSelectAble from '../idtype/AProductSelectAble';
-import {
-  VALUE_TYPE_CATEGORICAL, VALUE_TYPE_INT, VALUE_TYPE_REAL, ICategoricalValueTypeDesc, INumberValueTypeDesc,
+import {IPersistable} from '../base/IPersistable';
+import {RangeLike, Range, ParseRangeUtils} from '../range';
+import {IDTypeManager} from '../idtype';
+import {IDType} from '../idtype/IDType';
+import {AProductSelectAble} from '../idtype/AProductSelectAble';
+import {ValueTypeUtils, ICategoricalValueTypeDesc, INumberValueTypeDesc,
   IValueTypeDesc
-} from '../datatype';
+} from '../data';
 import {IVector} from '../vector';
-import {IStatistics, IHistogram, computeStats, hist, categoricalHist, IAdvancedStatistics, computeAdvancedStats} from '../math';
+import {IHistogram, CatHistogram, Histogram} from '../data/histogram';
+import {IAdvancedStatistics, IStatistics, Statistics, AdvancedStatistics} from '../base/statistics';
 import {IMatrix, IHeatMapUrlOptions} from './IMatrix';
-import SliceColVector from './internal/SliceColVector';
-import ProjectedVector from './internal/ProjectedVector';
+import {SliceColVector} from './internal/SliceColVector';
+import {ProjectedVector} from './internal/ProjectedVector';
 
 function flatten<T>(arr: T[][], indices: Range, select: number = 0) {
   let r: T[]= [];
@@ -46,6 +45,16 @@ function flatten<T>(arr: T[][], indices: Range, select: number = 0) {
  * base class for different Matrix implementations, views, transposed,...
  */
 export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelectAble {
+
+  public static IDTYPE_ROW = 0;
+  public static IDTYPE_COLUMN = 1;
+  public static IDTYPE_CELL = 2;
+
+  public static DIM_ROW = 0;
+  public static DIM_COL = 1;
+
+
+
   constructor(protected root: IMatrix<T, D>) {
     super();
   }
@@ -73,11 +82,11 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
   }
 
   get indices(): Range {
-    return range([0, this.nrow], [0, this.ncol]);
+    return Range.range([0, this.nrow], [0, this.ncol]);
   }
 
-  view(range: RangeLike = all()): IMatrix<T, D> {
-    const r = parse(range);
+  view(range: RangeLike = Range.all()): IMatrix<T, D> {
+    const r = ParseRangeUtils.parseRangeLike(range);
     if (r.isAll) {
       return this.root;
     }
@@ -90,43 +99,43 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
     return new SliceColVector(this.root, col);
   }
 
-  async stats(range: RangeLike = all()): Promise<IStatistics> {
+  async stats(range: RangeLike = Range.all()): Promise<IStatistics> {
     const v = this.root.valuetype;
-    if (v.type === VALUE_TYPE_INT || v.type === VALUE_TYPE_REAL) {
-      return computeStats(...<any>await this.data(range));
+    if (v.type === ValueTypeUtils.VALUE_TYPE_INT || v.type === ValueTypeUtils.VALUE_TYPE_REAL) {
+      return Statistics.computeStats(...<any>await this.data(range));
     }
     return Promise.reject('invalid value type: ' + v.type);
   }
 
-  async statsAdvanced(range: RangeLike = all()): Promise<IAdvancedStatistics> {
+  async statsAdvanced(range: RangeLike = Range.all()): Promise<IAdvancedStatistics> {
     const v = this.root.valuetype;
-    if (v.type === VALUE_TYPE_INT || v.type === VALUE_TYPE_REAL) {
-      return computeAdvancedStats([].concat(...<any>await this.data(range)));
+    if (v.type === ValueTypeUtils.VALUE_TYPE_INT || v.type === ValueTypeUtils.VALUE_TYPE_REAL) {
+      return AdvancedStatistics.computeAdvancedStats([].concat(...<any>await this.data(range)));
     }
     return Promise.reject('invalid value type: ' + v.type);
   }
 
-  async hist(bins?: number, range: RangeLike = all(), containedIds = 0): Promise<IHistogram> {
+  async hist(bins?: number, range: RangeLike = Range.all(), containedIds = 0): Promise<IHistogram> {
     const v = this.root.valuetype;
     const d = await this.data(range);
     const flat = flatten(d, this.indices, containedIds);
     switch (v.type) {
-      case VALUE_TYPE_CATEGORICAL:
+      case ValueTypeUtils.VALUE_TYPE_CATEGORICAL:
         const vc = <ICategoricalValueTypeDesc><any>v;
-        return categoricalHist<string>(<any[]>flat.data, flat.indices, flat.data.length, vc.categories.map((d) => typeof d === 'string' ? d : d.name),
+        return CatHistogram.categoricalHist<string>(<any[]>flat.data, flat.indices, flat.data.length, vc.categories.map((d) => typeof d === 'string' ? d : d.name),
           vc.categories.map((d) => typeof d === 'string' ? d : d.label || d.name),
           vc.categories.map((d) => typeof d === 'string' ? 'gray' : d.color || 'gray'));
-      case VALUE_TYPE_INT:
-      case VALUE_TYPE_REAL:
+      case ValueTypeUtils.VALUE_TYPE_INT:
+      case ValueTypeUtils.VALUE_TYPE_REAL:
         const vn = <INumberValueTypeDesc><any>v;
-        return hist(<any[]>flat.data, flat.indices, flat.data.length, bins ? bins : Math.round(Math.sqrt(this.length)), vn.range);
+        return Histogram.hist(<any[]>flat.data, flat.indices, flat.data.length, bins ? bins : Math.round(Math.sqrt(this.length)), vn.range);
       default:
         return Promise.reject<IHistogram>('invalid value type: ' + v.type); //cant create hist for unique objects or other ones
     }
   }
 
-  async idView(idRange: RangeLike = all()): Promise<IMatrix<T, D>> {
-    const r = parse(idRange);
+  async idView(idRange: RangeLike = Range.all()): Promise<IMatrix<T, D>> {
+    const r = ParseRangeUtils.parseRangeLike(idRange);
     if (r.isAll) {
       return Promise.resolve(this.root);
     }
@@ -141,10 +150,10 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
   restore(persisted: any): IPersistable {
     if (persisted && persisted.f) {
       /* tslint:disable:no-eval */
-      return this.reduce(eval(persisted.f), this, persisted.valuetype, persisted.idtype ? resolveIDType(persisted.idtype) : undefined);
+      return this.reduce(eval(persisted.f), this, persisted.valuetype, persisted.idtype ? IDTypeManager.getInstance().resolveIdType(persisted.idtype) : undefined);
       /* tslint:enable:no-eval */
     } else if (persisted && persisted.range) { //some view onto it
-      return this.view(parse(persisted.range));
+      return this.view(ParseRangeUtils.parseRangeLike(persisted.range));
     } else if (persisted && persisted.transposed) {
       return (<IMatrix<T, D>>(<any>this)).t;
     } else if (persisted && persisted.col) {
@@ -157,7 +166,6 @@ export abstract class AMatrix<T, D extends IValueTypeDesc> extends AProductSelec
   }
 
 }
-export default AMatrix;
 
 // circular dependency thus not extractable
 /**
@@ -190,24 +198,24 @@ export class MatrixView<T, D extends IValueTypeDesc> extends AMatrix<T, D> {
     };
   }
 
-  ids(range: RangeLike = all()) {
-    return this.root.ids(this.range.preMultiply(parse(range), this.root.dim));
+  ids(range: RangeLike = Range.all()) {
+    return this.root.ids(this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim));
   }
 
-  cols(range: RangeLike = all()) {
-    return this.root.cols(this.range.preMultiply(parse(range), this.root.dim));
+  cols(range: RangeLike = Range.all()) {
+    return this.root.cols(this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim));
   }
 
-  colIds(range: RangeLike = all()) {
-    return this.root.colIds(this.range.preMultiply(parse(range), this.root.dim));
+  colIds(range: RangeLike = Range.all()) {
+    return this.root.colIds(this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim));
   }
 
-  rows(range: RangeLike = all()) {
-    return this.root.rows(this.range.preMultiply(parse(range), this.root.dim));
+  rows(range: RangeLike = Range.all()) {
+    return this.root.rows(this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim));
   }
 
-  rowIds(range: RangeLike = all()) {
-    return this.root.rowIds(this.range.preMultiply(parse(range), this.root.dim));
+  rowIds(range: RangeLike = Range.all()) {
+    return this.root.rowIds(this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim));
   }
 
   size() {
@@ -219,28 +227,28 @@ export class MatrixView<T, D extends IValueTypeDesc> extends AMatrix<T, D> {
     return this.root.at(inverted[0], inverted[1]);
   }
 
-  data(range: RangeLike = all()) {
-    return this.root.data(this.range.preMultiply(parse(range), this.root.dim));
+  data(range: RangeLike = Range.all()) {
+    return this.root.data(this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim));
   }
 
-  hist(bins?: number, range: RangeLike = all(), containedIds = 0): Promise<IHistogram> {
-    return this.root.hist(bins, this.range.preMultiply(parse(range), this.root.dim), containedIds);
+  hist(bins?: number, range: RangeLike = Range.all(), containedIds = 0): Promise<IHistogram> {
+    return this.root.hist(bins, this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim), containedIds);
   }
 
-  stats(range: RangeLike = all()): Promise<IStatistics> {
-    return this.root.stats(this.range.preMultiply(parse(range), this.root.dim));
+  stats(range: RangeLike = Range.all()): Promise<IStatistics> {
+    return this.root.stats(this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim));
   }
 
-  statsAdvanced(range: RangeLike = all()): Promise<IAdvancedStatistics> {
-    return this.root.statsAdvanced(this.range.preMultiply(parse(range), this.root.dim));
+  statsAdvanced(range: RangeLike =Range.all()): Promise<IAdvancedStatistics> {
+    return this.root.statsAdvanced(this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim));
   }
 
-  heatmapUrl(range = all(), options: IHeatMapUrlOptions = {}) {
-    return this.root.heatmapUrl(this.range.preMultiply(parse(range), this.root.dim), options);
+  heatmapUrl(range = Range.all(), options: IHeatMapUrlOptions = {}) {
+    return this.root.heatmapUrl(this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim), options);
   }
 
-  view(range: RangeLike = all()) {
-    const r = parse(range);
+  view(range: RangeLike = Range.all()) {
+    const r = ParseRangeUtils.parseRangeLike(range);
     if (r.isAll) {
       return this;
     }

@@ -2,8 +2,8 @@
  * Created by Samuel Gratzl on 27.12.2016.
  */
 
-import Range1D, {ICompositeRange1D} from './Range1D';
-import Range1DGroup from './Range1DGroup';
+import {Range1D, ICompositeRange1D} from './Range1D';
+import {Range1DGroup} from './Range1DGroup';
 
 function toBase(groups: Range1DGroup[]) {
   if (groups.length === 1) {
@@ -21,7 +21,7 @@ function toBase(groups: Range1DGroup[]) {
 }
 
 
-export default class CompositeRange1D extends Range1D implements ICompositeRange1D {
+export class CompositeRange1D extends Range1D implements ICompositeRange1D {
   constructor(public readonly name: string, public readonly groups: Range1DGroup[], base?: Range1D) {
     super(base ? base : toBase(groups));
   }
@@ -68,4 +68,16 @@ export default class CompositeRange1D extends Range1D implements ICompositeRange
   fromLikeComposite(groups: Range1DGroup[]): ICompositeRange1D {
     return new CompositeRange1D(this.name, groups);
   }
+  /**
+   * TODO document
+   * @param name
+   * @param groups
+   * @return {CompositeRange1D}
+   */
+  static composite(name: string, groups: Range1DGroup[]) {
+    return new CompositeRange1D(name, groups);
+  }
+
 }
+
+
