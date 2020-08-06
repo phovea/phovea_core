@@ -14,6 +14,10 @@ export enum ProvenanceGraphDim {
 }
 
 export interface ICommonProvenanceGraphManagerOptions {
+  /**
+   * Application where the provenance graph is used
+   * @default unknown
+   */
   application?: string;
 }
 

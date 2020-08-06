@@ -15,8 +15,18 @@ import {ResolveNow} from '../base/promise';
 import {ICommonProvenanceGraphManagerOptions} from '.';
 
 export interface ILocalStorageProvenanceGraphManagerOptions extends ICommonProvenanceGraphManagerOptions {
+  /**
+   * Used storage engine of the browser (`localStorage` or `sessionStorage`)
+   * @default localStorage
+   */
   storage?: Storage;
+
+  /**
+   * Graph prefix that is for instance used in the URL hash
+   * @default clue
+   */
   prefix?: string;
+
   /**
    * Default permissions for new graphs.
    * @default ALL_READ_NONE

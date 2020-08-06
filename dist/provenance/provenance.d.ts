@@ -9,6 +9,10 @@ export declare enum ProvenanceGraphDim {
     Slide = 3
 }
 export interface ICommonProvenanceGraphManagerOptions {
+    /**
+     * Application where the provenance graph is used
+     * @default unknown
+     */
     application?: string;
 }
 export interface IProvenanceGraphManager {

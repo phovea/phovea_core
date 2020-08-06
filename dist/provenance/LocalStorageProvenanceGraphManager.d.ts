@@ -5,7 +5,15 @@ import { GraphBase } from '../graph/GraphBase';
 import { LocalStorageGraph } from '../graph/LocalStorageGraph';
 import { ICommonProvenanceGraphManagerOptions } from '.';
 export interface ILocalStorageProvenanceGraphManagerOptions extends ICommonProvenanceGraphManagerOptions {
+    /**
+     * Used storage engine of the browser (`localStorage` or `sessionStorage`)
+     * @default localStorage
+     */
     storage?: Storage;
+    /**
+     * Graph prefix that is for instance used in the URL hash
+     * @default clue
+     */
     prefix?: string;
     /**
      * Default permissions for new graphs.
