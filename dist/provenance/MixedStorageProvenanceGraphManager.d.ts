@@ -4,11 +4,14 @@
 import { ProvenanceGraph } from './ProvenanceGraph';
 import { IProvenanceGraphManager } from './provenance';
 import { IProvenanceGraphDataDescription } from './ICmd';
+import { ILocalStorageProvenanceGraphManagerOptions } from './LocalStorageProvenanceGraphManager';
+import { IRemoteStorageProvenanceGraphManagerOptions } from './RemoteStorageProvenanceGraphManager';
 import { GraphBase } from '../graph/GraphBase';
+export declare type IMixedStorageProvenanceGraphManagerOptions = ILocalStorageProvenanceGraphManagerOptions | IRemoteStorageProvenanceGraphManagerOptions;
 export declare class MixedStorageProvenanceGraphManager implements IProvenanceGraphManager {
     private remote;
     private local;
-    constructor(options?: {});
+    constructor(options?: IMixedStorageProvenanceGraphManagerOptions);
     listRemote(): Promise<IProvenanceGraphDataDescription[]>;
     listLocal(): PromiseLike<IProvenanceGraphDataDescription[]>;
     listLocalSync(): IProvenanceGraphDataDescription[];

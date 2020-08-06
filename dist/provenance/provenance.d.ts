@@ -8,6 +8,9 @@ export declare enum ProvenanceGraphDim {
     State = 2,
     Slide = 3
 }
+export interface ICommonProvenanceGraphManagerOptions {
+    application?: string;
+}
 export interface IProvenanceGraphManager {
     list(): PromiseLike<IProvenanceGraphDataDescription[]>;
     get(desc: IProvenanceGraphDataDescription): PromiseLike<IProvenanceGraph>;

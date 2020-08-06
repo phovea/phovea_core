@@ -3,9 +3,19 @@ import { IProvenanceGraphManager } from './provenance';
 import { IProvenanceGraphDataDescription } from './ICmd';
 import { GraphBase } from '../graph/GraphBase';
 import { LocalStorageGraph } from '../graph/LocalStorageGraph';
+import { ICommonProvenanceGraphManagerOptions } from '.';
+export interface ILocalStorageProvenanceGraphManagerOptions extends ICommonProvenanceGraphManagerOptions {
+    storage?: Storage;
+    prefix?: string;
+    /**
+     * Default permissions for new graphs.
+     * @default ALL_READ_NONE
+     */
+    defaultPermission?: number;
+}
 export declare class LocalStorageProvenanceGraphManager implements IProvenanceGraphManager {
     private options;
-    constructor(options?: {});
+    constructor(options?: ILocalStorageProvenanceGraphManagerOptions);
     private loadFromLocalStorage;
     listSync(): IProvenanceGraphDataDescription[];
     list(): PromiseLike<IProvenanceGraphDataDescription[]>;

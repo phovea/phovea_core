@@ -13,6 +13,9 @@ export enum ProvenanceGraphDim {
   Slide = 3
 }
 
+export interface ICommonProvenanceGraphManagerOptions {
+  application?: string;
+}
 
 export interface IProvenanceGraphManager {
   list(): PromiseLike<IProvenanceGraphDataDescription[]>;

@@ -1,10 +1,12 @@
 import { ProvenanceGraph } from './ProvenanceGraph';
-import { IProvenanceGraphManager } from './provenance';
+import { IProvenanceGraphManager, ICommonProvenanceGraphManagerOptions } from './provenance';
 import { IProvenanceGraphDataDescription } from './ICmd';
 import { GraphBase } from '../graph/GraphBase';
+export interface IRemoteStorageProvenanceGraphManagerOptions extends ICommonProvenanceGraphManagerOptions {
+}
 export declare class RemoteStorageProvenanceGraphManager implements IProvenanceGraphManager {
     private options;
-    constructor(options?: {});
+    constructor(options?: IRemoteStorageProvenanceGraphManagerOptions);
     list(): Promise<IProvenanceGraphDataDescription[]>;
     getGraph(desc: IProvenanceGraphDataDescription): Promise<GraphBase>;
     get(desc: IProvenanceGraphDataDescription): Promise<ProvenanceGraph>;
