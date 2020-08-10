@@ -7,7 +7,7 @@ import { IProvenanceGraphDataDescription } from './ICmd';
 import { ILocalStorageProvenanceGraphManagerOptions } from './LocalStorageProvenanceGraphManager';
 import { IRemoteStorageProvenanceGraphManagerOptions } from './RemoteStorageProvenanceGraphManager';
 import { GraphBase } from '../graph/GraphBase';
-export declare type IMixedStorageProvenanceGraphManagerOptions = ILocalStorageProvenanceGraphManagerOptions | IRemoteStorageProvenanceGraphManagerOptions;
+export declare type IMixedStorageProvenanceGraphManagerOptions = ILocalStorageProvenanceGraphManagerOptions & IRemoteStorageProvenanceGraphManagerOptions;
 export declare class MixedStorageProvenanceGraphManager implements IProvenanceGraphManager {
     private remote;
     private local;
