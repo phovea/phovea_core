@@ -14,7 +14,8 @@ export class LocalStorageProvenanceGraphManager {
         this.options = {
             storage: localStorage,
             prefix: 'clue',
-            application: 'unknown'
+            application: 'unknown',
+            defaultPermission: Permission.ALL_READ_NONE
         };
         BaseUtils.mixin(this.options, options);
     }
@@ -91,7 +92,7 @@ export class LocalStorageProvenanceGraphManager {
                 of: this.options.application
             },
             creator: UserSession.getInstance().currentUserNameOrAnonymous(),
-            permissions: Permission.ALL_READ_NONE,
+            permissions: this.options.defaultPermission,
             ts: Date.now(),
             description: ''
         }, overrides);
@@ -117,7 +118,7 @@ export class LocalStorageProvenanceGraphManager {
                 of: this.options.application
             },
             creator: UserSession.getInstance().currentUserNameOrAnonymous(),
-            permissions: Permission.ALL_READ_NONE,
+            permissions: this.options.defaultPermission,
             ts: Date.now(),
             description: ''
         }, base ? base : {}, {

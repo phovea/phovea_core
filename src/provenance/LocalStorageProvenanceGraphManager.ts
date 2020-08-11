@@ -12,15 +12,37 @@ import {UserSession} from '../app/UserSession';
 import {Permission} from '../security/Permission';
 import {MemoryGraph} from '../graph/MemoryGraph';
 import {ResolveNow} from '../base/promise';
+import {ICommonProvenanceGraphManagerOptions} from '.';
+
+export interface ILocalStorageProvenanceGraphManagerOptions extends ICommonProvenanceGraphManagerOptions {
+  /**
+   * Used storage engine of the browser (`localStorage` or `sessionStorage`)
+   * @default localStorage
+   */
+  storage?: Storage;
+
+  /**
+   * Graph prefix that is for instance used in the URL hash
+   * @default clue
+   */
+  prefix?: string;
+
+  /**
+   * Default permissions for new graphs.
+   * @default ALL_READ_NONE
+   */
+  defaultPermission?: number;
+}
 
 export class LocalStorageProvenanceGraphManager implements IProvenanceGraphManager {
-  private options = {
+  private options: ILocalStorageProvenanceGraphManagerOptions = {
     storage: localStorage,
     prefix: 'clue',
-    application: 'unknown'
+    application: 'unknown',
+    defaultPermission: Permission.ALL_READ_NONE
   };
 
-  constructor(options = {}) {
+  constructor(options: ILocalStorageProvenanceGraphManagerOptions = {}) {
     BaseUtils.mixin(this.options, options);
   }
 
@@ -106,7 +128,7 @@ export class LocalStorageProvenanceGraphManager implements IProvenanceGraphManag
         of: this.options.application
       },
       creator: UserSession.getInstance().currentUserNameOrAnonymous(),
-      permissions: Permission.ALL_READ_NONE,
+      permissions: this.options.defaultPermission,
       ts: Date.now(),
       description: ''
     }, overrides);
@@ -134,7 +156,7 @@ export class LocalStorageProvenanceGraphManager implements IProvenanceGraphManag
         of: this.options.application
       },
       creator: UserSession.getInstance().currentUserNameOrAnonymous(),
-      permissions: Permission.ALL_READ_NONE,
+      permissions: this.options.defaultPermission,
       ts: Date.now(),
       description: ''
     }, base? base : {}, {
