@@ -4,7 +4,7 @@
 import {BaseUtils} from '../base/BaseUtils';
 import {DataCache} from '../data/DataCache';
 import {ProvenanceGraph} from './ProvenanceGraph';
-import {IProvenanceGraphManager} from './provenance';
+import {IProvenanceGraphManager, ICommonProvenanceGraphManagerOptions} from './provenance';
 import {IProvenanceGraphDataDescription} from './ICmd';
 import {ProvenanceGraphUtils} from './ProvenanceGraphUtils';
 import {GraphBase} from '../graph/GraphBase';
@@ -15,12 +15,17 @@ import {ResolveNow} from '../base/promise';
 import {IDataType} from '../data/datatype';
 import {AGraph} from '../graph';
 
+// tslint:disable-next-line: no-empty-interface
+export interface IRemoteStorageProvenanceGraphManagerOptions extends ICommonProvenanceGraphManagerOptions {
+  // empty for now
+}
+
 export class RemoteStorageProvenanceGraphManager implements IProvenanceGraphManager {
-  private options = {
+  private options: IRemoteStorageProvenanceGraphManagerOptions = {
     application: 'unknown'
   };
 
-  constructor(options = {}) {
+  constructor(options: IRemoteStorageProvenanceGraphManagerOptions = {}) {
     BaseUtils.mixin(this.options, options);
   }
 

@@ -4,15 +4,17 @@
 import {ProvenanceGraph} from './ProvenanceGraph';
 import {IProvenanceGraphManager} from './provenance';
 import {IProvenanceGraphDataDescription} from './ICmd';
-import {LocalStorageProvenanceGraphManager} from './LocalStorageProvenanceGraphManager';
-import {RemoteStorageProvenanceGraphManager} from './RemoteStorageProvenanceGraphManager';
+import {LocalStorageProvenanceGraphManager, ILocalStorageProvenanceGraphManagerOptions} from './LocalStorageProvenanceGraphManager';
+import {RemoteStorageProvenanceGraphManager, IRemoteStorageProvenanceGraphManagerOptions} from './RemoteStorageProvenanceGraphManager';
 import {GraphBase} from '../graph/GraphBase';
+
+export type IMixedStorageProvenanceGraphManagerOptions = ILocalStorageProvenanceGraphManagerOptions & IRemoteStorageProvenanceGraphManagerOptions;
 
 export class MixedStorageProvenanceGraphManager implements IProvenanceGraphManager {
   private remote: RemoteStorageProvenanceGraphManager;
   private local: LocalStorageProvenanceGraphManager;
 
-  constructor(options = {}) {
+  constructor(options: IMixedStorageProvenanceGraphManagerOptions = {}) {
     this.remote = new RemoteStorageProvenanceGraphManager(options);
     this.local = new LocalStorageProvenanceGraphManager(options);
   }
