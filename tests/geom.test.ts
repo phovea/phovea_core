@@ -1,6 +1,6 @@
 /// <reference types="jest" />
-import {Circle, Rect, Ellipse, Polygon, Line, CORNER} from '../src/geom';
-import {Vector2D} from '../src/2D';
+import {Circle, Rect, Ellipse, Polygon, Line, Corner} from '../src/geom';
+import {Vector2D} from '../src/2D/Vector2D';
 
 describe('Circle', () => {
   const circle = new Circle(1,1,1);
@@ -46,7 +46,7 @@ describe('Circle', () => {
   describe('corner', () => {
     function corner(label: string, expected: string) {
       it(label, () => {
-        expect(circle.corner(CORNER[label]).toString()).toEqual(expected);
+        expect(circle.corner(Corner.CORNER[label]).toString()).toEqual(expected);
       });
     }
     corner('NW', '0,0');
@@ -94,10 +94,6 @@ describe('Circle', () => {
   });
   it('xy', () => {
     expect(circle.xy.toString()).toEqual('1,1');
-  });
-  // "bounding sphere"
-  it('bs', () => {
-    expect(circle.bs().toString()).toEqual('Circle(x=1,y=1,radius=1)');
   });
   it('center', () => {
     expect(circle.center.toString()).toEqual('1,1');
@@ -160,7 +156,7 @@ describe('Rect', () => {
   describe('corner', () => {
     function corner(label: string, expected: string) {
       it(label, () => {
-        expect(rect.corner(CORNER[label]).toString()).toEqual(expected);
+        expect(rect.corner(Corner.CORNER[label]).toString()).toEqual(expected);
       });
     }
     corner('NW', '0,0');
@@ -202,10 +198,6 @@ describe('Rect', () => {
   });
   it('xy', () => {
     expect(rect.xy.toString()).toEqual('0,0');
-  });
-  // "bounding sphere"
-  it('bs', () => {
-    expect(rect.bs().toString()).toMatch(/Circle.x=1,y=1,radius=1.414/);
   });
   it('center', () => {
     expect(rect.center.toString()).toEqual('1,1');
@@ -267,7 +259,7 @@ describe('Ellipse', () => {
   describe('corner', () => {
     function corner(label: string, expected: string) {
       it(label, () => {
-        expect(ellipse.corner(CORNER[label]).toString()).toEqual(expected);
+        expect(ellipse.corner(Corner.CORNER[label]).toString()).toEqual(expected);
       });
     }
     corner('NW', '0,0');
@@ -375,7 +367,7 @@ describe('Polygon', () => {
   describe('corner', () => {
     function corner(label: string, expected: string) {
       it(label, () => {
-        expect(poly.corner(CORNER[label]).toString()).toEqual(expected);
+        expect(poly.corner(Corner.CORNER[label]).toString()).toEqual(expected);
       });
     }
     corner('NW', '0,0');
@@ -498,7 +490,7 @@ describe('Line', () => {
   describe('corner', () => {
     function corner(label: string, expected: string) {
       it(label, () => {
-        expect(line.corner(CORNER[label]).toString()).toEqual(expected);
+        expect(line.corner(Corner.CORNER[label]).toString()).toEqual(expected);
       });
     }
     corner('NW', '0,0');

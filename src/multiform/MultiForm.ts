@@ -7,20 +7,18 @@
  * Created by Samuel Gratzl on 27.08.2014.
  */
 
-import {mixin} from '../index';
-import {IDataType, assignData} from '../datatype';
-import {
-  IVisMetaData, IVisInstance, IVisPluginDesc, AVisInstance, assignVis, list as listVisses,
-  ITransform
-} from '../vis';
-import {IMultiForm, IMultiFormOptions, addSelectVisChooser, addIconVisChooser} from './IMultiForm';
-import {createNode, ProxyMetaData, clearNode, selectVis} from './internal';
+import {BaseUtils} from '../base/BaseUtils';
+import {IDataType, DataUtils} from '../data';
+import {IVisMetaData, IVisPluginDesc, AVisInstance, VisUtils, ITransform, IVisInstance} from '../vis';
+import {IMultiForm, IMultiFormOptions} from './IMultiForm';
+import {VisChooser} from './VisChooser';
+import {FormUtils, ProxyMetaData} from './internal/internal';
 import {Range} from '../range';
 
 /**
  * a simple multi form class using a select to switch
  */
-export default class MultiForm extends AVisInstance implements IVisInstance, IMultiForm {
+export class MultiForm extends AVisInstance implements IVisInstance, IMultiForm {
   readonly node: HTMLElement;
   /**
    * list of all possibles vis techniques
@@ -37,18 +35,18 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
 
   constructor(public readonly data: IDataType, parent: HTMLElement, private options: IMultiFormOptions = {}) {
     super();
-    this.options = mixin({
+    this.options = BaseUtils.mixin({
       initialVis: 0,
       all: { //options to all visses
 
       },
       filter: () => true
     }, options);
-    this.node = createNode(parent, 'div', 'multiform');
-    assignData(parent, data);
-    assignVis(this.node, this);
+    this.node = FormUtils.createNode(parent, 'div', 'multiform');
+    DataUtils.assignData(parent, data);
+    VisUtils.assignVis(this.node, this);
     //find all suitable plugins
-    this.visses = listVisses(data).filter(this.options.filter);
+    this.visses = VisUtils.listVisPlugins(data).filter(this.options.filter);
 
     this.build();
   }
@@ -66,7 +64,7 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
     //create select option field
 
     //create content
-    this.content = createNode(this.node, 'div', 'content');
+    this.content = FormUtils.createNode(this.node, 'div', 'content');
     //switch to first
     this.switchTo(this.options.initialVis);
   }
@@ -100,26 +98,26 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
     return Promise.resolve(that);
   }
 
-  locate(...args: Range[]): Promise<any> {
+  locate(...range: Range[]): Promise<any> {
     const p = this.actVisPromise || Promise.resolve(null);
     return p.then((...aa: IVisInstance[]) => {
       const vis = aa.length > 0 ? aa[0] : undefined;
       if (vis && typeof(vis.locate) === 'function') {
-        return vis.locate.apply(vis, args);
+        return vis.locate.apply(vis, range);
       } else {
-        return Promise.resolve((aa.length === 1 ? undefined : new Array(args.length)));
+        return Promise.resolve((aa.length === 1 ? undefined : new Array(range.length)));
       }
     });
   }
 
-  locateById(...args: Range[]): Promise<any> {
+  locateById(...range: Range[]): Promise<any> {
     const p = this.actVisPromise || Promise.resolve(null);
     return p.then((...aa: IVisInstance[]) => {
       const vis = aa.length > 0 ? aa[0] : undefined;
       if (vis && typeof(vis.locateById) === 'function') {
-        return vis.locateById.apply(vis, args);
+        return vis.locateById.apply(vis, range);
       } else {
-        return Promise.resolve((aa.length === 1 ? undefined : new Array(args.length)));
+        return Promise.resolve((aa.length === 1 ? undefined : new Array(range.length)));
       }
     });
   }
@@ -179,7 +177,7 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
    * @param param
    */
   switchTo(param: number|string|IVisPluginDesc): Promise<IVisInstance> {
-    const vis: IVisPluginDesc = selectVis(param, this.visses);
+    const vis: IVisPluginDesc = FormUtils.selectVis(param, this.visses);
 
     if (vis === this.actDesc) {
       return this.actVisPromise; //already selected
@@ -191,7 +189,7 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
       this.actVisPromise = null;
     }
     //remove content dom side
-    clearNode(this.content);
+    FormUtils.clearNode(this.content);
 
     //switch and trigger event
     const bak = this.actDesc;
@@ -207,7 +205,7 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
         if (this.actDesc !== vis) { //changed in the meanwhile
           return null;
         }
-        this.actVis = plugin.factory(this.data, this.content, mixin({}, this.options.all, this.options[vis.id] || {}));
+        this.actVis = plugin.factory(this.data, this.content, BaseUtils.mixin({}, this.options.all, this.options[vis.id] || {}));
         if (this.actVis.isBuilt) {
           this.markReady();
         } else {
@@ -224,14 +222,15 @@ export default class MultiForm extends AVisInstance implements IVisInstance, IMu
   }
 
   addIconVisChooser(toolbar: HTMLElement) {
-    return addIconVisChooser(toolbar, this);
+    return VisChooser.addIconVisChooser(toolbar, this);
   }
 
   addSelectVisChooser(toolbar: HTMLElement) {
-    return addSelectVisChooser(toolbar);
+    return VisChooser.addSelectVisChooser(toolbar);
   }
-}
 
-export function create(data: IDataType, parent: HTMLElement, options?: IMultiFormOptions) {
-  return new MultiForm(data, parent, options);
+  static create(data: IDataType, parent: HTMLElement, options?: IMultiFormOptions) {
+    return new MultiForm(data, parent, options);
+  }
+
 }

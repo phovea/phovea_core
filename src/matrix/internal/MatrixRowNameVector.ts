@@ -1,11 +1,11 @@
 /**
  * Created by Samuel Gratzl on 16.03.2017.
  */
-import {IAnyMatrix} from '../';
-import {RangeLike, all} from '../../range';
-import ANameVector, {IStringVector} from '../../vector/internal/ANameVector';
+import {IAnyMatrix} from '../IMatrix';
+import {RangeLike, Range} from '../../range';
+import {ANameVector, IStringVector} from '../../stratification/vector/ANameVector';
 
-export default class MatrixRowNameVector extends ANameVector<IAnyMatrix> implements IStringVector {
+export class MatrixRowNameVector extends ANameVector<IAnyMatrix> implements IStringVector {
 
   constructor(matrix: IAnyMatrix) {
     super(matrix);
@@ -16,11 +16,11 @@ export default class MatrixRowNameVector extends ANameVector<IAnyMatrix> impleme
     return this.base.rowtype;
   }
 
-  names(range: RangeLike = all()) {
+  names(range: RangeLike = Range.all()) {
     return this.base.rows(range);
   }
 
-  ids(range: RangeLike = all()) {
+  ids(range: RangeLike = Range.all()) {
     return this.base.rowIds(range);
   }
 
@@ -34,14 +34,12 @@ export default class MatrixRowNameVector extends ANameVector<IAnyMatrix> impleme
       names: 'row'
     };
   }
-}
-
-
-/**
- * converts the rows of the given matrix as a string vector
- * @param matrix
- * @return {IStringVector}
- */
-export function asNameVector(matrix: IAnyMatrix): IStringVector {
-  return new MatrixRowNameVector(matrix);
+  /**
+   * converts the rows of the given matrix as a string vector
+   * @param matrix
+   * @return {IStringVector}
+   */
+  static asNameVector(matrix: IAnyMatrix): IStringVector {
+    return new MatrixRowNameVector(matrix);
+  }
 }

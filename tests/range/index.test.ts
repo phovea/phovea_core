@@ -1,9 +1,9 @@
 /// <reference types="jest" />
-import {parse} from '../../src/range';
+import {ParseRangeUtils} from '../../src/range';
 
 describe('parse', () => {
   function parseCheck(code: string, output: string) {
-    return () => expect(parse(code).toString()).toEqual(output);
+    return () => expect(ParseRangeUtils.parseRange(code).toString()).toEqual(output);
   }
   it('start', parseCheck('1','1'));
   it('start + end (single)', parseCheck('1:2','1')); // OK: end index is excluded
@@ -21,5 +21,5 @@ describe('parse', () => {
   it('comma tab set', parseCheck('1,\t(1,4)', '1,(1,4)'));
   it('comma space range', parseCheck('(1:3), (1:3)', '(1:3),(1:3)'));
 
-  it('syntax error', () => expect(parse.bind(null, ':::::')).toThrow());
+  it('syntax error', () => expect(ParseRangeUtils.parseRange.bind(null, ':::::')).toThrow());
 });

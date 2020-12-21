@@ -7,12 +7,12 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import Range1D from './Range1D';
-
+import {Range1D} from './Range1D';
+import {IRangeSlice} from './IRangeSlice';
 /**
  * multi dimensional version of a RangeDim
  */
-export default class Range {
+export class Range {
   constructor(public readonly dims: Range1D[] = []) {
 
   }
@@ -101,7 +101,7 @@ export default class Range {
    */
   intersect(other: Range, size?: number[]) {
     if (this.isNone || other.isNone) {
-      return none();
+      return Range.none();
     }
     if (this.isAll) {
       return other.clone();
@@ -121,7 +121,7 @@ export default class Range {
       return this.clone();
     }
     if (without.isAll) {
-      return none();
+      return Range.none();
     }
     const r = new Range();
     this.dims.forEach((d, i) => {
@@ -210,7 +210,7 @@ export default class Range {
 
   indexRangeOf(r: Range, size?: number[]): Range {
     if (r.isNone || this.isNone) {
-      return none();
+      return Range.none();
     }
     if (this.isNone || r.isAll) {
       return this.clone();
@@ -296,17 +296,124 @@ export default class Range {
       return d.toString();
     }).join(',');
   }
-}
 
 
-/**
- * creates a new range including everything
- * @returns {Range}
- */
-export function all() {
-  return new Range();
-}
-export function none() {
-  //ensure two dimensions
-  return new Range([Range1D.none(), Range1D.none()]);
+  /**
+   * creates a new range including everything
+   * @returns {Range}
+   */
+  static all() {
+    return new Range();
+  }
+  static none() {
+    //ensure two dimensions
+    return new Range([Range1D.none(), Range1D.none()]);
+  }
+  /**
+   * Tests if the given object is a range
+   */
+  static isRange(obj: any) {
+    return obj instanceof Range;
+  }
+
+  /**
+   * TODO document
+   * @param dimIndices
+   * @return {any}
+   */
+  static cell(...dimIndices: number[]) {
+    return new Range(dimIndices.map(Range1D.single));
+  }
+
+  /**
+   * Creates a new range starting at from and optionally up to 'to' and optionally with a step
+   * @param from the index where the range starts (included)
+   * @param to the index where the range ends (excluded), defaults to the end of the data structure
+   * @param step the step size, defaults to 1
+   */
+  static range(from: number, to?: number, step?: number): Range;
+  /**
+   * Creates a new multidimensional range using step functions.
+   * @param ranges Each array can contain up to three indices, the first is read as 'from',
+   * the second as 'to' and the third as 'step'. IRangeSlice explicitly defines from/to/step.
+   */
+  static range(...ranges: (number[]|IRangeSlice)[]): Range;
+  /**
+   * Creates a new range that includes all elements in the data structure
+   * @returns {any}
+   */
+  static range() {
+    if (arguments.length === 0) {
+      return Range.all();
+    }
+    const r = new Range();
+    if (Array.isArray(arguments[0])) { //array mode
+      Array.from(arguments).forEach((arr: number[], i) => {
+        if (arr.length === 0) {
+          return;
+        }
+        r.dim(i).setSlice(arr[0], arr[1], arr[2]);
+      });
+    } else if (Object.prototype.toString.call(arguments[0]) === '[object Object]') {
+      // slice object mode
+      Array.from(arguments).forEach((slice: IRangeSlice, i) => {
+        r.dim(i).setSlice(slice.from, slice.to, slice.step);
+      });
+    } else if (typeof arguments[0] === 'number') { //single slice mode
+      r.dim(0).setSlice(arguments[0], arguments[1], arguments[2]);
+    }
+    return r;
+  }
+
+  /**
+   * Creates a new range from a list of indices
+   * @param dimsOrIndicesOrIndexArray
+   */
+  static list(...dimsOrIndicesOrIndexArray: (Range1D | number[] | number)[]): Range;
+  static list(dims: Range1D[]): Range;
+  static list(): Range {
+    if (arguments.length === 0) {
+      return Range.all();
+    }
+    if (Array.isArray(arguments[0]) && arguments[0][0] instanceof Range1D) {
+      return new Range(arguments[0]);
+    } else if (Array.isArray(arguments[0])) { //array mode
+      const r = new Range();
+      Array.from(arguments).forEach((arr: any, i) => {
+        if (arr instanceof Range1D) {
+          r.dims[i] = arr;
+        } else {
+          r.dim(i).setList(arr);
+        }
+      });
+      return r;
+    } else if (typeof arguments[0] === 'number') { //single slice mode
+      const r = new Range();
+      r.dim(0).setList(Array.from(arguments));
+      return r;
+    } else if (arguments[0] instanceof Range1D) {
+      return new Range(Array.from(arguments));
+    }
+    return Range.none();
+  }
+
+  /**
+   * Joins the specified ranges into a multidimensional range. If no ranges are provided as parameter,
+   * returns a new range that includes all elements.
+   * @param ranges the ranges to be joined. If the supplied range is a multidimensional range,
+   * then the first one is used, the rest is ignored.
+   * @return a multidimensional range.
+   */
+  static join(ranges: Range[]): Range;
+  static join(...ranges: Range[]): Range;
+  static join() {
+    if (arguments.length === 0) {
+      return Range.all();
+    }
+    let ranges = arguments[0];
+    if (!Array.isArray(ranges)) { //array mode
+      ranges = Array.from(arguments);
+    }
+    return new Range(ranges.map((r: Range) => r.dim(0)));
+  }
 }

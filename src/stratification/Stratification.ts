@@ -7,22 +7,23 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {mixin} from '../index';
-import {parse, RangeLike, Range, CompositeRange1D, all} from '../range';
-import {resolve as resolveIDType, createLocalAssigner} from '../idtype';
-import {ADataType, IDataType, VALUE_TYPE_CATEGORICAL, ICategory} from '../datatype';
-import {getFirstByFQName} from '../data';
+import {BaseUtils} from '../base/BaseUtils';
+import {RangeLike, Range, CompositeRange1D, ParseRangeUtils} from '../range';
+import {IDTypeManager, LocalIDAssigner} from '../idtype';
+import {ADataType, IDataType, ValueTypeUtils, ICategory} from '../data';
+import {DataCache} from '../data/DataCache';
 import {ICategoricalVector} from '../vector';
-import {rangeHist, IHistogram} from '../math';
-import {IStratification, IStratificationDataDescription, createDefaultStratificationDesc} from './IStratification';
-import StratificationGroup from './StratificationGroup';
-import {IStratificationLoader, viaAPILoader, viaDataLoader} from './loader';
-import StratificationVector from './StratificationVector';
+import {RangeHistogram, IHistogram} from '../data/histogram';
+import {IStratification, IStratificationDataDescription} from './IStratification';
+import {StratificationGroup} from './StratificationGroup';
+import {StratificationUtils} from './StratificationUtils';
+import {IStratificationLoader, StratificationLoaderUtils} from './loader';
+import {StratificationCategoricalVector} from './StratificationCategoricalVector';
 /**
  * root matrix implementation holding the data
  * @internal
  */
-export default class Stratification extends ADataType<IStratificationDataDescription> implements IStratification {
+export class Stratification extends ADataType<IStratificationDataDescription> implements IStratification {
   private _v: Promise<ICategoricalVector>;
 
   constructor(desc: IStratificationDataDescription, private loader: IStratificationLoader) {
@@ -30,7 +31,7 @@ export default class Stratification extends ADataType<IStratificationDataDescrip
   }
 
   get idtype() {
-    return resolveIDType(this.desc.idtype);
+    return IDTypeManager.getInstance().resolveIdType(this.desc.idtype);
   }
 
   get groups() {
@@ -43,7 +44,7 @@ export default class Stratification extends ADataType<IStratificationDataDescrip
 
   async hist(bins?: number, range?: Range): Promise<IHistogram> {
     //TODO
-    return rangeHist(await this.range());
+    return RangeHistogram.rangeHist(await this.range());
   }
 
   vector() {
@@ -52,14 +53,14 @@ export default class Stratification extends ADataType<IStratificationDataDescrip
 
   asVector(): Promise<ICategoricalVector> {
     if (!this._v) {
-      this._v = this.loader(this.desc).then((data) => new StratificationVector(this, data.range));
+      this._v = this.loader(this.desc).then((data) => new StratificationCategoricalVector(this, data.range));
     }
     return this._v;
   }
 
   origin(): Promise<IDataType> {
     if ('origin' in this.desc) {
-      return getFirstByFQName(this.desc.origin);
+      return DataCache.getInstance().getFirstByFQName(this.desc.origin);
     }
     return Promise.reject('no origin specified');
   }
@@ -75,12 +76,12 @@ export default class Stratification extends ADataType<IStratificationDataDescrip
     return <CompositeRange1D>ids.preMultiply(range, this.dim[0]);
   }
 
-  async names(range: RangeLike = all()) {
-    return parse(range).filter((await this.loader(this.desc)).rows, this.dim);
+  async names(range: RangeLike = Range.all()) {
+    return ParseRangeUtils.parseRangeLike(range).filter((await this.loader(this.desc)).rows, this.dim);
   }
 
-  async ids(range: RangeLike = all()): Promise<Range> {
-    return (await this.loader(this.desc)).rowIds.preMultiply(parse(range), this.dim);
+  async ids(range: RangeLike = Range.all()): Promise<Range> {
+    return (await this.loader(this.desc)).rowIds.preMultiply(ParseRangeUtils.parseRangeLike(range), this.dim);
   }
 
   get idtypes() {
@@ -106,75 +107,84 @@ export default class Stratification extends ADataType<IStratificationDataDescrip
   persist() {
     return this.desc.id;
   }
-}
 
-/**
- * module entry point for creating a datatype
- * @param desc
- * @returns {IVector}
- */
-export function create(desc: IStratificationDataDescription): Stratification {
-  return new Stratification(desc, viaAPILoader());
-}
+  static guessColor(stratification: string, group: string) {
+    switch (group.toLowerCase()) {
+      case 'male':
+        return 'blue';
+      case 'female':
+        return 'red';
+      case 'deceased':
+        return '#e41a1b';
+      case 'living':
+        return '#377eb8';
+    }
+    return 'gray';
+  }
+  /**
+   * module entry point for creating a datatype
+   * @param desc
+   * @returns {IVector}
+   */
+  static create(desc: IStratificationDataDescription): Stratification {
+    return new Stratification(desc, StratificationLoaderUtils.viaAPILoader());
+  }
+  static wrap(desc: IStratificationDataDescription, rows: string[], rowIds: number[], range: CompositeRange1D) {
+    return new Stratification(desc, StratificationLoaderUtils.viaDataLoader(rows, rowIds, range));
+  }
+  static asStratification(rows: string[], range: CompositeRange1D, options: IAsStratifcationOptions = {}) {
+    const desc = BaseUtils.mixin(StratificationUtils.createDefaultStratificationDesc(), {
+      size: 0,
+      groups: range.groups.map((r) => ({name: r.name, color: r.color, size: r.length})),
+      ngroups: range.groups.length
+    }, options);
 
-export function wrap(desc: IStratificationDataDescription, rows: string[], rowIds: number[], range: CompositeRange1D) {
-  return new Stratification(desc, viaDataLoader(rows, rowIds, range));
+    const rowAssigner = options.rowassigner || LocalIDAssigner.create();
+    return new Stratification(desc, StratificationLoaderUtils.viaDataLoader(rows, rowAssigner(rows), range));
+  }
+  static wrapCategoricalVector(v: ICategoricalVector) {
+    if (v.valuetype.type !== ValueTypeUtils.VALUE_TYPE_CATEGORICAL) {
+      throw new Error('invalid vector value type: ' + v.valuetype.type);
+    }
+    const toGroup = (g: string|ICategory) => {
+      if (typeof g === 'string') {
+        return {name: <string>g, color: 'gray', size: NaN};
+      }
+      const cat = <ICategory>g;
+      return {name: cat.name, color: cat.color || 'gray', size: NaN};
+    };
+    const cats = v.desc.value.categories.map(toGroup);
+    const desc: IStratificationDataDescription = {
+      id: v.desc.id + '-s',
+      type: 'stratification',
+      name: v.desc.name + '-s',
+      fqname: v.desc.fqname + '-s',
+      description: v.desc.description,
+      idtype: v.idtype.id,
+      ngroups: cats.length,
+      groups: cats,
+      size: v.length,
+      creator: v.desc.creator,
+      ts: v.desc.ts
+    };
+
+    function loader() {
+      return Promise.all<any>([v.groups(), v.ids(), v.names()]).then((args) => {
+        const range = <CompositeRange1D>args[0];
+        range.groups.forEach((g, i) => cats[i].size = g.length);
+        return {
+          range: args[0],
+          rowIds: args[1],
+          rows: args[2]
+        };
+      });
+    }
+    return new Stratification(desc, loader);
+  }
 }
 
 export interface IAsStratifcationOptions {
   name?: string;
   idtype?: string;
   rowassigner?(ids: string[]): Range;
-}
-
-export function asStratification(rows: string[], range: CompositeRange1D, options: IAsStratifcationOptions = {}) {
-  const desc = mixin(createDefaultStratificationDesc(), {
-    size: 0,
-    groups: range.groups.map((r) => ({name: r.name, color: r.color, size: r.length})),
-    ngroups: range.groups.length
-  }, options);
-
-  const rowAssigner = options.rowassigner || createLocalAssigner();
-  return new Stratification(desc, viaDataLoader(rows, rowAssigner(rows), range));
-}
-
-export function wrapCategoricalVector(v: ICategoricalVector) {
-  if (v.valuetype.type !== VALUE_TYPE_CATEGORICAL) {
-    throw new Error('invalid vector value type: ' + v.valuetype.type);
-  }
-  const toGroup = (g: string|ICategory) => {
-    if (typeof g === 'string') {
-      return {name: <string>g, color: 'gray', size: NaN};
-    }
-    const cat = <ICategory>g;
-    return {name: cat.name, color: cat.color || 'gray', size: NaN};
-  };
-  const cats = v.desc.value.categories.map(toGroup);
-  const desc: IStratificationDataDescription = {
-    id: v.desc.id + '-s',
-    type: 'stratification',
-    name: v.desc.name + '-s',
-    fqname: v.desc.fqname + '-s',
-    description: v.desc.description,
-    idtype: v.idtype.id,
-    ngroups: cats.length,
-    groups: cats,
-    size: v.length,
-    creator: v.desc.creator,
-    ts: v.desc.ts
-  };
-
-  function loader() {
-    return Promise.all<any>([v.groups(), v.ids(), v.names()]).then((args) => {
-      const range = <CompositeRange1D>args[0];
-      range.groups.forEach((g, i) => cats[i].size = g.length);
-      return {
-        range: args[0],
-        rowIds: args[1],
-        rows: args[2]
-      };
-    });
-  }
-
-  return new Stratification(desc, loader);
 }

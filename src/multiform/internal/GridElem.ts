@@ -2,17 +2,18 @@
  * Created by sam on 26.12.2016.
  */
 
-import {IPersistable, offset} from '../../index';
-import {IDataType, assignData} from '../../datatype';
-import {IVisInstance, assignVis, ITransform} from '../../vis';
+import {BaseUtils} from '../../base/BaseUtils';
+import {IPersistable} from '../../base/IPersistable';
+import {IDataType, DataUtils} from '../../data';
+import {IVisInstance, VisUtils, ITransform} from '../../vis';
 import {Range} from '../../range';
-import {clearNode} from './index';
-import {IPlugin} from '../../plugin';
+import {IPlugin} from '../../base/plugin';
+import {FormUtils} from './FormUtils';
 
 /**
  * @internal
  */
-export default class GridElem implements IPersistable {
+export class GridElem implements IPersistable {
   actVis: IVisInstance;
   content: HTMLElement;
 
@@ -21,7 +22,7 @@ export default class GridElem implements IPersistable {
 
   setContent(c: HTMLElement) {
     this.content = c;
-    assignData(this.content, this.data);
+    DataUtils.assignData(this.content, this.data);
   }
 
   subrange(r: Range) {
@@ -71,7 +72,7 @@ export default class GridElem implements IPersistable {
 
   switchDestroy() {
     //remove content dom side
-    clearNode(this.content);
+    FormUtils.clearNode(this.content);
     if (this.actVis && typeof(this.actVis.destroy) === 'function') {
       this.actVis.destroy();
     }
@@ -80,12 +81,12 @@ export default class GridElem implements IPersistable {
 
   build(plugin: IPlugin, options: any) {
     this.actVis = plugin.factory(this.data, this.content, options);
-    assignVis(this.content, this.actVis);
+    VisUtils.assignVis(this.content, this.actVis);
     return this.actVis;
   }
 
   get location() {
-    const o = offset(this.content);
+    const o = BaseUtils.offset(this.content);
     return {
       x: o.left,
       y: o.top

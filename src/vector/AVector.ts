@@ -7,40 +7,27 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {all, list as rlist, RangeLike, range, asUngrouped, composite, parse} from '../range';
-import Range from '../range/Range';
-import CompositeRange1D from '../range/CompositeRange1D';
-import {argSort, argFilter} from '../index';
-import {SelectAble, resolve as resolveIDType, IDType} from '../idtype';
+import {Range, RangeLike, Range1DGroup, ParseRangeUtils} from '../range';
+import {CompositeRange1D} from '../range/CompositeRange1D';
+import {ArrayUtils} from '../base/ArrayUtils';
+import {ASelectAble, IDTypeManager, IDType} from '../idtype';
 import {
-  categorical2partitioning,
+  Categorical2PartioningUtils,
   ICategorical2PartitioningOptions,
   ICategory,
   ICategoricalValueTypeDesc,
-  INumberValueTypeDesc,
-  VALUE_TYPE_CATEGORICAL,
-  VALUE_TYPE_INT,
-  VALUE_TYPE_REAL, IValueTypeDesc
-} from '../datatype';
-import {
-  computeAdvancedStats,
-  IAdvancedStatistics,
-  IHistogram,
-  categoricalHist,
-  hist,
-  IStatistics,
-  computeStats
-} from '../math';
+  INumberValueTypeDesc,ValueTypeUtils, IValueTypeDesc
+} from '../data';
+import {IHistogram, Histogram, CatHistogram} from '../data/histogram';
+import {IAdvancedStatistics, IStatistics, Statistics, AdvancedStatistics} from '../base/statistics';
 import {IVector} from './IVector';
-import {IStratification} from '../stratification';
-import StratificationVector from './internal/StratificationVector';
-import ProjectedAtom from './internal/ProjectedAtom';
-import IAtom, {IAtomValue} from '../atom/IAtom';
+import {ProjectedAtom} from './ProjectedAtom';
+import {IAtom, IAtomValue} from '../atom/IAtom';
 /**
  * base class for different Vector implementations, views, transposed,...
  * @internal
  */
-export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
+export abstract class AVector<T,D extends IValueTypeDesc> extends ASelectAble {
   constructor(protected root: IVector<T,D>) {
     super();
   }
@@ -57,33 +44,33 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
     return this.size();
   }
 
-  view(range: RangeLike = all()): IVector<T,D> {
+  view(range: RangeLike = Range.all()): IVector<T,D> {
     // tslint:disable:no-use-before-declare
     // Disabled the rule, because the classes below reference each other in a way that it is impossible to find a successful order.
-    return new VectorView(this.root, parse(range));
+    return new VectorView(this.root, ParseRangeUtils.parseRangeLike(range));
   }
 
-  async idView(idRange: RangeLike = all()): Promise<IVector<T,D>> {
+  async idView(idRange: RangeLike = Range.all()): Promise<IVector<T,D>> {
     const ids = await this.ids();
-    return this.view(ids.indexOf(parse(idRange)));
+    return this.view(ids.indexOf(ParseRangeUtils.parseRangeLike(idRange)));
   }
 
-  async stats(range: RangeLike = all()): Promise<IStatistics> {
-    if (this.root.valuetype.type !== VALUE_TYPE_INT && this.root.valuetype.type !== VALUE_TYPE_REAL) {
+  async stats(range: RangeLike = Range.all()): Promise<IStatistics> {
+    if (this.root.valuetype.type !== ValueTypeUtils.VALUE_TYPE_INT && this.root.valuetype.type !== ValueTypeUtils.VALUE_TYPE_REAL) {
       return Promise.reject('invalid value type: ' + this.root.valuetype.type);
     }
-    return computeStats(await this.data(range));
+    return Statistics.computeStats(await this.data(range));
   }
 
-  async statsAdvanced(range: RangeLike = all()): Promise<IAdvancedStatistics> {
-    if (this.root.valuetype.type !== VALUE_TYPE_INT && this.root.valuetype.type !== VALUE_TYPE_REAL) {
+  async statsAdvanced(range: RangeLike = Range.all()): Promise<IAdvancedStatistics> {
+    if (this.root.valuetype.type !== ValueTypeUtils.VALUE_TYPE_INT && this.root.valuetype.type !== ValueTypeUtils.VALUE_TYPE_REAL) {
       return Promise.reject('invalid value type: ' + this.root.valuetype.type);
     }
-    return computeAdvancedStats(await this.data(range));
+    return AdvancedStatistics.computeAdvancedStats(await this.data(range));
   }
 
   get indices(): Range {
-    return range(0, this.length);
+    return Range.range(0, this.length);
   }
 
   /**
@@ -91,7 +78,7 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
    */
   async groups(): Promise<CompositeRange1D> {
     const v = this.root.valuetype;
-    if (v.type === VALUE_TYPE_CATEGORICAL) {
+    if (v.type === ValueTypeUtils.VALUE_TYPE_CATEGORICAL) {
       const vc = <ICategoricalValueTypeDesc><any>v;
       const d = await this.data();
       const options: ICategorical2PartitioningOptions = {
@@ -106,33 +93,25 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
           options.labels = vcc.map((d) => d.label);
         }
       }
-      return categorical2partitioning(d, vc.categories.map((d) => typeof d === 'string' ? d : d.name), options);
+      return Categorical2PartioningUtils.categorical2partitioning(d, vc.categories.map((d) => typeof d === 'string' ? d : d.name), options);
     } else {
-      return Promise.resolve(composite(this.root.desc.id, [asUngrouped(this.indices.dim(0))]));
+      return Promise.resolve(CompositeRange1D.composite(this.root.desc.id, [Range1DGroup.asUngrouped(this.indices.dim(0))]));
     }
   }
 
-  stratification(): Promise<IStratification> {
-    return this.asStratification();
-  }
-
-  async asStratification(): Promise<IStratification> {
-    return new StratificationVector(this.root, await this.groups());
-  }
-
-  async hist(bins?: number, range: RangeLike = all()): Promise<IHistogram> {
+  async hist(bins?: number, range: RangeLike = Range.all()): Promise<IHistogram> {
     const v = this.root.valuetype;
     const d = await this.data(range);
     switch (v.type) {
-      case VALUE_TYPE_CATEGORICAL:
+      case ValueTypeUtils.VALUE_TYPE_CATEGORICAL:
         const vc = <ICategoricalValueTypeDesc><any>v;
-        return categoricalHist(d, this.indices.dim(0), d.length, vc.categories.map((d) => typeof d === 'string' ? d : d.name),
+        return CatHistogram.categoricalHist(d, this.indices.dim(0), d.length, vc.categories.map((d) => typeof d === 'string' ? d : d.name),
           vc.categories.map((d) => typeof d === 'string' ? d : d.label || d.name),
           vc.categories.map((d) => typeof d === 'string' ? 'gray' : d.color || 'gray'));
-      case VALUE_TYPE_REAL:
-      case VALUE_TYPE_INT:
+      case ValueTypeUtils.VALUE_TYPE_REAL:
+      case ValueTypeUtils.VALUE_TYPE_INT:
         const vn = <INumberValueTypeDesc><any>v;
-        return hist(d, this.indices.dim(0), d.length, bins ? bins : Math.round(Math.sqrt(this.length)), vn.range);
+        return Histogram.hist(d, this.indices.dim(0), d.length, bins ? bins : Math.round(Math.sqrt(this.length)), vn.range);
       default:
         return null; //cant create hist for unique objects or other ones
     }
@@ -175,16 +154,14 @@ export abstract class AVector<T,D extends IValueTypeDesc> extends SelectAble {
     let r: IVector<T,D> = <IVector<T,D>>(<any>this);
     if (persisted && persisted.f) {
       /* tslint:disable:no-eval */
-      return this.reduceAtom(eval(persisted.f), this, persisted.valuetype, persisted.idtype ? resolveIDType(persisted.idtype) : undefined);
+      return this.reduceAtom(eval(persisted.f), this, persisted.valuetype, persisted.idtype ? IDTypeManager.getInstance().resolveIdType(persisted.idtype) : undefined);
       /* tslint:enable:no-eval */
     } else if (persisted && persisted.range) { //some view onto it
-      r = r.view(parse(persisted.range));
+      r = r.view(ParseRangeUtils.parseRangeLike(persisted.range));
     }
     return r;
   }
 }
-
-export default AVector;
 
 
 /**
@@ -220,20 +197,20 @@ export class VectorView<T,D extends IValueTypeDesc> extends AVector<T,D> {
     return this.root.at(inverted[0]);
   }
 
-  data(range: RangeLike = all()) {
-    return this.root.data(this.range.preMultiply(parse(range), this.root.dim));
+  data(range: RangeLike = Range.all()) {
+    return this.root.data(this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim));
   }
 
-  names(range: RangeLike = all()) {
-    return this.root.names(this.range.preMultiply(parse(range), this.root.dim));
+  names(range: RangeLike = Range.all()) {
+    return this.root.names(this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim));
   }
 
-  ids(range: RangeLike = all()) {
-    return this.root.ids(this.range.preMultiply(parse(range), this.root.dim));
+  ids(range: RangeLike = Range.all()) {
+    return this.root.ids(this.range.preMultiply(ParseRangeUtils.parseRangeLike(range), this.root.dim));
   }
 
-  view(range: RangeLike = all()) {
-    const r = parse(range);
+  view(range: RangeLike = Range.all()) {
+    const r = ParseRangeUtils.parseRangeLike(range);
     if (r.isAll) {
       return this;
     }
@@ -258,14 +235,14 @@ export class VectorView<T,D extends IValueTypeDesc> extends AVector<T,D> {
 
   async sort(compareFn?: (a: T, b: T) => number, thisArg?: any): Promise<IVector<T,D>> {
     const d = await this.data();
-    const indices = argSort(d, compareFn, thisArg);
-    return this.view(rlist(indices));
+    const indices = ArrayUtils.argSort(d, compareFn, thisArg);
+    return this.view(Range.list(indices));
   }
 
   async filter(callbackfn: (value: T, index: number) => boolean, thisArg?: any): Promise<IVector<T,D>> {
     const d = await this.data();
-    const indices = argFilter(d, callbackfn, thisArg);
-    return this.view(rlist(indices));
+    const indices = ArrayUtils.argFilter(d, callbackfn, thisArg);
+    return this.view(Range.list(indices));
   }
 }
 

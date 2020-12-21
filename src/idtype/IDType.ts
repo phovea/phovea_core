@@ -8,19 +8,20 @@
  */
 
 
-import {getAPIJSON, sendAPI} from '../ajax';
-import {EventHandler} from '../event';
-import {none, Range, RangeLike, parse, list as rlist} from '../range';
-import {IIDType, defaultSelectionType, SelectOperation, asSelectOperation} from './IIDType';
-import {IDTypeLike, resolve} from './manager';
-import {resolveImmediately} from '../internal/promise';
+import {AppContext} from '../app/AppContext';
+import {EventHandler} from '../base/event';
+import {Range, RangeLike, ParseRangeUtils} from '../range';
+import {IIDType} from './IIDType';
+import {SelectOperation, SelectionUtils} from './SelectionUtils';
+import {ResolveNow} from '../base/promise';
 /**
  * An IDType is a semantic aggregation of an entity type, like Patient and Gene.
  *
  * An entity is tracked by a unique identifier (integer) within the system,
  * which is mapped to a common, external identifier or name (string) as well.
  */
-export default class IDType extends EventHandler implements IIDType {
+export class IDType extends EventHandler implements IIDType {
+
   static readonly EVENT_SELECT = 'select';
   /**
    * the current selections
@@ -31,7 +32,7 @@ export default class IDType extends EventHandler implements IIDType {
   private readonly name2idCache = new Map<string, number>();
   private readonly id2nameCache = new Map<number, string>();
 
-  private canBeMappedTo: Promise<IDType[]> = null;
+  canBeMappedTo: Promise<IDType[]> = null;
 
   /**
    * @param id the system identifier of this IDType
@@ -73,11 +74,11 @@ export default class IDType extends EventHandler implements IIDType {
    * @param type optional the selection type
    * @returns {Range}
    */
-  selections(type = defaultSelectionType) {
+  selections(type = SelectionUtils.defaultSelectionType) {
     if (this.sel.has(type)) {
       return this.sel.get(type);
     }
-    const v = none();
+    const v = Range.none();
     this.sel.set(type, v);
     return v;
   }
@@ -92,15 +93,15 @@ export default class IDType extends EventHandler implements IIDType {
   select(type: string, range: RangeLike, op: SelectOperation): Range;
   select() {
     const a = Array.from(arguments);
-    const type = (typeof a[0] === 'string') ? a.shift() : defaultSelectionType,
-      range = parse(a[0]),
-      op = asSelectOperation(a[1]);
+    const type = (typeof a[0] === 'string') ? a.shift() : SelectionUtils.defaultSelectionType,
+      range = ParseRangeUtils.parseRangeLike(a[0]),
+      op = SelectionUtils.asSelectOperation(a[1]);
     return this.selectImpl(range, op, type);
   }
 
-  private selectImpl(range: Range, op = SelectOperation.SET, type: string = defaultSelectionType) {
+  private selectImpl(range: Range, op = SelectOperation.SET, type: string = SelectionUtils.defaultSelectionType) {
     const b = this.selections(type);
-    let newValue: Range = none();
+    let newValue: Range = Range.none();
     switch (op) {
       case SelectOperation.SET:
         newValue = range;
@@ -116,15 +117,15 @@ export default class IDType extends EventHandler implements IIDType {
       return b;
     }
     this.sel.set(type, newValue);
-    const added = op !== SelectOperation.REMOVE ? range : none();
-    const removed = (op === SelectOperation.ADD ? none() : (op === SelectOperation.SET ? b : range));
+    const added = op !== SelectOperation.REMOVE ? range : Range.none();
+    const removed = (op === SelectOperation.ADD ? Range.none() : (op === SelectOperation.SET ? b : range));
     this.fire(IDType.EVENT_SELECT, type, newValue, added, removed, b);
     this.fire(`${IDType.EVENT_SELECT}-${type}`, newValue, added, removed, b);
     return b;
   }
 
-  clear(type = defaultSelectionType) {
-    return this.selectImpl(none(), SelectOperation.SET, type);
+  clear(type = SelectionUtils.defaultSelectionType) {
+    return this.selectImpl(Range.none(), SelectOperation.SET, type);
   }
 
   /**
@@ -140,60 +141,7 @@ export default class IDType extends EventHandler implements IIDType {
     });
   }
 
-  /**
-   * returns the list of idtypes that this type can be mapped to
-   * @returns {Promise<IDType[]>}
-   */
-  getCanBeMappedTo() {
-    if (this.canBeMappedTo === null) {
-      this.canBeMappedTo = getAPIJSON(`/idtype/${this.id}/`).then((list) => list.map(resolve));
-    }
-    return this.canBeMappedTo;
-  }
 
-  mapToFirstName(ids: RangeLike, toIDType: IDTypeLike): Promise<string[]> {
-    const target = resolve(toIDType);
-    const r = parse(ids);
-    return chooseRequestMethod(`/idtype/${this.id}/${target.id}`, {ids: r.toString(), mode: 'first'});
-  }
-
-  mapNameToFirstName(names: string[], toIDtype: IDTypeLike): Promise<string[]> {
-    const target = resolve(toIDtype);
-    return chooseRequestMethod(`/idtype/${this.id}/${target.id}`, {q: names, mode: 'first'});
-  }
-
-  mapToName(ids: RangeLike, toIDType: string|IDType): Promise<string[][]> {
-    const target = resolve(toIDType);
-    const r = parse(ids);
-    return chooseRequestMethod(`/idtype/${this.id}/${target.id}`, {ids: r.toString()});
-  }
-
-  mapNameToName(names: string[], toIDtype: IDTypeLike): Promise<string[][]> {
-    const target = resolve(toIDtype);
-    return chooseRequestMethod(`/idtype/${this.id}/${target.id}`, {q: names});
-  }
-
-  mapToFirstID(ids: RangeLike, toIDType: IDTypeLike): Promise<number[]> {
-    const target = resolve(toIDType);
-    const r = parse(ids);
-    return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {ids: r.toString(), mode: 'first'});
-  }
-
-  mapToID(ids: RangeLike, toIDType: IDTypeLike): Promise<number[][]> {
-    const target = resolve(toIDType);
-    const r = parse(ids);
-    return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {ids: r.toString()});
-  }
-
-  mapNameToFirstID(names: string[], toIDType: IDTypeLike): Promise<number[]> {
-    const target = resolve(toIDType);
-    return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {q: names, mode: 'first'});
-  }
-
-  mapNameToID(names: string[], toIDType: IDTypeLike): Promise<number[][]> {
-    const target = resolve(toIDType);
-    return chooseRequestMethod(`/idtype/${this.id}/${target.id}/map`, {q: names});
-  }
 
   /**
    * Request the system identifiers for the given entity names.
@@ -204,9 +152,9 @@ export default class IDType extends EventHandler implements IIDType {
     names = names.map((s) => String(s)); // ensure strings
     const toResolve = names.filter((name) => !this.name2idCache.has(name));
     if (toResolve.length === 0) {
-      return resolveImmediately(names.map((name) => this.name2idCache.get(name)));
+      return ResolveNow.resolveImmediately(names.map((name) => this.name2idCache.get(name)));
     }
-    const ids: number[] = await chooseRequestMethod(`/idtype/${this.id}/map`, {ids: toResolve});
+    const ids: number[] = await IDType.chooseRequestMethod(`/idtype/${this.id}/map`, {ids: toResolve});
     toResolve.forEach((name, i) => {
       this.name2idCache.set(name, ids[i]);
       this.id2nameCache.set(ids[i], name);
@@ -220,15 +168,15 @@ export default class IDType extends EventHandler implements IIDType {
    * @returns a promise of system identifiers that match the input names
    */
   async unmap(ids: RangeLike): Promise<string[]> {
-    const r = parse(ids);
+    const r = ParseRangeUtils.parseRangeLike(ids);
     const toResolve: number[] = [];
     r.dim(0).forEach((name) => !(this.id2nameCache.has(name)) ? toResolve.push(name) : null);
     if (toResolve.length === 0) {
       const result: string[] = [];
       r.dim(0).forEach((name) => result.push(this.id2nameCache.get(name)));
-      return resolveImmediately(result);
+      return ResolveNow.resolveImmediately(result);
     }
-    const result: string[] = await chooseRequestMethod(`/idtype/${this.id}/unmap`, {ids: rlist(toResolve).toString()});
+    const result: string[] = await IDType.chooseRequestMethod(`/idtype/${this.id}/unmap`, {ids: Range.list(toResolve).toString()});
     toResolve.forEach((id, i) => {
       const r = String(result[i]);
       this.id2nameCache.set(id, r);
@@ -246,7 +194,7 @@ export default class IDType extends EventHandler implements IIDType {
    * @return {Promise<void>}
    */
   async search(pattern: string, limit = 10): Promise<IDPair[]> {
-   const result: IDPair[] = await getAPIJSON(`/idtype/${this.id}/search`, {q: pattern, limit});
+   const result: IDPair[] = await AppContext.getInstance().getAPIJSON(`/idtype/${this.id}/search`, {q: pattern, limit});
     // cache results
     result.forEach((pair) => {
       const r = String(pair.name);
@@ -257,31 +205,23 @@ export default class IDType extends EventHandler implements IIDType {
   }
 
   /**
-   * search for all matching ids for a given pattern
-   * @param pattern
-   * @param limit maximal number of results
-   * @return {Promise<void>}
+   * chooses whether a GET or POST request based on the expected url length
+   * @param url
+   * @param data
+   * @returns {Promise<any>}
    */
-  searchMapping(pattern: string, toIDType: string|IDType, limit = 10): Promise<{match: string, to: string}[]> {
-    const target = resolve(toIDType);
-    return getAPIJSON(`/idtype/${this.id}/${target.id}/search`, {q: pattern, limit});
+  static chooseRequestMethod(url: string, data: any = {}) {
+    const dataLengthGuess = JSON.stringify(data);
+    const lengthGuess = url.length + dataLengthGuess.length;
+
+    const method = lengthGuess < 2000 ? 'GET' : 'POST';
+    return AppContext.getInstance().sendAPI(url, data, method);
   }
 }
 
-/**
- * chooses whether a GET or POST request based on the expected url length
- * @param url
- * @param data
- * @returns {Promise<any>}
- */
-function chooseRequestMethod(url: string, data: any = {}) {
-  const dataLengthGuess = JSON.stringify(data);
-  const lengthGuess = url.length + dataLengthGuess.length;
 
-  const method = lengthGuess < 2000 ? 'GET' : 'POST';
-  return sendAPI(url, data, method);
-}
 
+export declare type IDTypeLike = string|IDType;
 
 export interface IDPair {
   readonly name: string;

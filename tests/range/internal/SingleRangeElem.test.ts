@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 07.03.2017.
  */
 /// <reference types="jest" />
-import SingleRangeElem from '../../../src/range/internal/SingleRangeElem';
+import {SingleRangeElem} from '../../../src/range/internal/SingleRangeElem';
 
 describe('SingleRangeElem', () => {
   const VALUE = 5;

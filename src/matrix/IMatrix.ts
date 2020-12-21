@@ -8,23 +8,18 @@
  */
 
 import {RangeLike} from '../range';
-import Range from '../range/Range';
+import {Range} from '../range/Range';
 import {IProductSelectAble} from '../idtype';
-import IDType from '../idtype/IDType';
+import {IDType} from '../idtype/IDType';
 import {
-  IHistAbleDataType, IValueTypeDesc, IDataDescription, createDefaultDataDesc as createDefaultBaseDesc,
+  IHistAbleDataType, IValueTypeDesc, IDataDescription, DataUtils,
   INumberValueTypeDesc, ICategoricalValueTypeDesc, IStatsAbleDataType
-} from '../datatype';
+} from '../data';
 import {IVector} from '../vector';
-import {IHistogram, IStatistics, IAdvancedStatistics} from '../math';
-import {mixin} from '../index';
+import {IHistogram} from '../data/histogram';
+import {IAdvancedStatistics, IStatistics} from '../base/statistics';
+import {BaseUtils} from '../base/BaseUtils';
 
-export const IDTYPE_ROW = 0;
-export const IDTYPE_COLUMN = 1;
-export const IDTYPE_CELL = 2;
-
-export const DIM_ROW = 0;
-export const DIM_COL = 1;
 
 export interface IHeatMapUrlOptions {
   format?: string;
@@ -143,17 +138,17 @@ export interface IMatrix<T, D extends IValueTypeDesc> extends IHistAbleDataType<
   heatmapUrl(range?: RangeLike, options?: IHeatMapUrlOptions): string;
 }
 
-export default IMatrix;
 export declare type INumericalMatrix = IMatrix<number, INumberValueTypeDesc>;
 export declare type ICategoricalMatrix = IMatrix<number, ICategoricalValueTypeDesc>;
 export declare type IAnyMatrix = IMatrix<any, IValueTypeDesc>;
 
-
-export function createDefaultMatrixDesc(): IMatrixDataDescription<IValueTypeDesc> {
-  return <IMatrixDataDescription<IValueTypeDesc>>mixin(createDefaultBaseDesc(), {
-    type: 'matrix',
-    rowtype: '_rows',
-    coltype: '_cols',
-    size: [0, 0]
-  });
+export class MatrixUtils {
+  static createDefaultMatrixDesc(): IMatrixDataDescription<IValueTypeDesc> {
+    return <IMatrixDataDescription<IValueTypeDesc>>BaseUtils.mixin(DataUtils.createDefaultDataDesc(), {
+      type: 'matrix',
+      rowtype: '_rows',
+      coltype: '_cols',
+      size: [0, 0]
+    });
+  }
 }

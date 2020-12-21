@@ -5,20 +5,21 @@
  * Created by Samuel Gratzl on 22.10.2014.
  */
 import {GraphNode, GraphEdge, AGraph, IGraph, IGraphDataDescription} from './graph';
-export {IGraphDataDescription} from './graph';
-import {resolveImmediately} from '../internal/promise';
 
 export interface IGraphFactory {
   makeNode(p: any): GraphNode;
   makeEdge(p: any, lookup: (id: number) => GraphNode): GraphEdge;
 }
 
-export const defaultGraphFactory: IGraphFactory = {
-  makeNode: (p: any) => ((new GraphNode()).restore(p)),
-  makeEdge: (p: any, lookup) => ((new GraphEdge()).restore(p, lookup))
-};
+export class GraphFactoryUtils {
 
-export default class GraphBase extends AGraph implements IGraph {
+  static defaultGraphFactory: IGraphFactory = {
+    makeNode: (p: any) => ((new GraphNode()).restore(p)),
+    makeEdge: (p: any, lookup) => ((new GraphEdge()).restore(p, lookup))
+  };
+}
+
+export class GraphBase extends AGraph implements IGraph {
   private readonly _nodes: GraphNode[];
   private readonly _edges: GraphEdge[];
 

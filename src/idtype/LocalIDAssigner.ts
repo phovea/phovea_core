@@ -7,11 +7,11 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {IdPool} from '../index';
-import {Range, list as rlist} from '../range';
+import {IdPool} from '../internal/IdPool';
+import {Range} from '../range';
 
 
-export default class LocalIDAssigner {
+export class LocalIDAssigner {
   private readonly pool = new IdPool();
   private readonly lookup = new Map<string, number>();
 
@@ -41,11 +41,11 @@ export default class LocalIDAssigner {
 
   map(ids: string[]): Range {
     const numbers: number[] = ids.map((d) => this.mapOne(d));
-    return rlist(...numbers);
+    return Range.list(...numbers);
   }
-}
 
-export function createLocalAssigner() {
-  const r = new LocalIDAssigner();
-  return r.map.bind(r);
+  static create() {
+    const r = new LocalIDAssigner();
+    return r.map.bind(r);
+  }
 }

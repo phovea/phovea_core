@@ -2,9 +2,9 @@
  * Created by Samuel Gratzl on 27.12.2016.
  */
 
-import Range1D from './Range1D';
+import {Range1D, IRange1DGroup} from './Range1D';
 
-export default class Range1DGroup extends Range1D {
+export class Range1DGroup extends Range1D implements IRange1DGroup  {
   constructor(public name: string, public color: string, base?: Range1D) {
     super(base);
   }
@@ -43,5 +43,13 @@ export default class Range1DGroup extends Range1D {
 
   fromLike(indices: number[]) {
     return new Range1DGroup(this.name, this.color, super.fromLike(indices));
+  }
+  /**
+   * TODO document
+   * @param range
+   * @return {Range1DGroup}
+   */
+  static asUngrouped(range: Range1D) {
+    return new Range1DGroup('unnamed', 'gray', range);
   }
 }

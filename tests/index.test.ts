@@ -1,31 +1,35 @@
 /// <reference types="jest" />
-import {argFilter, argSort, bounds, mod, uniqueId, uniqueString, resolveIn, randomId, flagId} from '../src';
+import {BaseUtils} from '../src/base/BaseUtils';
+import {ArrayUtils} from '../src/base/ArrayUtils';
+import {UniqueIdManager} from '../src/app/UniqueIdManager';
+
+
 import * as pkg from '../package.json';
 
 
 describe('argFilter', () => {
-  it('evens', () => expect(argFilter([1, 3, 5, 2, 4, 6, 7, 9, 11], (d) => d % 2 === 0))
+  it('evens', () => expect(ArrayUtils.argFilter([1, 3, 5, 2, 4, 6, 7, 9, 11], (d) => d % 2 === 0))
       .toEqual([3, 4, 5]));
 });
 
 describe('argSort', () => {
-  it('length', () => expect(argSort(['lizard', 'marsupial', 'cat', 'dolphin'], (a, b) => a.length - b.length))
+  it('length', () => expect(ArrayUtils.argSort(['lizard', 'marsupial', 'cat', 'dolphin'], (a, b) => a.length - b.length))
       .toEqual([2, 0, 3, 1])
   );
 });
 
 describe('mod', () => {
-  it('+ % +', () => expect(mod(101, 5)).toEqual(1));
+  it('+ % +', () => expect(BaseUtils.mod(101, 5)).toEqual(1));
   it('- % + (native)', () => expect(-101 % 5).toEqual(-1));
-  it('- % +', () => expect(mod(-101, 5)).toEqual(4));
-  it('+ % -', () => expect(mod(101, -5)).toEqual(-4));
-  it('- % -', () => expect(mod(-101, -5)).toEqual(-1));
+  it('- % +', () => expect(BaseUtils.mod(-101, 5)).toEqual(4));
+  it('+ % -', () => expect(BaseUtils.mod(101, -5)).toEqual(-4));
+  it('- % -', () => expect(BaseUtils.mod(-101, -5)).toEqual(-1));
 });
 
 describe('bounds', () => {
   /* TODO: This seems odd. For instance, there is already an x and y provided by the DOM,
   but we give a different meaning to these.  */
-  it('not a DOM object', () => expect(bounds(null)).toEqual({ x: 0, y: 0, w: 0, h: 0 }));
+  it('not a DOM object', () => expect(BaseUtils.bounds(null)).toEqual({ x: 0, y: 0, w: 0, h: 0 }));
   // TODO: DOM object
 });
 
@@ -33,20 +37,20 @@ describe('bounds', () => {
 it('version is sem ver', () => expect(pkg.version).toMatch(/\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z\-]+(?:\.[\da-z\-]+)*)?(?:\+[\da-z\-]+(?:\.[\da-z\-]+)*)?\b/ig));
 
 describe('uniqueId', () => {
-  it('first time', () => expect(uniqueId()).toEqual(0));
-  it('second time', () => expect(uniqueId()).toEqual(1));
+  it('first time', () => expect(UniqueIdManager.getInstance().uniqueId()).toEqual(0));
+  it('second time', () => expect(UniqueIdManager.getInstance().uniqueId()).toEqual(1));
 });
 
 describe('uniqueString', () => {
-  it('first time', () => expect(uniqueString()).toEqual('_default2'));
-  it('second time', () => expect(uniqueString()).toEqual('_default3'));
-  it('foobar time', () => expect(uniqueString('foobar')).toEqual('foobar0'));
+  it('first time', () => expect(UniqueIdManager.getInstance().uniqueString()).toEqual('_default2'));
+  it('second time', () => expect(UniqueIdManager.getInstance().uniqueString()).toEqual('_default3'));
+  it('foobar time', () => expect(UniqueIdManager.getInstance().uniqueString('foobar')).toEqual('foobar0'));
 });
 
 describe('resolveIn', () => {
   it('200ms', (done) => {
     const past = Date.now();
-    resolveIn(200).then(function() {
+    BaseUtils.resolveIn(200).then(function() {
       const present = Date.now();
       const actual = present - past;
       expect(actual).toBeGreaterThanOrEqual(200);
@@ -56,12 +60,12 @@ describe('resolveIn', () => {
 });
 
 describe('randomId', () => {
-  it('default', () => expect(randomId()).toMatch(/^[0-9a-z]{8}$/));
-  it('short', () => expect(randomId(1)).toMatch(/^[0-9a-z]$/));
+  it('default', () => expect(BaseUtils.randomId()).toMatch(/^[0-9a-z]{8}$/));
+  it('short', () => expect(BaseUtils.randomId(1)).toMatch(/^[0-9a-z]$/));
 });
 
 // TODO: What is this for?
-it('flagId', () => expect(flagId('fake', 1)).toEqual(1));
+it('flagId', () => expect(UniqueIdManager.getInstance().flagId('fake', 1)).toEqual(1));
 
 // TODO: Add at least one test for copyDnD
 // TODO: Add at least one test for delayedCall

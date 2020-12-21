@@ -1,242 +1,26 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import {mixin, hash, resolveIn} from '../index';
-import {IDType, SelectOperation, defaultSelectionType, resolve as resolveIDType} from '../idtype';
-import {Range, list as rlist, Range1D, all} from '../range';
-import {ADataType} from '../datatype';
-import {list as listPlugins, load as loadPlugin} from '../plugin';
-import ObjectNode, {IObjectRef, cat} from './ObjectNode';
-import StateNode, {} from './StateNode';
-import ActionNode, {IAction, meta, ActionMetaData} from './ActionNode';
-import SlideNode from './SlideNode';
-import {isType, GraphEdge, GraphNode} from '../graph/graph';
-import GraphBase, {IGraphFactory, IGraphDataDescription} from '../graph/GraphBase';
-import {resolveImmediately} from '../internal/promise';
+import {BaseUtils} from '../base/BaseUtils';
+import {AppContext} from '../app/AppContext';
+import {IDType, SelectOperation, SelectionUtils, IDTypeManager} from '../idtype';
+import {Range, Range1D} from '../range';
+import {ADataType} from '../data/datatype';
+import {ObjectNode, IObjectRef, ObjectRefUtils} from './ObjectNode';
+import {StateNode, } from './StateNode';
+import {ActionNode} from './ActionNode';
+import {IAction} from './ICmd';
+import {SlideNode} from './SlideNode';
+import {GraphEdge, GraphNode} from '../graph/graph';
+import {GraphBase} from '../graph/GraphBase';
+import {ResolveNow} from '../base/promise';
+import {ProvenanceGraphDim} from './provenance';
+import {IProvenanceGraphDataDescription, ICmdFunction, IInverseActionCreator, ICmdResult, IProvenanceGraph} from './ICmd';
+import {ProvenanceGraphUtils} from './ProvenanceGraphUtils';
+import {MemoryGraph} from '../graph/MemoryGraph';
+import {ActionMetaData} from './ActionMeta';
 
-export interface IProvenanceGraphDataDescription extends IGraphDataDescription {
-  readonly local?: boolean;
-  readonly size: [number, number];
-  readonly attrs: {
-    graphtype: string;
-    of: string;
-  };
-}
-
-export interface IInverseActionCreator {
-  (inputs: IObjectRef<any>[], creates: IObjectRef<any>[], removes: IObjectRef<any>[]): IAction;
-}
-
-export interface ICmdResult {
-  /**
-   * the command to revert this command
-   */
-  inverse: IAction | IInverseActionCreator;
-  /**
-   * the created references
-   */
-  created?: IObjectRef<any>[];
-  /**
-   * the removed references
-   */
-  removed?: IObjectRef<any>[];
-
-  /**
-   * then number of actual milliseconds consumed
-   */
-  consumed?: number;
-}
-
-/**
- * abstract definition of a command
- */
-export interface ICmdFunction {
-  (inputs: IObjectRef<any>[], parameters: any, graph: ProvenanceGraph, within: number): PromiseLike<ICmdResult> | ICmdResult;
-}
-/**
- * a factory to create from an id the corresponding command
- */
-export interface ICmdFunctionFactory {
-  (id: string): ICmdFunction;
-}
-
-
-/**
- * an action compressor is used to compress a series of action to fewer one, e.g. create and remove can be annihilated
- */
-export interface IActionCompressor {
-  (path: ActionNode[]): ActionNode[];
-}
-
-
-function removeNoops(path: ActionNode[]) {
-  return path.filter((a) => a.f_id !== 'noop');
-}
-
-function compositeCompressor(cs: IActionCompressor[]) {
-  return (path: ActionNode[]) => {
-    path = removeNoops(path);
-    let before: number;
-    do {
-      before = path.length;
-      cs.forEach((c) => path = c(path));
-    } while (before > path.length);
-    return path;
-  };
-}
-async function createCompressor(path: ActionNode[]) {
-  const toload = listPlugins('actionCompressor').filter((plugin: any) => {
-    return path.some((action) => action.f_id.match(plugin.matches) != null);
-  });
-  return compositeCompressor((await loadPlugin(toload)).map((l) => <IActionCompressor>l.factory));
-}
-/**
- * returns a compressed version of the paths where just the last selection operation remains
- * @param path
- */
-export async function compress(path: ActionNode[]) {
-  if (path.length <= 1) {
-    return path; //can't compress single one
-  }
-  //return resolveImmediately(path);
-  //TODO find a strategy how to compress but also invert skipped actions
-  const compressor = await createCompressor(path);
-  //return path;
-  //console.log('before', path.map((path) => path.toString()));
-  let before: number;
-  do {
-    before = path.length;
-    path = compressor(path);
-  } while (before > path.length);
-  //console.log('after', path.map((path) => path.toString()));
-  return path;
-}
-
-/**
- * find common element in the list of two elements returning the indices of the first same item
- * @param a
- * @param b
- * @returns {any}
- */
-function findCommon<T>(a: T[], b: T[]) {
-  let c = 0;
-  while (c < a.length && c < b.length && a[c] === b[c]) { //go to next till a difference
-    c++;
-  }
-  if (c === 0) { //not even the root common
-    return null;
-  }
-  return {
-    i: c - 1,
-    j: c - 1
-  };
-}
-
-function asFunction(i: any) {
-  if (typeof(i) !== 'function') { //make a function
-    return () => i;
-  }
-  return i;
-}
-
-function noop(inputs: IObjectRef<any>[], parameter: any): ICmdResult {
-  return {
-    inverse: createNoop()
-  };
-}
-
-function createNoop() {
-  return {
-    meta: meta('noop', cat.custom),
-    id: 'noop',
-    f: noop,
-    inputs: <IObjectRef<any>[]>[],
-    parameter: {}
-  };
-}
-
-function createLazyCmdFunctionFactory(): ICmdFunctionFactory {
-  const facts = listPlugins('actionFactory');
-  const singles = listPlugins('actionFunction');
-
-  function resolveFun(id: string) {
-    if (id === 'noop') {
-      return resolveImmediately(noop);
-    }
-    const single = singles.find((f) => f.id === id);
-    if (single) {
-      return single.load().then((f) => f.factory);
-    }
-    const factory = facts.find((f: any) => id.match(f.creates) != null);
-    if (factory) {
-      return factory.load().then((f) => f.factory(id));
-    }
-    return Promise.reject('no factory found for ' + id);
-  }
-
-  const lazyFunction = (id: string) => {
-    let _resolved: PromiseLike<any> = null;
-    return function (this: any, inputs: IObjectRef<any>[], parameters: any) {
-      const that = this, args = Array.from(arguments);
-      if (_resolved == null) {
-        _resolved = resolveFun(id);
-      }
-      return _resolved.then((f) => f.apply(that, args));
-    };
-  };
-  return (id) => lazyFunction(id);
-}
-
-export function provenanceGraphFactory(): IGraphFactory {
-  const factory = createLazyCmdFunctionFactory();
-  const types: any = {
-    action: ActionNode,
-    state: StateNode,
-    object: ObjectNode,
-    story: SlideNode
-  };
-  return {
-    makeNode: (n) => types[n.type].restore(n, factory),
-    makeEdge: (n, lookup) => ((new GraphEdge()).restore(n, lookup))
-  };
-}
-
-export enum ProvenanceGraphDim {
-  Action = 0,
-  Object = 1,
-  State = 2,
-  Slide = 3
-}
-
-export function toSlidePath(s?: SlideNode) {
-  const r: SlideNode[] = [];
-  while (s) {
-    if (r.indexOf(s) >= 0) {
-      return r;
-    }
-    r.push(s);
-    s = s.next;
-  }
-  return r;
-}
-
-export interface IProvenanceGraphManager {
-  list(): PromiseLike<IProvenanceGraphDataDescription[]>;
-  get(desc: IProvenanceGraphDataDescription): PromiseLike<ProvenanceGraph>;
-  create(): PromiseLike<ProvenanceGraph>;
-
-  edit(graph: IProvenanceGraphDataDescription|ProvenanceGraph, desc: any): PromiseLike<IProvenanceGraphDataDescription>;
-
-  delete(desc: IProvenanceGraphDataDescription): PromiseLike<boolean>;
-
-  import(json: any): PromiseLike<ProvenanceGraph>;
-}
-
-function findMetaObject<T>(find: IObjectRef<T>) {
-  return (obj: ObjectNode<any>) => find === obj || ((obj.value === null || obj.value === find.value) && (find.hash === obj.hash));
-}
-
-export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescription> {
+export class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescription> implements IProvenanceGraph {
   private static readonly PROPAGATED_EVENTS = ['sync', 'add_edge', 'add_node', 'sync_node', 'sync_edge', 'sync_start'];
   private _actions: ActionNode[] = [];
   private _objects: ObjectNode<any>[] = [];
@@ -286,31 +70,31 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     return [this._actions.length, this._objects.length, this._states.length, this._slides.length];
   }
 
-  ids(range: Range = all()) {
+  ids(range: Range = Range.all()) {
     const toID = (a: any) => a.id;
     const actions = Range1D.from(this._actions.map(toID));
     const objects = Range1D.from(this._objects.map(toID));
     const states = Range1D.from(this._states.map(toID));
     const stories = Range1D.from(this._slides.map(toID));
-    return Promise.resolve(range.preMultiply(rlist(actions, objects, states, stories)));
+    return Promise.resolve(range.preMultiply(Range.list(actions, objects, states, stories)));
   }
 
-  selectState(state: StateNode, op: SelectOperation = SelectOperation.SET, type = defaultSelectionType, extras = {}) {
+  selectState(state: StateNode, op: SelectOperation = SelectOperation.SET, type = SelectionUtils.defaultSelectionType, extras = {}) {
     this.fire('select_state,select_state_' + type, state, type, op, extras);
     this.select(ProvenanceGraphDim.State, type, state ? [this._states.indexOf(state)] : [], op);
   }
 
-  selectSlide(state: SlideNode, op: SelectOperation = SelectOperation.SET, type = defaultSelectionType, extras = {}) {
+  selectSlide(state: SlideNode, op: SelectOperation = SelectOperation.SET, type = SelectionUtils.defaultSelectionType, extras = {}) {
     this.fire('select_slide,select_slide_' + type, state, type, op, extras);
     this.select(ProvenanceGraphDim.Slide, type, state ? [this._slides.indexOf(state)] : [], op);
   }
 
-  selectAction(action: ActionNode, op: SelectOperation = SelectOperation.SET, type = defaultSelectionType) {
+  selectAction(action: ActionNode, op: SelectOperation = SelectOperation.SET, type = SelectionUtils.defaultSelectionType) {
     this.fire('select_action,select_action_' + type, action, type, op);
     this.select(ProvenanceGraphDim.Action, type, action ? [this._actions.indexOf(action)] : [], op);
   }
 
-  selectedStates(type = defaultSelectionType): StateNode[] {
+  selectedStates(type = SelectionUtils.defaultSelectionType): StateNode[] {
     const sel = this.idtypes[ProvenanceGraphDim.State].selections(type);
     if (sel.isNone) {
       return [];
@@ -328,7 +112,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   }
 
 
-  selectedSlides(type = defaultSelectionType): SlideNode[] {
+  selectedSlides(type = SelectionUtils.defaultSelectionType): SlideNode[] {
     const sel = this.idtypes[ProvenanceGraphDim.Slide].selections(type);
     if (sel.isNone) {
       return [];
@@ -346,7 +130,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   }
 
   get idtypes(): IDType[] {
-    return ['_provenance_actions', '_provenance_objects', '_provenance_states', '_provenance_stories'].map(resolveIDType);
+    return ['_provenance_actions', '_provenance_objects', '_provenance_states', '_provenance_stories'].map(IDTypeManager.getInstance().resolveIdType);
   }
 
   clear() {
@@ -403,7 +187,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   }
 
   getSlides(): SlideNode[][] {
-    return this.getSlideChains().map(toSlidePath);
+    return this.getSlideChains().map(SlideNode.toSlidePath);
   }
 
   get edges() {
@@ -450,8 +234,8 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     });
 
     //create the loop in the states
-    this.addEdge(action.resultsIn, 'next', inverted);
-    this.addEdge(inverted, 'resultsIn', action.previous);
+    this.addEdge(StateNode.resultsIn(action), 'next', inverted);
+    this.addEdge(inverted, 'resultsIn', StateNode.previous(action));
 
     return inverted;
   }
@@ -485,15 +269,15 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   }
 
 
-  addObject<T>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = name + '_' + category) {
+  addObject<T>(value: T, name: string = value ? value.toString() : 'Null', category = ObjectRefUtils.category.data, hash = name + '_' + category) {
     return this.addObjectImpl(value, name, category, hash, true);
   }
 
-  addJustObject<T>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = name + '_' + category) {
+  addJustObject<T>(value: T, name: string = value ? value.toString() : 'Null', category = ObjectRefUtils.category.data, hash = name + '_' + category) {
     return this.addObjectImpl(value, name, category, hash, false);
   }
 
-  private addObjectImpl<T>(value: T, name: string = value ? value.toString() : 'Null', category = cat.data, hash = name + '_' + category, createEdge = false) {
+  private addObjectImpl<T>(value: T, name: string = value ? value.toString() : 'Null', category = ObjectRefUtils.category.data, hash = name + '_' + category, createEdge = false) {
     const r = new ObjectNode<T>(value, name, category, hash);
     this._objects.push(r);
     this.backend.addNode(r);
@@ -527,7 +311,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
       return <ObjectNode<any>>(<any>r)._resolvesTo;
     }
     //else create a new instance
-    const result = arr.find(findMetaObject(r));
+    const result = arr.find(ProvenanceGraphUtils.findMetaObject(r));
     (<any>r)._resolvesTo = result;
     return result;
   }
@@ -550,8 +334,8 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
       return <ObjectNode<T>>j._resolvesTo;
     }
     if (j.hasOwnProperty('value') && j.hasOwnProperty('name')) { //sounds like an proxy
-      j.category = j.category || cat.data;
-      r = this._objects.find(findMetaObject(j));
+      j.category = j.category || ObjectRefUtils.category.data;
+      r = this._objects.find(ProvenanceGraphUtils.findMetaObject(j));
       if (r) {
         if (r.value === null) { //restore instance
           r.value = j.value;
@@ -588,8 +372,8 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
 
   private executedAction(action: ActionNode, newState: boolean, result: ICmdResult) {
     const current = this.act;
-    const next = action.resultsIn;
-    result = mixin({created: [], removed: [], inverse: null, consumed: 0}, result);
+    const next = StateNode.resultsIn(action);
+    result = BaseUtils.mixin({created: [], removed: [], inverse: null, consumed: 0}, result);
     this.fire('executed', action, result);
 
     const firstTime = !action.onceExecuted;
@@ -627,8 +411,8 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
       removed = action.removes;
       removed.forEach((c) => c.value = null);
     }
-    result.inverse = asFunction(result.inverse);
-    action.updateInverse(this, <IInverseActionCreator>result.inverse);
+    result.inverse = ProvenanceGraphUtils.asFunction(result.inverse);
+    ProvenanceGraph.updateInverse(action, this, <IInverseActionCreator>result.inverse);
 
     this.switchToImpl(action, next);
 
@@ -642,7 +426,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   }
 
   private run(action: ActionNode, result: ICmdResult, withinMilliseconds: number | (() => number) = -1): PromiseLike<ICmdResult> {
-    let next: StateNode = action.resultsIn,
+    let next: StateNode = StateNode.resultsIn(action),
       newState = false;
     if (!next) { //create a new state
       newState = true;
@@ -651,7 +435,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
       this.addEdge(action, 'resultsIn', next);
     }
     this.fire('execute', action);
-    if (hash.has('debug')) {
+    if (AppContext.getInstance().hash.has('debug')) {
       console.log('execute ' + action.meta + ' ' + action.f_id);
     }
     this.currentlyRunning = true;
@@ -661,7 +445,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     }
     this.executeCurrentActionWithin = <number>withinMilliseconds;
 
-    const runningAction = (result ? resolveImmediately(result) : action.execute(this, this.executeCurrentActionWithin)).then(this.executedAction.bind(this, action, newState));
+    const runningAction = (result ? ResolveNow.resolveImmediately(result) : ProvenanceGraph.execute(action, this, this.executeCurrentActionWithin)).then(this.executedAction.bind(this, action, newState));
 
     runningAction.then((result) => {
       const q = this.nextQueue.shift();
@@ -692,14 +476,14 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   private async runChain(actions: ActionNode[], withinMilliseconds = -1) {
     if (actions.length === 0) {
       if (withinMilliseconds > 0) {
-        return resolveIn(withinMilliseconds).then(() => []);
+        return BaseUtils.resolveIn(withinMilliseconds).then(() => []);
       }
-      return resolveImmediately([]);
+      return ResolveNow.resolveImmediately([]);
     }
     //actions = compress(actions, null);
     const last = actions[actions.length - 1];
 
-    const torun = await compress(actions);
+    const torun = await ProvenanceGraphUtils.compressGraph(actions);
 
 
     let remaining = withinMilliseconds;
@@ -722,8 +506,8 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
       updateTime(result.consumed);
     }
 
-    if (this.act !== last.resultsIn) {
-      this.switchToImpl(last, last.resultsIn);
+    if (this.act !== StateNode.resultsIn(last)) {
+      this.switchToImpl(last, StateNode.resultsIn(last));
     }
     this.fire('ran_chain', this.act, torun);
     return results;
@@ -731,14 +515,14 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
 
   undo() {
     if (!this.lastAction) {
-      return resolveImmediately(null);
+      return ResolveNow.resolveImmediately(null);
     }
     //create and store the inverse
     if (this.lastAction.inverses != null) {
       //undo and undoing should still go one up
       return this.jumpTo(this.act.previousState);
     } else {
-      return this.inOrder(() => this.run(this.lastAction.getOrCreateInverse(this), null));
+      return this.inOrder(() => this.run(ProvenanceGraph.getOrCreateInverse(this.lastAction, this), null));
     }
   }
 
@@ -747,16 +531,16 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
       let actions: ActionNode[] = [];
       const act = this.act;
       if (act === state) { //jump to myself
-        return withinMilliseconds >= 0 ? resolveIn(withinMilliseconds).then(() => []) : resolveImmediately([]);
+        return withinMilliseconds >= 0 ? BaseUtils.resolveIn(withinMilliseconds).then(() => []) : ResolveNow.resolveImmediately([]);
       }
       //lets look at the simple past
       const actPath = act.path,
         targetPath = state.path;
-      const common = findCommon(actPath, targetPath);
+      const common = ProvenanceGraphUtils.findCommon(actPath, targetPath);
       if (common) {
         const toRevert = actPath.slice(common.i + 1).reverse(),
           toForward = targetPath.slice(common.j + 1);
-        actions = actions.concat(toRevert.map((r) => r.resultsFrom[0].getOrCreateInverse(this)));
+        actions = actions.concat(toRevert.map((r) => ProvenanceGraph.getOrCreateInverse(r.resultsFrom[0], this)));
         actions = actions.concat(toForward.map((r) => r.resultsFrom[0]));
       }
       //no in the direct branches maybe in different loop instances?
@@ -776,7 +560,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     //sanity check if target is a child of target ... bad
     //collect all states
     const all: StateNode[] = [];
-    const queue = [action.resultsIn];
+    const queue = [StateNode.resultsIn(action)];
     while (queue.length > 0) {
       const next = queue.shift();
       if (all.indexOf(next) >= 0) {
@@ -790,7 +574,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     }
 
     const targetObjects = target.consistsOf;
-    const sourceObjects = action.previous.consistsOf;
+    const sourceObjects = StateNode.previous(action).consistsOf;
     //function isSame(a: any[], b : any[]) {
     //  return a.length === b.length && a.every((ai, i) => ai === b[i]);
     //}
@@ -825,7 +609,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   private copyAction(action: ActionNode, appendTo: StateNode, objectReplacements: {[id: string]: IObjectRef<any>}) {
     const clone = this.initAction(action.clone(), action.requires.map((a) => objectReplacements[String(a.id)] || a));
     this.addEdge(appendTo, 'next', clone);
-    const s = this.makeState(action.resultsIn.name, action.resultsIn.description);
+    const s = this.makeState(StateNode.resultsIn(action).name, StateNode.resultsIn(action).description);
     this.addEdge(clone, 'resultsIn', s);
     this.copyObjects(action.resultsIn, s);
     s.visState.cloneAndPersist(action.resultsIn.visState);
@@ -843,7 +627,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
         //copy it and create a new pair to execute
         b = this.copyAction(a, next.b, objectReplacements);
       }
-      queue.push.apply(queue, a.resultsIn.next.map((aa) => ({a: aa, b})));
+      queue.push.apply(queue, StateNode.resultsIn(a).next.map((aa) => ({a: aa, b})));
     }
   }
 
@@ -916,7 +700,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
         clone.setAttr(attr, state.getAttr(attr, null));
       }
     });
-    clone.setAttr('annotations', state.annotations.map((a) => mixin({}, a)));
+    clone.setAttr('annotations', state.annotations.map((a) => BaseUtils.mixin({}, a)));
     return clone;
   }
 
@@ -980,7 +764,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   }
 
   appendToSlide(slide: SlideNode, elem: SlideNode) {
-    const s = toSlidePath(slide);
+    const s = SlideNode.toSlidePath(slide);
     return this.moveSlide(elem, s[s.length - 1], false);
   }
 
@@ -1057,7 +841,7 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
   }
 
   setSlideJumpToTarget(node: SlideNode, state: StateNode) {
-    const old = node.outgoing.filter(isType('jumpTo'))[0];
+    const old = node.outgoing.filter(GraphEdge.isGraphType('jumpTo'))[0];
     if (old) {
       this.backend.removeEdge(old);
     }
@@ -1066,4 +850,56 @@ export default class ProvenanceGraph extends ADataType<IProvenanceGraphDataDescr
     }
     this.fire('set_jump_target', node, old ? old.target : null, state);
   }
+
+
+  static createDummy() {
+    const desc: IProvenanceGraphDataDescription = {
+      type: 'provenance_graph',
+      id: 'dummy',
+      name: 'dummy',
+      fqname: 'dummy',
+      description: '',
+      creator: 'Anonymous',
+      ts: Date.now(),
+      size: [0, 0],
+      attrs: {
+        graphtype: 'provenance_graph',
+        of: 'dummy'
+      }
+    };
+    return new ProvenanceGraph(desc, new MemoryGraph(desc, [], [], ProvenanceGraphUtils.provenanceGraphFactory()));
+  }
+
+  static getOrCreateInverse(node: ActionNode, graph: ProvenanceGraph) {
+    const i = node.inversedBy;
+    if (i) {
+      return i;
+    }
+    if (node.inverter) {
+      return graph.createInverse(node, node.inverter);
+    }
+    node.inverter = null; //not needed anymore
+    return null;
+  }
+
+  static updateInverse(node: ActionNode, graph: ProvenanceGraph, inverter: IInverseActionCreator) {
+    const i = node.inversedBy;
+    if (i) { //update with the actual values / parameter only
+      const c = inverter.call(node, node.requires, node.creates, node.removes);
+      i.parameter = c.parameter;
+      node.inverter = null;
+    } else if (!node.isInverse) {
+      //create inverse action immediatelly
+      graph.createInverse(node, inverter);
+      node.inverter = null;
+    } else {
+      node.inverter = inverter;
+    }
+  }
+
+  static execute(node: ActionNode, graph: ProvenanceGraph, withinMilliseconds: number): PromiseLike<ICmdResult> {
+    const r = node.f.call(node, node.requires, node.parameter, graph, <number>withinMilliseconds);
+    return ResolveNow.resolveImmediately(r);
+  }
+
 }

@@ -1,37 +1,11 @@
 /**
  * Created by sam on 12.02.2015.
  */
-import {get as getData} from '../data';
-import {isDataType, IDataType} from '../datatype';
-import {GraphNode, isType} from '../graph/graph';
-import ActionNode from './ActionNode';
-import StateNode from './StateNode';
+import {DataCache} from '../data/DataCache';
+import {ADataType, IDataType} from '../data/datatype';
+import {GraphNode} from '../graph/graph';
+import {ResolveNow} from '../base/promise';
 import {IPropertyValue} from './retrieval/VisStateProperty';
-import {resolveImmediately} from '../internal/promise';
-
-
-/**
- * list of categories for actions and objects
- */
-export const cat = {
-  data: 'data',
-  selection: 'selection',
-  visual: 'visual',
-  layout: 'layout',
-  logic: 'logic',
-  custom: 'custom',
-  annotation: 'annotation'
-};
-
-/**
- * list of operations
- */
-export const op = {
-  create: 'create',
-  update: 'update',
-  remove: 'remove'
-};
-
 
 /**
  * an object reference is a common description of an object node in the provenance graph
@@ -61,22 +35,47 @@ export interface IObjectRef<T> {
   readonly hash: string;
 }
 
-/**
- * creates an object reference to the given object
- * @param v
- * @param name
- * @param category
- * @param hash
- * @returns {{v: T, name: string, category: string}}
- */
-export function ref<T>(v: T, name: string, category = cat.data, hash = name + '_' + category): IObjectRef<T> {
-  return {
-    v: resolveImmediately(v),
-    value: v,
-    name,
-    category,
-    hash
+export class ObjectRefUtils {
+
+  /**
+   * list of categories for actions and objects
+   */
+  public static category = {
+    data: 'data',
+    selection: 'selection',
+    visual: 'visual',
+    layout: 'layout',
+    logic: 'logic',
+    custom: 'custom',
+    annotation: 'annotation'
   };
+
+  /**
+   * list of operations
+   */
+  public static operation = {
+    create: 'create',
+    update: 'update',
+    remove: 'remove'
+  };
+
+  /**
+   * creates an object reference to the given object
+   * @param v
+   * @param name
+   * @param category
+   * @param hash
+   * @returns {{v: T, name: string, category: string}}
+   */
+  static objectRef<T>(v: T, name: string, category = ObjectRefUtils.category.data, hash = name + '_' + category): IObjectRef<T> {
+    return {
+      v: ResolveNow.resolveImmediately(v),
+      value: v,
+      name,
+      category,
+      hash
+    };
+  }
 }
 
 /**
@@ -93,7 +92,7 @@ function persistData(v: any): any {
       id = e.getAttribute('id');
     return {type: 'element', id};
   }
-  if (isDataType(v)) {
+  if (ADataType.isADataType(v)) {
     const e = <IDataType>v;
     return {type: 'dataset', id: e.desc.id, persist: e.persist()};
   }
@@ -110,13 +109,13 @@ function restoreData(v: any): any {
   switch (v.type) {
     case 'element':
       if (v.id) {
-        return resolveImmediately(document.getElementById(v.id));
+        return ResolveNow.resolveImmediately(document.getElementById(v.id));
       }
       return null;
     case 'dataset':
-      return getData(v.persist);
+      return DataCache.getInstance().get(v.persist);
     case 'primitive':
-      return resolveImmediately(v.v);
+      return ResolveNow.resolveImmediately(v.v);
   }
   return null;
 }
@@ -124,17 +123,17 @@ function restoreData(v: any): any {
 /**
  * a graph node of type object
  */
-export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
+export class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
   /**
    * a promise of the value accessible via .v
    */
   private _promise: PromiseLike<T>;
   private _persisted: any = null;
 
-  constructor(private _v: T, name: string, category = cat.data, hash = name + '_' + category, description = '') {
+  constructor(private _v: T, name: string, category = ObjectRefUtils.category.data, hash = name + '_' + category, description = '') {
     super('object');
     if (_v != null) { //if the value is given, auto generate a promise for it
-      this._promise = resolveImmediately(_v);
+      this._promise = ResolveNow.resolveImmediately(_v);
     }
     super.setAttr('name', name);
     super.setAttr('category', category);
@@ -156,7 +155,7 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
 
   set value(v: T) {
     this._v = v;
-    this._promise = v == null ? null : resolveImmediately(v);
+    this._promise = v == null ? null : ResolveNow.resolveImmediately(v);
     this._persisted = null;
   }
 
@@ -216,24 +215,6 @@ export default class ObjectNode<T> extends GraphNode implements IObjectRef<T> {
   static restore(p: any) {
     const r = new ObjectNode<any>(null, p.attrs.name, p.attrs.category, p.attrs.hash || p.attrs.name + '_' + p.attrs.category);
     return r.restore(p);
-  }
-
-  get createdBy() {
-    const r = this.incoming.filter(isType('creates'))[0];
-    return r ? <ActionNode>r.source : null;
-  }
-
-  get removedBy() {
-    const r = this.incoming.filter(isType('removes'))[0];
-    return r ? <ActionNode>r.source : null;
-  }
-
-  get requiredBy() {
-    return this.incoming.filter(isType('requires')).map((e) => <ActionNode>e.source);
-  }
-
-  get partOf() {
-    return this.incoming.filter(isType('consistsOf')).map((e) => <StateNode>e.source);
   }
 
   toString() {

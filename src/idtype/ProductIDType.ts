@@ -7,10 +7,11 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 
-import {EventHandler, IEvent, IEventListener} from '../event';
-import {none, Range, RangeLike, parse, Range1D, list as rlist} from '../range';
-import {SelectOperation, asSelectOperation, IIDType, defaultSelectionType} from './IIDType';
-import IDType from './IDType';
+import {EventHandler, IEvent, IEventListener} from '../base/event';
+import {Range, RangeLike, ParseRangeUtils, Range1D} from '../range';
+import {SelectOperation, SelectionUtils} from './SelectionUtils';
+import {IIDType} from './IIDType';
+import {IDType} from './IDType';
 
 //function indicesCompare(a: number[], b: number[]) {
 //  //assert a.length = b.length
@@ -64,7 +65,7 @@ function removeCells(b: Range[], without: Range[], ndim: number) {
 /**
  * a product idtype is a product of multiple underlying ones, e.g. patient x gene.
  */
-export default class ProductIDType extends EventHandler implements IIDType {
+export class ProductIDType extends EventHandler implements IIDType {
   static readonly EVENT_SELECT_DIM = 'selectDim';
   static readonly EVENT_SELECT_PRODUCT = 'selectProduct';
 
@@ -117,7 +118,7 @@ export default class ProductIDType extends EventHandler implements IIDType {
   }
 
   restore(persisted: any) {
-    Object.keys(persisted.sel).forEach((type) => this.sel.set(type, persisted.sel[type].map(parse)));
+    Object.keys(persisted.sel).forEach((type) => this.sel.set(type, persisted.sel[type].map(ParseRangeUtils.parseRangeLike)));
     return this;
   }
 
@@ -134,7 +135,7 @@ export default class ProductIDType extends EventHandler implements IIDType {
    * @param type optional the selection type
    * @returns {Range[]}
    */
-  selections(type = defaultSelectionType): Range[] {
+  selections(type = SelectionUtils.defaultSelectionType): Range[] {
     if (this.sel.has(type)) {
       return this.sel.get(type).slice();
     }
@@ -142,7 +143,7 @@ export default class ProductIDType extends EventHandler implements IIDType {
     return [];
   }
 
-  productSelections(type = defaultSelectionType /*, wildcardLookup: (idtype: IDType) => Promise<number> */): Range[] {
+  productSelections(type = SelectionUtils.defaultSelectionType /*, wildcardLookup: (idtype: IDType) => Promise<number> */): Range[] {
     const cells = this.selections(type);
     const usedCells = this.toPerDim(cells);
     this.elems.forEach((e, i) => {
@@ -151,7 +152,7 @@ export default class ProductIDType extends EventHandler implements IIDType {
       const wildcard = s.without(usedCells[i]);
       if (!wildcard.isNone) {
         //create wildcard cells, e.g., the remaining ones are row/column selections
-        cells.push(rlist(this.elems.map((e2) => e === e2 ? wildcard.dim(0) : Range1D.all())));
+        cells.push(Range.list(this.elems.map((e2) => e === e2 ? wildcard.dim(0) : Range1D.all())));
       }
     });
 
@@ -193,14 +194,14 @@ export default class ProductIDType extends EventHandler implements IIDType {
   select(type: string, range: RangeLike[], op: SelectOperation): Range[];
   select() {
     const a = Array.from(arguments);
-    const type = (typeof a[0] === 'string') ? a.shift() : defaultSelectionType,
-      range = a[0].map(parse),
-      op = asSelectOperation(a[1]);
+    const type = (typeof a[0] === 'string') ? a.shift() : SelectionUtils.defaultSelectionType,
+      range = a[0].map(ParseRangeUtils.parseRangeLike),
+      op = SelectionUtils.asSelectOperation(a[1]);
     return this.selectImpl(range, op, type);
   }
 
-  private selectImpl(cells: Range[], op = SelectOperation.SET, type: string = defaultSelectionType) {
-    const rcells = cells.map(parse);
+  private selectImpl(cells: Range[], op = SelectOperation.SET, type: string = SelectionUtils.defaultSelectionType) {
+    const rcells = cells.map(ParseRangeUtils.parseRangeLike);
 
     const b = this.selections(type);
 
@@ -240,15 +241,15 @@ export default class ProductIDType extends EventHandler implements IIDType {
   private toPerDim(sel: Range[]) {
     return this.elems.map((elem, i) => {
       if (sel.length === 0) {
-        return none();
+        return Range.none();
       }
       const dimselections = sel.map((r) => r.dim(i));
       const selection = dimselections.reduce((p, a) => p ? p.union(a) : a, null);
-      return rlist(selection);
+      return Range.list(selection);
     });
   }
 
-  clear(type = defaultSelectionType) {
+  clear(type = SelectionUtils.defaultSelectionType) {
     return this.selectImpl([], SelectOperation.SET, type);
   }
 }

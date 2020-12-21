@@ -2,16 +2,15 @@
  * Created by Samuel Gratzl on 27.12.2016.
  */
 
-import {IRangeElem} from './internal';
-import RangeElem from './internal/RangeElem';
-import {IIterator, Iterator, forList, concat} from '../iterator';
-import Range1DGroup from './Range1DGroup';
+import {IRangeElem} from './internal/internal';
+import {RangeElem} from './internal/RangeElem';
+import {IIterator, Iterator, ListIterator, ConcatIterator} from '../base/iterator';
 
 function sortNumeric(a: number, b: number) {
   return a - b;
 }
 
-export default class Range1D {
+export class Range1D {
   private readonly arr: IRangeElem[];
 
   constructor(arg?: Range1D|IRangeElem[]) {
@@ -425,10 +424,10 @@ export default class Range1D {
    */
   iter(size?: number): IIterator<number> {
     if (this.isList) {
-      return forList(this.arr.map((d) => (<any>d).from));
+      return ListIterator.create(this.arr.map((d) => (<any>d).from));
     }
     const its: IIterator<number>[] = this.arr.map((d) => d.iter(size));
-    return concat.apply(null, its);
+    return ConcatIterator.concatIterators.apply(null, its);
   }
 
   get __iterator__() {
@@ -516,7 +515,11 @@ export default class Range1D {
   }
 }
 
+export interface IRange1DGroup extends Range1D {
+  fromLike(indices: number[]): IRange1DGroup;
+}
+
 export interface ICompositeRange1D extends Range1D {
-  groups: Range1DGroup[];
-  fromLikeComposite(groups: Range1DGroup[]): Range1D;
+  groups: IRange1DGroup[];
+  fromLikeComposite(groups: IRange1DGroup[]): Range1D;
 }

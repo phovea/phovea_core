@@ -118,7 +118,7 @@ function parentList(node: Node) {
   return result.reverse();
 }
 
-export default class RemoveNodeObserver {
+export class RemoveNodeObserver {
   //weak since if the root is gone anyhow, we don't care about its listener
   private readonly documents = new WeakMap<HTMLElement, RemoveParentObserver>();
 
