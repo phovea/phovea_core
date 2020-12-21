@@ -14,3 +14,4 @@ export * from './ProvenanceGraph';
 export * from './LocalStorageProvenanceGraphManager';
 export * from './RemoteStorageProvenanceGraphManager';
 export * from './MixedStorageProvenanceGraphManager';
+export * from './retrieval';

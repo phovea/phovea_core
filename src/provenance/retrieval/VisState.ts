@@ -3,7 +3,7 @@
  */
 
 import {GraphNode} from '../../graph/graph';
-import {createPropertyValue, IPropertyValue, PropertyType, TAG_VALUE_SEPARATOR} from './VisStateProperty';
+import {createPropertyValue, IPropertyValue, PropertyType} from './VisStateProperty';
 import {TermFrequency} from './tf_idf/TermFrequency';
 import {InverseDocumentFrequency} from './tf_idf/InverseDocumentFrequency';
 import {
