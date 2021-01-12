@@ -1,6 +1,8 @@
 /.tscache
 /.idea
 /build/
+/dist/
+/tsBuildInfoFile/
 /lib/
 node_modules/
 /src/**/*.js
