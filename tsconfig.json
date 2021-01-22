@@ -17,7 +17,9 @@
     "esModuleInterop": false,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true, // required for i18next,
-    "preserveWatchOutput":true
+    "preserveWatchOutput":true,
+    "incremental": true,
+    "tsBuildInfoFile": "dist/tsBuildInfoFile"
   },
   "include": [
     "src/**/*.ts",

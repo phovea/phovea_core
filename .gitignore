@@ -2,6 +2,7 @@
 /.idea
 /build/
 /lib/
+/dist/tsBuildInfoFile
 node_modules/
 /src/**/*.js
 /tests/**/*.js
