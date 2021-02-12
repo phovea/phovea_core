@@ -49,8 +49,11 @@ export class LocalStorageProvenanceGraphManager {
         return new ProvenanceGraph(desc, await this.getGraph(desc));
     }
     async clone(graph, desc = {}) {
-        const description = `Cloned from ${graph.desc.name} created by ${graph.desc.creator}\n${(graph.desc.description || '')}`;
-        const pdesc = this.createDesc(BaseUtils.mixin({ name: graph.desc.name, description }, desc));
+        const name = graph.desc.name;
+        const prefix = 'Clone of ';
+        const newName = name.includes(prefix) ? name : prefix + name;
+        const description = `Cloned from ${name} created by ${graph.desc.creator}\n${(graph.desc.description || '')}`;
+        const pdesc = this.createDesc(BaseUtils.mixin({ name: newName, description }, desc));
         const newGraph = await this.getGraph(pdesc);
         newGraph.restoreDump(graph.persist(), ProvenanceGraphUtils.provenanceGraphFactory());
         return new ProvenanceGraph(pdesc, newGraph);
