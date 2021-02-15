@@ -50,8 +50,7 @@ jobs:
       - run:
           name: Authentication
           command: |
-            echo -e "registry=https://$NPM_REPOSITORY" >> ~/.npmrc
-            echo -e "//$NPM_REPOSITORY:authToken=$NPM_TOKEN" >> ~/.npmrc
+            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
       - run:
           name: Publish package
           command: npm publish
