@@ -1,6 +1,7 @@
 /.tscache
 /.idea
 /build/
+/dist/tsBuildInfoFile/
 /lib/
 /dist/tsBuildInfoFile
 node_modules/

@@ -1,7 +1,7 @@
 {
   "name": "phovea_core",
   "description": "Phovea Core including plugin registry, data definition (+ common types: tables, matrix, vector, stratification), ajax, selections",
-  "version": "5.0.2-SNAPSHOT",
+  "version": "6.0.1-SNAPSHOT",
   "author": {
     "name": "The Caleydo Team",
     "email": "contact@caleydo.org",
@@ -54,7 +54,7 @@
     "i18next": "^19.8.4"
   },
   "devDependencies": {
-    "@types/jest": "~26.0.18",
+    "@types/jest": "~26.0.20",
     "identity-obj-proxy": "~3.0.0",
     "jest": "~26.6.3",
     "jest-raw-loader": "~1.0.1",
