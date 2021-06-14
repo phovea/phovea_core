@@ -23,6 +23,7 @@ export class PluginRegistry {
                 return { desc: p, factory: PluginRegistry.getInstance().getFactoryMethod(instance, p.factory) };
             }
         }, typeof descOrLoader === 'function' ? desc : descOrLoader);
+        console.log('Plugin: ' + p.name + '/' + p.id + '/' + p.description);
         PluginRegistry.getInstance().registry.push(p);
     }
     register(plugin, generator) {
@@ -33,6 +34,7 @@ export class PluginRegistry {
         if (PluginRegistry.getInstance().knownPlugins.has(plugin)) {
             return; // don't call it twice
         }
+        console.log('knownPlugins: ' +plugin);
         PluginRegistry.getInstance().knownPlugins.add(plugin);
         generator(PluginRegistry.getInstance());
     }
