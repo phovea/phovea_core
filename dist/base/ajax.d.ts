@@ -1,3 +1,7 @@
+export declare class AjaxError extends Error {
+    readonly response: Response;
+    constructor(response: Response, message?: string);
+}
 export declare class Ajax {
     static GLOBAL_EVENT_AJAX_PRE_SEND: string;
     static GLOBAL_EVENT_AJAX_POST_SEND: string;
