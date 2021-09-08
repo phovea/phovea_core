@@ -11,7 +11,7 @@ import {GlobalEventHandler} from './event';
 
 
 
-class AjaxError extends Error {
+export class AjaxError extends Error {
   constructor(public readonly response: Response, message?: string) {
     super(message ? message : response.statusText);
     // Set the prototype explicitly. needed for Typescript 2.1

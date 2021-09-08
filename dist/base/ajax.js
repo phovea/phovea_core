@@ -7,7 +7,7 @@
  * Created by Samuel Gratzl on 04.08.2014.
  */
 import { GlobalEventHandler } from './event';
-class AjaxError extends Error {
+export class AjaxError extends Error {
     constructor(response, message) {
         super(message ? message : response.statusText);
         this.response = response;
