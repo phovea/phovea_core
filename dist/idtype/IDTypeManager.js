@@ -77,7 +77,7 @@ export class IDTypeManager {
             return IDTypeManager.getInstance().cache.get(id);
         }
         IDTypeManager.getInstance().cache.set(id, idtype);
-        GlobalEventHandler.getInstance().fire('register.idtype', idtype);
+        GlobalEventHandler.getInstance().fire(IDTypeManager.EVENT_REGISTER_IDTYPE, idtype);
         return idtype;
     }
     persistIdTypes() {
