@@ -1,10 +1,13 @@
-phovea_core
+DEPRECATED: phovea_core
 =====================
  [![Phovea][phovea-image]][phovea-url] [![NPM version][npm-image]][npm-url] [![Build Status][circleci-image]][circleci-url]
 
 Phovea is a framework for developing web-based visualization applications. This is the core repository, but you will find the code distributed among [many repositories](http://phovea.caleydo.org/list_of_plugins).
 
 If you want to learn how to use Phovea, check out the [documentation](http://phovea.caleydo.org).
+
+### DEPRECATION Information
+Please note that this project has been archived and is no longer being maintained. There is an active development under https://github.com/datavisyn/tdp_core and we will also contribute our future changes to it.
 
 Installation
 ------------
